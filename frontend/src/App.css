@@ -1,0 +1,109 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.login-container {
+  height: 100vh;
+  background: #e7dca0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 400px;
+
+  background: #f5f3ea;
+
+  padding: 40px;
+
+  border-radius: 20px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.login-card h1 {
+  text-align: center;
+  color: #2f67b2;
+}
+
+.login-description {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.login-card input {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  background-color: white;
+  color: black;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 20px;
+
+  padding: 12px;
+
+  background: #2f67b2;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.password-container {
+  position: relative;
+  margin-top: 15px;
+}
+
+.password-container input {
+  width: 100%;
+
+  margin-top: 0;   /* เพิ่มบรรทัดนี้ */
+
+  padding: 12px 45px 12px 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  background: white;
+  color: black;
+}
+
+.toggle-password {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  transform: translateY(-50%);
+
+  background: none;
+  border: none;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #777;
+  cursor: pointer;
+}
