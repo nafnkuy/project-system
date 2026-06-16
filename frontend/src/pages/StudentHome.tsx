@@ -1,0 +1,125 @@
+import "./StudentHome.css";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
+function StudentHome() {
+
+    const navigate = useNavigate();
+
+    const username = localStorage.getItem("username");
+
+    useEffect(() => {
+
+  if (!username) {
+    navigate("/");
+  }
+
+}, [username, navigate]);
+
+    const handleLogout = () => {
+
+  localStorage.removeItem("username");
+  localStorage.removeItem("name");
+
+  navigate("/");
+
+};
+
+
+  /*const name =
+    localStorage.getItem("name");*/
+
+  return (
+    <div className="layout">
+
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="logo">
+          <h2>SPTC System</h2>
+          <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+        </div>
+
+        <nav>
+          <ul>
+            <li className="active">หน้าหลัก</li>
+            <li>รายชื่ออาจารย์</li>
+            <li>ส่งคำเสนอหัวข้อใหม่</li>
+            <li>ข้อมูลส่วนตัว</li>
+            <li>โครงงานของฉัน</li>
+            <li>การแจ้งเตือน</li>
+          </ul>
+        </nav>
+
+        <button className="logout-btn" onClick={handleLogout}>
+          ออกจากระบบ
+        </button>
+      </aside>
+
+      {/* Main */}
+      <main className="main">
+
+        {/* Header */}
+        <header className="header">
+          <h2>หน้าหลัก</h2>
+
+          <div className="user-info">
+            🔔
+            <span>{username}</span>
+          </div>
+        </header>
+
+        {/* Search */}
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="ค้นหาโครงงาน/อาจารย์"
+          />
+        </div>
+
+        {/* Table */}
+        <div className="table-container">
+          <h3>รายการหัวข้อโครงงาน</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ชื่อหัวข้อ</th>
+                <th>อาจารย์ที่ปรึกษา</th>
+                <th>สาขาวิชา</th>
+                <th>สถานะ</th>
+                <th>รายละเอียด</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>ระบบติดตามโครงงานนิสิต</td>
+                <td>ผศ.ดร.สมชาย</td>
+                <td>IT</td>
+                <td>เปิดรับ</td>
+                <td>
+                  <button>ดูรายละเอียด</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td>ระบบจัดการห้องสมุด</td>
+                <td>ผศ.ดร.กิตติ</td>
+                <td>CS</td>
+                <td>ใกล้เต็ม</td>
+                <td>
+                  <button>ดูรายละเอียด</button>
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+
+      </main>
+
+    </div>
+  );
+}
+
+export default StudentHome;

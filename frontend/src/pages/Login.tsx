@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
+
+const navigate = useNavigate();
 
 const [username, setUsername] = useState("");
 const [password, setPassword] = useState("");
@@ -14,12 +17,12 @@ const [errors, setErrors] = useState({
 const [loginError, setLoginError] = useState("");
 const [showPassword, setShowPassword] = useState(false);
 
-const mockUser = {
+/*const mockUser = {
   username: "66160000",
   password: "1234",
-};
+};*/
 
-const handleLogin = () => {
+const handleLogin = async () => {
   const newErrors = {
     username: "",
     password: "",
@@ -41,17 +44,66 @@ const handleLogin = () => {
 
   setLoginError("");
 
-  if (
-    username !== mockUser.username ||
-    password !== mockUser.password
-  ) {
-    setLoginError(
-      "รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง"
+  try {
+    const response = await fetch(
+      "http://localhost:5000/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      }
     );
-    return;
-  }
 
-  alert("เข้าสู่ระบบสำเร็จ");
+    if (!response.ok) {
+      setLoginError(
+        "รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง"
+      );
+      return;
+    }
+
+    const data = await response.json();
+
+if (data.user.role === "student") {
+
+  localStorage.setItem(
+    "username",
+    data.user.username
+  );
+
+  localStorage.setItem(
+    "name",
+    data.user.name
+  );
+
+  navigate("/StudentHome");
+
+  return;
+}
+
+if (data.user.role === "teacher") {
+  navigate("/teacher-home");
+  return;
+}
+
+    console.log("Login Success:", data);
+
+    //alert("เข้าสู่ระบบสำเร็จ");
+
+    // ไว้แก้กลับทีหลัง
+     //navigate("/home");
+
+  } catch (error) {
+    console.error(error);
+
+    setLoginError(
+      "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+    );
+  }
 };
 
   return (

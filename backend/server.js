@@ -9,10 +9,10 @@ app.use(express.json());
 const users = [
   {
     id: 1,
-    username: "student01",
+    username: "66160000",
     password: "1234",
     role: "student",
-    name: "Somchai"
+    name: "สุขใจ ใจดี"
   },
   {
     id: 2,
@@ -45,8 +45,10 @@ app.post("/login", (req, res) => {
   res.json({
     token: "fake-jwt-token",
     user: {
-      name: user.name,
-      role: user.role
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    role: user.role
     }
   });
 });
