@@ -1,29 +1,24 @@
 import "./StudentHome.css";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom"; 
+import { useEffect } from "react"; //ใช้ตรวจสอบการเข้าสู่ระบบ
 
 function StudentHome() {
 
     const navigate = useNavigate();
 
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem("username"); //ดึงค่ารหัสประจำตัวจาก localStorage
 
-    useEffect(() => {
-
-  if (!username) {
-    navigate("/");
-  }
-
-}, [username, navigate]);
+    useEffect(() => { //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
+      if (!username) { //ถ้าไม่มีรหัสประจำตัวให้เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
+      navigate("/");
+    }}, [username, navigate]); //ตรวจสอบค่ารหัสประจำตัวและฟังก์ชัน navigate
 
     const handleLogout = () => {
 
-  localStorage.removeItem("username");
-  localStorage.removeItem("name");
-
-  navigate("/");
-
-};
+    localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
+    localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
+    navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
+    };
 
 
   /*const name =

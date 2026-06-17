@@ -1,103 +1,98 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; //useNavigate ใช้เปลี่ยนหน้า
+import { FaEye, FaEyeSlash } from "react-icons/fa"; //ไอคอนตา
 
 function Login() {
 
-const navigate = useNavigate();
+const navigate = useNavigate(); //ใช้เปลี่ยนหน้า
 
-const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
+const [username, setUsername] = useState(""); //เก็บค่ารหัสประจำตัว
+const [password, setPassword] = useState(""); //เก็บค่ารหัสผ่าน
 
-const [errors, setErrors] = useState({
+const [errors, setErrors] = useState({ //เก็บค่าความผิดพลาด
   username: "",
   password: "",
 });
 
-const [loginError, setLoginError] = useState("");
-const [showPassword, setShowPassword] = useState(false);
+const [loginError, setLoginError] = useState("");  //เก็บค่าความผิดพลาดในการเข้าสู่ระบบ
+const [showPassword, setShowPassword] = useState(false);  //เก็บค่าการแสดงรหัสผ่าน
 
-/*const mockUser = {
-  username: "66160000",
-  password: "1234",
-};*/
-
-const handleLogin = async () => {
-  const newErrors = {
+const handleLogin = async () => { //ฟังก์ชันสำหรับเข้าสู่ระบบ
+  const newErrors = { //เก็บค่าความผิดพลาด
     username: "",
     password: "",
   };
 
-  if (!username.trim()) {
+  if (!username.trim()) { //ตรวจสอบว่ารหัสประจำตัวว่างหรือไม่
     newErrors.username = "กรุณากรอกรหัสประจำตัว";
   }
 
-  if (!password.trim()) {
+  if (!password.trim()) { //ตรวจสอบว่ารหัสผ่านว่างหรือไม่
     newErrors.password = "กรุณากรอกรหัสผ่าน";
   }
 
-  setErrors(newErrors);
+  setErrors(newErrors); //อัปเดตค่าความผิดพลาด
 
-  if (newErrors.username || newErrors.password) {
+  if (newErrors.username || newErrors.password) { //ตรวจสอบว่ามีความผิดพลาดหรือไม่
     return;
   }
 
-  setLoginError("");
+  setLoginError(""); //ล้างค่าความผิดพลาดในการเข้าสู่ระบบ
 
-  try {
-    const response = await fetch(
-      "http://localhost:5000/login",
+  try { //ลองเข้าสู่ระบบ
+    const response = await fetch( //ส่งคำขอเข้าสู่ระบบ
+      "http://localhost:5000/login", //ส่งคำขอเข้าสู่ระบบไปยังเซิร์ฟเวอร์
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+        method: "POST", 
+        headers: { //กำหนดหัวข้อของคำขอ
+          "Content-Type": "application/json", //กำหนดประเภทของข้อมูลเป็น JSON
         },
-        body: JSON.stringify({
+        body: JSON.stringify({ //แปลงข้อมูลเป็น JSON
           username,
           password,
         }),
       }
     );
 
-    if (!response.ok) {
-      setLoginError(
+    if (!response.ok) { //ตรวจสอบว่าการเข้าสู่ระบบสำเร็จหรือไม่
+      setLoginError( //แสดงข้อความความผิดพลาด
         "รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง"
       );
       return;
     }
 
-    const data = await response.json();
+    const data = await response.json(); //แปลงข้อมูลที่ได้รับจากเซิร์ฟเวอร์เป็น JSON
 
-if (data.user.role === "student") {
+if (data.user.role === "student") { //ตรวจสอบว่าผู้ใช้เป็นนิสิตหรือไม่
 
-  localStorage.setItem(
+  localStorage.setItem( //เก็บค่ารหัสประจำตัวและชื่อผู้ใช้ใน localStorage
     "username",
     data.user.username
   );
 
-  localStorage.setItem(
+  /*localStorage.setItem( 
     "name",
     data.user.name
-  );
+  );*/
 
-  navigate("/StudentHome");
+  navigate("/StudentHome"); //เปลี่ยนหน้าไปยังหน้าหลักของนิสิต
 
   return;
 }
 
-if (data.user.role === "teacher") {
+if (data.user.role === "teacher") { //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
   navigate("/teacher-home");
   return;
 }
 
-    console.log("Login Success:", data);
+    console.log("Login Success:", data); //แสดงข้อความเข้าสู่ระบบสำเร็จ
 
     //alert("เข้าสู่ระบบสำเร็จ");
 
     // ไว้แก้กลับทีหลัง
      //navigate("/home");
 
-  } catch (error) {
+  } catch (error) { //จับข้อผิดพลาดในการเข้าสู่ระบบ
     console.error(error);
 
     setLoginError(
@@ -106,7 +101,7 @@ if (data.user.role === "teacher") {
   }
 };
 
-  return (
+  return ( 
     <div className="login-container">
       <div className="login-card">
 
@@ -121,25 +116,25 @@ if (data.user.role === "teacher") {
   placeholder="รหัสประจำตัว"
   value={username}
   onChange={(e) => {
-    setUsername(e.target.value);
+    setUsername(e.target.value); //อัปเดตค่ารหัสประจำตัว
 
-    setLoginError("");
+    setLoginError(""); //ล้างค่าความผิดพลาดในการเข้าสู่ระบบ
 
-    if (errors.username) {
-      setErrors((prev) => ({
+    if (errors.username) { //ตรวจสอบว่ามีความผิดพลาดหรือไม่
+      setErrors((prev) => ({ //อัปเดตค่าความผิดพลาด
         ...prev,
         username: "",
       }));
     }
   }}
   className={
-  errors.username || loginError
+  errors.username || loginError 
     ? "input-error"
     : ""
 }
 />
 
-{errors.username && (
+{errors.username && ( //ตรวจสอบว่ามีความผิดพลาดหรือไม่
   <p className="error-text">
     ⓘ {errors.username}
   </p>
@@ -168,18 +163,18 @@ if (data.user.role === "teacher") {
   <button
     type="button"
     className="toggle-password"
-    onClick={() => setShowPassword(!showPassword)}
+    onClick={() => setShowPassword(!showPassword)} //สลับการแสดงรหัสผ่าน
   >
-    {showPassword ? <FaEyeSlash /> : <FaEye />}
+    {showPassword ? <FaEyeSlash /> : <FaEye />} //แสดงไอคอนตา
   </button>
 </div>
 
-{errors.password && (
+{errors.password && ( //ตรวจสอบว่ามีความผิดพลาดหรือไม่
   <p className="error-text">
     ⓘ {errors.password}
   </p>
 )}
-{loginError && (
+{loginError && ( //ตรวจสอบว่ามีความผิดพลาดในการเข้าสู่ระบบหรือไม่
   <p className="error-text">
     ⓘ {loginError}
   </p>
@@ -188,7 +183,7 @@ if (data.user.role === "teacher") {
 
     <button
       className="login-btn"
-      onClick={handleLogin}
+      onClick={handleLogin} 
     >
       เข้าสู่ระบบ
     </button>
