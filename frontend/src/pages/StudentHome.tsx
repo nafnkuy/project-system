@@ -2,6 +2,8 @@ import "./StudentHome.css";
 import { useNavigate } from "react-router-dom"; 
 import { useEffect } from "react"; //ใช้ตรวจสอบการเข้าสู่ระบบ
 
+import logo from "../assets/Logo.svg";
+
 function StudentHome() {
 
     const navigate = useNavigate();
@@ -30,20 +32,26 @@ function StudentHome() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
+          <img src={logo} alt="Logo" />
+
+          <div>
           <h2>SPTC System</h2>
           <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+          </div>
         </div>
 
-        <nav>
-          <ul>
-            <li className="active">หน้าหลัก</li>
-            <li>รายชื่ออาจารย์</li>
-            <li>ส่งคำเสนอหัวข้อใหม่</li>
-            <li>ข้อมูลส่วนตัว</li>
-            <li>โครงงานของฉัน</li>
-            <li>การแจ้งเตือน</li>
-          </ul>
-        </nav>
+        <div className="menu-area">
+          <nav>
+            <ul>
+              <li className="active">หน้าหลัก</li>
+              <li>รายชื่ออาจารย์</li>
+              <li>ส่งคำเสนอหัวข้อใหม่</li>
+              <li>ข้อมูลส่วนตัว</li>
+              <li>โครงงานของฉัน</li>
+              <li>การแจ้งเตือน</li>
+            </ul>
+          </nav>
+        </div>
 
         <button className="logout-btn" onClick={handleLogout}>
           ออกจากระบบ
