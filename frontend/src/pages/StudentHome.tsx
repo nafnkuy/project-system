@@ -127,7 +127,7 @@ const filteredProjects = projects.filter(
           </div>
         </div>
 
-        <div className="menu-area">
+
           <nav>
             <ul>
               <li className="active">หน้าหลัก</li>
@@ -138,7 +138,7 @@ const filteredProjects = projects.filter(
               <li>การแจ้งเตือน</li>
             </ul>
           </nav>
-        </div>
+        
 
         <button className="logout-btn" onClick={handleLogout}>
           ออกจากระบบ
@@ -148,54 +148,59 @@ const filteredProjects = projects.filter(
       {/* Main */}
       <main className="main">
         {/* Header */}
-        <header className="header">
-          <h2>หน้าหลัก</h2>
+<header className="header">
+  <h2>หน้าหลัก</h2>
 
-          <div className="user-info">
+  <div className="header-right">
 
-  <div className="notification-wrapper">
+    <div className="notification-box">
+      <div className="notification-wrapper">
 
-    <button
-      className="notification-btn"
-      onClick={() =>
-        setShowNotifications(!showNotifications)
-      }
-    >
-      <FaBell />
+        <button
+          className="notification-btn"
+          onClick={() =>
+            setShowNotifications(!showNotifications)
+          }
+        >
+          <FaBell />
 
-      <span className="notification-count">
-        {notifications.length}
-      </span>
-    </button>
+          <span className="notification-count">
+            {notifications.length}
+          </span>
+        </button>
 
-    {showNotifications && (
-      <div className="notification-dropdown">
+        {showNotifications && (
+          <div className="notification-dropdown">
 
-        <h4>การแจ้งเตือน</h4>
+            <h4>การแจ้งเตือน</h4>
 
-        {notifications.map((item) => (
-          <div
-            key={item.id}
-            className="notification-item"
-          >
-            <p>{item.message}</p>
-            <small>{item.time}</small>
+            {notifications.map((item) => (
+              <div
+                key={item.id}
+                className="notification-item"
+              >
+                <p>{item.message}</p>
+                <small>{item.time}</small>
+              </div>
+            ))}
+
           </div>
-        ))}
+        )}
 
       </div>
-    )}
+    </div>
+
+    <div className="user-info">
+      <img
+        src={`http://localhost:5000${profileImage}`}
+        alt="Profile"
+        className="profile-image"
+      />
+      <span>{username}</span>
+    </div>
 
   </div>
-<img
-  src={`http://localhost:5000${profileImage}`}
-  alt="Profile"
-  className="profile-image"
-/>
-  <span>{username}</span>
-
-</div>
-        </header>
+</header>
 
         {/* Search */}
         <div className="search-box">
