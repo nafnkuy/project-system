@@ -82,11 +82,14 @@ function Login() {
           "username",
           data.user.username,
         );
-
         /*localStorage.setItem( 
 "name",
 data.user.name
 );*/
+        localStorage.setItem(
+          "profileImage", 
+          data.user.profileImage
+        );
 
         navigate("/StudentHome"); //เปลี่ยนหน้าไปยังหน้าหลักของนิสิต
 
@@ -95,7 +98,13 @@ data.user.name
 
       if (data.user.role === "teacher") {
         //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
+        localStorage.setItem(
+          "profileImage", 
+          data.user.profileImage
+        );
+
         navigate("/teacher-home");
+        
         return;
       }
 
