@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const db = require("./db");
 
 const app = express();
 
@@ -11,51 +12,41 @@ app.use(
   express.static(path.join(__dirname, "../frontend/src/assets")),
 );
 
-const users = [
-  {
-    id: 1,
-    username: "66160000",
-    password: "1234",
-    role: "student",
-    name: "สุขใจ ใจดี",
-    profileImage: "/src/assets/student.jpg",
-  },
-  {
-    id: 2,
-    username: "teacher01",
-    password: "1234",
-    role: "teacher",
-    name: "Ajarn Anan",
-    profileImage: "/src/assets/teacher01.jpg",
-  },
-];
-
 app.get("/", (req, res) => {
-  res.send("Backend OK");
+  res.send("<h1>Backend OK</h1>");
 });
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  const user = users.find(
-    (u) => u.username === username && u.password === password,
-  );
+  const sql =
+    "SELECT * FROM users WHERE username = ? AND password = ?";
 
-  if (!user) {
-    return res.status(401).json({
-      message: "Invalid username or password",
+  db.query(sql, [username, password], (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    const user = results[0];
+
+    res.json({
+      token: "fake-jwt-token",
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        profileImage: user.profile_image,
+      },
     });
-  }
-
-  res.json({
-    token: "fake-jwt-token",
-    user: {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      role: user.role,
-      profileImage: user.profileImage,
-    },
   });
 });
 

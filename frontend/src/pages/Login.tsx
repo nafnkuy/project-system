@@ -48,7 +48,7 @@ function Login() {
       //ลองเข้าสู่ระบบ
       const response = await fetch(
         //ส่งคำขอเข้าสู่ระบบ
-        "http://localhost:5000/login", //ส่งคำขอเข้าสู่ระบบไปยังเซิร์ฟเวอร์
+        "http://localhost:5000/login", //ส่งคำขอเข้าสู่ระบบไปยังเซิร์ฟเวอร์ endpoint /login
         {
           method: "POST",
           headers: {
@@ -86,10 +86,7 @@ function Login() {
 "name",
 data.user.name
 );*/
-        localStorage.setItem(
-          "profileImage", 
-          data.user.profileImage
-        );
+        localStorage.setItem("profileImage", data.user.profileImage);
 
         navigate("/StudentHome"); //เปลี่ยนหน้าไปยังหน้าหลักของนิสิต
 
@@ -98,13 +95,10 @@ data.user.name
 
       if (data.user.role === "teacher") {
         //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
-        localStorage.setItem(
-          "profileImage", 
-          data.user.profileImage
-        );
+        localStorage.setItem("profileImage", data.user.profileImage);
 
         navigate("/teacher-home");
-        
+
         return;
       }
 
