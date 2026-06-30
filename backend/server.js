@@ -19,8 +19,7 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  const sql =
-    "SELECT * FROM users WHERE username = ? AND password = ?";
+  const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
   db.query(sql, [username, password], (err, results) => {
     if (err) {
@@ -47,6 +46,20 @@ app.post("/login", (req, res) => {
         profileImage: user.profile_image,
       },
     });
+  });
+});
+
+app.get("/projects", (req, res) => {
+  const sql = "SELECT * FROM projects";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json(results);
   });
 });
 
