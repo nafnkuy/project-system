@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"; //ใช้ตรวจสอบก
 import axios from "axios";
 import { FaBell } from "react-icons/fa";
 
-import logo from "../assets/Logo.svg";
+import logo from "../../assets/Logo.svg";
 
 interface Project {
   id: number;
@@ -55,7 +55,8 @@ function StudentHome() {
     },
   ];
 
-  useEffect(() => { //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
+  useEffect(() => {
+    //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
     //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
     if (!username) {
       //ถ้าไม่มีรหัสประจำตัวให้เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
@@ -63,7 +64,8 @@ function StudentHome() {
     }
   }, [username, navigate]); //ตรวจสอบค่ารหัสประจำตัวและฟังก์ชัน navigate
 
-  useEffect(() => { //ดึงข้อมูลโครงงานจาก backend
+  useEffect(() => {
+    //ดึงข้อมูลโครงงานจาก backend
     axios
       .get("http://localhost:5000/projects")
       .then((res) => {
@@ -74,7 +76,8 @@ function StudentHome() {
       });
   }, []);
 
-  useEffect(() => { //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
+  useEffect(() => {
+    //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
     setCurrentPage(1);
   }, [searchTerm]);
 
@@ -196,7 +199,11 @@ function StudentHome() {
                   <td>{project.major}</td>
                   <td>{project.status}</td>
                   <td>
-                    <button>ดูรายละเอียด</button>
+                    <button
+                      onClick={() => navigate(`/project-details/${project.id}`)}
+                    >
+                      ดูรายละเอียด
+                    </button>
                   </td>
                 </tr>
               ))}

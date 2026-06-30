@@ -63,6 +63,28 @@ app.get("/projects", (req, res) => {
   });
 });
 
+app.get("/projects/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = "SELECT * FROM projects WHERE id = ?";
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    res.json(results[0]);
+  });
+});
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
