@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; //useNavigate ใช้เปลี่ยนหน้า
 import { FaEye, FaEyeSlash } from "react-icons/fa"; //ไอคอนตา
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate(); //ใช้เปลี่ยนหน้า
@@ -45,74 +46,30 @@ function Login() {
     setLoginError(""); //ล้างค่าความผิดพลาดในการเข้าสู่ระบบ
 
     try {
-      //ลองเข้าสู่ระบบ
-      const response = await fetch(
-        //ส่งคำขอเข้าสู่ระบบ
-        "http://localhost:5000/login", //ส่งคำขอเข้าสู่ระบบไปยังเซิร์ฟเวอร์ endpoint /login
-        {
-          method: "POST",
-          headers: {
-            //กำหนดหัวข้อของคำขอ
-            "Content-Type": "application/json", //กำหนดประเภทของข้อมูลเป็น JSON
-          },
-          body: JSON.stringify({
-            //แปลงข้อมูลเป็น JSON
-            username,
-            password,
-          }),
-        },
-      );
+      const res = await axios.post("http://localhost:5000/login", {
+        username,
+        password,
+      });
 
-      if (!response.ok) {
-        //ตรวจสอบว่าการเข้าสู่ระบบสำเร็จหรือไม่
-        setLoginError(
-          //แสดงข้อความความผิดพลาด
-          "รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง",
-        );
-        return;
-      }
-
-      const data = await response.json(); //แปลงข้อมูลที่ได้รับจากเซิร์ฟเวอร์เป็น JSON
+      const data = res.data;
 
       if (data.user.role === "student") {
-        //ตรวจสอบว่าผู้ใช้เป็นนิสิตหรือไม่
-
-        localStorage.setItem(
-          //เก็บค่ารหัสประจำตัวและชื่อผู้ใช้ใน localStorage
-          "username",
-          data.user.username,
-        );
-        /*localStorage.setItem( 
-"name",
-data.user.name
-);*/
+        localStorage.setItem("username", data.user.username);
         localStorage.setItem("profileImage", data.user.profileImage);
 
-        navigate("/StudentHome"); //เปลี่ยนหน้าไปยังหน้าหลักของนิสิต
-
+        navigate("/StudentHome");
         return;
       }
 
-      if (data.user.role === "teacher") {
-        //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
+      if (data.user.role === "teacher") { //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
         localStorage.setItem("profileImage", data.user.profileImage);
 
-        navigate("/teacher-home");
-
+        navigate("/teacher-home"); // เปลี่ยนหน้าไปยังหน้าอาจารย์
         return;
       }
-
-      console.log("Login Success:", data); //แสดงข้อความเข้าสู่ระบบสำเร็จ
-
-      //alert("เข้าสู่ระบบสำเร็จ");
-
-      // ไว้แก้กลับทีหลัง
-      //navigate("/home");
-    } catch (error) {
-      //จับข้อผิดพลาดในการเข้าสู่ระบบ
-      console.error(error);
-
-      setLoginError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+    } catch (error) { //ตรวจสอบว่ามีความผิดพลาดในการเข้าสู่ระบบหรือไม่
+      setLoginError("รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง");
+      console.error(error); //แสดงความผิดพลาดใน console
     }
   };
 

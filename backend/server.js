@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  console.log("Login request received:", req.body);
   const { username, password } = req.body;
 
   const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
@@ -27,6 +28,7 @@ app.post("/login", (req, res) => {
         message: "Database Error",
       });
     }
+    console.log("Login results:", results);
 
     if (results.length === 0) {
       return res.status(401).json({
@@ -50,7 +52,14 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/projects", (req, res) => {
-  const sql = "SELECT * FROM projects";
+  const sql = `
+    SELECT
+      p.*,
+      u.name AS advisor_name
+    FROM projects p
+    LEFT JOIN users u
+      ON p.advisor_id = u.id
+  `;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -66,7 +75,15 @@ app.get("/projects", (req, res) => {
 app.get("/projects/:id", (req, res) => {
   const { id } = req.params;
 
-  const sql = "SELECT * FROM projects WHERE id = ?";
+  const sql = `
+  SELECT
+      p.*,
+      u.name AS advisor_name
+  FROM projects p
+  LEFT JOIN users u
+  ON p.advisor_id = u.id
+  WHERE p.id = ?
+  `;
 
   db.query(sql, [id], (err, results) => {
     if (err) {

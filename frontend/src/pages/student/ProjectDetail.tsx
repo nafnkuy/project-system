@@ -1,4 +1,4 @@
-import "./StudentHome.css";
+import "./ProjectDetail.css";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,8 +10,17 @@ interface Project {
   id: number;
   title: string;
   advisor: string;
+  advisor_name: string;
   major: string;
   status: string;
+  project_type: string;
+  max_members: number;
+  current_members: number;
+  academic_year: number;
+  description: string;
+  objectives: string;
+  skills: string;
+  requirements: string;
 }
 
 function ProjectDetail() {
@@ -25,7 +34,11 @@ function ProjectDetail() {
   const [showNotifications, setShowNotifications] = useState(false);
 
   const notifications = [
-    { id: 1, message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว", time: "2 ชั่วโมงที่แล้ว" },
+    {
+      id: 1,
+      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
+      time: "2 ชั่วโมงที่แล้ว",
+    },
     { id: 2, message: "ส่งคำขอเลือกหัวข้อสำเร็จ", time: "1 วันที่แล้ว" },
   ];
 
@@ -40,7 +53,6 @@ function ProjectDetail() {
       .catch((err) => console.log(err));
   }, [id]);
 
-  
   const handleLogout = () => {
     localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
     localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
@@ -48,14 +60,12 @@ function ProjectDetail() {
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
-
   if (!project) {
     return <h2 style={{ padding: 20 }}>กำลังโหลด...</h2>;
   }
 
   return (
     <div className="layout">
-
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
@@ -68,12 +78,14 @@ function ProjectDetail() {
 
         <nav>
           <ul>
-            <li className="active" onClick={() => navigate("/student-home")}>หน้าหลัก</li>
+            <li className="active" onClick={() => navigate("/student-home")}>
+              หน้าหลัก
+            </li>
             <li>รายชื่ออาจารย์</li>
             <li>ส่งคำเสนอหัวข้อใหม่</li>
-            <li>ข้อมูลส่วนตัว</li>
             <li>โครงงานของฉัน</li>
             <li>การแจ้งเตือน</li>
+            <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 
@@ -84,23 +96,17 @@ function ProjectDetail() {
 
       {/* Main */}
       <main className="main">
-
         {/* Header */}
-<header className="header">
+        <header className="header">
+          <div className="breadcrumb">
+            <span onClick={() => navigate("/StudentHome")}>หน้าหลัก</span>
 
-  <div className="breadcrumb">
-    <span onClick={() => navigate("/student-home")}>
-      หน้าหลัก
-    </span>
+            <span> &gt; </span>
 
-    <span> &gt; </span>
-
-    <span>รายละเอียด</span>
-  </div>
-
+            <span>รายละเอียด</span>
+          </div>
 
           <div className="header-right">
-
             <div className="notification-box">
               <button
                 className="notification-btn"
@@ -132,35 +138,89 @@ function ProjectDetail() {
               />
               <span>{username}</span>
             </div>
-
           </div>
         </header>
 
         {/* TABLE DETAIL (สำคัญ) */}
-        <div className="table-container">
-          <h3>รายละเอียดโครงงาน</h3>
+        <div className="project-detail-card">
+          <div className="project-top">
+            <h2>{project.title}</h2>
 
-          <table>
-            <thead>
-              <tr>
-                <th>หัวข้อ</th>
-                <th>อาจารย์ที่ปรึกษา</th>
-                <th>สาขา</th>
-                <th>สถานะ</th>
-              </tr>
-            </thead>
+            <div className="project-badges">
+              <span>ประเภท : {project.project_type}</span>
+              <span>
+                รับนิสิต : {project.current_members} / {project.max_members} คน
+              </span>
+              <span>สถานะ : {project.status}</span>
+            </div>
+          </div>
 
-            <tbody>
-              <tr>
-                <td>{project.title}</td>
-                <td>{project.advisor}</td>
-                <td>{project.major}</td>
-                <td>{project.status}</td>
-              </tr>
-            </tbody>
-          </table>
+          <section>
+            <h4>ข้อมูลโครงงาน</h4>
+
+            <p>อาจารย์ที่ปรึกษา : {project.advisor_name}</p>
+            <p>สาขาวิชา : {project.major}</p>
+            <p>ปีการศึกษา : {project.academic_year}</p>
+
+            <br />
+
+            <strong>สมาชิกในโครงงาน (1/2)</strong>
+            <p>66160001 นายทดสอบ ระบบ</p>
+          </section>
+
+          <section>
+            <h4>รายละเอียดโครงงาน</h4>
+
+            <p>{project.description}</p>
+          </section>
+
+          <section>
+            <h4>วัตถุประสงค์</h4>
+
+            <ul>
+              {(project.objectives || "")
+                .split("|")
+                .map(
+                  (objective, index) =>
+                    objective && <li key={index}>{objective}</li>,
+                )}
+            </ul>
+          </section>
+
+          <section>
+            <h4>ทักษะที่เกี่ยวข้อง</h4>
+
+            <div className="skill-tags">
+              {(project.skills || "")
+                .split("|")
+                .map(
+                  (skill, index) => skill && <span key={index}>{skill}</span>,
+                )}
+            </div>
+          </section>
+
+          <section>
+            <h4>คุณสมบัติผู้สมัคร</h4>
+
+            <ul className="requirement-list">
+              {(project.requirements || "")
+                .split("|")
+                .map((req, index) => req && <li key={index}>{req}</li>)}
+            </ul>
+          </section>
+
+          <section>
+            <h4>เอกสารที่เกี่ยวข้อง</h4>
+
+            <div className="file-box">📄 Project Proposal.pdf</div>
+
+            <div className="file-box">📄 Requirement Specification.pdf</div>
+          </section>
+
+          <div className="apply-section">
+            <button className="apply-btn">สมัครเข้าร่วมโครงงาน</button>
+          </div>
         </div>
-
       </main>
     </div>
   );
