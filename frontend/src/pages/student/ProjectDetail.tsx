@@ -60,6 +60,21 @@ function ProjectDetail() {
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
+  const skillColors: Record<string, string> = {
+    React: "#D6ECFF", // ฟ้า
+    "Node.js": "#DFF7DF", // เขียว
+    MySQL: "#ccdcff", // เหลือง
+    Git: "#FFDADA", // ชมพู
+    Python: "#E8DDFF", // ม่วง
+    RFID: "#FFE7C7", // ส้ม
+    AI: "#DDEBFF", // น้ำเงิน
+
+    HTML: "#FFE6CC", // ส้มอ่อน
+    CSS: "#D6F5FF", // ฟ้าอมเขียว
+    JavaScript: "#FFF9C4", // เหลืองสด
+    "QR Code": "#F5D0FE", // ม่วงชมพู
+    "API Integration": "#D1FAE5", // เขียวมิ้น
+  };
   if (!project) {
     return <h2 style={{ padding: 20 }}>กำลังโหลด...</h2>;
   }
@@ -155,26 +170,35 @@ function ProjectDetail() {
             </div>
           </div>
 
-          <section>
+          <section className="detail-section">
             <h4>ข้อมูลโครงงาน</h4>
 
-            <p>อาจารย์ที่ปรึกษา : {project.advisor_name}</p>
-            <p>สาขาวิชา : {project.major}</p>
-            <p>ปีการศึกษา : {project.academic_year}</p>
+            <div className="project-meta">
+              <strong>อาจารย์ที่ปรึกษา :</strong>
+              <span>{project.advisor_name}</span>
+
+              <strong>สาขาวิชา :</strong>
+              <span>{project.major}</span>
+
+              <strong>ปีการศึกษา :</strong>
+              <span>{project.academic_year}</span>
+            </div>
 
             <br />
 
             <strong>สมาชิกในโครงงาน (1/2)</strong>
-            <p>66160001 นายทดสอบ ระบบ</p>
+            <div className="member-list">
+              <p>66160001 นายทดสอบ ระบบ</p>
+            </div>
           </section>
 
-          <section>
+          <section className="detail-section">
             <h4>รายละเอียดโครงงาน</h4>
 
             <p>{project.description}</p>
           </section>
 
-          <section>
+          <section className="detail-section">
             <h4>วัตถุประสงค์</h4>
 
             <ul>
@@ -187,19 +211,27 @@ function ProjectDetail() {
             </ul>
           </section>
 
-          <section>
+          <section className="detail-section">
             <h4>ทักษะที่เกี่ยวข้อง</h4>
 
             <div className="skill-tags">
-              {(project.skills || "")
-                .split("|")
-                .map(
-                  (skill, index) => skill && <span key={index}>{skill}</span>,
-                )}
+              {(project.skills || "").split("|").map(
+                (skill, index) =>
+                  skill && (
+                    <span
+                      key={index}
+                      style={{
+                        backgroundColor: skillColors[skill] || "#F3F4F6",
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  ),
+              )}
             </div>
           </section>
 
-          <section>
+          <section className="detail-section">
             <h4>คุณสมบัติผู้สมัคร</h4>
 
             <ul className="requirement-list">
@@ -209,11 +241,11 @@ function ProjectDetail() {
             </ul>
           </section>
 
-          <section>
+          <section className="detail-section">
             <h4>เอกสารที่เกี่ยวข้อง</h4>
 
             <div className="file-box">📄 Project Proposal.pdf</div>
-
+            <br />
             <div className="file-box">📄 Requirement Specification.pdf</div>
           </section>
 

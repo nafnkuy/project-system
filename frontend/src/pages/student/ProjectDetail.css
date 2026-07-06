@@ -48,13 +48,13 @@ nav {
 .logo h2 {
   font-size: 23px;
   font-weight: 700;
-  margin-bottom: 2px;   /* ลดระยะห่าง */
+  margin-bottom: 2px; /* ลดระยะห่าง */
 }
 
 .logo p {
-  margin-top: 0;        /* ไม่ให้มีระยะด้านบน */
+  margin-top: 0; /* ไม่ให้มีระยะด้านบน */
   font-size: 9.5px;
-  line-height: 1.2;     /* ลดความสูงของบรรทัด */
+  line-height: 1.2; /* ลดความสูงของบรรทัด */
   color: #666;
 }
 
@@ -118,13 +118,6 @@ nav {
   font-weight: 400;
 }
 
-.user-info {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-
 /*เพิ่มตรงนี้เข้ามาเป็นของ 🔔 กับรูปโปรไฟล์ */
 .notification-wrapper {
   position: relative;
@@ -174,7 +167,7 @@ nav {
 
   border-radius: 10px;
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   z-index: 1000;
 }
@@ -246,114 +239,68 @@ nav {
   height: 50px;
 }
 
-.project-detail-card{
-    width:90%;
-    margin:25px auto;
-    background:#fff;
-    border-radius:10px;
-    padding:28px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+.project-detail-card {
+  width: 94%;
+  max-width: 1300px;
+  margin: 25px auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.project-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:30px;
+.project-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
 }
 
-.project-header h2{
-    font-size:28px;
-    font-weight:600;
+.project-top h2 {
+  font-size: 28px;
+  font-weight: 600;
 }
 
-.project-info{
-    display:flex;
-    gap:10px;
+.project-badges {
+  display: flex;
+  gap: 10px;
 }
 
-.project-info span{
-    border:1px solid #ddd;
-    padding:8px 12px;
-    border-radius:6px;
-    background:#fff;
-    font-size:14px;
+.project-badges span {
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
 }
 
-.detail-section{
-    margin-top:35px;
-}
-
-.detail-section h3{
-    margin-bottom:15px;
-    padding-bottom:10px;
-    border-bottom:1px solid #ddd;
-    font-size:18px;
-}
-
-.detail-section p{
-    margin:8px 0;
-    line-height:1.8;
-}
-
-.detail-section ul{
-    margin-left:22px;
-    line-height:1.8;
-}
-
-.skill-tags{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-}
-
-.skill-tags span{
-    padding:6px 14px;
-    border-radius:5px;
-    border:1px solid #4d8df7;
-    background:#edf4ff;
-    font-size:13px;
-}
-
-.file-item{
-    display:inline-block;
-    margin:8px 0;
-    padding:10px 14px;
-    border:1px solid #ddd;
-    border-radius:6px;
-}
-
-.apply-box{
-    text-align:center;
-    margin-top:40px;
-}
-
-.apply-btn{
-    background:#2cab63;
-    color:white;
-    border:none;
-    padding:12px 28px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:15px;
-}
-
-.apply-btn:hover{
-    background:#239455;
-}
-
-.requirement-tags {
+.skill-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
-.requirement-tags span {
-  background-color: #ffe8cc;
-  color: #8a4b00;
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-size: 13px;
+.skill-tags span {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.apply-btn {
+  background: #2cab63;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.apply-btn:hover {
+  background: #239455;
 }
 
 .requirement-list {
@@ -366,4 +313,55 @@ nav {
   font-size: 15px;
   color: #333;
   line-height: 1.6;
+}
+
+.detail-section{
+    margin-top:35px;
+}
+
+.detail-section h4{
+    font-size:18px;
+    margin-bottom:15px;
+    padding-bottom:10px;
+    border-bottom:1px solid #ddd;
+}
+
+.detail-section p{
+    margin:8px 0;
+    line-height:1.8;
+}
+
+.detail-section ul{
+    margin-left:22px;
+    line-height:1.8;
+}
+
+.member-list {
+  margin-top: 8px;
+  margin-left: 20px;
+}
+
+.file-box {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.apply-section {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.apply-btn {
+  width: 180px;
+  height: 42px;
+}
+
+.project-meta{
+    display:grid;
+    grid-template-columns:170px 1fr;
+    row-gap:10px;
 }
