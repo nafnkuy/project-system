@@ -98,7 +98,30 @@ app.get("/projects/:id", (req, res) => {
       });
     }
 
-    res.json(results[0]);
+    const project = results[0];
+
+    const memberSql = `
+    SELECT
+        u.id,
+        u.username,
+        u.name
+    FROM project_members pm
+    JOIN users u
+    ON pm.user_id = u.id
+    WHERE pm.project_id = ?
+    `;
+
+    db.query(memberSql, [id], (err, members) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      project.members = members;
+
+      res.json(project);
+    });
   });
 });
 

@@ -21,6 +21,13 @@ interface Project {
   objectives: string;
   skills: string;
   requirements: string;
+  members: Member[];
+}
+
+interface Member {
+  id: number;
+  username: string;
+  name: string;
 }
 
 function ProjectDetail() {
@@ -78,6 +85,11 @@ function ProjectDetail() {
   if (!project) {
     return <h2 style={{ padding: 20 }}>กำลังโหลด...</h2>;
   }
+
+  const currentMembers = project.current_members ?? 0;
+
+  const maxMembers =
+    project.max_members ?? (project.project_type === "โครงงานคู่" ? 2 : 1);
 
   return (
     <div className="layout">
@@ -164,7 +176,7 @@ function ProjectDetail() {
             <div className="project-badges">
               <span>ประเภท : {project.project_type}</span>
               <span>
-                รับนิสิต : {project.current_members} / {project.max_members} คน
+                รับนิสิต : {currentMembers} / {maxMembers} คน
               </span>
               <span>สถานะ : {project.status}</span>
             </div>
@@ -186,9 +198,20 @@ function ProjectDetail() {
 
             <br />
 
-            <strong>สมาชิกในโครงงาน (1/2)</strong>
+            <strong>
+              สมาชิกในโครงงาน ({currentMembers}/{maxMembers} คน)
+            </strong>
+
             <div className="member-list">
-              <p>66160001 นายทดสอบ ระบบ</p>
+              {project.members.length > 0 ? (
+                project.members.map((member) => (
+                  <p key={member.id}>
+                    {member.username} {member.name}
+                  </p>
+                ))
+              ) : (
+                <p>ยังไม่มีสมาชิก</p>
+              )}
             </div>
           </section>
 
