@@ -273,7 +273,9 @@ function ProjectDetail() {
           </section>
 
           <div className="apply-section">
-            <button className="apply-btn">สมัครเข้าร่วมโครงงาน</button>
+            <button className="apply-btn"onClick={() => navigate(`/apply-project/${project.id}`)}>
+              สมัครเข้าร่วมโครงงาน
+            </button>
           </div>
         </div>
       </main>
