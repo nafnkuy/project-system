@@ -67,20 +67,62 @@ function ProjectDetail() {
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
-  const skillColors: Record<string, string> = {
-    React: "#D6ECFF", // ฟ้า
-    "Node.js": "#DFF7DF", // เขียว
-    MySQL: "#ccdcff", // เหลือง
-    Git: "#FFDADA", // ชมพู
-    Python: "#E8DDFF", // ม่วง
-    RFID: "#FFE7C7", // ส้ม
-    AI: "#DDEBFF", // น้ำเงิน
+  const skillStyles: Record<
+    string,
+    { backgroundColor: string; borderColor: string }
+  > = {
+    React: {
+      backgroundColor: "#DBEAFE",
+      borderColor: "#4385F5",
+    },
+    "Node.js": {
+      backgroundColor: "#DCFCE7",
+      borderColor: "#30BF2D",
+    },
+    MySQL: {
+      backgroundColor: "#FFEDD5",
+      borderColor: "#FF8A05",
+    },
+    Git: {
+      backgroundColor: "#FEE2E2",
+      borderColor: "#DD5245",
+    },
+    Python: {
+      backgroundColor: "#FEF3C7",
+      borderColor: "#EEB400",
+    },
+    RFID: {
+      backgroundColor: "#F3E8FF",
+      borderColor: "#BB38FF",
+    },
+    AI: {
+      backgroundColor: "#E0E7FF",
+      borderColor: "#055DF2",
+    },
+    HTML: {
+      backgroundColor: "#FDF2F8", // ชมพูพาสเทล
+      borderColor: "#F472B6",
+    },
 
-    HTML: "#FFE6CC", // ส้มอ่อน
-    CSS: "#D6F5FF", // ฟ้าอมเขียว
-    JavaScript: "#FFF9C4", // เหลืองสด
-    "QR Code": "#F5D0FE", // ม่วงชมพู
-    "API Integration": "#D1FAE5", // เขียวมิ้น
+    CSS: {
+      backgroundColor: "#ECFDF5", // มิ้นต์พาสเทล
+      borderColor: "#34D399",
+    },
+
+    JavaScript: {
+      backgroundColor: "#FAF5FF", // ม่วงพาสเทล
+      borderColor: "#C084FC",
+    },
+
+    "QR Code": {
+      backgroundColor: "#FFEAF4",
+      borderColor: "#E91E63", // ชมพูเข้ม
+    },
+
+    "API Integration": {
+      backgroundColor: "#E8F8F5",
+      borderColor: "#16A085", // เขียวอมฟ้า (Teal)
+    },
   };
   if (!project) {
     return <h2 style={{ padding: 20 }}>กำลังโหลด...</h2>;
@@ -135,27 +177,31 @@ function ProjectDetail() {
 
           <div className="header-right">
             <div className="notification-box">
-              <button
-                className="notification-btn"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <FaBell />
-                <span className="notification-count">
-                  {notifications.length}
-                </span>
-              </button>
+              <div className="notification-wrapper">
+                <button
+                  className="notification-btn"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <FaBell />
 
-              {showNotifications && (
-                <div className="notification-dropdown">
-                  <h4>การแจ้งเตือน</h4>
-                  {notifications.map((n) => (
-                    <div key={n.id} className="notification-item">
-                      <p>{n.message}</p>
-                      <small>{n.time}</small>
-                    </div>
-                  ))}
-                </div>
-              )}
+                  <span className="notification-count">
+                    {notifications.length}
+                  </span>
+                </button>
+
+                {showNotifications && (
+                  <div className="notification-dropdown">
+                    <h4>การแจ้งเตือน</h4>
+
+                    {notifications.map((item) => (
+                      <div key={item.id} className="notification-item">
+                        <p>{item.message}</p>
+                        <small>{item.time}</small>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="user-info">
@@ -175,10 +221,15 @@ function ProjectDetail() {
 
             <div className="project-badges">
               <span>ประเภท : {project.project_type}</span>
+
               <span>
                 รับนิสิต : {currentMembers} / {maxMembers} คน
               </span>
-              <span>สถานะ : {project.status}</span>
+
+              <span>
+                สถานะ :
+                <b className={`status ${project.status}`}>{project.status}</b>
+              </span>
             </div>
           </div>
 
@@ -238,19 +289,24 @@ function ProjectDetail() {
             <h4>ทักษะที่เกี่ยวข้อง</h4>
 
             <div className="skill-tags">
-              {(project.skills || "").split("|").map(
-                (skill, index) =>
-                  skill && (
-                    <span
-                      key={index}
-                      style={{
-                        backgroundColor: skillColors[skill] || "#F3F4F6",
-                      }}
-                    >
-                      {skill}
-                    </span>
-                  ),
-              )}
+              {(project.skills || "").split("|").map((skill, index) => {
+                const style = skillStyles[skill] || {
+                  backgroundColor: "#F3F4F6",
+                  borderColor: "#D1D5DB",
+                };
+
+                return (
+                  <span
+                    key={index}
+                    style={{
+                      backgroundColor: style.backgroundColor,
+                      border: `1px solid ${style.borderColor}`,
+                    }}
+                  >
+                    {skill}
+                  </span>
+                );
+              })}
             </div>
           </section>
 
@@ -273,7 +329,10 @@ function ProjectDetail() {
           </section>
 
           <div className="apply-section">
-            <button className="apply-btn"onClick={() => navigate(`/apply-project/${project.id}`)}>
+            <button
+              className="apply-btn"
+              onClick={() => navigate(`/apply-project/${project.id}`)}
+            >
               สมัครเข้าร่วมโครงงาน
             </button>
           </div>
