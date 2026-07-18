@@ -31,13 +31,17 @@ interface Member {
 }
 
 function ProjectDetail() {
-  const { id } = useParams();
+  // ใช้ useParams เพื่อดึงค่าพารามิเตอร์ id จาก URL
+  const { id } = useParams(); 
+  // ใช้ useNavigate เพื่อเปลี่ยนหน้า
   const navigate = useNavigate();
 
-  const username = localStorage.getItem("username");
+  // ดึงค่ารหัสประจำตัวและรูปโปรไฟล์จาก localStorage
+  const username = localStorage.getItem("username"); // ดึงค่ารหัสประจำตัวจาก localStorage
   const profileImage = localStorage.getItem("profileImage");
 
-  const [project, setProject] = useState<Project | null>(null);
+  // <Project | null> หมายถึง project อาจเป็น Project หรือ null ได้ แล้วใช้ useState เพื่อเก็บสถานะของโครงงานที่ดึงมาจาก API
+  const [project, setProject] = useState<Project | null>(null); // สถานะของโครงงานที่ดึงมาจาก API
   const [showNotifications, setShowNotifications] = useState(false);
 
   const notifications = [
@@ -49,10 +53,12 @@ function ProjectDetail() {
     { id: 2, message: "ส่งคำขอเลือกหัวข้อสำเร็จ", time: "1 วันที่แล้ว" },
   ];
 
+  // useEffect ทำงานเมื่อค่า username หรือ navigate เปลี่ยนแปลง ถ้า username ไม่มีค่า (ผู้ใช้ยังไม่ได้เข้าสู่ระบบ) จะเปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   useEffect(() => {
-    if (!username) navigate("/");
+    if (!username) navigate("/"); // ทำงานตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่ ถ้าไม่ให้เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   }, [username, navigate]);
 
+  // useEffect ทำงานเมื่อ component ถูก mount และเมื่อค่า id เปลี่ยนแปลง ดึงข้อมูลโครงงานจาก API โดยใช้ axios
   useEffect(() => {
     axios
       .get(`http://localhost:5000/projects/${id}`)

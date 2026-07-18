@@ -55,6 +55,7 @@ function Login() {
 
       if (data.user.role === "student") {
         localStorage.setItem("username", data.user.username);
+        localStorage.setItem("name", res.data.user.name);
         localStorage.setItem("profileImage", data.user.profileImage);
 
         navigate("/StudentHome");
