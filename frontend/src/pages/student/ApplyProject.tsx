@@ -1,6 +1,7 @@
 import "./ApplyProject.css";
 import { useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -39,7 +40,7 @@ function ApplyProject() {
   const name = localStorage.getItem("name");
   const profileImage = localStorage.getItem("profileImage");
 
-    const handleLogout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
     localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
     localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
@@ -102,7 +103,9 @@ function ApplyProject() {
           </ul>
         </nav>
 
-        <button className="logout-btn" onClick={handleLogout}>ออกจากระบบ</button>
+        <button className="logout-btn" onClick={handleLogout}>
+          ออกจากระบบ
+        </button>
       </aside>
 
       {/* Main */}
@@ -206,18 +209,22 @@ function ApplyProject() {
                 <span style={{ color: "red" }}> *</span>
               </h3>
 
-              <select
-                value={contactType}
-                onChange={(e) => setContactType(e.target.value)}
-              >
-                <option value="">เลือกช่องทางการติดต่อ</option>
-                <option>Email</option>
-                <option>Line</option>
-                <option>Facebook</option>
-                <option>Instagram</option>
-                <option>Discord</option>
-                <option>โทรศัพท์</option>
-              </select>
+              <div className="select-wrapper">
+                <select
+                  value={contactType}
+                  onChange={(e) => setContactType(e.target.value)}
+                >
+                  <option value="">เลือกช่องทางการติดต่อ</option>
+                  <option>Email</option>
+                  <option>Line</option>
+                  <option>Facebook</option>
+                  <option>Instagram</option>
+                  <option>Discord</option>
+                  <option>โทรศัพท์</option>
+                </select>
+
+                <FaChevronDown className="select-arrow" />
+              </div>
 
               {contactType !== "" && (
                 <>

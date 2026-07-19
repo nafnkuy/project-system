@@ -1,13 +1,17 @@
 .apply-card {
+  width: 90%;
+  margin: 25px auto;
+  margin-top: 40px;
+
   background: #fff;
-  border-radius: 14px;
-  padding: 30px;
-  margin-top: 25px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.08);
 }
 
 .apply-card h2 {
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .section {
@@ -19,6 +23,13 @@
 
 .section h3 {
   margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.section p,
+.section strong{
+  font-size: 15px;
+  font-weight: 400;
 }
 
 .notification-box {
@@ -97,10 +108,35 @@
 /* ฟอร์ม */
 .section label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
   margin-top: 10px;
   margin-bottom: 6px;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 10px 45px 10px 12px;
+
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 18px;   /* ปรับเป็น 20px หรือ 25px ได้ */
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #555;
+  font-size: 14px;
 }
 
 .section input,
@@ -111,7 +147,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   box-sizing: border-box;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .section input:disabled {
@@ -129,12 +165,26 @@
   margin-top: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  padding-left: 10px;
+}
+
+.agree-box input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.agree-box label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ปุ่ม */
 .button-group {
-  margin-top: 25px;
+  margin-top: 40px;
   display: flex;
   justify-content: center;
   gap: 15px;

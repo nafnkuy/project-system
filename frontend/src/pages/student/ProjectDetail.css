@@ -12,9 +12,8 @@
 
 .layout {
   display: flex;
-  min-height: 100vh;
-  background: #f5f5f5;
   align-items: stretch;
+  background: #f5f5f5;
 }
 
 /* Sidebar */
@@ -24,14 +23,19 @@
   background: #fff;
   border-right: 1px solid #ddd;
 
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
 
-  min-height: 100%;
+  align-self: stretch;   /* ยืดตามความสูงของ .layout */
+}
+
+.sidebar nav {
+  flex: 1;
 }
 
 nav {
   margin-top: 8px;
+  flex: 1;
 }
 
 .logo {
@@ -86,7 +90,7 @@ nav {
 
 .logout-btn {
   width: 190px;
-  margin: 0 auto 20px;
+  margin: 20px auto;
   padding: 12px;
 
   border: none;
@@ -319,11 +323,11 @@ nav {
 .apply-btn {
   background: #2cab63;
   color: white;
+  margin-top: 10px;
   border: none;
   padding: 12px 28px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 15px;
 }
 
 .apply-btn:hover {
