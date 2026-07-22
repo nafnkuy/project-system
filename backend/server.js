@@ -125,6 +125,116 @@ app.get("/projects/:id", (req, res) => {
   });
 });
 
+app.post("/project-requests", (req, res) => {
+  const { project_id, student_id, contact_type, contact_value, introduction } =
+    req.body;
+
+  const checkSql = `
+    SELECT id
+    FROM project_requests
+    WHERE project_id = ?
+      AND student_id = ?
+      AND status != 'ถูกยกเลิก'
+  `;
+
+  db.query(checkSql, [project_id, student_id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (rows.length > 0) {
+      return res.status(400).json({
+        message: "คุณได้ส่งใบสมัครแล้ว",
+      });
+    }
+
+    const insertSql = `
+      INSERT INTO project_requests
+      (
+        project_id,
+        student_id,
+        contact_type,
+        contact_value,
+        introduction
+      )
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      insertSql,
+      [project_id, student_id, contact_type, contact_value, introduction],
+      (err, result) => {
+        if (err) {
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        res.json({
+          success: true,
+          id: result.insertId,
+        });
+      },
+    );
+  });
+});
+
+app.get("/project-requests/check/:projectId/:studentId", (req, res) => {
+  const { projectId, studentId } = req.params;
+
+  const sql = `
+    SELECT id
+    FROM project_requests
+    WHERE project_id=?
+      AND student_id=?
+      AND status!='ถูกยกเลิก'
+  `;
+
+  db.query(sql, [projectId, studentId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Database Error" });
+    }
+
+    res.json({
+      submitted: result.length > 0,
+    });
+  });
+
+  app.get("/project-requests/:projectId/:studentId", (req, res) => {
+    const { projectId, studentId } = req.params;
+
+    const sql = `
+    SELECT
+      contact_type,
+      contact_value,
+      introduction,
+      status
+    FROM project_requests
+    WHERE project_id = ?
+      AND student_id = ?
+      AND status != 'ถูกยกเลิก'
+    LIMIT 1
+  `;
+
+    db.query(sql, [projectId, studentId], (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          message: "Not Found",
+        });
+      }
+
+      res.json(result[0]);
+    });
+  });
+});
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

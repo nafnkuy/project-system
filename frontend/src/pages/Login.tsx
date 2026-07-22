@@ -54,6 +54,7 @@ function Login() {
       const data = res.data;
 
       if (data.user.role === "student") {
+        localStorage.setItem("userId", data.user.id);
         localStorage.setItem("username", data.user.username);
         localStorage.setItem("name", res.data.user.name);
         localStorage.setItem("profileImage", data.user.profileImage);

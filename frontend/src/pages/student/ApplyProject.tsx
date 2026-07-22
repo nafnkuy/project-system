@@ -17,25 +17,28 @@ interface Project {
   current_members: number;
 }
 
-interface User {
-  username: string;
-  fullname: string;
-}
-
 function ApplyProject() {
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { id } = useParams(); //คือการดึงค่าพารามิเตอร์จาก URL โดยในที่นี้คือ id ของโครงงานที่ต้องการสมัครเข้าร่วม
 
+  // <Project | null> หมายถึงค่าของ state project สามารถเป็นได้ทั้ง object ของ Project หรือ null ซึ่ง null จะใช้ในกรณีที่ยังไม่มีข้อมูลโครงงานถูกโหลดเข้ามา
   const [project, setProject] = useState<Project | null>(null);
 
+  // State สำหรับการแสดงผลการแจ้งเตือน
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // State สำหรับเก็บค่าช่องทางการติดต่อและข้อมูลอื่น ๆ ของผู้สมัคร
   const [contactType, setContactType] = useState("");
   const [contactValue, setContactValue] = useState("");
   const [introduction, setIntroduction] = useState("");
   const [agree, setAgree] = useState(false);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const userId = localStorage.getItem("userId");
   const username = localStorage.getItem("username");
   const name = localStorage.getItem("name");
   const profileImage = localStorage.getItem("profileImage");
@@ -70,6 +73,65 @@ function ApplyProject() {
         console.log(err);
       });
   }, [id]);
+
+  useEffect(() => {
+  if (!project?.id || !userId) return;
+
+  axios
+    .get(
+      `http://localhost:5000/project-requests/check/${project.id}/${userId}`
+    )
+    .then((res) => {
+      setIsSubmitted(res.data.submitted);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}, [project, userId]);
+
+useEffect(() => {
+  if (!project?.id || !userId) return;
+
+  axios
+    .get(
+      `http://localhost:5000/project-requests/${project.id}/${userId}`
+    )
+    .then((res) => {
+      setContactType(res.data.contact_type);
+      setContactValue(res.data.contact_value);
+      setIntroduction(res.data.introduction || "");
+      setAgree(true);
+    })
+    .catch(() => {});
+}, [project, userId]);
+
+  const handleSubmit = async () => {
+    if (!contactType || !contactValue || !agree) {
+      alert("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
+
+    try {
+      setShowPopup(true);
+      setIsSubmitting(true);
+
+      await axios.post("http://localhost:5000/project-requests", {
+        project_id: project?.id,
+        student_id: Number(userId),
+        contact_type: contactType,
+        contact_value: contactValue,
+        introduction,
+      });
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+      }, 5000);
+    } catch (err) {
+      console.log(err);
+      alert("ส่งใบสมัครไม่สำเร็จ");
+    }
+  };
 
   return (
     <div className="layout">
@@ -216,7 +278,7 @@ function ApplyProject() {
                 >
                   <option value="">เลือกช่องทางการติดต่อ</option>
                   <option>Email</option>
-                  <option>Line</option>
+                  <option>Line ID</option>
                   <option>Facebook</option>
                   <option>Instagram</option>
                   <option>Discord</option>
@@ -261,14 +323,66 @@ function ApplyProject() {
           </div>
 
           <div className="button-group">
-            <button className="cancel-btn" onClick={() => navigate(-1)}>
-              ยกเลิก
-            </button>
 
-            <button className="submit-btn">ส่งคำขอเข้าร่วมโครงงาน</button>
-          </div>
+  {isSubmitted ? (
+
+    <button className="submit-btn" disabled>
+      ✓ ส่งใบสมัครแล้ว
+    </button>
+
+  ) : (
+
+    <>
+      <button
+        className="cancel-btn"
+        onClick={() => navigate(-1)}
+      >
+        ยกเลิก
+      </button>
+
+      <button
+        className="submit-btn"
+        onClick={handleSubmit}
+      >
+        ส่งคำขอเข้าร่วมโครงงาน
+      </button>
+    </>
+
+  )}
+
+</div>
         </div>
       </main>
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            {isSubmitting ? (
+              <>
+                <div className="loader"></div>
+                <h3>กำลังส่งใบสมัคร...</h3>
+                <p>กรุณารอสักครู่</p>
+              </>
+            ) : (
+              <>
+                <h3>ส่งใบสมัครสำเร็จ</h3>
+
+                <p>
+                  ใบสมัครของคุณถูกส่งไปยังอาจารย์แล้ว
+                  <br />
+                  กรุณารอการพิจารณา
+                </p>
+
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="submit-btn"
+                >
+                  ตกลง
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -32,7 +32,7 @@ interface Member {
 
 function ProjectDetail() {
   // ใช้ useParams เพื่อดึงค่าพารามิเตอร์ id จาก URL
-  const { id } = useParams(); 
+  const { id } = useParams();
   // ใช้ useNavigate เพื่อเปลี่ยนหน้า
   const navigate = useNavigate();
 
