@@ -75,35 +75,33 @@ function ApplyProject() {
   }, [id]);
 
   useEffect(() => {
-  if (!project?.id || !userId) return;
+    if (!project?.id || !userId) return;
 
-  axios
-    .get(
-      `http://localhost:5000/project-requests/check/${project.id}/${userId}`
-    )
-    .then((res) => {
-      setIsSubmitted(res.data.submitted);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}, [project, userId]);
+    axios
+      .get(
+        `http://localhost:5000/project-requests/check/${project.id}/${userId}`,
+      )
+      .then((res) => {
+        setIsSubmitted(res.data.submitted);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [project, userId]);
 
-useEffect(() => {
-  if (!project?.id || !userId) return;
+  useEffect(() => {
+    if (!project?.id || !userId) return;
 
-  axios
-    .get(
-      `http://localhost:5000/project-requests/${project.id}/${userId}`
-    )
-    .then((res) => {
-      setContactType(res.data.contact_type);
-      setContactValue(res.data.contact_value);
-      setIntroduction(res.data.introduction || "");
-      setAgree(true);
-    })
-    .catch(() => {});
-}, [project, userId]);
+    axios
+      .get(`http://localhost:5000/project-requests/${project.id}/${userId}`)
+      .then((res) => {
+        setContactType(res.data.contact_type);
+        setContactValue(res.data.contact_value);
+        setIntroduction(res.data.introduction || "");
+        setAgree(true);
+      })
+      .catch(() => {});
+  }, [project, userId]);
 
   const handleSubmit = async () => {
     if (!contactType || !contactValue || !agree) {
@@ -126,7 +124,7 @@ useEffect(() => {
       setTimeout(() => {
         setIsSubmitting(false);
         setIsSubmitted(true);
-      }, 5000);
+      }, 3000);
     } catch (err) {
       console.log(err);
       alert("ส่งใบสมัครไม่สำเร็จ");
@@ -323,34 +321,22 @@ useEffect(() => {
           </div>
 
           <div className="button-group">
+            {isSubmitted ? (
+              <button className="submit-btn" disabled>
+                ✓ ส่งใบสมัครแล้ว
+              </button>
+            ) : (
+              <>
+                <button className="cancel-btn" onClick={() => navigate(-1)}>
+                  ยกเลิก
+                </button>
 
-  {isSubmitted ? (
-
-    <button className="submit-btn" disabled>
-      ✓ ส่งใบสมัครแล้ว
-    </button>
-
-  ) : (
-
-    <>
-      <button
-        className="cancel-btn"
-        onClick={() => navigate(-1)}
-      >
-        ยกเลิก
-      </button>
-
-      <button
-        className="submit-btn"
-        onClick={handleSubmit}
-      >
-        ส่งคำขอเข้าร่วมโครงงาน
-      </button>
-    </>
-
-  )}
-
-</div>
+                <button className="submit-btn" onClick={handleSubmit}>
+                  ส่งคำขอเข้าร่วมโครงงาน
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </main>
       {showPopup && (

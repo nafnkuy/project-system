@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql:3306
--- Generation Time: Jul 22, 2026 at 01:34 PM
+-- Generation Time: Jul 29, 2026 at 01:09 PM
 -- Server version: 8.0.43
 -- PHP Version: 8.2.29
 
@@ -36,8 +36,17 @@ CREATE TABLE `project_requests` (
   `status` enum('รอพิจารณา','อนุมัติ','ไม่อนุมัติ','ถูกยกเลิก') DEFAULT 'รอพิจารณา',
   `reject_reason` text,
   `request_date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `decision_date` datetime DEFAULT NULL
+  `decision_date` datetime DEFAULT NULL,
+  `contact_type` varchar(50) DEFAULT NULL,
+  `contact_value` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `project_requests`
+--
+
+INSERT INTO `project_requests` (`id`, `project_id`, `student_id`, `introduction`, `request_file`, `status`, `reject_reason`, `request_date`, `decision_date`, `contact_type`, `contact_value`) VALUES
+(1, 1, 1, 'สวัสดีจ้า', NULL, 'รอพิจารณา', NULL, '2026-07-22 14:25:15', NULL, 'โทรศัพท์', '0321654987');
 
 --
 -- Indexes for dumped tables
@@ -48,7 +57,7 @@ CREATE TABLE `project_requests` (
 --
 ALTER TABLE `project_requests`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `project_id` (`project_id`),
+  ADD UNIQUE KEY `unique_request` (`project_id`,`student_id`),
   ADD KEY `student_id` (`student_id`);
 
 --
@@ -59,7 +68,7 @@ ALTER TABLE `project_requests`
 -- AUTO_INCREMENT for table `project_requests`
 --
 ALTER TABLE `project_requests`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
