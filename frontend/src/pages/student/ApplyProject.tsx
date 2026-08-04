@@ -35,7 +35,7 @@ function ApplyProject() {
   const [agree, setAgree] = useState(false);
 
   const [showPopup, setShowPopup] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  //const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const userId = localStorage.getItem("userId");
@@ -49,6 +49,15 @@ function ApplyProject() {
     localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
+
+  // State สำหรับตรวจสอบว่าผู้ใช้มีคำขอที่รอดำเนินการอยู่หรือไม่
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+
+  const [popupType, setPopupType] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
+
+  const [popupMessage, setPopupMessage] = useState("");
 
   const notifications = [
     {
@@ -103,6 +112,16 @@ function ApplyProject() {
       .catch(() => {});
   }, [project, userId]);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    axios
+      .get(`http://localhost:5000/project-requests/student/${userId}`)
+      .then((res) => {
+        setHasPendingRequest(res.data.hasPending);
+      });
+  }, [userId]);
+
   const handleSubmit = async () => {
     if (!contactType || !contactValue || !agree) {
       alert("กรุณากรอกข้อมูลให้ครบ");
@@ -110,8 +129,8 @@ function ApplyProject() {
     }
 
     try {
+      setPopupType("loading");
       setShowPopup(true);
-      setIsSubmitting(true);
 
       await axios.post("http://localhost:5000/project-requests", {
         project_id: project?.id,
@@ -121,13 +140,11 @@ function ApplyProject() {
         introduction,
       });
 
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-      }, 3000);
-    } catch (err) {
-      console.log(err);
-      alert("ส่งใบสมัครไม่สำเร็จ");
+      setPopupType("success");
+      setIsSubmitted(true);
+    } catch (err: any) {
+      setPopupType("error");
+      setPopupMessage(err.response?.data?.message || "ส่งใบสมัครไม่สำเร็จ");
     }
   };
 
@@ -153,7 +170,9 @@ function ApplyProject() {
 
             <li>รายชื่ออาจารย์</li>
 
-            <li>ส่งคำเสนอหัวข้อใหม่</li>
+            <li onClick={() => navigate("/submit-new-project")}>
+              ส่งคำเสนอโครงงานใหม่
+            </li>
 
             <li>โครงงานของฉัน</li>
 
@@ -331,8 +350,14 @@ function ApplyProject() {
                   ยกเลิก
                 </button>
 
-                <button className="submit-btn" onClick={handleSubmit}>
-                  ส่งคำขอเข้าร่วมโครงงาน
+                <button
+                  className="submit-btn"
+                  disabled={hasPendingRequest}
+                  onClick={handleSubmit}
+                >
+                  {hasPendingRequest
+                    ? "มีใบสมัครที่กำลังรอพิจารณา"
+                    : "ส่งคำขอเข้าร่วมโครงงาน"}
                 </button>
               </>
             )}
@@ -342,14 +367,20 @@ function ApplyProject() {
       {showPopup && (
         <div className="popup-overlay">
           <div className="popup-card">
-            {isSubmitting ? (
+            {popupType === "loading" && (
               <>
                 <div className="loader"></div>
+
                 <h3>กำลังส่งใบสมัคร...</h3>
+
                 <p>กรุณารอสักครู่</p>
               </>
-            ) : (
+            )}
+
+            {popupType === "success" && (
               <>
+                <div style={{ fontSize: 60 }}>✅</div>
+
                 <h3>ส่งใบสมัครสำเร็จ</h3>
 
                 <p>
@@ -359,10 +390,27 @@ function ApplyProject() {
                 </p>
 
                 <button
-                  onClick={() => setShowPopup(false)}
                   className="submit-btn"
+                  onClick={() => setShowPopup(false)}
                 >
                   ตกลง
+                </button>
+              </>
+            )}
+
+            {popupType === "error" && (
+              <>
+                <div style={{ fontSize: 60 }}>❌</div>
+
+                <h3>ไม่สามารถส่งใบสมัครได้</h3>
+
+                <p>{popupMessage}</p>
+
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ปิด
                 </button>
               </>
             )}

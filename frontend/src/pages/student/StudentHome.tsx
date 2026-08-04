@@ -14,9 +14,16 @@ interface Project {
   status: string;
 }
 
+interface Notification {
+  id: number;
+  sender_name: string;
+  created_at: string;
+}
+
 function StudentHome() {
   const navigate = useNavigate();
 
+  const userId = localStorage.getItem("userId");
   const username = localStorage.getItem("username"); //ดึงค่ารหัสประจำตัวจาก localStorage
   const profileImage = localStorage.getItem("profileImage");
 
@@ -42,19 +49,7 @@ function StudentHome() {
     currentPage * itemsPerPage,
   );
 
-  const notifications = [
-    {
-      id: 1,
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-      time: "2 ชั่วโมงที่แล้ว",
-    },
-    {
-      id: 2,
-      message: "ส่งคำขอเลือกหัวข้อสำเร็จ",
-      time: "1 วันที่แล้ว",
-    },
-  ];
-
+const [notifications, setNotifications] = useState<Notification[]>([]);
   useEffect(() => {
     //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
     //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
@@ -80,6 +75,19 @@ function StudentHome() {
     //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
     setCurrentPage(1);
   }, [searchTerm]);
+
+  useEffect(()=>{
+
+axios.get(
+`http://localhost:5000/project-invitations/${userId}`
+)
+.then(res=>{
+
+setNotifications(res.data);
+
+});
+
+},[]);
 
   const handleLogout = () => {
     localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
@@ -108,7 +116,9 @@ function StudentHome() {
           <ul>
             <li className="active">หน้าหลัก</li>
             <li>รายชื่ออาจารย์</li>
-            <li>ส่งคำเสนอหัวข้อใหม่</li>
+            <li onClick={() => navigate("/submit-new-project")}>
+              ส่งคำเสนอโครงงานใหม่
+            </li>
             <li>โครงงานของฉัน</li>
             <li>การแจ้งเตือน</li>
             <li>ข้อมูลส่วนตัว</li>
@@ -146,8 +156,8 @@ function StudentHome() {
 
                     {notifications.map((item) => (
                       <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-                        <small>{item.time}</small>
+                        <p>{item.sender_name} ได้ส่งคำเชิญให้คุณ</p>
+                        <small>{item.created_at}</small>
                       </div>
                     ))}
                   </div>
