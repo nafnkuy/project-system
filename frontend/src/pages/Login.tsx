@@ -63,13 +63,17 @@ function Login() {
         return;
       }
 
-      if (data.user.role === "teacher") { //ตรวจสอบว่าผู้ใช้เป็นอาจารย์หรือไม่
+      if (data.user.role === "teacher") {
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("username", data.user.username);
+        localStorage.setItem("name", data.user.name);
         localStorage.setItem("profileImage", data.user.profileImage);
 
-        navigate("/teacher-home"); // เปลี่ยนหน้าไปยังหน้าอาจารย์
+        navigate("/teacher-home");
         return;
       }
-    } catch (error) { //ตรวจสอบว่ามีความผิดพลาดในการเข้าสู่ระบบหรือไม่
+    } catch (error) {
+      //ตรวจสอบว่ามีความผิดพลาดในการเข้าสู่ระบบหรือไม่
       setLoginError("รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง");
       console.error(error); //แสดงความผิดพลาดใน console
     }

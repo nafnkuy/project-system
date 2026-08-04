@@ -2,9 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css'
 import Login from './pages/Login'
 import StudentHome from "./pages/student/StudentHome";
-import TeacherHome from "./pages/teacher/Teacher-home";
+import TeacherHome from "./pages/teacher/TeacherHome";
 import ProjectDetail from "./pages/student/ProjectDetail";
 import ApplyProject from "./pages/student/ApplyProject";
+import SubmitNewProject from "./pages/student/SubmitNewProject";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/StudentHome" element={<StudentHome />} />
         <Route path="/apply-project/:id" element={<ApplyProject />} />
         <Route path="/project-details/:id" element={<ProjectDetail />} />
+        <Route path="/submit-new-project" element={<SubmitNewProject />} />
         <Route path="/teacher-home" element={<TeacherHome />} />
       </Routes>
     </BrowserRouter>

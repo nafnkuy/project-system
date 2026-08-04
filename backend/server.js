@@ -132,12 +132,11 @@ app.post("/project-requests", (req, res) => {
   const checkSql = `
     SELECT id
     FROM project_requests
-    WHERE project_id = ?
-      AND student_id = ?
-      AND status != 'ถูกยกเลิก'
-  `;
+    WHERE student_id = ?
+      AND status IN ('รอพิจารณา','อนุมัติ')
+`;
 
-  db.query(checkSql, [project_id, student_id], (err, rows) => {
+  db.query(checkSql, [student_id], (err, rows) => {
     if (err) {
       return res.status(500).json({
         message: "Database Error",
@@ -146,7 +145,7 @@ app.post("/project-requests", (req, res) => {
 
     if (rows.length > 0) {
       return res.status(400).json({
-        message: "คุณได้ส่งใบสมัครแล้ว",
+        message: "คุณมีใบสมัครที่กำลังรอพิจารณาหรือได้รับการอนุมัติแล้ว",
       });
     }
 
@@ -187,25 +186,28 @@ app.get("/project-requests/check/:projectId/:studentId", (req, res) => {
   const sql = `
     SELECT id
     FROM project_requests
-    WHERE project_id=?
-      AND student_id=?
-      AND status!='ถูกยกเลิก'
+    WHERE project_id = ?
+      AND student_id = ?
+      AND status != 'ถูกยกเลิก'
   `;
 
   db.query(sql, [projectId, studentId], (err, result) => {
     if (err) {
-      return res.status(500).json({ message: "Database Error" });
+      return res.status(500).json({
+        message: "Database Error",
+      });
     }
 
     res.json({
       submitted: result.length > 0,
     });
   });
+});
 
-  app.get("/project-requests/:projectId/:studentId", (req, res) => {
-    const { projectId, studentId } = req.params;
+app.get("/project-requests/:projectId/:studentId", (req, res) => {
+  const { projectId, studentId } = req.params;
 
-    const sql = `
+  const sql = `
     SELECT
       contact_type,
       contact_value,
@@ -218,23 +220,358 @@ app.get("/project-requests/check/:projectId/:studentId", (req, res) => {
     LIMIT 1
   `;
 
-    db.query(sql, [projectId, studentId], (err, result) => {
+  db.query(sql, [projectId, studentId], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "Not Found",
+      });
+    }
+
+    res.json(result[0]);
+  });
+});
+
+app.get("/project-requests/student/:studentId", (req, res) => {
+  const { studentId } = req.params;
+
+  const sql = `
+    SELECT id
+    FROM project_requests
+    WHERE student_id = ?
+      AND status IN ('รอพิจารณา','อนุมัติ')
+  `;
+
+  db.query(sql, [studentId], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json({
+      hasPending: result.length > 0,
+    });
+  });
+});
+
+app.post("/projects", (req, res) => {
+  const {
+    title,
+    advisor,
+    advisor_id,
+    major,
+    project_type,
+    max_members,
+    academic_year,
+    description,
+    objectives,
+    skills,
+    requirements,
+  } = req.body;
+
+  const sql = `
+    INSERT INTO projects
+    (
+      title,
+      advisor,
+      advisor_id,
+      major,
+      status,
+      project_type,
+      max_members,
+      current_members,
+      academic_year,
+      description,
+      objectives,
+      skills,
+      requirements,
+      source
+    )
+    VALUES
+    (
+      ?, ?, ?, ?, 'รออนุมัติ',
+      ?, ?, 0, ?,
+      ?, ?, ?, ?,
+      'student'
+    )
+  `;
+
+  db.query(
+    sql,
+    [
+      title,
+      advisor,
+      advisor_id,
+      major,
+      project_type,
+      max_members,
+      academic_year,
+      description,
+      objectives,
+      skills,
+      requirements,
+    ],
+    (err, result) => {
       if (err) {
+        console.log("Create project error:", err);
+
         return res.status(500).json({
           message: "Database Error",
         });
       }
 
-      if (result.length === 0) {
-        return res.status(404).json({
-          message: "Not Found",
+      res.json({
+        success: true,
+        project_id: result.insertId,
+      });
+    },
+  );
+});
+
+app.get("/teachers/search", (req, res) => {
+  const { name } = req.query;
+
+  const sql = `
+    SELECT
+      id,
+      name
+    FROM users
+    WHERE role = 'teacher'
+      AND name LIKE ?
+  `;
+
+  db.query(sql, [`%${name}%`], (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json(results);
+  });
+});
+
+app.get("/users/student/:username", (req, res) => {
+  const { username } = req.params;
+
+  const sql = `
+    SELECT
+      id,
+      username,
+      name
+    FROM users
+    WHERE username = ?
+      AND role = 'student'
+  `;
+
+  db.query(sql, [username], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบนิสิต",
+      });
+    }
+
+    res.json(result[0]);
+  });
+});
+
+app.get("/teacher/requests/:advisorId", (req, res) => {
+  const advisorId = req.params.advisorId;
+
+  const sql = `
+    SELECT
+      pr.id,
+      p.title,
+      u.name AS student_name,
+      pr.request_date,
+      pr.status
+
+    FROM project_requests pr
+
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    INNER JOIN users u
+      ON pr.student_id = u.id
+
+    WHERE p.advisor_id = ?
+
+    ORDER BY pr.request_date DESC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.log("Teacher requests error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    console.log("Teacher requests:", results);
+
+    res.json(results);
+  });
+});
+
+app.post("/project-invitations", (req, res) => {
+  const {
+    sender_id,
+    receiver_id,
+    project_id,
+    advisor_id,
+    title,
+    project_type,
+    description,
+    objectives,
+    skills,
+    requirements,
+  } = req.body;
+
+  const sql = `
+    INSERT INTO project_invitations
+    (
+      sender_id,
+      receiver_id,
+      project_id,
+      advisor_id,
+      title,
+      project_type,
+      description,
+      objectives,
+      skills,
+      requirements
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [
+      sender_id,
+      receiver_id,
+      project_id,
+      advisor_id,
+      title,
+      project_type,
+      description,
+      objectives,
+      skills,
+      requirements,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log("Project invitation error:", err);
+
+        return res.status(500).json({
+          message: "Database Error",
         });
       }
 
-      res.json(result[0]);
-    });
+      // หา名字คนส่ง
+      const senderSql = `
+        SELECT name
+        FROM users
+        WHERE id = ?
+      `;
+
+      db.query(senderSql, [sender_id], (senderErr, senderResult) => {
+        if (senderErr) {
+          console.log("Get sender error:", senderErr);
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        const senderName = senderResult[0]?.name || "นิสิต";
+
+        // สร้าง notification
+        const notificationSql = `
+          INSERT INTO notifications
+          (
+            user_id,
+            message
+          )
+          VALUES (?, ?)
+        `;
+
+        db.query(
+          notificationSql,
+          [
+            receiver_id,
+            `${senderName} ได้เชิญคุณเข้าร่วมโครงงาน "${title}"`,
+          ],
+          (notificationErr) => {
+            if (notificationErr) {
+              console.log("Notification error:", notificationErr);
+            }
+
+            res.json({
+              success: true,
+              invitation_id: result.insertId,
+            });
+          },
+        );
+      });
+    },
+  );
+});
+
+app.get("/project-invitations/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  const sql = `
+    SELECT
+      pi.id,
+      pi.project_id,
+      u.name AS sender_name,
+      pi.title,
+      pi.project_type,
+      pi.description,
+      pi.objectives,
+      pi.skills,
+      pi.requirements,
+      pi.status,
+      pi.created_at
+
+    FROM project_invitations pi
+
+    JOIN users u
+      ON pi.sender_id = u.id
+
+    WHERE pi.receiver_id = ?
+      AND pi.status = 'รอตอบรับ'
+
+    ORDER BY pi.created_at DESC
+  `;
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.log("Get invitations error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json(result);
   });
 });
+
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

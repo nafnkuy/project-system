@@ -153,11 +153,13 @@ function ProjectDetail() {
 
         <nav>
           <ul>
-            <li className="active" onClick={() => navigate("/student-home")}>
+            <li className="active" onClick={() => navigate("/StudentHome")}>
               หน้าหลัก
             </li>
             <li>รายชื่ออาจารย์</li>
-            <li>ส่งคำเสนอหัวข้อใหม่</li>
+            <li onClick={() => navigate("/submit-new-project")}>
+              ส่งคำเสนอโครงงานใหม่
+            </li>
             <li>โครงงานของฉัน</li>
             <li>การแจ้งเตือน</li>
             <li>ข้อมูลส่วนตัว</li>
