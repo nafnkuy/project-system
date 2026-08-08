@@ -325,3 +325,79 @@ th {
   font-size: 14px;
   font-weight: 500;
 }
+
+/* =========================
+   Invitation Popup
+========================= */
+
+.invitation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+.invitation-popup {
+  width: 500px;
+  max-width: 90%;
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.invitation-popup h3 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.invitation-divider {
+  border-top: 1px solid #ddd;
+  margin: 15px 0;
+}
+
+.invitation-detail {
+  margin: 18px 0;
+}
+
+.invitation-detail p {
+  margin: 5px 0;
+}
+
+.invitation-question {
+  text-align: center;
+  margin: 25px 0 15px;
+  font-weight: 500;
+}
+
+.invitation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.invitation-actions button {
+  padding: 10px 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.reject-btn {
+  background: #ddd;
+}
+
+.accept-btn {
+  background: #4caf50;
+  color: white;
+}

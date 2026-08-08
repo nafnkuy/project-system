@@ -273,6 +273,8 @@ app.post("/projects", (req, res) => {
     objectives,
     skills,
     requirements,
+    source,
+    student_id,
   } = req.body;
 
   const sql = `
@@ -298,7 +300,7 @@ app.post("/projects", (req, res) => {
       ?, ?, ?, ?, 'รออนุมัติ',
       ?, ?, 0, ?,
       ?, ?, ?, ?,
-      'student'
+      ?
     )
   `;
 
@@ -316,6 +318,7 @@ app.post("/projects", (req, res) => {
       objectives,
       skills,
       requirements,
+      source,
     ],
     (err, result) => {
       if (err) {
@@ -326,11 +329,14 @@ app.post("/projects", (req, res) => {
         });
       }
 
+      const projectId = result.insertId;
+
+      // ถ้า source เป็น teacher
       res.json({
         success: true,
-        project_id: result.insertId,
+        project_id: projectId,
       });
-    },
+    }
   );
 });
 
@@ -427,7 +433,25 @@ app.get("/teacher/requests/:advisorId", (req, res) => {
 });
 
 app.post("/project-invitations", (req, res) => {
-  const {
+const {
+  sender_id,
+  receiver_id,
+  project_id,
+  advisor_id,
+  title,
+  project_type,
+  description,
+  objectives,
+  skills,
+  requirements,
+  contact_type,
+  contact_value,
+  introduction,
+} = req.body;
+
+const sql = `
+  INSERT INTO project_invitations
+  (
     sender_id,
     receiver_id,
     project_id,
@@ -438,25 +462,12 @@ app.post("/project-invitations", (req, res) => {
     objectives,
     skills,
     requirements,
-  } = req.body;
-
-  const sql = `
-    INSERT INTO project_invitations
-    (
-      sender_id,
-      receiver_id,
-      project_id,
-      advisor_id,
-      title,
-      project_type,
-      description,
-      objectives,
-      skills,
-      requirements
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
+    contact_type,
+    contact_value,
+    introduction
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
   db.query(
     sql,
     [
@@ -470,6 +481,9 @@ app.post("/project-invitations", (req, res) => {
       objectives,
       skills,
       requirements,
+      contact_type,
+      contact_value,
+      introduction,
     ],
     (err, result) => {
       if (err) {
@@ -537,20 +551,40 @@ app.get("/project-invitations/:userId", (req, res) => {
     SELECT
       pi.id,
       pi.project_id,
-      u.name AS sender_name,
+
+      -- สมาชิกคนที่ 1
+      sender.id AS sender_id,
+      sender.username AS sender_username,
+      sender.name AS sender_name,
+
+      -- สมาชิกคนที่ 2
+      receiver.id AS receiver_id,
+      receiver.username AS receiver_username,
+      receiver.name AS receiver_name,
+
+      -- ข้อมูลโครงงาน
       pi.title,
       pi.project_type,
       pi.description,
       pi.objectives,
       pi.skills,
       pi.requirements,
+
+      -- ข้อมูลติดต่อ
+      pi.contact_type,
+      pi.contact_value,
+      pi.introduction,
+
       pi.status,
       pi.created_at
 
     FROM project_invitations pi
 
-    JOIN users u
-      ON pi.sender_id = u.id
+    JOIN users sender
+      ON pi.sender_id = sender.id
+
+    JOIN users receiver
+      ON pi.receiver_id = receiver.id
 
     WHERE pi.receiver_id = ?
       AND pi.status = 'รอตอบรับ'
@@ -567,7 +601,144 @@ app.get("/project-invitations/:userId", (req, res) => {
       });
     }
 
+    console.log("INVITATION DATA:", result);
+
     res.json(result);
+  });
+});
+
+app.post("/project-invitations/:id/accept", (req, res) => {
+  const invitationId = req.params.id;
+
+  // 1. ดึงข้อมูลคำเชิญ
+  const getInvitationSql = `
+    SELECT
+      pi.*,
+      sender.name AS sender_name,
+      receiver.name AS receiver_name
+    FROM project_invitations pi
+
+    JOIN users sender
+      ON pi.sender_id = sender.id
+
+    JOIN users receiver
+      ON pi.receiver_id = receiver.id
+
+    WHERE pi.id = ?
+  `;
+
+  db.query(getInvitationSql, [invitationId], (err, invitationResult) => {
+    if (err) {
+      console.log("Get invitation error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (invitationResult.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบคำเชิญ",
+      });
+    }
+
+    const invitation = invitationResult[0];
+
+    // ตรวจสอบว่าคำเชิญยังรอตอบรับอยู่หรือไม่
+    if (invitation.status !== "รอตอบรับ") {
+      return res.status(400).json({
+        message: "คำเชิญนี้ถูกตอบไปแล้ว",
+      });
+    }
+
+    // 2. เปลี่ยนสถานะคำเชิญ
+    const updateInvitationSql = `
+      UPDATE project_invitations
+      SET status = 'ตอบรับ'
+      WHERE id = ?
+    `;
+
+    db.query(
+      updateInvitationSql,
+      [invitationId],
+      (err) => {
+        if (err) {
+          console.log("Update invitation error:", err);
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        // 3. สร้าง project_request
+        // student_id = สมาชิกคนที่ 1 (sender_id)
+        const insertRequestSql = `
+          INSERT INTO project_requests
+          (
+            project_id,
+            student_id,
+            contact_type,
+            contact_value,
+            introduction
+          )
+          VALUES (?, ?, ?, ?, ?)
+        `;
+
+        db.query(
+          insertRequestSql,
+          [
+            invitation.project_id,
+            invitation.sender_id,
+            invitation.contact_type,
+            invitation.contact_value,
+            invitation.introduction,
+          ],
+          (err, requestResult) => {
+            if (err) {
+              console.log("Create project request error:", err);
+
+              return res.status(500).json({
+                message: "สร้างคำขอไม่สำเร็จ",
+              });
+            }
+
+            // 4. ส่ง notification กลับไปหาสมาชิกคนที่ 1
+            const notificationSql = `
+              INSERT INTO notifications
+              (
+                user_id,
+                message
+              )
+              VALUES (?, ?)
+            `;
+
+            db.query(
+              notificationSql,
+              [
+                invitation.sender_id,
+                `${invitation.receiver_name} ตอบรับคำเชิญเข้าร่วมโครงงาน "${invitation.title}" แล้ว`,
+              ],
+              (notificationErr) => {
+                if (notificationErr) {
+                  console.log(
+                    "Notification error:",
+                    notificationErr
+                  );
+                }
+
+                // 5. ส่งผลกลับไป Frontend
+                res.json({
+                  success: true,
+                  message: "ตอบรับคำเชิญเรียบร้อยแล้ว",
+                  invitation_id: invitationId,
+                  request_id: requestResult.insertId,
+                });
+              }
+            );
+          }
+        );
+      }
+    );
   });
 });
 

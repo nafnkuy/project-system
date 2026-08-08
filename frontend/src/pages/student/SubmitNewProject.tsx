@@ -118,6 +118,10 @@ function SubmitNewProject() {
   // สถานะสำหรับเทคโนโลยีที่ใช้
   const [skills, setSkills] = useState(""); // ข้อความเทคโนโลยี (ตัวอย่าง: React | Node.js)
 
+  const [contactType, setContactType] = useState("");
+  const [contactValue, setContactValue] = useState("");
+  const [introduction, setIntroduction] = useState("");
+
   // ฟังก์ชันค้นหานิสิตโดยรหัส (เมื่อกดปุ่มค้นหา)
   // - ตรวจสอบว่าผู้ใช้กรอกรหัสหรือไม่
   // - เรียก API ไปหา user ประเภท student
@@ -188,6 +192,10 @@ function SubmitNewProject() {
           objectives: objective,
           skills: skills,
           requirements: "",
+
+          // เพิ่ม
+          source: "student",
+          student_id: Number(userId),
         });
 
         currentProjectId = projectRes.data.project_id;
@@ -210,6 +218,10 @@ function SubmitNewProject() {
         objectives: objective,
         skills: skills,
         requirements: "",
+
+        contact_type: contactType,
+        contact_value: contactValue,
+        introduction: introduction,
       });
 
       alert("ส่งคำเชิญแล้ว");
@@ -221,36 +233,72 @@ function SubmitNewProject() {
     }
   };
 
+
   // ฟังก์ชันเมื่อกดปุ่มส่งข้อเสนอโครงงาน
   // - ส่งข้อมูลฟอร์มไปยัง backend (สร้าง project)
   const handleSubmit = async () => {
     try {
-      // ถ้ามี project อยู่แล้ว
-      // แปลว่าสร้างไปแล้วตอนกดเชิญเพื่อน
-      if (projectId) {
-        alert("ส่งคำเสนอโครงงานสำเร็จ");
-        navigate("/StudentHome");
+      if (!projectTitle.trim()) {
+        alert("กรุณากรอกชื่อหัวข้อโครงงาน");
         return;
       }
 
-      // ถ้ายังไม่มี project ค่อยสร้างใหม่
-      const res = await axios.post("http://localhost:5000/projects", {
+      if (!advisorId) {
+        alert("กรุณาเลือกอาจารย์ที่ปรึกษาก่อน");
+        return;
+      }
+
+      if (!major) {
+        alert("กรุณาเลือกสาขาวิชา");
+        return;
+      }
+
+      if (!contactType || !contactValue) {
+        alert("กรุณากรอกข้อมูลการติดต่อ");
+        return;
+      }
+
+      // =========================
+      // กรณีโครงงานคู่
+      // =========================
+      if (projectType === "คู่") {
+        alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
+        return;
+      }
+
+      // =========================
+      // กรณีโครงงานเดี่ยว
+      // =========================
+
+      // 1. สร้าง project ก่อน
+      const projectRes = await axios.post("http://localhost:5000/projects", {
         title: projectTitle,
         advisor: advisorName,
         advisor_id: advisorId,
         major: major,
-        project_type: projectType,
-        max_members: projectType === "คู่" ? 2 : 1,
+        project_type: "เดี่ยว",
+        max_members: 1,
         description: description,
         objectives: objective,
         skills: skills,
         requirements: "",
+        source: "student",
+        student_id: Number(userId),
       });
 
-      console.log("สร้าง project สำเร็จ:", res.data);
-      
+      const newProjectId = projectRes.data.project_id;
 
-      alert("ส่งข้อเสนอสำเร็จ");
+      // 2. สร้าง project_request
+      await axios.post("http://localhost:5000/project-requests", {
+        project_id: newProjectId,
+        student_id: Number(userId),
+        contact_type: contactType,
+        contact_value: contactValue,
+        introduction: introduction,
+      });
+
+      alert("ส่งข้อเสนอโครงงานสำเร็จ");
+
       navigate("/StudentHome");
     } catch (err: any) {
       console.log(err);
@@ -259,7 +307,6 @@ function SubmitNewProject() {
       alert(err.response?.data?.message || "ส่งข้อเสนอไม่สำเร็จ");
     }
   };
-
   // ส่วน JSX: โครงสร้าง HTML ของหน้า
   return (
     <div className="layout">
@@ -475,6 +522,43 @@ function SubmitNewProject() {
               )}
             </div>
           )}
+
+          {/* ช่องทางการติดต่อ */}
+          <div className="form-group">
+            <label>ช่องทางการติดต่อ</label>
+
+            <select
+              value={contactType}
+              onChange={(e) => setContactType(e.target.value)}
+            >
+              <option value="">เลือกช่องทางติดต่อ</option>
+              <option value="Email">Email</option>
+              <option value="Line ID">Line ID</option>
+              <option value="เบอร์โทรศัพท์">เบอร์โทรศัพท์</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>ข้อมูลการติดต่อ</label>
+
+            <input
+              value={contactValue}
+              onChange={(e) => setContactValue(e.target.value)}
+              placeholder="เช่น 66160001@gmail.com หรือ ID Line"
+            />
+          </div>
+
+          {/* แนะนำตัว */}
+          <div className="form-group">
+            <label>แนะนำตัว / ข้อมูลเพิ่มเติม</label>
+
+            <textarea
+              rows={4}
+              value={introduction}
+              onChange={(e) => setIntroduction(e.target.value)}
+              placeholder="แนะนำตัวหรือข้อมูลเพิ่มเติมสำหรับอาจารย์"
+            />
+          </div>
 
           {/* ส่วนเลือกอาจารย์ที่ปรึกษา */}
           <div className="form-group">
