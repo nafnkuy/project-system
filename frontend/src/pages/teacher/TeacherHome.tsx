@@ -109,7 +109,7 @@ useEffect(() => {
         <nav>
           <ul>
             <li className="active">หน้าหลัก</li>
-            <li>โครงงานที่ฉันรับผิดชอบ</li>
+            <li onClick={() => navigate("/teacher-projects")}>จัดการหัวข้อโครงงาน</li>
             <li>การแจ้งเตือน</li>
             <li>ข้อมูลส่วนตัว</li>
           </ul>
