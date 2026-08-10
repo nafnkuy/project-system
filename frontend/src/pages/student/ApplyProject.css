@@ -199,6 +199,7 @@
   cursor: pointer;
 }
 
+/* ปุ่มส่งคำขอ */
 .submit-btn {
   background: #2eb872;
   color: #fff;
@@ -206,6 +207,16 @@
   padding: 12px 35px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* ปุ่มส่งใบสมัครแล้ว */
+.submitted-btn {
+  background: #bdbdbd;
+  color: rgb(9, 0, 0)a2a;
+  border: none;
+  padding: 12px 35px;
+  border-radius: 8px;
+  cursor: not-allowed;
 }
 
 .popup-overlay {
@@ -225,12 +236,70 @@
 }
 
 .popup-card {
-  width: 420px;
+  width: 450px;              /* จาก 420 เป็น 700 */
+  max-width: 90%;
+
   background: #fff;
-  border-radius: 12px;
-  padding: 35px;
+  border: 2px solid #7d7d7d;
+  border-radius: 18px;
+
+  padding: 35px 55px 40px;
+
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 700;
+
+  margin-bottom: 25px;
+}
+
+.popup-divider {
+  width: 85%;
+  height: 1px;
+
+  margin: 0 auto 40px;
+
+  background: #bdbdbd;
+}
+
+.popup-message {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.8;
+  color: #222;
+  margin-bottom: 50px;
+}
+
+.popup-message p {
+  margin: 35px 0;
+}
+
+.popup-message p:first-child {
+  margin-top: 0;
+}
+
+.popup-message p:last-child {
+  margin-bottom: 0;
+}
+
+.popup-btn {
+  width: 120px;
+  height: 45px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #29a96b;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  cursor: pointer;
 }
 
 .loader {

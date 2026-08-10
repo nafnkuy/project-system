@@ -10,22 +10,51 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
 .layout {
   display: flex;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
   background: #f5f5f5;
 }
 
 /* Sidebar */
 
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
   width: 250px;
+  height: 100vh;
+
   background: #fff;
   border-right: 1px solid #ddd;
 
   display: grid;
   grid-template-rows: auto 1fr auto;
-  height: 100vh;
+
+  z-index: 100;
+}
+
+.main {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  padding-bottom: 0;
 }
 
 nav {
@@ -96,12 +125,6 @@ nav {
   cursor: pointer;
 }
 
-/* Main */
-
-.main {
-  flex: 1;
-}
-
 .header {
   background: #f0e3a1;
 
@@ -131,21 +154,26 @@ nav {
 }
 
 .search-box input {
-  width: 430px;
+  width: 430px !important;
+  max-width: 430px !important;
   height: 36px;
 
   border: 1px solid #ccc;
   border-radius: 20px;
 
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .table-container {
   width: 90%;
-  margin: auto;
+  margin: 30px auto 0;
+
   background: #fff;
+
   padding: 18px;
   border-radius: 8px;
+
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
 }
 
@@ -158,18 +186,59 @@ nav {
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th,
 td {
   font-size: 14px;
+
   border: 1px solid #ddd;
+
   padding: 12px;
+
   text-align: center;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 th {
   background: #fafafa;
+}
+
+/* =========================
+   กำหนดความกว้างแต่ละคอลัมน์
+========================= */
+
+/* ชื่อหัวข้อ */
+table th:nth-child(1),
+table td:nth-child(1) {
+  width: 45%;
+}
+
+/* อาจารย์ที่ปรึกษา */
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 20%;
+}
+
+/* สาขาวิชา */
+table th:nth-child(3),
+table td:nth-child(3) {
+  width: 10%;
+}
+
+/* รับนิสิต */
+table th:nth-child(4),
+table td:nth-child(4) {
+  width: 10%;
+}
+
+/* รายละเอียด */
+table th:nth-child(5),
+table td:nth-child(5) {
+  width: 15%;
 }
 
 /*เพิ่มตรงนี้เข้ามาเป็นของ 🔔 กับรูปโปรไฟล์ */
@@ -214,25 +283,22 @@ th {
   position: absolute;
   top: 40px;
   right: 0;
-
   width: 280px;
-
   background: white;
-
   border-radius: 10px;
-
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-
   z-index: 1000;
 }
 
 .notification-dropdown h4 {
+  font-size: 16px;
   padding: 12px;
   margin: 0;
   border-bottom: 1px solid #eee;
 }
 
 .notification-item {
+  font-size: 14px;
   padding: 12px;
   border-bottom: 1px solid #eee;
 }

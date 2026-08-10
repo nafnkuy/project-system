@@ -11,7 +11,8 @@ interface Project {
   title: string;
   advisor: string;
   major: string;
-  status: string;
+  max_members: number;
+  current_members: number;
 }
 
 interface SystemNotification {
@@ -160,39 +161,35 @@ function StudentHome() {
     }
   };
 
+  const handleRejectInvitation = async () => {
+    if (!selectedInvitation) {
+      return;
+    }
 
-const handleRejectInvitation = async () => {
-  if (!selectedInvitation) {
-    return;
-  }
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/project-invitations/${selectedInvitation.id}/reject`,
+      );
 
-  try {
-    const res = await axios.post(
-      `http://localhost:5000/project-invitations/${selectedInvitation.id}/reject`,
-    );
+      alert(res.data.message);
 
-    alert(res.data.message);
+      // เอาคำเชิญที่ปฏิเสธแล้วออกจากรายการแจ้งเตือน
+      setNotifications((prev) =>
+        prev.filter((item) => item.id !== selectedInvitation.id),
+      );
 
-    // เอาคำเชิญที่ปฏิเสธแล้วออกจากรายการแจ้งเตือน
-    setNotifications((prev) =>
-      prev.filter((item) => item.id !== selectedInvitation.id),
-    );
+      // ปิด Popup
+      setSelectedInvitation(null);
 
-    // ปิด Popup
-    setSelectedInvitation(null);
+      // ปิด dropdown แจ้งเตือน
+      setShowNotifications(false);
+    } catch (err: any) {
+      console.log("Reject invitation error:", err);
+      console.log(err.response?.data);
 
-    // ปิด dropdown แจ้งเตือน
-    setShowNotifications(false);
-  } catch (err: any) {
-    console.log("Reject invitation error:", err);
-    console.log(err.response?.data);
-
-    alert(
-      err.response?.data?.message ||
-        "ไม่สามารถปฏิเสธคำเชิญได้",
-    );
-  }
-};
+      alert(err.response?.data?.message || "ไม่สามารถปฏิเสธคำเชิญได้");
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
@@ -324,7 +321,7 @@ const handleRejectInvitation = async () => {
                 <th>ชื่อหัวข้อ</th>
                 <th>อาจารย์ที่ปรึกษา</th>
                 <th>สาขาวิชา</th>
-                <th>สถานะ</th>
+                <th>รับนิสิต</th>
                 <th>รายละเอียด</th>
               </tr>
             </thead>
@@ -335,7 +332,7 @@ const handleRejectInvitation = async () => {
                   <td>{project.title}</td>
                   <td>{project.advisor}</td>
                   <td>{project.major}</td>
-                  <td>{project.status}</td>
+                  <td>{project.current_members}/{project.max_members} คน</td>
                   <td>
                     <button
                       onClick={() => navigate(`/project-details/${project.id}`)}
@@ -367,8 +364,6 @@ const handleRejectInvitation = async () => {
             </button>
           </div>
         </div>
-        {/* Table */}
-        <div className="table-container">{/* ของเดิมทั้งหมดของคุณ */}</div>
 
         {/* Invitation Popup */}
         {selectedInvitation && (
@@ -413,10 +408,7 @@ const handleRejectInvitation = async () => {
               <p className="invitation-question">คุณต้องการเข้าร่วมหรือไม่</p>
 
               <div className="invitation-actions">
-                <button
-                  className="reject-btn"
-                  onClick={handleRejectInvitation}
-                >
+                <button className="reject-btn" onClick={handleRejectInvitation}>
                   ปฏิเสธ
                 </button>
 
