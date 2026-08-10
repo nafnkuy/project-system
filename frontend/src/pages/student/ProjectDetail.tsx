@@ -294,7 +294,7 @@ function ProjectDetail() {
           </section>
 
           <section className="detail-section">
-            <h4>ทักษะที่เกี่ยวข้อง</h4>
+            <h4>เทคโนโลยีที่ใช้</h4>
 
             <div className="skill-tags">
               {(project.skills || "").split("|").map((skill, index) => {

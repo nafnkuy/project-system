@@ -32,7 +32,6 @@ function ApplyProject() {
   const [contactType, setContactType] = useState("");
   const [contactValue, setContactValue] = useState("");
   const [introduction, setIntroduction] = useState("");
-  const [agree, setAgree] = useState(false);
 
   const [showPopup, setShowPopup] = useState(false);
   //const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,7 +106,6 @@ function ApplyProject() {
         setContactType(res.data.contact_type);
         setContactValue(res.data.contact_value);
         setIntroduction(res.data.introduction || "");
-        setAgree(true);
       })
       .catch(() => {});
   }, [project, userId]);
@@ -122,11 +120,11 @@ function ApplyProject() {
       });
   }, [userId]);
 
-  const handleSubmit = async () => {
-    if (!contactType || !contactValue || !agree) {
-      alert("กรุณากรอกข้อมูลให้ครบ");
-      return;
-    }
+const handleSubmit = async () => {
+  if (!contactType || !contactValue) {
+    alert("กรุณากรอกข้อมูลให้ครบ");
+    return;
+  }
 
     try {
       setPopupType("loading");
@@ -327,18 +325,6 @@ function ApplyProject() {
             />
           </div>
 
-          <div className="agree-box">
-            <input
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
-            />
-
-            <label>
-              ยินยอมให้อาจารย์เจ้าของโครงงานติดต่อผ่านข้อมูลที่ระบุไว้
-            </label>
-          </div>
-
           <div className="button-group">
             {isSubmitted ? (
               <button className="submit-btn" disabled>
@@ -352,12 +338,12 @@ function ApplyProject() {
 
                 <button
                   className="submit-btn"
-                  disabled={hasPendingRequest}
+                  disabled={!contactType || !contactValue || hasPendingRequest}
                   onClick={handleSubmit}
                 >
                   {hasPendingRequest
                     ? "มีใบสมัครที่กำลังรอพิจารณา"
-                    : "ส่งคำขอเข้าร่วมโครงงาน"}
+                    : "ส่งคำขอสมัครเข้าร่วมโครงงาน"}
                 </button>
               </>
             )}

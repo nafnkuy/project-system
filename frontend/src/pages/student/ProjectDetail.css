@@ -184,12 +184,14 @@ nav {
 }
 
 .notification-dropdown h4 {
+  font-size: 16px;
   padding: 12px;
   margin: 0;
   border-bottom: 1px solid #eee;
 }
 
 .notification-item {
+  font-size: 14px;
   padding: 12px;
   border-bottom: 1px solid #eee;
 }
@@ -268,7 +270,7 @@ nav {
 }
 
 .project-top h2 {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
 }
 
