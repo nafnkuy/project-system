@@ -68,6 +68,7 @@ function Login() {
         localStorage.setItem("username", data.user.username);
         localStorage.setItem("name", data.user.name);
         localStorage.setItem("profileImage", data.user.profileImage);
+        localStorage.setItem("major", res.data.user.major);
 
         navigate("/teacher-home");
         return;

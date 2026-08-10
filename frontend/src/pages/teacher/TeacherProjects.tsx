@@ -178,7 +178,7 @@ const filteredProjects = projects.filter((project) => {
               <option value="ปิดรับ">ปิดรับ</option>
             </select>
 
-            <button className="create-project-btn">
+            <button className="create-project-btn" onClick={() => navigate("/create-teacher-project")}>
               <FaPlus />
               สร้างหัวข้อโครงงาน
             </button>

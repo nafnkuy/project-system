@@ -16,6 +16,7 @@ function SubmitNewProject() {
   const username = localStorage.getItem("username"); // รหัสประจำตัวผู้ใช้ (เช่น 66160000)
   const userId = localStorage.getItem("userId"); // id ที่อาจใช้เรียก API
   const profileImage = localStorage.getItem("profileImage"); // path รูปโปรไฟล์ที่เก็บไว้
+  
 
   // สถานะภายในคอมโพเนนต์ ใช้ useState เพื่อให้ UI รีเรนเดอร์เมื่อค่ามีการเปลี่ยน
   const [showNotifications, setShowNotifications] = useState(false); // ควบคุมการโชว์ dropdown การแจ้งเตือน
@@ -164,11 +165,6 @@ function SubmitNewProject() {
 
       if (!advisorId) {
         alert("กรุณาเลือกอาจารย์ที่ปรึกษาก่อน");
-        return;
-      }
-
-      if (!major) {
-        alert("กรุณาเลือกสาขาวิชา");
         return;
       }
 
@@ -434,14 +430,6 @@ function SubmitNewProject() {
             </label>
           </div>
 
-          <select value={major} onChange={(e) => setMajor(e.target.value)}>
-            <option value="">เลือกสาขา</option>
-            <option value="CS">Computer Science</option>
-            <option value="SE">Software Engineering</option>
-            <option value="IT">Information Technology</option>
-            <option value="AI">Applied AI & Smart Tech</option>
-          </select>
-
           <h4>สมาชิกโครงงาน</h4>
           <div className="member-card">
             <h5>สมาชิกคนที่ 1</h5>
@@ -605,6 +593,7 @@ function SubmitNewProject() {
                           // เมื่อเลือกอาจารย์จากรายการ ให้เซ็ต id, name
                           setAdvisorId(teacher.id);
                           setAdvisorName(teacher.name);
+                          setMajor(teacher.major);
                           // ตั้งค่าช่องค้นหาเป็นชื่อนั้น (เพื่อแสดงใน input)
                           setTeacherKeyword(teacher.name);
                           // และเคลียร์รายการผลลัพธ์

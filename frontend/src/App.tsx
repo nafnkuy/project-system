@@ -8,6 +8,7 @@ import SubmitNewProject from "./pages/student/SubmitNewProject";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
+import CreateTeacherProject from "./pages/teacher/CreateTeacherProject";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/submit-new-project" element={<SubmitNewProject />} />
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
+        <Route path="/create-teacher-project" element={<CreateTeacherProject />} />
       </Routes>
     </BrowserRouter>
   );

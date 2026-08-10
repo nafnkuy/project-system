@@ -46,6 +46,7 @@ app.post("/login", (req, res) => {
         name: user.name,
         role: user.role,
         profileImage: user.profile_image,
+        major: user.major,
       },
     });
   });
@@ -274,7 +275,6 @@ app.post("/projects", (req, res) => {
     skills,
     requirements,
     source,
-    student_id,
   } = req.body;
 
   const sql = `
@@ -297,29 +297,34 @@ app.post("/projects", (req, res) => {
     )
     VALUES
     (
-      ?, ?, ?, ?, 'รออนุมัติ',
+      ?, ?, ?, ?, ?,
       ?, ?, 0, ?,
       ?, ?, ?, ?,
       ?
     )
   `;
 
-  db.query(
-    sql,
-    [
-      title,
-      advisor,
-      advisor_id,
-      major,
-      project_type,
-      max_members,
-      academic_year,
-      description,
-      objectives,
-      skills,
-      requirements,
-      source,
-    ],
+const status = source === "teacher"
+  ? "เปิดรับ"
+  : "รออนุมัติ";
+
+db.query(
+  sql,
+  [
+    title,
+    advisor,
+    advisor_id,
+    major,
+    status,
+    project_type,
+    max_members,
+    academic_year,
+    description,
+    objectives,
+    skills,
+    requirements,
+    source,
+  ],
     (err, result) => {
       if (err) {
         console.log("Create project error:", err);
@@ -346,7 +351,8 @@ app.get("/teachers/search", (req, res) => {
   const sql = `
     SELECT
       id,
-      name
+      name,
+      major
     FROM users
     WHERE role = 'teacher'
       AND name LIKE ?

@@ -13,8 +13,9 @@ interface Project {
   major: string;
   max_members: number;
   current_members: number;
+  source: string;
+  status: string;
 }
-
 interface SystemNotification {
   id: number;
   message: string;
@@ -67,11 +68,13 @@ function StudentHome() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filteredProjects = projects.filter(
-    (project) =>
-      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.advisor.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+const filteredProjects = projects.filter(
+  (project) =>
+    project.source === "teacher" &&
+    (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม") &&
+    (project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.advisor.toLowerCase().includes(searchTerm.toLowerCase())),
+);
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
 
