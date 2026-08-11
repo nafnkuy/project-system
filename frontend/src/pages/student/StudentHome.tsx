@@ -15,7 +15,9 @@ interface Project {
   current_members: number;
   source: string;
   status: string;
+  visibility: "แสดง" | "ซ่อน";
 }
+
 interface SystemNotification {
   id: number;
   message: string;
@@ -68,13 +70,14 @@ function StudentHome() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-const filteredProjects = projects.filter(
-  (project) =>
-    project.source === "teacher" &&
-    (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม") &&
-    (project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.advisor.toLowerCase().includes(searchTerm.toLowerCase())),
-);
+  const filteredProjects = projects.filter(
+    (project) =>
+      project.source === "teacher" &&
+      project.visibility === "แสดง" &&
+      (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม") &&
+      (project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.advisor.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
 
@@ -335,7 +338,9 @@ const filteredProjects = projects.filter(
                   <td>{project.title}</td>
                   <td>{project.advisor}</td>
                   <td>{project.major}</td>
-                  <td>{project.current_members}/{project.max_members} คน</td>
+                  <td>
+                    {project.current_members}/{project.max_members} คน
+                  </td>
                   <td>
                     <button
                       onClick={() => navigate(`/project-details/${project.id}`)}

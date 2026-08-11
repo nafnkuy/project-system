@@ -9,6 +9,8 @@ import SubmitNewProject from "./pages/student/SubmitNewProject";
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
 import CreateTeacherProject from "./pages/teacher/CreateTeacherProject";
+import TeacherProjectDetail from "./pages/teacher/TeacherProjectDetail";
+import TeacherProjectEdit from "./pages/teacher/TeacherProjectEdit";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
         <Route path="/create-teacher-project" element={<CreateTeacherProject />} />
+        <Route path="/teacher-project-details/:id" element={<TeacherProjectDetail />} />
+        <Route path="/teacher-project-edit/:id" element={<TeacherProjectEdit />} />
       </Routes>
     </BrowserRouter>
   );

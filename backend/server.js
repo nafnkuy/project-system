@@ -862,6 +862,232 @@ app.get("/teacher/projects/:advisorId", (req, res) => {
   });
 });
 
+app.get("/teacher/projects/:projectId/:advisorId", (req, res) => {
+  const { projectId, advisorId } = req.params;
+
+  const sql = `
+    SELECT
+      p.*,
+      u.name AS advisor_name
+    FROM projects p
+    LEFT JOIN users u
+      ON p.advisor_id = u.id
+    WHERE p.id = ?
+      AND p.advisor_id = ?
+      AND p.source = 'teacher'
+  `;
+
+  db.query(sql, [projectId, advisorId], (err, results) => {
+    if (err) {
+      console.log("Get teacher project detail error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบหัวข้อโครงงาน หรือหัวข้อนี้ไม่ใช่ของคุณ",
+      });
+    }
+
+    const project = results[0];
+
+    const memberSql = `
+      SELECT
+        u.id,
+        u.username,
+        u.name
+      FROM project_members pm
+      JOIN users u
+        ON pm.user_id = u.id
+      WHERE pm.project_id = ?
+    `;
+
+    db.query(memberSql, [projectId], (memberErr, members) => {
+      if (memberErr) {
+        console.log("Get project members error:", memberErr);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      project.members = members;
+
+      res.json(project);
+    });
+  });
+});
+
+
+// ==========================================
+// แก้ไขหัวข้อโครงงานของอาจารย์
+// ==========================================
+
+app.put("/teacher/projects/:projectId/:advisorId", (req, res) => {
+  const { projectId, advisorId } = req.params;
+
+  const {
+    title,
+    project_type,
+    max_members,
+    academic_year,
+    description,
+    objectives,
+    skills,
+    requirements,
+    status,
+    visibility,
+  } = req.body;
+
+  const sql = `
+    UPDATE projects
+    SET
+      title = ?,
+      project_type = ?,
+      max_members = ?,
+      academic_year = ?,
+      description = ?,
+      objectives = ?,
+      skills = ?,
+      requirements = ?,
+      status = ?,
+      visibility = ?
+    WHERE id = ?
+      AND advisor_id = ?
+      AND source = 'teacher'
+  `;
+
+  db.query(
+    sql,
+    [
+      title,
+      project_type,
+      max_members,
+      academic_year,
+      description,
+      objectives,
+      skills,
+      requirements,
+      status,
+      visibility,
+      projectId,
+      advisorId,
+    ],
+    (err, result) => {
+      if (err) {
+        console.log("Update teacher project error:", err);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          message: "ไม่พบหัวข้อโครงงาน หรือหัวข้อนี้ไม่ใช่ของคุณ",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "แก้ไขหัวข้อโครงงานเรียบร้อยแล้ว",
+      });
+    },
+  );
+});
+
+/* =========================
+   ซ่อนหัวข้อโครงงาน
+========================= */
+
+app.put(
+  "/teacher/projects/:projectId/:advisorId/visibility",
+  (req, res) => {
+    const { projectId, advisorId } = req.params;
+    const { visibility } = req.body;
+
+    const sql = `
+      UPDATE projects
+      SET visibility = ?
+      WHERE id = ?
+        AND advisor_id = ?
+        AND source = 'teacher'
+    `;
+
+    db.query(
+      sql,
+      [visibility, projectId, advisorId],
+      (err, result) => {
+        if (err) {
+          console.log("Hide project error:", err);
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            message:
+              "ไม่พบหัวข้อโครงงาน หรือหัวข้อนี้ไม่ใช่ของคุณ",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "ซ่อนหัวข้อโครงงานเรียบร้อยแล้ว",
+        });
+      },
+    );
+  },
+);
+/* =========================
+   ลบหัวข้อโครงงาน
+========================= */
+
+app.delete(
+  "/teacher/projects/:projectId/:advisorId",
+  (req, res) => {
+    const { projectId, advisorId } = req.params;
+
+    const sql = `
+      DELETE FROM projects
+      WHERE id = ?
+        AND advisor_id = ?
+        AND source = 'teacher'
+    `;
+
+    db.query(
+      sql,
+      [projectId, advisorId],
+      (err, result) => {
+        if (err) {
+          console.log("Delete project error:", err);
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            message:
+              "ไม่พบหัวข้อโครงงาน หรือหัวข้อนี้ไม่ใช่ของคุณ",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "ลบหัวข้อโครงงานเรียบร้อยแล้ว",
+        });
+      },
+    );
+  },
+);
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

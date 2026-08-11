@@ -110,7 +110,15 @@ useEffect(() => {
           <ul>
             <li className="active">หน้าหลัก</li>
             <li onClick={() => navigate("/teacher-projects")}>จัดการหัวข้อโครงงาน</li>
+
+            <li>คำขอเข้าร่วมโครงงาน</li>
+
+            <li>ภาระงานที่ปรึกษา</li>
+
+            <li>ประวัติการพิจารณา</li>
+
             <li>การแจ้งเตือน</li>
+
             <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>

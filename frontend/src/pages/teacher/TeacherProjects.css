@@ -680,3 +680,57 @@
 
   color: #999;
 }
+
+/* =========================
+   MORE MENU
+========================= */
+
+.more-menu-wrapper {
+  position: relative;
+}
+
+.more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.more-menu {
+  position: absolute;
+  right: 0;
+  bottom: 42px;
+  width: 140px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 100;
+}
+
+.more-menu button {
+  width: 100%;
+  border: none;
+  background: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+  color: #333;
+}
+
+.more-menu button:hover {
+  background: #f5f5f5;
+}
+
+.more-menu .delete-option {
+  color: #e53935;
+  border-top: 1px solid #eee;
+}
+
+.more-menu .delete-option:hover {
+  background: #fff1f1;
+}

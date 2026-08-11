@@ -33,6 +33,7 @@ function TeacherProjects() {
   const [sortOrder, setSortOrder] = useState("latest");
 
   const [loading, setLoading] = useState(true);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   /* =========================
      ตรวจสอบ Login
@@ -77,6 +78,123 @@ function TeacherProjects() {
 
     navigate("/");
   };
+
+  /* =========================
+   ซ่อนหัวข้อโครงงาน
+========================= */
+
+const handleHideProject = async (projectId: number) => {
+  if (!userId) return;
+
+  const confirmHide = window.confirm(
+    "คุณต้องการซ่อนหัวข้อโครงงานนี้ใช่หรือไม่?"
+  );
+
+  if (!confirmHide) return;
+
+  try {
+    await axios.put(
+      `http://localhost:5000/teacher/projects/${projectId}/${userId}/visibility`,
+      {
+        visibility: "ซ่อน",
+      },
+    );
+
+    // เปลี่ยนข้อมูลบนหน้าทันที
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === projectId
+          ? { ...project, visibility: "ซ่อน" }
+          : project
+      )
+    );
+
+    setOpenMenuId(null);
+
+    alert("ซ่อนหัวข้อโครงงานเรียบร้อยแล้ว");
+  } catch (error) {
+    console.log("Hide project error:", error);
+
+    alert("ไม่สามารถซ่อนหัวข้อโครงงานได้");
+  }
+};
+/* =========================
+   แสดงหัวข้อโครงงาน
+========================= */
+
+const handleShowProject = async (projectId: number) => {
+  if (!userId) return;
+
+  const confirmShow = window.confirm(
+    "คุณต้องการแสดงหัวข้อโครงงานนี้อีกครั้งใช่หรือไม่?"
+  );
+
+  if (!confirmShow) return;
+
+  try {
+    await axios.put(
+      `http://localhost:5000/teacher/projects/${projectId}/${userId}/visibility`,
+      {
+        visibility: "แสดง",
+      },
+    );
+
+    // เปลี่ยนข้อมูลบนหน้าทันที
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              visibility: "แสดง",
+            }
+          : project
+      )
+    );
+
+    setOpenMenuId(null);
+
+    alert("แสดงหัวข้อโครงงานเรียบร้อยแล้ว");
+  } catch (error) {
+    console.log("Show project error:", error);
+
+    alert("ไม่สามารถแสดงหัวข้อโครงงานได้");
+  }
+};
+
+/* =========================
+   ลบหัวข้อโครงงาน
+========================= */
+
+const handleDeleteProject = async (projectId: number) => {
+  if (!userId) return;
+
+  const confirmDelete = window.confirm(
+    "คุณต้องการลบหัวข้อโครงงานนี้ใช่หรือไม่?\nการลบจะไม่สามารถกู้คืนได้",
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await axios.delete(
+      `http://localhost:5000/teacher/projects/${projectId}/${userId}`,
+    );
+
+    // เอาออกจากรายการทันที
+    setProjects((prevProjects) =>
+      prevProjects.filter(
+        (project) => project.id !== projectId
+      )
+    );
+
+    setOpenMenuId(null);
+
+    alert("ลบหัวข้อโครงงานเรียบร้อยแล้ว");
+  } catch (error) {
+    console.log("Delete project error:", error);
+
+    alert("ไม่สามารถลบหัวข้อโครงงานได้");
+  }
+};
 
   /* =========================
      Search + Filter + Sort
@@ -355,13 +473,68 @@ function TeacherProjects() {
                   {/* Card Actions */}
 
                   <div className="project-card-actions">
-                    <button>รายละเอียด</button>
-
-                    <button>แก้ไข</button>
-
-                    <button className="more-btn">
-                      <FaEllipsisV />
+                    <button
+                      onClick={() =>
+                        navigate(`/teacher-project-details/${project.id}`)
+                      }
+                    >
+                      รายละเอียด
                     </button>
+
+                    <button
+                      onClick={() =>
+                        navigate(`/teacher-project-edit/${project.id}`)
+                      }
+                    >
+                      แก้ไข
+                    </button>
+
+<div className="more-menu-wrapper">
+  <button
+    className="more-btn"
+    onClick={() =>
+      setOpenMenuId(
+        openMenuId === project.id
+          ? null
+          : project.id
+      )
+    }
+  >
+    <FaEllipsisV />
+  </button>
+{openMenuId === project.id && (
+  <div className="more-menu">
+
+    {project.visibility === "แสดง" ? (
+      <button
+        onClick={() =>
+          handleHideProject(project.id)
+        }
+      >
+        ซ่อนหัวข้อ
+      </button>
+    ) : (
+      <button
+        onClick={() =>
+          handleShowProject(project.id)
+        }
+      >
+        แสดงหัวข้อ
+      </button>
+    )}
+
+    <button
+      className="delete-option"
+      onClick={() =>
+        handleDeleteProject(project.id)
+      }
+    >
+      ลบหัวข้อ
+    </button>
+
+  </div>
+)}
+</div>
                   </div>
                 </div>
               ))}
