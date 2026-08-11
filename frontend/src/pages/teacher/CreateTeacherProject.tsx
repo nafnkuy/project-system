@@ -68,32 +68,28 @@ function CreateTeacherProject() {
       setLoading(true);
 
       // กำหนดจำนวนสมาชิกจากประเภทโครงงาน
-      const maxMembers =
-        projectType === "โครงงานเดี่ยว" ? 1 : 2;
+      const maxMembers = projectType === "โครงงานเดี่ยว" ? 1 : 2;
 
-      const res = await axios.post(
-        "http://localhost:5000/projects",
-        {
-          title,
-          advisor: name,
-          advisor_id: userId,
-          major: major,
+      const res = await axios.post("http://localhost:5000/projects", {
+        title,
+        advisor: name,
+        advisor_id: userId,
+        major: major,
 
-          project_type: projectType,
-          max_members: maxMembers,
-          current_members: 0,
+        project_type: projectType,
+        max_members: maxMembers,
+        current_members: 0,
 
-          academic_year: academicYear,
+        academic_year: academicYear,
 
-          description,
-          objectives,
-          skills,
-          requirements,
+        description,
+        objectives,
+        skills,
+        requirements,
 
-          // อาจารย์เป็นผู้สร้าง
-          source: "teacher",
-        }
-      );
+        // อาจารย์เป็นผู้สร้าง
+        source: "teacher",
+      });
 
       console.log("Create project response:", res.data);
 
@@ -104,10 +100,7 @@ function CreateTeacherProject() {
       console.log("Create teacher project error:", err);
       console.log(err.response?.data);
 
-      alert(
-        err.response?.data?.message ||
-          "ไม่สามารถสร้างหัวข้อโครงงานได้"
-      );
+      alert(err.response?.data?.message || "ไม่สามารถสร้างหัวข้อโครงงานได้");
     } finally {
       setLoading(false);
     }
@@ -115,10 +108,8 @@ function CreateTeacherProject() {
 
   return (
     <div className="teacher-project-page">
-
       {/* Sidebar */}
       <aside className="sidebar">
-
         <div className="logo-section">
           <img src={logo} alt="SPTC Logo" />
 
@@ -130,12 +121,7 @@ function CreateTeacherProject() {
 
         <nav>
           <ul>
-
-            <li
-              onClick={() => navigate("/teacher-home")}
-            >
-              หน้าหลัก
-            </li>
+            <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
 
             <li
               className="active"
@@ -144,35 +130,27 @@ function CreateTeacherProject() {
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li>
-              การแจ้งเตือน
-            </li>
+            <li>คำขอเข้าร่วมโครงงาน</li>
 
-            <li>
-              ข้อมูลส่วนตัว
-            </li>
+            <li>ภาระงานที่ปรึกษา</li>
 
+            <li>ประวัติการพิจารณา</li>
+
+            <li>การแจ้งเตือน</li>
+
+            <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
-
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
+        <button className="logout-btn" onClick={handleLogout}>
           ออกจากระบบ
         </button>
-
       </aside>
-
 
       {/* Main */}
       <main className="main">
-
         {/* Header */}
         <header className="header">
-
           <div className="breadcrumb">
-
             <span
               onClick={() => navigate("/teacher-projects")}
               className="breadcrumb-link"
@@ -182,21 +160,15 @@ function CreateTeacherProject() {
 
             <span> &gt; </span>
 
-            <span>
-              สร้างหัวข้อโครงงาน
-            </span>
-
+            <span>สร้างหัวข้อโครงงาน</span>
           </div>
 
-
           <div className="header-right">
-
             <button className="notification-btn">
               <FaBell />
             </button>
 
             <div className="user-info">
-
               <img
                 src={`http://localhost:5000${profileImage}`}
                 alt="Profile"
@@ -204,289 +176,216 @@ function CreateTeacherProject() {
               />
 
               <span>{username}</span>
-
             </div>
-
           </div>
-
         </header>
-
 
         {/* Content */}
         <div className="create-project-content">
-
           <form onSubmit={handleSubmit}>
 
-            {/* ========================= */}
-            {/* ข้อมูลหัวข้อโครงงาน */}
-            {/* ========================= */}
+  {/* =========================
+      ชื่อหัวข้อโครงงาน
+  ========================= */}
+  <div className="form-section">
 
-            <div className="form-section">
+    <div className="form-group">
+      <label>ชื่อหัวข้อโครงงาน *</label>
+
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="กรอกชื่อหัวข้อโครงงาน"
+      />
+    </div>
 
-              <h3>ข้อมูลหัวข้อโครงงาน</h3>
+  </div>
 
 
-              <div className="form-group">
-
-                <label>
-                  ชื่อหัวข้อโครงงาน *
-                </label>
-
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) =>
-                    setTitle(e.target.value)
-                  }
-                  placeholder="กรอกชื่อหัวข้อโครงงาน"
-                />
-
-              </div>
-
-
-              <div className="form-group">
-
-                <label>
-                  รายละเอียดหัวข้อโครงงาน *
-                </label>
-
-                <textarea
-                  value={description}
-                  onChange={(e) =>
-                    setDescription(e.target.value)
-                  }
-                  placeholder="กรอกรายละเอียดของโครงงาน"
-                  rows={5}
-                />
-
-              </div>
-
-
-              <div className="form-group">
-
-                <label>
-                  วัตถุประสงค์
-                </label>
-
-                <textarea
-                  value={objectives}
-                  onChange={(e) =>
-                    setObjectives(e.target.value)
-                  }
-                  placeholder="กรอกวัตถุประสงค์ของโครงงาน"
-                  rows={4}
-                />
-
-              </div>
-
-
-              <div className="form-group">
-
-                <label>
-                  ทักษะหรือความรู้ที่จำเป็น *
-                </label>
-
-                <textarea
-                  value={skills}
-                  onChange={(e) =>
-                    setSkills(e.target.value)
-                  }
-                  placeholder="เช่น React, Node.js, MySQL"
-                  rows={3}
-                />
-
-              </div>
-
-
-              <div className="form-group">
-
-                <label>
-                  คุณสมบัติ/ข้อกำหนดของนิสิต
-                </label>
-
-                <textarea
-                  value={requirements}
-                  onChange={(e) =>
-                    setRequirements(e.target.value)
-                  }
-                  placeholder="เช่น มีพื้นฐานการเขียนโปรแกรม"
-                  rows={3}
-                />
-
-              </div>
-
-            </div>
-
-
-            {/* ========================= */}
-            {/* รายละเอียดการเปิดรับ */}
-            {/* ========================= */}
-
-            <div className="form-section">
-
-              <h3>รายละเอียดการเปิดรับ</h3>
-
-
-              <div className="form-row">
-
-                {/* ประเภทโครงงาน */}
-                <div className="form-group">
-
-                  <label>
-                    ประเภทโครงงาน *
-                  </label>
-
-                  <select
-                    value={projectType}
-                    onChange={(e) =>
-                      setProjectType(e.target.value)
-                    }
-                  >
-
-                    <option value="โครงงานเดี่ยว">
-                      โครงงานเดี่ยว
-                    </option>
-
-                    <option value="โครงงานคู่">
-                      โครงงานคู่
-                    </option>
-
-                  </select>
-
-                </div>
-
-
-                {/* ปีการศึกษา */}
-                <div className="form-group">
-
-                  <label>
-                    ปีการศึกษา / ภาคเรียน *
-                  </label>
-
-                  <select
-                    value={academicYear}
-                    onChange={(e) =>
-                      setAcademicYear(e.target.value)
-                    }
-                  >
-
-                    <option value="2569/1">
-                      2569/1
-                    </option>
-
-                    <option value="2569/2">
-                      2569/2
-                    </option>
-
-                    <option value="2570/1">
-                      2570/1
-                    </option>
-
-                    <option value="2570/2">
-                      2570/2
-                    </option>
-
-                  </select>
-
-                </div>
-
-              </div>
-
-
-              {/* แสดงจำนวนสมาชิกตามประเภท */}
-              <div className="project-member-info">
-
-                <span>
-                  จำนวนสมาชิกที่รับ
-                </span>
-
-                <strong>
-                  {projectType === "โครงงานเดี่ยว"
-                    ? "1 คน"
-                    : "2 คน"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* ========================= */}
-            {/* ข้อมูลอาจารย์ */}
-            {/* ========================= */}
-
-            <div className="form-section">
-
-              <h3>ข้อมูลอาจารย์</h3>
-
-
-              <div className="teacher-info">
-
-                <div>
-
-                  <span>
-                    อาจารย์ผู้สร้างหัวข้อ
-                  </span>
-
-                  <strong>
-                    {name}
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    สาขาวิชา
-                  </span>
-
-                  <strong>
-                    {major || "-"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* ========================= */}
-            {/* ปุ่ม */}
-            {/* ========================= */}
-
-            <div className="form-actions">
-
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={() =>
-                  navigate("/teacher-projects")
-                }
-              >
-                ยกเลิก
-              </button>
-
-
-              <button
-                type="submit"
-                className="save-btn"
-                disabled={loading}
-              >
-                {loading
-                  ? "กำลังบันทึก..."
-                  : "บันทึกหัวข้อโครงงาน"}
-              </button>
-
-            </div>
-
-          </form>
-
+  {/* =========================
+      อาจารย์ที่ปรึกษา
+  ========================= */}
+  <div className="form-section teacher-section">
+
+  <div className="teacher-row">
+
+    {/* อาจารย์ที่ปรึกษา */}
+    <div className="form-group">
+      <label>อาจารย์ที่ปรึกษา</label>
+
+      <input
+        type="text"
+        value={name || ""}
+        readOnly
+        className="readonly-input"
+      />
+    </div>
+
+
+    {/* สาขาวิชา */}
+    <div className="form-group">
+      <label>สาขาวิชา</label>
+
+      <input
+        type="text"
+        value={major || "-"}
+        readOnly
+        className="readonly-input"
+      />
+    </div>
+
+  </div>
+
+</div>
+
+
+  {/* =========================
+      การเปิดรับ
+  ========================= */}
+  <div className="form-section">
+    <div className="form-row">
+
+      {/* ประเภทโครงงาน */}
+      <div className="form-group">
+        <label>ประเภทโครงงาน *</label>
+
+        <select
+          value={projectType}
+          onChange={(e) => setProjectType(e.target.value)}
+        >
+          <option value="โครงงานเดี่ยว">
+            โครงงานเดี่ยว
+          </option>
+
+          <option value="โครงงานคู่">
+            โครงงานคู่
+          </option>
+        </select>
+      </div>
+
+
+      {/* ปีการศึกษา */}
+      <div className="form-group">
+        <label>ปีการศึกษา / ภาคเรียน *</label>
+
+        <select
+          value={academicYear}
+          onChange={(e) => setAcademicYear(e.target.value)}
+        >
+          <option value="2569/1">2569/1</option>
+          <option value="2569/2">2569/2</option>
+          <option value="2570/1">2570/1</option>
+          <option value="2570/2">2570/2</option>
+        </select>
+      </div>
+
+    </div>
+
+
+    {/* จำนวนสมาชิก */}
+    <div className="project-member-info">
+
+      <span>จำนวนที่รับ</span>
+
+      <strong>
+        {projectType === "โครงงานเดี่ยว"
+          ? "รับ 1 คน"
+          : "รับ 2 คน"}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  {/* =========================
+      รายละเอียดโครงงาน
+  ========================= */}
+  <div className="form-section">
+    
+    {/* รายละเอียด */}
+    <div className="form-group">
+      <label>รายละเอียดโครงงาน *</label>
+
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="กรอกรายละเอียดของโครงงาน"
+        rows={5}
+      />
+    </div>
+
+
+    {/* วัตถุประสงค์ */}
+    <div className="form-group">
+      <label>วัตถุประสงค์</label>
+
+      <textarea
+        value={objectives}
+        onChange={(e) => setObjectives(e.target.value)}
+        placeholder="กรอกวัตถุประสงค์ของโครงงาน"
+        rows={4}
+      />
+    </div>
+
+
+    {/* เทคโนโลยี / ทักษะ */}
+    <div className="form-group">
+      <label>เทคโนโลยีหรือทักษะที่จำเป็น *</label>
+
+      <textarea
+        value={skills}
+        onChange={(e) => setSkills(e.target.value)}
+        placeholder="เช่น React, Node.js, MySQL"
+        rows={3}
+      />
+    </div>
+
+
+    {/* คุณสมบัติ */}
+    <div className="form-group">
+      <label>คุณสมบัติ/ข้อกำหนดของนิสิต</label>
+
+      <textarea
+        value={requirements}
+        onChange={(e) => setRequirements(e.target.value)}
+        placeholder="เช่น มีพื้นฐานการเขียนโปรแกรม"
+        rows={3}
+      />
+    </div>
+
+  </div>
+
+
+  {/* =========================
+      ปุ่ม
+  ========================= */}
+  <div className="form-actions">
+
+    <button
+      type="button"
+      className="cancel-btn"
+      onClick={() => navigate("/teacher-projects")}
+    >
+      ยกเลิก
+    </button>
+
+    <button
+      type="submit"
+      className="save-btn"
+      disabled={loading}
+    >
+      {loading
+        ? "กำลังบันทึก..."
+        : "บันทึกหัวข้อโครงงาน"}
+    </button>
+
+  </div>
+
+</form>
         </div>
-
       </main>
-
     </div>
   );
 }
