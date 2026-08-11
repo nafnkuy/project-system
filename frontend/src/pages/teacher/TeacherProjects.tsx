@@ -30,17 +30,22 @@ function TeacherProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("latest");
 
   const [loading, setLoading] = useState(true);
 
-  // ตรวจสอบ Login
+  /* =========================
+     ตรวจสอบ Login
+  ========================= */
   useEffect(() => {
     if (!userId) {
       navigate("/");
     }
   }, [userId, navigate]);
 
-  // ดึงหัวข้อโครงงานของอาจารย์
+  /* =========================
+     ดึงหัวข้อโครงงานของอาจารย์
+  ========================= */
   useEffect(() => {
     if (!userId) return;
 
@@ -61,6 +66,9 @@ function TeacherProjects() {
       });
   }, [userId]);
 
+  /* =========================
+     Logout
+  ========================= */
   const handleLogout = () => {
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
@@ -70,27 +78,42 @@ function TeacherProjects() {
     navigate("/");
   };
 
-  // ค้นหา + filter สถานะ
-// ค้นหา + filter สถานะ
-const filteredProjects = projects.filter((project) => {
-  const matchSearch = project.title
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase());
+  /* =========================
+     Search + Filter + Sort
+  ========================= */
+  const filteredProjects = [...projects]
+    .filter((project) => {
+      const matchSearch = project.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-  let matchStatus = true;
+      let matchStatus = true;
 
-  if (statusFilter === "รับนิสิต") {
-    matchStatus =
-      project.status === "เปิดรับ" ||
-      project.status === "ใกล้เต็ม";
-  } else if (statusFilter === "ปิดรับ") {
-    matchStatus = project.status === "ปิดรับ";
-  }
+      if (statusFilter === "รับนิสิต") {
+        matchStatus =
+          project.status === "เปิดรับ" || project.status === "ใกล้เต็ม";
+      } else if (statusFilter === "ปิดรับ") {
+        matchStatus = project.status === "ปิดรับ";
+      }
 
-  return matchSearch && matchStatus;
-});
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      if (sortOrder === "title") {
+        return a.title.localeCompare(b.title, "th");
+      }
 
-  // จำนวนหัวข้อ
+      if (sortOrder === "oldest") {
+        return a.id - b.id;
+      }
+
+      return b.id - a.id;
+    });
+
+  /* =========================
+     จำนวนหัวข้อ
+  ========================= */
+
   const totalProjects = projects.length;
 
   const openProjects = projects.filter(
@@ -103,13 +126,15 @@ const filteredProjects = projects.filter((project) => {
 
   return (
     <div className="teacher-projects-page">
-      {/* Sidebar */}
+      {/* ================= SIDEBAR ================= */}
+
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img src={logo} alt="Logo" />
+          <img src={logo} alt="SPTC Logo" />
 
           <div>
             <h2>SPTC System</h2>
+
             <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
           </div>
         </div>
@@ -119,6 +144,12 @@ const filteredProjects = projects.filter((project) => {
             <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
 
             <li className="active">จัดการหัวข้อโครงงาน</li>
+
+            <li>คำขอเข้าร่วมโครงงาน</li>
+
+            <li>ภาระงานที่ปรึกษา</li>
+
+            <li>ประวัติการพิจารณา</li>
 
             <li>การแจ้งเตือน</li>
 
@@ -131,9 +162,11 @@ const filteredProjects = projects.filter((project) => {
         </button>
       </aside>
 
-      {/* Main */}
+      {/* ================= MAIN ================= */}
+
       <main className="main">
-        {/* Header */}
+        {/* ================= HEADER ================= */}
+
         <header className="header">
           <h2>จัดการหัวข้อโครงงาน</h2>
 
@@ -144,7 +177,9 @@ const filteredProjects = projects.filter((project) => {
 
             <div className="user-info">
               <img
-                src={`http://localhost:5000${profileImage}`}
+                src={
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
+                }
                 alt="Profile"
                 className="profile-image"
               />
@@ -154,61 +189,103 @@ const filteredProjects = projects.filter((project) => {
           </div>
         </header>
 
-        {/* Content */}
+        {/* ================= CONTENT ================= */}
+
         <div className="project-content">
-          {/* Search + Filter + Create */}
+          {/* ================= TOOLBAR ================= */}
+
           <div className="project-toolbar">
+            {/* Search */}
+
             <div className="project-search">
               <FaSearch />
 
               <input
                 type="text"
-                placeholder="ค้นหาหัวข้อโครงงาน..."
+                placeholder="ค้นหาหัวข้อโครงงาน"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">สถานะทั้งหมด</option>
-              <option value="รับนิสิต">กำลังรับนิสิต</option>
-              <option value="ปิดรับ">ปิดรับ</option>
-            </select>
+            {/* Status */}
 
-            <button className="create-project-btn" onClick={() => navigate("/create-teacher-project")}>
+            <div className="select-wrapper">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">สถานะทั้งหมด</option>
+
+                <option value="รับนิสิต">กำลังรับนิสิต</option>
+
+                <option value="ปิดรับ">ปิดรับ</option>
+              </select>
+
+              <span className="select-arrow">▼</span>
+            </div>
+
+            {/* Sort */}
+
+            <div className="select-wrapper">
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <option value="latest">เรียงตาม</option>
+
+                <option value="latest">ล่าสุด</option>
+
+                <option value="oldest">เก่าสุด</option>
+
+                <option value="title">ชื่อหัวข้อ</option>
+              </select>
+
+              <span className="select-arrow">▼</span>
+            </div>
+
+            {/* Create */}
+
+            <button
+              className="create-project-btn"
+              onClick={() => navigate("/create-teacher-project")}
+            >
               <FaPlus />
               สร้างหัวข้อโครงงาน
             </button>
           </div>
 
-          {/* Summary */}
+          {/* ================= SUMMARY ================= */}
+
           <div className="project-summary">
             <div className="summary-card">
               <span>หัวข้อทั้งหมด</span>
+
               <strong>{totalProjects}</strong>
             </div>
 
             <div className="summary-card">
-              <span>กำลังรับนิสิต</span>
+              <span>เปิดรับ</span>
+
               <strong>{openProjects}</strong>
             </div>
 
             <div className="summary-card">
               <span>ปิดรับ</span>
+
               <strong>{closedProjects}</strong>
             </div>
           </div>
 
-          {/* Project List */}
+          {/* ================= PROJECT LIST ================= */}
+
           <div className="project-list-container">
             <div className="project-list-header">
               <h3>หัวข้อโครงงานของฉัน</h3>
             </div>
 
             {/* Loading */}
+
             {loading && (
               <div className="empty-project">
                 <p>กำลังโหลดข้อมูล...</p>
@@ -216,6 +293,7 @@ const filteredProjects = projects.filter((project) => {
             )}
 
             {/* ไม่มีข้อมูล */}
+
             {!loading && filteredProjects.length === 0 && (
               <div className="empty-project">
                 <p>
@@ -232,11 +310,13 @@ const filteredProjects = projects.filter((project) => {
               </div>
             )}
 
-            {/* Project Cards */}
+            {/* ================= PROJECT CARDS ================= */}
+
             {!loading &&
               filteredProjects.map((project) => (
                 <div className="project-card" key={project.id}>
                   {/* Card Header */}
+
                   <div className="project-card-header">
                     <h4>{project.title}</h4>
 
@@ -244,6 +324,7 @@ const filteredProjects = projects.filter((project) => {
                   </div>
 
                   {/* Project Info */}
+
                   <div className="project-info">
                     <p>
                       <strong>ปีการศึกษา :</strong> {project.academic_year}
@@ -263,7 +344,7 @@ const filteredProjects = projects.filter((project) => {
                     </p>
 
                     <p>
-                      <strong>ทักษะที่ต้องการ :</strong> {project.skills || "-"}
+                      <strong>เทคโนโลยีที่ใช้ :</strong> {project.skills || "-"}
                     </p>
 
                     <p>
@@ -272,6 +353,7 @@ const filteredProjects = projects.filter((project) => {
                   </div>
 
                   {/* Card Actions */}
+
                   <div className="project-card-actions">
                     <button>รายละเอียด</button>
 

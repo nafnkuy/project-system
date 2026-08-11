@@ -1,432 +1,682 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+
+/* =========================
+   RESET
+========================= */
+
+.teacher-projects-page,
+.teacher-projects-page * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
 .teacher-projects-page {
   display: flex;
+  width: 100%;
   min-height: 100vh;
-  background: #f5f6fa;
+  background: #f5f5f5;
 }
 
-/* ================= SIDEBAR ================= */
+
+/* =========================
+   SIDEBAR
+========================= */
 
 .teacher-projects-page .sidebar {
-  width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
   background: #ffffff;
-  border-right: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 18px;
+  border-right: 1px solid #ddd;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
 }
 
-.sidebar-logo {
+
+/* =========================
+   LOGO
+========================= */
+
+.teacher-projects-page .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 40px;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+
+  margin-bottom: 0;
 }
 
-.sidebar-logo img {
-  width: 48px;
-  height: 48px;
+.teacher-projects-page .sidebar-logo img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
 }
 
-.sidebar-logo h2 {
+.teacher-projects-page .sidebar-logo h2 {
   margin: 0;
-  font-size: 18px;
+
+  font-size: 23px;
+  font-weight: 700;
 }
 
-.sidebar-logo p {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: #777;
-  line-height: 1.4;
+.teacher-projects-page .sidebar-logo p {
+  margin: 0;
+
+  font-size: 9.5px;
+  line-height: 1.2;
+
+  color: #666;
 }
 
-/* ================= MENU ================= */
+
+/* =========================
+   MENU
+========================= */
+
+.teacher-projects-page nav {
+  margin: 0;
+  width: 100%;
+}
 
 .teacher-projects-page nav ul {
   list-style: none;
+
   padding: 0;
   margin: 0;
 }
 
 .teacher-projects-page nav li {
-  padding: 13px 16px;
-  margin-bottom: 6px;
-  border-radius: 8px;
+  width: 100%;
+  padding: 18px 0;
+  margin: 0;
+  border-radius: 0;
+  color: #222;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
   cursor: pointer;
-  color: #555;
-  font-size: 14px;
 }
 
 .teacher-projects-page nav li:hover {
-  background: #f0f1f5;
+  background: #f0f0f0;
 }
+
+
+/* ACTIVE MENU */
 
 .teacher-projects-page nav li.active {
-  background: #ece9ff;
-  color: #5b4bc4;
-  font-weight: 600;
+  background: #2f5d7c;
+
+  color: #ffffff;
+
+  font-weight: 400;
 }
 
-/* ================= LOGOUT ================= */
+
+/* =========================
+   LOGOUT
+========================= */
 
 .teacher-projects-page .logout-btn {
-  margin-top: auto;
+  width: 190px;
+
+  margin: 0 auto 20px;
+
+  padding: 12px;
+
   border: none;
-  background: transparent;
-  color: #777;
-  padding: 13px 16px;
-  text-align: left;
+
+  border-radius: 8px;
+
+  background: #3b75c4;
+
+  color: white;
+
   cursor: pointer;
-  font-size: 14px;
 }
 
 .teacher-projects-page .logout-btn:hover {
-  color: #d9534f;
+  background: #2f6db5;
 }
 
-/* ================= MAIN ================= */
+
+/* =========================
+   MAIN
+========================= */
 
 .teacher-projects-page .main {
-  flex: 1;
-  min-width: 0;
+  width: calc(100% - 250px);
+
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
 }
 
-/* ================= HEADER ================= */
+
+/* =========================
+   HEADER
+========================= */
 
 .teacher-projects-page .header {
-  height: 76px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-
+  width: 100%;
+  height: 70px;
+  padding: 0 20px;
+  background: #f0e3a1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 32px;
+  border: none;
 }
 
 .teacher-projects-page .header h2 {
   margin: 0;
   font-size: 22px;
+  font-weight: 400;
+  color: #111;
 }
 
-.header-right {
+
+/* =========================
+   HEADER RIGHT
+========================= */
+
+.teacher-projects-page .header-right {
   display: flex;
+
   align-items: center;
-  gap: 20px;
+
+  gap: 10px;
 }
+
+
+/* =========================
+   NOTIFICATION
+========================= */
 
 .teacher-projects-page .notification-btn {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
 
-  border: none;
-  background: transparent;
+  border: 1px solid #ddd;
 
-  font-size: 18px;
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  color: #999;
+
+  font-size: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
   cursor: pointer;
 }
 
+
+/* =========================
+   USER
+========================= */
+
 .teacher-projects-page .user-info {
+  height: 50px;
+
+  padding: 0 14px;
+
   display: flex;
+
   align-items: center;
+
   gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+
+  border-radius: 4px;
+
+  font-size: 14px;
 }
 
 .teacher-projects-page .profile-image {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
+
   border-radius: 50%;
+
   object-fit: cover;
 }
 
-/* ================= CONTENT ================= */
 
-.project-content {
-  padding: 30px 36px;
+/* =========================
+   CONTENT
+========================= */
+
+.teacher-projects-page .project-content {
+  width: 100%;
+
+  padding: 35px 38px;
 }
 
-/* ================= TOOLBAR ================= */
 
-.project-toolbar {
+/* =========================
+   TOOLBAR
+========================= */
+
+.teacher-projects-page .project-toolbar {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-
-  margin-bottom: 24px;
+  gap: 7px;
+  margin-bottom: 35px;
 }
 
 
-.project-search {
-  width: 380px;
+/* =========================
+   SEARCH
+========================= */
 
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-
-  padding: 10px 14px;
-}
-
-
-.project-toolbar > select {
-  margin-left: auto;
-
-  height: 40px;
-
-  padding: 0 10px;
-
-  border: 1px solid #ccc;
-  border-radius: 6px;
-
-  background: #ffffff;
-
-  font-size: 13px;
-}
-
-
-.create-project-btn {
-  height: 40px;
+.teacher-projects-page .project-search {
+  width: 360px;
+  height: 36px;
 
   display: flex;
   align-items: center;
+
+  flex-direction: row-reverse; /* ⭐ ย้ายไอคอนไปด้านหลัง */
+
   gap: 8px;
+  padding: 0 12px;
+
+  background: #ffffff;
+  border: 1px solid #aaa;
+  border-radius: 20px;
+}
+
+.teacher-projects-page .project-search svg {
+  color: #999;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.teacher-projects-page .project-search input {
+  width: 100%;
 
   border: none;
-  border-radius: 8px;
 
-  padding: 0 18px;
+  outline: none;
 
-  background: #635bdb;
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.teacher-projects-page
+  .project-search
+  input::placeholder {
+  color: #aaa;
+}
+
+
+/* =========================
+   SELECT
+========================= */
+
+.teacher-projects-page .select-wrapper {
+  position: relative;
+  width: 140px;
+  height: 36px;
+}
+
+.teacher-projects-page .select-wrapper select {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 35px 0 12px;
+
+  border: 1px solid #aaa;
+  border-radius: 20px;
+
+  background: #ffffff;
+  color: #999;
+
+  font-size: 12px;
+  outline: none;
+
+  /* ซ่อนลูกศรเดิมของ browser */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.teacher-projects-page .select-arrow {
+  position: absolute;
+
+  right: 14px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  font-size: 9px;
+  color: #999;
+
+  pointer-events: none;
+}
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+.teacher-projects-page .create-project-btn {
+  margin-left: auto;
+
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 0 14px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #20a36a;
   color: #ffffff;
 
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
-
-  font-size: 14px;
-}
-.create-project-btn:hover {
-  opacity: 0.9;
 }
 
-/* ================= SUMMARY ================= */
+.teacher-projects-page .create-project-btn:hover {
+  background: #188c59;
+}
 
-.project-summary {
+
+/* =========================
+   SUMMARY
+========================= */
+
+.teacher-projects-page .project-summary {
+  width: 100%;
+
   display: grid;
+
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
 
-  margin-bottom: 25px;
+  gap: 15px;
+
+  margin-bottom: 35px;
 }
 
-.summary-card {
+.teacher-projects-page .summary-card {
+  height: 120px;
+
   background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-
-  padding: 20px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.summary-card span {
-  color: #666;
-  font-size: 14px;
-}
-
-.summary-card strong {
-  font-size: 28px;
-}
-
-/* ================= PROJECT LIST ================= */
-
-.project-list-container {
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-
-  padding: 20px;
-}
-
-
-.project-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 16px;
-}
-
-
-.project-list-header h3 {
-  margin: 0;
-
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.project-list-header select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-}
-
-/* ================= EMPTY ================= */
-
-.empty-project {
-  min-height: 280px;
+  padding: 15px 25px;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-
-  color: #777;
 }
 
-.empty-project p {
-  margin: 0 0 8px;
-  font-size: 16px;
+.teacher-projects-page .summary-card span {
+  color: #222;
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 
-.empty-project span {
-  font-size: 13px;
-  color: #999;
+.teacher-projects-page .summary-card strong {
+  font-size: 35px;
+  font-weight: 600;
 }
 
-/* ================= PROJECT CARD ================= */
+/* จำนวนทั้งหมด = น้ำเงิน */
 
-.project-card {
-  border: 1px solid #dcdcdc;
+.teacher-projects-page
+  .summary-card:nth-child(1)
+  strong {
+  color: #337ab7;
+}
+
+
+/* กำลังรับนิสิต = เขียว */
+
+.teacher-projects-page
+  .summary-card:nth-child(2)
+  strong {
+  color: #20a36a;
+}
+
+
+/* ปิดรับ = แดง */
+
+.teacher-projects-page
+  .summary-card:nth-child(3)
+  strong {
+  color: #ff0000;
+}
+
+
+/* =========================
+   PROJECT LIST CONTAINER
+========================= */
+
+.teacher-projects-page .project-list-container {
+  width: 100%;
+
+  background: #ffffff;
+
   border-radius: 8px;
-  padding: 14px 14px 12px;
-  margin-bottom: 14px;
+
+  padding: 25px;
+
+  border: none;
+}
+
+
+/* =========================
+   LIST HEADER
+========================= */
+
+.teacher-projects-page .project-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.teacher-projects-page .project-list-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+
+/* =========================
+   PROJECT CARD
+========================= */
+
+.teacher-projects-page .project-card {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  padding: 10px 14px 12px;
+  margin-bottom: 15px;
   background: #ffffff;
 }
 
 
-/* ================= CARD HEADER ================= */
+/* =========================
+   CARD HEADER
+========================= */
 
-.project-card-header {
+.teacher-projects-page .project-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  padding-bottom: 9px;
-  border-bottom: 1px solid #dddddd;
-
-  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 15px;
 }
 
-
-.project-card-header h4 {
+.teacher-projects-page .project-card-header h4 {
   margin: 0;
-
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #222;
-
-  line-height: 1.5;
 }
 
 
-/* ================= STATUS ================= */
+/* =========================
+   STATUS
+========================= */
 
-.project-status {
+.teacher-projects-page .project-status {
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
 
-  padding: 3px 10px;
+  min-width: 52px;
 
-  border: 1px solid #28a745;
+  padding: 3px 8px;
+
+  border: 1px solid #20a36a;
+
   border-radius: 4px;
 
-  color: #28a745;
   background: #ffffff;
 
-  font-size: 11px;
+  color: #20a36a;
+
+  font-size: 10px;
+
   white-space: nowrap;
 }
 
 
-/* ================= PROJECT INFO ================= */
+/* =========================
+   PROJECT INFO
+========================= */
 
-.project-info {
-  font-size: 12px;
-  color: #333;
-
-  line-height: 1.7;
+.teacher-projects-page .project-info {
+  font-size: 13px;
+  color: #222;
+  line-height: 1.8;
 }
 
-
-.project-info p {
+.teacher-projects-page .project-info p {
   margin: 2px 0;
 }
 
-
-.project-info strong {
-  font-weight: 500;
+.teacher-projects-page .project-info strong {
+  font-weight: 400;
 }
 
 
-/* ================= CARD ACTIONS ================= */
+/* =========================
+   ACTIONS
+========================= */
 
-.project-card-actions {
+.teacher-projects-page .project-card-actions {
   display: flex;
+
   justify-content: flex-end;
+
   align-items: center;
 
   gap: 5px;
 
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
+.teacher-projects-page
+  .project-card-actions
+  button {
+  height: 27px;
 
-.project-card-actions button {
-  height: 30px;
+  padding: 0 10px;
 
-  padding: 0 12px;
+  border: 1px solid #ccc;
 
-  border: 1px solid #d6d6d6;
   border-radius: 5px;
 
   background: #ffffff;
-  color: #888;
 
-  font-size: 11px;
+  color: #999;
+
+  font-size: 10px;
 
   cursor: pointer;
 }
 
 
-.project-card-actions button:hover {
-  background: #f5f5f5;
-  color: #555;
-}
+/* MORE */
 
-
-/* ================= MORE BUTTON ================= */
-
-.project-card-actions .more-btn {
-  width: 30px;
+.teacher-projects-page
+  .project-card-actions
+  .more-btn {
+  width: 28px;
 
   padding: 0;
 
   display: flex;
+
   align-items: center;
+
+  justify-content: center;
+}
+
+
+/* =========================
+   EMPTY
+========================= */
+
+.teacher-projects-page .empty-project {
+  min-height: 250px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
   justify-content: center;
 
   color: #777;
 }
 
+.teacher-projects-page .empty-project p {
+  margin: 0 0 8px;
 
-.project-card-actions .more-btn svg {
+  font-size: 14px;
+}
+
+.teacher-projects-page .empty-project span {
   font-size: 12px;
+
+  color: #999;
 }
