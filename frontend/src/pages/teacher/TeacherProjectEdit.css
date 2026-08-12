@@ -1,18 +1,31 @@
-/* =========================
-   PAGE
-========================= */
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
 
-.layout {
-  min-height: 100vh;
+/* =========================================================
+   RESET
+========================================================= */
+
+.teacher-project-edit-page,
+.teacher-project-edit-page * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.teacher-project-edit-page {
   display: flex;
+  width: 100%;
+  min-height: 100vh;
   background: #f5f5f5;
 }
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
-.sidebar {
+.teacher-project-edit-page .sidebar {
   position: fixed;
   top: 0;
   left: 0;
@@ -30,31 +43,34 @@
   z-index: 100;
 }
 
-.logo {
+/* =========================================================
+   LOGO
+========================================================= */
+
+.teacher-project-edit-page .logo-section {
   display: flex;
   align-items: center;
-
   gap: 10px;
 
   padding: 24px 20px;
-
-  margin-bottom: 0;
 }
 
-.logo img {
+.teacher-project-edit-page .logo-section img {
   width: 55px;
   height: 55px;
   object-fit: contain;
 }
 
-.logo h2 {
+.teacher-project-edit-page .logo-section h2 {
   margin: 0;
 
   font-size: 23px;
   font-weight: 700;
+
+  color: #222;
 }
 
-.logo p {
+.teacher-project-edit-page .logo-section p {
   margin: 0;
 
   font-size: 9.5px;
@@ -63,41 +79,55 @@
   color: #666;
 }
 
-.sidebar nav {
+/* =========================================================
+   MENU
+========================================================= */
+
+.teacher-project-edit-page nav {
   margin: 0;
   width: 100%;
 }
 
-.sidebar nav ul {
+.teacher-project-edit-page nav ul {
   list-style: none;
 
   padding: 0;
   margin: 0;
 }
 
-.sidebar nav li {
+.teacher-project-edit-page nav li {
   width: 100%;
+
   padding: 18px 0;
   margin: 0;
+
   border-radius: 0;
+
   color: #222;
+
   font-size: 15px;
   font-weight: 400;
+
   text-align: center;
+
   cursor: pointer;
 }
 
-.sidebar nav li:hover {
+.teacher-project-edit-page nav li:hover {
   background: #f0f0f0;
 }
 
-.sidebar nav li.active {
+.teacher-project-edit-page nav li.active {
   background: #2f5d7c;
   color: #ffffff;
   font-weight: 400;
 }
 
-.logout-btn {
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.teacher-project-edit-page .logout-btn {
   width: 190px;
 
   margin: 0 auto 20px;
@@ -105,7 +135,6 @@
   padding: 12px;
 
   border: none;
-
   border-radius: 8px;
 
   background: #3b75c4;
@@ -113,384 +142,763 @@
   color: white;
 
   cursor: pointer;
+
+  font-size: 13px;
 }
 
-.logout-btn:hover {
+.teacher-project-edit-page .logout-btn:hover {
   background: #2f6db5;
 }
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+========================================================= */
 
-.main {
+.teacher-project-edit-page .main {
   width: calc(100% - 250px);
+
   min-height: 100vh;
+
   margin-left: 250px;
+
+  background: #f5f5f5;
 }
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
-.header {
+.teacher-project-edit-page .header {
   width: 100%;
   height: 70px;
+
   padding: 0 20px;
+
   background: #f0e3a1;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   border: none;
 }
 
-.header h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 400;
-  color: #111;
-}
+/* =========================================================
+   BREADCRUMB
+========================================================= */
 
-.breadcrumb {
+.teacher-project-edit-page .breadcrumb {
   display: flex;
+  align-items: center;
+
   gap: 8px;
-  align-items: center;
+
+  margin: 0;
+
   font-size: 22px;
   font-weight: 400;
+
   color: #111;
+
+  line-height: 1;
 }
 
-.breadcrumb-link {
+.teacher-project-edit-page .breadcrumb span {
+  color: #111;
+
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.teacher-project-edit-page .breadcrumb-link {
+  color: #111 !important;
+
   cursor: pointer;
+
+  text-decoration: none;
 }
 
-.breadcrumb-link:hover {
-  text-decoration: underline;
+.teacher-project-edit-page .breadcrumb-link:hover {
+  color: #111 !important;
+
+  text-decoration: none;
 }
 
-.header-right {
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
+.teacher-project-edit-page .header-right {
   display: flex;
   align-items: center;
+
   gap: 10px;
 }
 
-.notification-btn {
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+.teacher-project-edit-page .notification-btn {
   width: 50px;
   height: 50px;
+
   border: 1px solid #ddd;
   border-radius: 4px;
+
   background: #ffffff;
+
   color: #999;
+
   font-size: 20px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   cursor: pointer;
 }
 
-.notification-btn svg {
+.teacher-project-edit-page .notification-btn svg {
   color: #999;
 }
 
-.user-info {
+/* =========================================================
+   USER
+========================================================= */
+
+.teacher-project-edit-page .user-info {
   height: 50px;
+
   padding: 0 14px;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   background: #ffffff;
+
   border: 1px solid #ddd;
   border-radius: 4px;
+
   font-size: 14px;
+
+  color: #222;
 }
 
-.profile-image {
+.teacher-project-edit-page .profile-image {
   width: 30px;
   height: 30px;
+
   border-radius: 50%;
+
   object-fit: cover;
 }
 
-.user-info span {
+.teacher-project-edit-page .user-info span {
   font-size: 12px;
 }
 
-/* =========================
+/* =========================================================
    CONTENT
-========================= */
+========================================================= */
 
-.edit-content {
-  padding: 22px 32px 40px;
-}
-
-.edit-card {
-  width: 80%;
-  max-width: 850px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 8px;
-  padding: 24px 28px 32px;
-  box-sizing: border-box;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-
-.edit-title {
-  font-size: 16px;
-  margin: 0 0 22px;
-  font-weight: 600;
-}
-
-/* =========================
-   FORM
-========================= */
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group > label:first-child {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 7px;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group select,
-.form-group textarea {
+.teacher-project-edit-page .edit-content {
   width: 100%;
+
+  padding: 30px 40px;
+
+  max-width: 1100px;
+
+  margin: 0 auto;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.teacher-project-edit-page .edit-form {
+  width: 100%;
+}
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
+
+.teacher-project-edit-page .form-section {
+  width: 100%;
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  padding: 25px;
+
+  margin-bottom: 20px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.teacher-project-edit-page .form-section h3 {
+  margin-top: 0;
+  margin-bottom: 22px;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  color: #222;
+}
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.teacher-project-edit-page .form-group {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 18px;
+}
+
+.teacher-project-edit-page .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.teacher-project-edit-page .form-group > label {
+  font-weight: 600;
+
+  margin-bottom: 8px;
+
+  font-size: 16px;
+
+  color: #222;
+}
+
+/* =========================================================
+   INPUT / TEXTAREA / SELECT
+========================================================= */
+
+.teacher-project-edit-page .form-group input,
+.teacher-project-edit-page .form-group textarea {
+  width: 100%;
+
   box-sizing: border-box;
+
   border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 10px;
-  font-size: 12px;
-  background: white;
+
+  border-radius: 8px;
+
+  padding: 11px 16px;
+
+  font-size: 13px;
+
+  font-family: inherit;
+
+  background: #fff;
+
+  color: #222;
+
   outline: none;
 }
 
-.form-group textarea {
+.teacher-project-edit-page .form-group textarea {
   resize: vertical;
+
   line-height: 1.6;
-  min-height: 80px;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #4d9ccc;
-  box-shadow: 0 0 0 2px rgba(77, 156, 204, 0.08);
+.teacher-project-edit-page .form-group input:focus,
+.teacher-project-edit-page .form-group textarea:focus,
+.teacher-project-edit-page .form-group select:focus {
+  outline: none;
+
+  border-color: #777;
 }
 
-.form-group select {
-  width: 230px;
-  cursor: pointer;
+/* =========================================================
+   SELECT
+========================================================= */
+
+.teacher-project-edit-page .select-wrapper {
+  position: relative;
+
+  width: 100%;
 }
 
-/* =========================
-   ADVISOR
-========================= */
+.teacher-project-edit-page .select-wrapper select {
+  width: 100%;
+  height: 42px;
 
-.advisor-label {
-  font-size: 11px;
-  margin-bottom: 4px;
-  color: #555;
-}
+  box-sizing: border-box;
 
-.advisor-display {
-  width: 230px;
-  background: #eeeeee;
-  border-radius: 4px;
-  padding: 9px 10px;
-  font-size: 12px;
-  color: #555;
-}
+  padding: 0 40px 0 16px;
 
-/* =========================
-   RADIO
-========================= */
-
-.radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.radio-group label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  font-weight: normal;
-  cursor: pointer;
-}
-
-.radio-group input[type="radio"] {
-  margin: 0;
-  cursor: pointer;
-}
-
-/* =========================
-   NUMBER
-========================= */
-
-.number-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.number-input input {
-  width: 80px !important;
-}
-
-.number-input span {
-  font-size: 12px;
-}
-
-.member-warning {
-  display: block;
-  margin-top: 5px;
-  color: #777;
-  font-size: 10px;
-}
-
-/* =========================
-   TECHNOLOGY
-========================= */
-
-.example-text {
-  font-size: 10px;
-  color: #666;
-  margin-bottom: 5px;
-}
-
-.technology-box {
   border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 11px;
+
+  border-radius: 8px;
+
+  background: #fff;
+
+  color: #222;
+
+  font-size: 13px;
+
+  font-family: inherit;
+
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  cursor: pointer;
+}
+
+.teacher-project-edit-page .select-arrow {
+  position: absolute;
+
+  right: 15px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  font-size: 10px;
+
   color: #555;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   FORM ROW
+========================================================= */
+
+.teacher-project-edit-page .form-row {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 20px;
+}
+
+/* =========================================================
+   TEACHER INFO
+========================================================= */
+
+.teacher-project-edit-page .teacher-row {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 25px;
+}
+
+.teacher-project-edit-page .teacher-info-item {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.teacher-project-edit-page .teacher-info-item label {
+  font-size: 14px;
+
+  font-weight: 600;
+
   margin-bottom: 8px;
-  min-height: 20px;
+
+  color: #222;
 }
 
-/* =========================
-   DOCUMENT
-========================= */
+.teacher-project-edit-page .teacher-info-value {
+  width: 100%;
+  height: 40px;
 
-.document-list {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.document-list button,
-.choose-file-btn {
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 4px;
-  padding: 7px 10px;
-  font-size: 11px;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-}
 
-.document-list button:hover,
-.choose-file-btn:hover {
   background: #f7f7f7;
+
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 0 13px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: #222;
 }
 
-.choose-file-btn {
+/* =========================================================
+   MEMBER INFO
+========================================================= */
+
+.teacher-project-edit-page .project-member-info {
+  display: flex;
+
+  flex-direction: column;
+
+  background: #f7f7f7;
+
+  border-radius: 8px;
+
+  padding: 15px;
+
   margin-top: 2px;
 }
 
-/* =========================
-   ACTIONS
-========================= */
+.teacher-project-edit-page .project-member-info span {
+  display: block;
 
-.edit-actions {
+  font-size: 13px;
+
+  color: #777;
+
+  margin-bottom: 5px;
+}
+
+.teacher-project-edit-page .project-member-info strong {
+  font-size: 15px;
+
+  color: #222;
+}
+
+.teacher-project-edit-page .project-member-info small {
+  margin-top: 5px;
+
+  font-size: 11px;
+
+  color: #777;
+}
+
+/* =========================================================
+   PROJECT INFORMATION
+========================================================= */
+
+.teacher-project-edit-page .project-info-list {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 35px;
+
+  flex-direction: column;
+
+  gap: 18px;
 }
 
-.cancel-btn,
-.save-btn {
-  width: 125px;
-  border: none;
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.cancel-btn {
-  background: #ff0000;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background: #dc0000;
-}
-
-.save-btn {
-  background: #3378c5;
-  color: white;
-}
-
-.save-btn:hover {
-  background: #2869b1;
-}
-
-.save-btn:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
-
-/* =========================
-   LOADING
-========================= */
-
-.edit-loading {
-  min-height: 100vh;
+.teacher-project-edit-page .project-info-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+
+  gap: 5px;
+
   font-size: 14px;
 }
 
-/* =========================
+.teacher-project-edit-page .project-info-row span {
+  color: #777;
+}
+
+.teacher-project-edit-page .project-info-row strong {
+  color: #222;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   PROJECT MEMBER DETAIL
+========================================================= */
+
+.teacher-project-edit-page .project-member-detail {
+  display: flex;
+
+  flex-direction: column;
+
+  margin-top: 5px;
+}
+
+.teacher-project-edit-page .project-member-detail > strong {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #222;
+}
+
+/* ข้อความยังไม่มีสมาชิกให้อยู่ด้านล่าง + เยื้องขวา */
+
+.teacher-project-edit-page .empty-member {
+  margin: 6px 0 0 22px;
+
+  font-size: 13px;
+
+  color: #777;
+}
+
+.teacher-project-edit-page .member-count {
+  margin: 6px 0 0 22px;
+
+  font-size: 13px;
+
+  color: #555;
+}
+
+/* =========================================================
+   EXAMPLE TEXT
+========================================================= */
+
+.teacher-project-edit-page .example-text {
+  font-size: 10px;
+
+  color: #666;
+
+  margin-bottom: 6px;
+
+  line-height: 1.6;
+}
+
+.teacher-project-edit-page .example-text strong {
+  font-weight: 500;
+
+  color: #777;
+}
+
+/* =========================================================
+   DOCUMENT
+========================================================= */
+
+.teacher-project-edit-page .document-list {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 8px;
+
+  margin-bottom: 10px;
+}
+
+.teacher-project-edit-page .document-list button,
+.teacher-project-edit-page .choose-file-btn {
+  border: 1px solid #ddd;
+
+  background: white;
+
+  border-radius: 8px;
+
+  padding: 9px 12px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  color: #333;
+}
+
+.teacher-project-edit-page .document-list button:hover,
+.teacher-project-edit-page .choose-file-btn:hover {
+  background: #f7f7f7;
+}
+
+.teacher-project-edit-page .choose-file-btn {
+  margin-top: 2px;
+}
+
+/* =========================================================
+   RADIO
+========================================================= */
+
+.teacher-project-edit-page .radio-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.teacher-project-edit-page .radio-group label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 13px;
+
+  font-weight: 400;
+
+  color: #222;
+
+  cursor: pointer;
+}
+
+.teacher-project-edit-page .radio-group input[type="radio"] {
+  margin: 0;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.teacher-project-edit-page .form-actions {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 25px;
+
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.teacher-project-edit-page .cancel-btn {
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 11px 22px;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  background: #ef2d2d;
+
+  color: white;
+
+  width: 180px;
+}
+
+.teacher-project-edit-page .cancel-btn:hover {
+  background: #c82333;
+}
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+.teacher-project-edit-page .save-btn {
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 11px 22px;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  background: #2cab63;
+
+  color: white;
+
+  width: 180px;
+}
+
+.teacher-project-edit-page .save-btn:hover {
+  background: #229755;
+
+  color: white;
+}
+
+.teacher-project-edit-page .save-btn:focus,
+.teacher-project-edit-page .save-btn:active {
+  background: #2cab63;
+
+  color: white;
+
+  outline: none;
+
+  box-shadow: none;
+}
+
+.teacher-project-edit-page .save-btn:disabled {
+  background: #aaa;
+
+  color: white;
+
+  opacity: 1;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.edit-loading {
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+}
+
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
 
 @media (max-width: 900px) {
-  .edit-card {
-    width: 95%;
+
+  .teacher-project-edit-page .edit-content {
+    padding: 20px;
   }
+
+  .teacher-project-edit-page .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-project-edit-page .teacher-row {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 @media (max-width: 700px) {
-  .sidebar {
+
+  .teacher-project-edit-page .sidebar {
     width: 150px;
   }
 
-  .main {
-    margin-left: 150px;
+  .teacher-project-edit-page .main {
     width: calc(100% - 150px);
+
+    margin-left: 150px;
   }
 
-  .edit-content {
+  .teacher-project-edit-page .edit-content {
     padding: 15px;
   }
 
-  .edit-card {
-    width: 100%;
+  .teacher-project-edit-page .form-section {
     padding: 20px;
   }
+
+  .teacher-project-edit-page .breadcrumb {
+    font-size: 16px;
+  }
+
+  .teacher-project-edit-page .breadcrumb span {
+    font-size: 16px;
+  }
+
 }
