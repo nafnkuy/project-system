@@ -101,8 +101,10 @@
   margin: 0;
   border-radius: 0;
   color: #222;
-  font-size: 15px;
+  font-family: "Prompt", sans-serif;
+  font-size: 14px !important;
   font-weight: 400;
+  line-height: 1.5;
   text-align: center;
   cursor: pointer;
 }
@@ -129,19 +131,12 @@
 
 .teacher-projects-page .logout-btn {
   width: 190px;
-
   margin: 0 auto 20px;
-
   padding: 12px;
-
   border: none;
-
   border-radius: 8px;
-
   background: #3b75c4;
-
   color: white;
-
   cursor: pointer;
 }
 
@@ -182,7 +177,7 @@
 
 .teacher-projects-page .header h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px !important;
   font-weight: 400;
   color: #111;
 }
@@ -386,9 +381,12 @@
 .teacher-projects-page .create-project-btn {
   margin-left: auto;
 
+  width: 170px;
   height: 36px;
+
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 
   padding: 0 14px;
@@ -484,13 +482,9 @@
 
 .teacher-projects-page .project-list-container {
   width: 100%;
-
   background: #ffffff;
-
   border-radius: 8px;
-
   padding: 25px;
-
   border: none;
 }
 
@@ -508,7 +502,7 @@
 
 .teacher-projects-page .project-list-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #222;
 }
@@ -543,7 +537,7 @@
 
 .teacher-projects-page .project-card-header h4 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #222;
 }
