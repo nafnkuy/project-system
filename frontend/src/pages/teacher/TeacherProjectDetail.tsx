@@ -94,7 +94,66 @@ function TeacherProjectDetail() {
     localStorage.removeItem("profileImage");
 
     navigate("/");
+  };const skillStyles: Record<
+    string,
+    { backgroundColor: string; borderColor: string }
+  > = {
+    React: {
+      backgroundColor: "#DBEAFE",
+      borderColor: "#4385F5",
+    },
+    "Node.js": {
+      backgroundColor: "#DCFCE7",
+      borderColor: "#30BF2D",
+    },
+    MySQL: {
+      backgroundColor: "#FFEDD5",
+      borderColor: "#FF8A05",
+    },
+    Git: {
+      backgroundColor: "#FEE2E2",
+      borderColor: "#DD5245",
+    },
+    Python: {
+      backgroundColor: "#FEF3C7",
+      borderColor: "#EEB400",
+    },
+    RFID: {
+      backgroundColor: "#F3E8FF",
+      borderColor: "#BB38FF",
+    },
+    AI: {
+      backgroundColor: "#E0E7FF",
+      borderColor: "#055DF2",
+    },
+    HTML: {
+      backgroundColor: "#FDF2F8", // ชมพูพาสเทล
+      borderColor: "#F472B6",
+    },
+
+    CSS: {
+      backgroundColor: "#ECFDF5", // มิ้นต์พาสเทล
+      borderColor: "#34D399",
+    },
+
+    JavaScript: {
+      backgroundColor: "#FAF5FF", // ม่วงพาสเทล
+      borderColor: "#C084FC",
+    },
+
+    "QR Code": {
+      backgroundColor: "#FFEAF4",
+      borderColor: "#E91E63", // ชมพูเข้ม
+    },
+
+    "API Integration": {
+      backgroundColor: "#E8F8F5",
+      borderColor: "#16A085", // เขียวอมฟ้า (Teal)
+    },
   };
+  if (!project) {
+    return <h2 style={{ padding: 20 }}>กำลังโหลด...</h2>;
+  }
 
   // =========================
   // Loading state
@@ -291,11 +350,24 @@ function TeacherProjectDetail() {
             <h3>เทคโนโลยี</h3>
 
             <div className="tag-list">
-              {skills.map((skill, index) => (
-                <span className="skill-tag" key={index}>
-                  {skill}
-                </span>
-              ))}
+              {(project.skills || "").split("|").map((skill, index) => {
+                const style = skillStyles[skill] || {
+                  backgroundColor: "#F3F4F6",
+                  borderColor: "#D1D5DB",
+                };
+
+                return (
+                  <span
+                    key={index}
+                    style={{
+                      backgroundColor: style.backgroundColor,
+                      border: `1px solid ${style.borderColor}`,
+                    }}
+                  >
+                    {skill}
+                  </span>
+                );
+              })}
             </div>
           </section>
 

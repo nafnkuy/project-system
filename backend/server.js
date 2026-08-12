@@ -866,7 +866,7 @@ app.get("/teacher/projects/:projectId/:advisorId", (req, res) => {
   const { projectId, advisorId } = req.params;
 
   const sql = `
-    SELECT
+ SELECT
       p.*,
       u.name AS advisor_name
     FROM projects p
