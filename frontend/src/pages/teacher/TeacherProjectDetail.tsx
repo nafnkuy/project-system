@@ -202,19 +202,21 @@ function TeacherProjectDetail() {
               PROJECT HEADER
           ========================= */}
           <div className="project-detail-header">
-            <div>
-              <h1>{project.title}</h1>
+            <h1>{project.title}</h1>
 
-              <div className="project-badges">
-                <span>ประเภท : {project.project_type}</span>
+            <div className="project-badges">
+              <span>ประเภทโครงงาน : {project.project_type}</span>
 
-                <span>
-                  รับนิสิต : {project.current_members} / {project.max_members}{" "}
-                  คน
-                </span>
+              <span>
+                รับนิสิต : {project.current_members} / {project.max_members} คน
+              </span>
 
-                <span>สถานะ : {project.status}</span>
-              </div>
+              <span>
+                สถานะ:{" "}
+                <strong className={`status-text ${project.status}`}>
+                  {project.status}
+                </strong>
+              </span>
             </div>
           </div>
 
@@ -236,28 +238,28 @@ function TeacherProjectDetail() {
               <p>
                 <strong>ปีการศึกษา :</strong> {project.academic_year}
               </p>
-            </div>
-          </section>
 
-          {/* =========================
-              MEMBERS
-          ========================= */}
-          <section className="detail-section">
-            <h3>
-              สมาชิกในโครงงาน ({project.current_members}/{project.max_members})
-            </h3>
+              <div className="project-members-info">
+                <p>
+                  <strong>
+                    สมาชิกในโครงงาน ({project.current_members}/
+                    {project.max_members}) :
+                  </strong>
+                </p>
 
-            {project.members.length === 0 ? (
-              <p className="empty-member">ยังไม่มีนิสิตเข้าร่วมโครงงาน</p>
-            ) : (
-              <div className="member-list">
-                {project.members.map((member) => (
-                  <div className="member-item" key={member.id}>
-                    {member.name}
+                {project.members.length === 0 ? (
+                  <p className="empty-member">ยังไม่มีนิสิตเข้าร่วมโครงงาน</p>
+                ) : (
+                  <div className="member-list">
+                    {project.members.map((member) => (
+                      <div className="member-item" key={member.id}>
+                        {member.name}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            </div>
           </section>
 
           {/* =========================
@@ -333,6 +335,7 @@ function TeacherProjectDetail() {
             </button>
 
             <button
+              className="edit-btn"
               onClick={() => navigate(`/teacher-project-edit/${project.id}`)}
             >
               แก้ไข

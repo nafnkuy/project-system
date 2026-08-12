@@ -71,7 +71,7 @@
   margin: 0;
   border-radius: 0;
   color: #222;
-  font-size: 15px;
+  font-size: 14px !important;
   font-weight: 400;
   text-align: center;
   cursor: pointer;
@@ -125,23 +125,22 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 22px;
+  margin: 0;
+  font-family: "Prompt", sans-serif;
+  font-size: 20px !important;
   font-weight: 400;
   color: #111;
 }
 
 .teacher-project-detail-page .breadcrumb-link {
-  cursor: pointer;
+  cursor: default;
+  color: #111;
+  text-decoration: none;
 }
 
 .teacher-project-detail-page .breadcrumb-link:hover {
-  text-decoration: underline;
-}
-
-.teacher-project-detail-page .header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  color: #111;
+  text-decoration: none;
 }
 
 .teacher-project-detail-page .notification-btn {
@@ -184,60 +183,116 @@
 /* ================= CONTENT ================= */
 
 .teacher-project-detail-page .detail-content {
+  width: 100%;
+  max-width: 1100px;
   background: white;
-  margin: 20px 25px;
+  margin: 40px auto 40px;
   padding: 20px 25px;
   border-radius: 5px;
 }
 
+/* ================= PROJECT HEADER ================= */
+
 .teacher-project-detail-page .project-detail-header {
   display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #ddd;
+  align-items: center;
+  gap: 30px;
   padding-bottom: 15px;
 }
 
 .teacher-project-detail-page .project-detail-header h1 {
+  margin: 0;
   font-size: 18px;
-  margin: 0 0 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .teacher-project-detail-page .project-badges {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 .teacher-project-detail-page .project-badges span {
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 10px;
+  border: 1.5px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  color: #333;
+}
+
+.teacher-project-detail-page .status-text {
+  font-weight: 500;
+}
+
+.teacher-project-detail-page .status-text.เปิดรับ {
+  color: #18a86b;
+}
+
+.teacher-project-detail-page .status-text.ปิดรับ {
+  color: #e04b4b;
+}
+
+.teacher-project-detail-page .status-text.รอพิจารณา {
+  color: #d99a00;
 }
 
 /* ================= SECTION ================= */
 
 .teacher-project-detail-page .detail-section {
-  margin-top: 25px;
+  margin-top: 40px;
+}
+
+.teacher-project-detail-page .project-detail-header + .detail-section {
+  margin-top: 10px;
 }
 
 .teacher-project-detail-page .detail-section h3 {
-  font-size: 13px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
 }
 
-.teacher-project-detail-page .detail-info p,
-.teacher-project-detail-page .detail-text,
-.teacher-project-detail-page .detail-section li,
-.teacher-project-detail-page .empty-member {
-  font-size: 11px;
+.teacher-project-detail-page .detail-section p {
+  margin: 8px 0;
   line-height: 1.8;
 }
 
 .teacher-project-detail-page .detail-section ul {
+  margin: 10px 0 0 20px;
   padding-left: 20px;
+  line-height: 1.8;
+}
+
+.teacher-project-detail-page .detail-section p,
+.teacher-project-detail-page .detail-section span,
+.teacher-project-detail-page .detail-section li {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.teacher-project-detail-page .detail-section strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.teacher-project-detail-page .project-members-info {
+  margin-top: 18px;
+}
+
+.teacher-project-detail-page .project-members-info p {
+  margin: 0;
+}
+
+.teacher-project-detail-page .empty-member {
+  margin-top: 8px !important;
+  margin-left: 20px !important;
+  color: #666;
 }
 
 /* ================= SKILLS ================= */
@@ -245,14 +300,15 @@
 .teacher-project-detail-page .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .teacher-project-detail-page .skill-tag {
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  padding: 5px 14px;
-  font-size: 10px;
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ================= MEMBERS ================= */
@@ -267,7 +323,7 @@
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 15px;
 }
 
 /* ================= ACTION ================= */
@@ -276,7 +332,6 @@
   display: flex;
   justify-content: center;
   gap: 10px;
-  border-top: 1px solid #ddd;
   padding-top: 15px;
   margin-top: 30px;
 }
