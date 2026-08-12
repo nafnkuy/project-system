@@ -219,11 +219,6 @@
    BREADCRUMB
 ========================================================= */
 
-/*
-  จุดนี้แก้จากของพี่รอบก่อน
-  ไม่ให้ "จัดการหัวข้อโครงงาน" เป็นสีน้ำเงิน
-  และไม่ให้ตัวหนังสือเล็กเกินไป
-*/
 
 .teacher-project-page .breadcrumb {
   display: flex;
@@ -412,23 +407,59 @@
 ========================================================= */
 
 .teacher-project-page .form-group input,
-.teacher-project-page .form-group textarea,
-.teacher-project-page .form-group select {
+.teacher-project-page .form-group textarea {
   width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
 
+
+/* =========================
+   SELECT
+========================= */
+
+.teacher-project-page .select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.teacher-project-page .select-wrapper select {
+  width: 100%;
+  height: 42px;
   box-sizing: border-box;
 
-  border: 1px solid #ddd;
+  padding: 0 40px 0 16px;
 
+  border: 1px solid #ddd;
   border-radius: 8px;
 
-  padding: 11px 13px;
-
-  font-size: 15px;
-
+  background: #fff;
+  color: #222;
+  font-size: 13px;
   font-family: inherit;
 
-  background: #fff;
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.teacher-project-page .select-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-size: 10px;
+  color: #555;
+
+  pointer-events: none;
 }
 
 .teacher-project-page .form-group textarea {
@@ -476,7 +507,7 @@
 .teacher-project-page .project-member-info span {
   display: block;
 
-  font-size: 13px;
+  font-size: 9px;
 
   color: #777;
 
@@ -484,7 +515,7 @@
 }
 
 .teacher-project-page .project-member-info strong {
-  font-size: 15px;
+  font-size: 13px;
 
   color: #222;
 }
@@ -531,14 +562,11 @@
 
 .teacher-project-page .form-actions {
   display: flex;
-
-  justify-content: flex-end;
-
+  justify-content: center;
+  align-items: center;
   gap: 12px;
-
-  margin-top: 10px;
-
-  margin-bottom: 30px;
+  margin-top: 25px;
+  margin-bottom: 0;
 }
 
 
@@ -548,24 +576,18 @@
 
 .teacher-project-page .cancel-btn {
   border: none;
-
   border-radius: 8px;
-
   padding: 11px 22px;
-
-  font-size: 14px;
-
+  font-size: 13px;
   cursor: pointer;
-
-  background: #eee;
-
-  color: #444;
+  background: #ef2d2d;
+  color: white;
+  width: 180px;
 }
 
 .teacher-project-page .cancel-btn:hover {
-  background: #ddd;
+  background: #c82333;
 }
-
 
 /* =========================================================
    SAVE BUTTON
@@ -573,30 +595,37 @@
 
 .teacher-project-page .save-btn {
   border: none;
-
   border-radius: 8px;
-
   padding: 11px 22px;
-
-  font-size: 14px;
-
+  font-size: 13px;
   cursor: pointer;
+  background: #2cab63;
+  color: white;
+  width: 180px;
+}
 
-  background: #20a36a;
-
+/* ตอนเอาเมาส์วาง */
+.teacher-project-page .save-btn:hover {
+  background: #229755;
   color: white;
 }
 
-.teacher-project-page .save-btn:hover {
-  opacity: 0.9;
+/* ตอนกด / เลือกปุ่ม */
+.teacher-project-page .save-btn:focus,
+.teacher-project-page .save-btn:active {
+  background: #2cab63;
+  color: white;
+  outline: none;
+  box-shadow: none;
 }
 
+/* ตอนข้อมูลยังไม่ครบ */
 .teacher-project-page .save-btn:disabled {
-  opacity: 0.6;
-
+  background: #aaa;
+  color: white;
+  opacity: 1;
   cursor: not-allowed;
 }
-
 
 /* =========================================================
    RESPONSIVE
@@ -648,4 +677,52 @@
   .teacher-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* =========================
+   TEACHER INFO
+========================= */
+
+.teacher-section {
+  padding: 25px;
+}
+
+.teacher-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.teacher-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.teacher-info-item label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.teacher-info-value {
+  width: 100%;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+
+  /* พื้นเทา */
+  background: #f7f7f7;
+
+  /* ไม่มีเส้นขอบ */
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 0 13px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
 }

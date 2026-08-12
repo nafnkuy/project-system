@@ -335,7 +335,7 @@ const handleDeleteProject = async (projectId: number) => {
               >
                 <option value="all">สถานะทั้งหมด</option>
 
-                <option value="รับนิสิต">กำลังรับนิสิต</option>
+                <option value="รับนิสิต">เปิดรับ</option>
 
                 <option value="ปิดรับ">ปิดรับ</option>
               </select>
@@ -355,8 +355,6 @@ const handleDeleteProject = async (projectId: number) => {
                 <option value="latest">ล่าสุด</option>
 
                 <option value="oldest">เก่าสุด</option>
-
-                <option value="title">ชื่อหัวข้อ</option>
               </select>
 
               <span className="select-arrow">▼</span>

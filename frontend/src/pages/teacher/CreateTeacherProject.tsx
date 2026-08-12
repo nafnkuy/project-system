@@ -183,207 +183,171 @@ function CreateTeacherProject() {
         {/* Content */}
         <div className="create-project-content">
           <form onSubmit={handleSubmit}>
-
-  {/* =========================
+            {/* =========================
       ชื่อหัวข้อโครงงาน
   ========================= */}
-  <div className="form-section">
+            <div className="form-section">
+              <div className="form-group">
+                <label>ชื่อหัวข้อโครงงาน *</label>
 
-    <div className="form-group">
-      <label>ชื่อหัวข้อโครงงาน *</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="กรอกชื่อหัวข้อโครงงาน"
+                />
+              </div>
+            </div>
 
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="กรอกชื่อหัวข้อโครงงาน"
-      />
-    </div>
-
-  </div>
-
-
-  {/* =========================
+            {/* =========================
       อาจารย์ที่ปรึกษา
   ========================= */}
-  <div className="form-section teacher-section">
+            <div className="form-section teacher-section">
+              <div className="teacher-row">
+                <div className="teacher-info-item">
+                  <label>อาจารย์ที่ปรึกษา</label>
 
-  <div className="teacher-row">
+                  <div className="teacher-info-value">{name || "-"}</div>
+                </div>
 
-    {/* อาจารย์ที่ปรึกษา */}
-    <div className="form-group">
-      <label>อาจารย์ที่ปรึกษา</label>
+                <div className="teacher-info-item">
+                  <label>สาขาวิชา</label>
 
-      <input
-        type="text"
-        value={name || ""}
-        readOnly
-        className="readonly-input"
-      />
-    </div>
+                  <div className="teacher-info-value">{major || "-"}</div>
+                </div>
+              </div>
+            </div>
 
-
-    {/* สาขาวิชา */}
-    <div className="form-group">
-      <label>สาขาวิชา</label>
-
-      <input
-        type="text"
-        value={major || "-"}
-        readOnly
-        className="readonly-input"
-      />
-    </div>
-
-  </div>
-
-</div>
-
-
-  {/* =========================
+            {/* =========================
       การเปิดรับ
   ========================= */}
-  <div className="form-section">
-    <div className="form-row">
+            <div className="form-section">
+              <div className="form-row">
+                {/* ประเภทโครงงาน */}
+                <div className="form-group">
+                  <label>ประเภทโครงงาน *</label>
 
-      {/* ประเภทโครงงาน */}
-      <div className="form-group">
-        <label>ประเภทโครงงาน *</label>
+                  <div className="select-wrapper">
+                    <select
+                      value={projectType}
+                      onChange={(e) => setProjectType(e.target.value)}
+                    >
+                      <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
 
-        <select
-          value={projectType}
-          onChange={(e) => setProjectType(e.target.value)}
-        >
-          <option value="โครงงานเดี่ยว">
-            โครงงานเดี่ยว
-          </option>
+                      <option value="โครงงานคู่">โครงงานคู่</option>
+                    </select>
 
-          <option value="โครงงานคู่">
-            โครงงานคู่
-          </option>
-        </select>
-      </div>
+                    <span className="select-arrow">▼</span>
+                  </div>
+                </div>
 
+                {/* ปีการศึกษา */}
+                <div className="form-group">
+                  <label>ปีการศึกษา / ภาคเรียน *</label>
 
-      {/* ปีการศึกษา */}
-      <div className="form-group">
-        <label>ปีการศึกษา / ภาคเรียน *</label>
+                  <div className="select-wrapper">
+                    <select
+                      value={academicYear}
+                      onChange={(e) => setAcademicYear(e.target.value)}
+                    >
+                      <option value="2569/1">2569/1</option>
+                      <option value="2569/2">2569/2</option>
+                      <option value="2570/1">2570/1</option>
+                      <option value="2570/2">2570/2</option>
+                    </select>
 
-        <select
-          value={academicYear}
-          onChange={(e) => setAcademicYear(e.target.value)}
-        >
-          <option value="2569/1">2569/1</option>
-          <option value="2569/2">2569/2</option>
-          <option value="2570/1">2570/1</option>
-          <option value="2570/2">2570/2</option>
-        </select>
-      </div>
+                    <span className="select-arrow">▼</span>
+                  </div>
+                </div>
+              </div>
 
-    </div>
+              {/* จำนวนสมาชิก */}
+              <div className="project-member-info">
+                <span>จำนวนที่รับ</span>
 
+                <strong>
+                  {projectType === "โครงงานเดี่ยว" ? "รับ 1 คน" : "รับ 2 คน"}
+                </strong>
+              </div>
+            </div>
 
-    {/* จำนวนสมาชิก */}
-    <div className="project-member-info">
-
-      <span>จำนวนที่รับ</span>
-
-      <strong>
-        {projectType === "โครงงานเดี่ยว"
-          ? "รับ 1 คน"
-          : "รับ 2 คน"}
-      </strong>
-
-    </div>
-
-  </div>
-
-
-  {/* =========================
+            {/* =========================
       รายละเอียดโครงงาน
   ========================= */}
-  <div className="form-section">
-    
-    {/* รายละเอียด */}
-    <div className="form-group">
-      <label>รายละเอียดโครงงาน *</label>
+            <div className="form-section">
+              {/* รายละเอียด */}
+              <div className="form-group">
+                <label>รายละเอียดโครงงาน *</label>
 
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="กรอกรายละเอียดของโครงงาน"
-        rows={5}
-      />
-    </div>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="กรอกรายละเอียดของโครงงาน"
+                  rows={5}
+                />
+              </div>
 
+              {/* วัตถุประสงค์ */}
+              <div className="form-group">
+                <label>วัตถุประสงค์</label>
 
-    {/* วัตถุประสงค์ */}
-    <div className="form-group">
-      <label>วัตถุประสงค์</label>
+                <textarea
+                  value={objectives}
+                  onChange={(e) => setObjectives(e.target.value)}
+                  placeholder="กรอกวัตถุประสงค์ของโครงงาน"
+                  rows={4}
+                />
+              </div>
 
-      <textarea
-        value={objectives}
-        onChange={(e) => setObjectives(e.target.value)}
-        placeholder="กรอกวัตถุประสงค์ของโครงงาน"
-        rows={4}
-      />
-    </div>
+              {/* เทคโนโลยี / ทักษะ */}
+              <div className="form-group">
+                <label>เทคโนโลยีหรือทักษะที่จำเป็น *</label>
 
+                <textarea
+                  value={skills}
+                  onChange={(e) => setSkills(e.target.value)}
+                  placeholder="เช่น React, Node.js, MySQL"
+                  rows={3}
+                />
+              </div>
 
-    {/* เทคโนโลยี / ทักษะ */}
-    <div className="form-group">
-      <label>เทคโนโลยีหรือทักษะที่จำเป็น *</label>
+              {/* คุณสมบัติ */}
+              <div className="form-group">
+                <label>คุณสมบัติ/ข้อกำหนดของนิสิต</label>
 
-      <textarea
-        value={skills}
-        onChange={(e) => setSkills(e.target.value)}
-        placeholder="เช่น React, Node.js, MySQL"
-        rows={3}
-      />
-    </div>
+                <textarea
+                  value={requirements}
+                  onChange={(e) => setRequirements(e.target.value)}
+                  placeholder="เช่น มีพื้นฐานการเขียนโปรแกรม"
+                  rows={3}
+                />
+              </div>
 
+              {/* ปุ่ม */}
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => navigate("/teacher-projects")}
+                >
+                  ยกเลิก
+                </button>
 
-    {/* คุณสมบัติ */}
-    <div className="form-group">
-      <label>คุณสมบัติ/ข้อกำหนดของนิสิต</label>
-
-      <textarea
-        value={requirements}
-        onChange={(e) => setRequirements(e.target.value)}
-        placeholder="เช่น มีพื้นฐานการเขียนโปรแกรม"
-        rows={3}
-      />
-    </div>
-
-  </div>
-
-
-  {/* =========================
-      ปุ่ม
-  ========================= */}
-  <div className="form-actions">
-
-    <button
-      type="button"
-      className="cancel-btn"
-      onClick={() => navigate("/teacher-projects")}
-    >
-      ยกเลิก
-    </button>
-
-    <button
-      type="submit"
-      className="save-btn"
-      disabled={loading}
-    >
-      {loading
-        ? "กำลังบันทึก..."
-        : "บันทึกหัวข้อโครงงาน"}
-    </button>
-
-  </div>
-
-</form>
+                <button
+                  type="submit"
+                  className="save-btn"
+                  disabled={
+                    loading ||
+                    !title.trim() ||
+                    !description.trim() ||
+                    !skills.trim()
+                  }
+                >
+                  {loading ? "กำลังบันทึก..." : "บันทึกหัวข้อโครงงาน"}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </main>
     </div>
