@@ -11,6 +11,7 @@ import TeacherProjects from "./pages/teacher/TeacherProjects";
 import CreateTeacherProject from "./pages/teacher/CreateTeacherProject";
 import TeacherProjectDetail from "./pages/teacher/TeacherProjectDetail";
 import TeacherProjectEdit from "./pages/teacher/TeacherProjectEdit";
+import TeacherRequestDetail from "./pages/teacher/TeacherRequestDetail";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/create-teacher-project" element={<CreateTeacherProject />} />
         <Route path="/teacher-project-details/:id" element={<TeacherProjectDetail />} />
         <Route path="/teacher-project-edit/:id" element={<TeacherProjectEdit />} />
+        <Route path="/teacher-request-details/:id" element={<TeacherRequestDetail />} />
       </Routes>
     </BrowserRouter>
   );

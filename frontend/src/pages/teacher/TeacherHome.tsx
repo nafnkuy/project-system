@@ -9,13 +9,24 @@ import logo from "../../assets/Logo.svg";
 interface Request {
   id: number;
   title: string;
+  source: string;
+  student_id: number;
+  student_username: string;
   student_name: string;
   request_date: string;
   status: string;
 }
 
+interface Dashboard {
+  totalProjects: number;
+  pendingRequests: number;
+  acceptedStudents: number;
+  totalCapacity: number;
+  status: string;
+}
+
 function TeacherHome() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const userId = localStorage.getItem("userId"); //ดึงค่ารหัสประจำตัวจาก localStorage
   const username = localStorage.getItem("username");
@@ -23,25 +34,37 @@ const navigate = useNavigate();
 
   const [showNotifications, setShowNotifications] = useState(false);
 
-const [requests, setRequests] = useState<Request[]>([]);
-const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [dashboard, setDashboard] = useState<Dashboard>({
+    totalProjects: 0,
+    pendingRequests: 0,
+    acceptedStudents: 0,
+    totalCapacity: 0,
+    status: "เปิดรับ",
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
 
-const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-const filteredRequests = requests.filter(
-  (item) =>
-    item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //item.student_id.includes(searchTerm) ||
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  const filteredRequests = requests.filter((item) => {
+    const matchesSearch =
+      item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-//const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+    const matchesStatus =
+      statusFilter === "ทั้งหมด" || item.status === statusFilter;
 
-const currentRequests = filteredRequests.slice(
-  (currentPage - 1) * itemsPerPage,
-  currentPage * itemsPerPage
-);
+    return matchesSearch && matchesStatus;
+  });
+
+  //const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+
+  const currentRequests = filteredRequests.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   const notifications = [
     {
@@ -65,17 +88,17 @@ const currentRequests = filteredRequests.slice(
     }
   }, [userId, navigate]); //ตรวจสอบค่ารหัสประจำตัวและฟังก์ชัน navigate
 
-useEffect(() => {
-  console.log("Teacher ID =", userId);
+  useEffect(() => {
+    console.log("Teacher ID =", userId);
 
-  axios
-    .get(`http://localhost:5000/teacher/requests/${userId}`)
-    .then((res) => {
-      console.log("API Response =", res.data); // เพิ่มบรรทัดนี้
-      setRequests(res.data);
-    })
-    .catch((err) => console.log(err));
-}, []);
+    axios
+      .get(`http://localhost:5000/teacher/requests/${userId}`)
+      .then((res) => {
+        console.log("API Response =", res.data); // เพิ่มบรรทัดนี้
+        setRequests(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   useEffect(() => {
     //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
@@ -89,6 +112,20 @@ useEffect(() => {
     localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    axios
+      .get(`http://localhost:5000/teacher/dashboard/${userId}`)
+      .then((res) => {
+        console.log("Dashboard =", res.data);
+        setDashboard(res.data);
+      })
+      .catch((err) => {
+        console.log("Dashboard error =", err);
+      });
+  }, [userId]);
 
   /*const name =
     localStorage.getItem("name");*/
@@ -109,7 +146,9 @@ useEffect(() => {
         <nav>
           <ul>
             <li className="active">หน้าหลัก</li>
-            <li onClick={() => navigate("/teacher-projects")}>จัดการหัวข้อโครงงาน</li>
+            <li onClick={() => navigate("/teacher-projects")}>
+              จัดการหัวข้อโครงงาน
+            </li>
 
             <li>คำขอเข้าร่วมโครงงาน</li>
 
@@ -174,48 +213,170 @@ useEffect(() => {
           </div>
         </header>
 
-        {/* Table */}
-<div className="table-container">
+        {/* Dashboard */}
+        <div className="dashboard-content">
+          {/* Search */}
+          <div className="search-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อนิสิต หรือหัวข้อโครงงาน"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
 
-<h3>คำขอเข้าร่วมโครงงาน</h3>
+              <span className="search-icon">⌕</span>
+            </div>
 
-<table>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="status-filter"
+            >
+              <option value="ทั้งหมด">ทั้งหมด</option>
+              <option value="รอพิจารณา">รอพิจารณา</option>
+              <option value="อนุมัติ">อนุมัติ</option>
+              <option value="ปฏิเสธ">ปฏิเสธ</option>
+            </select>
+          </div>
 
-<thead>
+          {/* Dashboard Cards */}
+          <div className="dashboard-cards">
+            <div className="dashboard-card">
+              <div className="card-title">หัวข้อโครงงานของฉัน</div>
 
-<tr>
+              <div className="card-number blue">{dashboard.totalProjects}</div>
+            </div>
 
-    <th>ชื่อนิสิต</th>
-    <th>หัวข้อโครงงาน</th>
-    <th>วันที่ส่งคำขอ</th>
-    <th>สถานะ</th>
-    <th>จัดการ</th>
+            <div className="dashboard-card">
+              <div className="card-title">คำขอรอพิจารณา</div>
 
-</tr>
+              <div className="card-number orange">
+                {dashboard.pendingRequests}
+              </div>
+            </div>
 
-</thead>
+            <div className="dashboard-card">
+              <div className="card-title">รับนิสิตแล้ว</div>
 
-<tbody>
-  {currentRequests.map((item) => (
-    <tr key={item.id}>
-      <td>{item.student_name}</td>
-      <td>{item.title}</td>
-      <td>{item.request_date}</td>
-      <td>{item.status}</td>
-      <td>
-        <button
-          onClick={() => navigate(`/teacher/request/${item.id}`)}
-        >
-          ดูรายละเอียด
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
+              <div className="card-number green">
+                {dashboard.acceptedStudents} / {dashboard.totalCapacity}
+              </div>
+            </div>
 
-</table>
+            <div className="dashboard-card">
+              <div className="card-title">สถานะ</div>
 
+              <div
+                className={`card-status ${
+                  dashboard.status === "เปิดรับ" ? "status-open" : "status-full"
+                }`}
+              >
+                {dashboard.status}
+              </div>
+            </div>
+          </div>
 
+          {/* Request Table */}
+          <div className="table-container">
+            <h3>คำขอเข้าร่วมโครงงาน</h3>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>ประเภท</th>
+                  <th>รหัสประจำตัว</th>
+                  <th>ชื่อนิสิต</th>
+                  <th>ชื่อหัวข้อโครงงาน</th>
+                  <th>วันที่</th>
+                  <th>เวลา</th>
+                  <th>สถานะ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {currentRequests.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      style={{
+                        textAlign: "center",
+                        padding: "30px",
+                      }}
+                    >
+                      ไม่พบคำขอ
+                    </td>
+                  </tr>
+                ) : (
+                  currentRequests.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        {" "}
+                        {item.source === "student"
+                          ? "เสนอหัวข้อโครงงาน"
+                          : "สมัครเข้าร่วม"}
+                      </td>
+
+                      <td>{item.student_username}</td>
+
+                      <td>{item.student_name}</td>
+
+                      <td>{item.title}</td>
+
+                      <td>
+                        {new Date(item.request_date).toLocaleDateString(
+                          "th-TH",
+                        )}
+                      </td>
+
+                      <td>
+                        {new Date(item.request_date).toLocaleTimeString(
+                          "th-TH",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}{" "}
+                        น.
+                      </td>
+
+                      <td>
+                        <span
+                          className={`request-status ${
+                            item.status === "อนุมัติ"
+                              ? "approved"
+                              : item.status === "ปฏิเสธ"
+                                ? "rejected"
+                                : "pending"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+
+                      <td>
+                        <button
+                          className="detail-btn"
+                          onClick={() =>
+                            navigate(`/teacher-request-details/${item.id}`)
+                          }
+                        >
+                          รายละเอียด
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+
+            <div className="view-all">
+              <button onClick={() => navigate("/teacher/requests")}>
+                ดูทั้งหมด →
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     </div>

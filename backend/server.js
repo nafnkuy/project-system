@@ -403,12 +403,15 @@ app.get("/teacher/requests/:advisorId", (req, res) => {
   const advisorId = req.params.advisorId;
 
   const sql = `
-    SELECT
-      pr.id,
-      p.title,
-      u.name AS student_name,
-      pr.request_date,
-      pr.status
+SELECT
+  pr.id,
+  p.title,
+  p.source,
+  u.id AS student_id,
+  u.username AS student_username,
+  u.name AS student_name,
+  pr.request_date,
+  pr.status
 
     FROM project_requests pr
 
@@ -1083,6 +1086,547 @@ app.delete(
           success: true,
           message: "ลบหัวข้อโครงงานเรียบร้อยแล้ว",
         });
+      },
+    );
+  },
+);
+
+// ==========================================
+// Dashboard ของอาจารย์
+// ==========================================
+app.get("/teacher/dashboard/:advisorId", (req, res) => {
+  const advisorId = req.params.advisorId;
+
+  // 1. จำนวนหัวข้อโครงงานของอาจารย์
+  const projectSql = `
+    SELECT COUNT(*) AS total_projects
+    FROM projects
+    WHERE advisor_id = ?
+      AND source = 'teacher'
+  `;
+
+  // 2. จำนวนคำขอที่รอพิจารณา
+  const pendingSql = `
+    SELECT COUNT(*) AS pending_requests
+    FROM project_requests pr
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+    WHERE p.advisor_id = ?
+      AND p.source = 'teacher'
+      AND pr.status = 'รอพิจารณา'
+  `;
+
+  // 3. จำนวนสมาชิกที่อาจารย์อนุมัติแล้ว
+  const membersSql = `
+    SELECT COUNT(DISTINCT pm.user_id) AS accepted_students
+    FROM project_members pm
+    INNER JOIN projects p
+      ON pm.project_id = p.id
+    WHERE p.advisor_id = ?
+      AND p.source = 'teacher'
+  `;
+
+  db.query(projectSql, [advisorId], (err, projectResult) => {
+    if (err) {
+      console.log("Dashboard project error:", err);
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    db.query(pendingSql, [advisorId], (err, pendingResult) => {
+      if (err) {
+        console.log("Dashboard pending error:", err);
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      db.query(membersSql, [advisorId], (err, membersResult) => {
+        if (err) {
+          console.log("Dashboard members error:", err);
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        const totalProjects =
+          Number(projectResult[0]?.total_projects) || 0;
+
+        const pendingRequests =
+          Number(pendingResult[0]?.pending_requests) || 0;
+
+        const acceptedStudents =
+          Number(membersResult[0]?.accepted_students) || 0;
+
+        // อาจารย์รับนิสิตได้สูงสุด 14 คน
+        const totalCapacity = 14;
+
+        res.json({
+          totalProjects,
+          pendingRequests,
+          acceptedStudents,
+          totalCapacity,
+          status:
+            acceptedStudents < totalCapacity
+              ? "เปิดรับ"
+              : "เต็ม",
+        });
+      });
+    });
+  });
+});
+
+// ==========================================
+// รายละเอียดคำขอเข้าร่วมโครงงาน
+// ==========================================
+app.get(
+  "/teacher/request/:requestId/:advisorId",
+  (req, res) => {
+    const { requestId, advisorId } = req.params;
+
+    const sql = `
+      SELECT
+        pr.id,
+        pr.project_id,
+        pr.student_id,
+        pr.contact_type,
+        pr.contact_value,
+        pr.introduction,
+        pr.request_date,
+        pr.status,
+
+        -- ข้อมูลนิสิต
+        student.username AS student_username,
+        student.name AS student_name,
+        student.major AS student_major,
+
+        -- ข้อมูลโครงงาน
+        p.title,
+        p.advisor_id,
+        p.major,
+        p.project_type,
+        p.max_members,
+        p.current_members,
+        p.academic_year,
+        p.description,
+        p.objectives,
+        p.skills,
+        p.requirements,
+
+        -- อาจารย์
+        advisor.name AS advisor_name
+
+      FROM project_requests pr
+
+      INNER JOIN projects p
+        ON pr.project_id = p.id
+
+      INNER JOIN users student
+        ON pr.student_id = student.id
+
+      LEFT JOIN users advisor
+        ON p.advisor_id = advisor.id
+
+      WHERE pr.id = ?
+        AND p.advisor_id = ?
+        AND p.source IN ('teacher', 'student')
+    `;
+
+    db.query(
+      sql,
+      [requestId, advisorId],
+      (err, results) => {
+        if (err) {
+          console.log(
+            "Get teacher request detail error:",
+            err,
+          );
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            message:
+              "ไม่พบคำขอ หรือคำขอนี้ไม่ใช่ของคุณ",
+          });
+        }
+
+        const request = results[0];
+
+        // ดึงสมาชิกของโครงงาน
+        const memberSql = `
+          SELECT
+            u.id,
+            u.username,
+            u.name
+          FROM project_members pm
+
+          INNER JOIN users u
+            ON pm.user_id = u.id
+
+          WHERE pm.project_id = ?
+        `;
+
+        db.query(
+          memberSql,
+          [request.project_id],
+          (memberErr, members) => {
+            if (memberErr) {
+              console.log(
+                "Get request members error:",
+                memberErr,
+              );
+
+              return res.status(500).json({
+                message: "Database Error",
+              });
+            }
+
+            request.members = members;
+
+            res.json(request);
+          },
+        );
+      },
+    );
+  },
+);
+
+// ==========================================
+// อนุมัติคำขอเข้าร่วมโครงงาน
+// ==========================================
+app.post(
+  "/teacher/request/:requestId/approve",
+  (req, res) => {
+    const { requestId } = req.params;
+    const { advisor_id } = req.body;
+
+    // 1. ดึงข้อมูลคำขอ
+    const getRequestSql = `
+      SELECT
+        pr.*,
+        p.title,
+        p.advisor_id,
+        p.max_members,
+        p.current_members,
+        student.name AS student_name
+      FROM project_requests pr
+
+      INNER JOIN projects p
+        ON pr.project_id = p.id
+
+      INNER JOIN users student
+        ON pr.student_id = student.id
+
+      WHERE pr.id = ?
+        AND p.advisor_id = ?
+        AND p.source IN ('teacher', 'student')
+    `;
+
+    db.query(
+      getRequestSql,
+      [requestId, advisor_id],
+      (err, results) => {
+        if (err) {
+          console.log(
+            "Get approve request error:",
+            err,
+          );
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            message:
+              "ไม่พบคำขอ หรือคำขอนี้ไม่ใช่ของคุณ",
+          });
+        }
+
+        const request = results[0];
+
+        // 2. ต้องเป็นคำขอที่รอพิจารณาเท่านั้น
+        if (request.status !== "รอพิจารณา") {
+          return res.status(400).json({
+            message: "คำขอนี้ได้รับการพิจารณาแล้ว",
+          });
+        }
+
+        // 3. ตรวจสอบจำนวนสมาชิก
+        if (
+          Number(request.current_members) >=
+          Number(request.max_members)
+        ) {
+          return res.status(400).json({
+            message:
+              "โครงงานนี้มีสมาชิกเต็มแล้ว",
+          });
+        }
+
+        // 4. ตรวจสอบว่านิสิตอยู่ใน project_members แล้วหรือยัง
+        const checkMemberSql = `
+          SELECT id
+          FROM project_members
+          WHERE project_id = ?
+            AND user_id = ?
+        `;
+
+        db.query(
+          checkMemberSql,
+          [
+            request.project_id,
+            request.student_id,
+          ],
+          (err, memberRows) => {
+            if (err) {
+              return res.status(500).json({
+                message: "Database Error",
+              });
+            }
+
+            if (memberRows.length > 0) {
+              return res.status(400).json({
+                message:
+                  "นิสิตคนนี้เป็นสมาชิกโครงงานอยู่แล้ว",
+              });
+            }
+
+            // 5. เพิ่มสมาชิก
+            const insertMemberSql = `
+              INSERT INTO project_members
+              (
+                project_id,
+                user_id
+              )
+              VALUES (?, ?)
+            `;
+
+            db.query(
+              insertMemberSql,
+              [
+                request.project_id,
+                request.student_id,
+              ],
+              (err) => {
+                if (err) {
+                  console.log(
+                    "Insert project member error:",
+                    err,
+                  );
+
+                  return res.status(500).json({
+                    message:
+                      "เพิ่มสมาชิกโครงงานไม่สำเร็จ",
+                  });
+                }
+
+                // 6. เปลี่ยนสถานะ request
+                const updateRequestSql = `
+                  UPDATE project_requests
+                  SET status = 'อนุมัติ'
+                  WHERE id = ?
+                `;
+
+                db.query(
+                  updateRequestSql,
+                  [requestId],
+                  (err) => {
+                    if (err) {
+                      console.log(
+                        "Update request status error:",
+                        err,
+                      );
+
+                      return res.status(500).json({
+                        message:
+                          "อัปเดตสถานะคำขอไม่สำเร็จ",
+                      });
+                    }
+
+                    // 7. เพิ่มจำนวนสมาชิก
+                    const updateProjectSql = `
+                      UPDATE projects
+                      SET current_members = current_members + 1
+                      WHERE id = ?
+                    `;
+
+                    db.query(
+                      updateProjectSql,
+                      [request.project_id],
+                      (err) => {
+                        if (err) {
+                          console.log(
+                            "Update project member count error:",
+                            err,
+                          );
+
+                          return res.status(500).json({
+                            message:
+                              "อัปเดตจำนวนสมาชิกไม่สำเร็จ",
+                          });
+                        }
+
+                        // 8. Notification
+                        const notificationSql = `
+                          INSERT INTO notifications
+                          (
+                            user_id,
+                            message
+                          )
+                          VALUES (?, ?)
+                        `;
+
+                        db.query(
+                          notificationSql,
+                          [
+                            request.student_id,
+                            `อาจารย์อนุมัติคำขอเข้าร่วมโครงงาน "${request.title}" ของคุณแล้ว`,
+                          ],
+                          (notificationErr) => {
+                            if (notificationErr) {
+                              console.log(
+                                "Notification error:",
+                                notificationErr,
+                              );
+                            }
+
+                            res.json({
+                              success: true,
+                              message:
+                                "อนุมัติคำขอเรียบร้อยแล้ว",
+                            });
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  },
+);
+
+// ==========================================
+// ปฏิเสธคำขอเข้าร่วมโครงงาน
+// ==========================================
+app.post(
+  "/teacher/request/:requestId/reject",
+  (req, res) => {
+    const { requestId } = req.params;
+    const { advisor_id } = req.body;
+
+    const getRequestSql = `
+      SELECT
+        pr.id,
+        pr.student_id,
+        pr.status,
+        p.title
+      FROM project_requests pr
+
+      INNER JOIN projects p
+        ON pr.project_id = p.id
+
+      WHERE pr.id = ?
+        AND p.advisor_id = ?
+        AND p.source IN ('teacher', 'student')
+    `;
+
+    db.query(
+      getRequestSql,
+      [requestId, advisor_id],
+      (err, results) => {
+        if (err) {
+          console.log(
+            "Get reject request error:",
+            err,
+          );
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            message:
+              "ไม่พบคำขอ หรือคำขอนี้ไม่ใช่ของคุณ",
+          });
+        }
+
+        const request = results[0];
+
+        if (request.status !== "รอพิจารณา") {
+          return res.status(400).json({
+            message:
+              "คำขอนี้ได้รับการพิจารณาแล้ว",
+          });
+        }
+
+        const updateSql = `
+          UPDATE project_requests
+          SET status = 'ปฏิเสธ'
+          WHERE id = ?
+        `;
+
+        db.query(
+          updateSql,
+          [requestId],
+          (err) => {
+            if (err) {
+              console.log(
+                "Reject request error:",
+                err,
+              );
+
+              return res.status(500).json({
+                message:
+                  "อัปเดตสถานะคำขอไม่สำเร็จ",
+              });
+            }
+
+            // แจ้งเตือนนิสิต
+            const notificationSql = `
+              INSERT INTO notifications
+              (
+                user_id,
+                message
+              )
+              VALUES (?, ?)
+            `;
+
+            db.query(
+              notificationSql,
+              [
+                request.student_id,
+                `อาจารย์ปฏิเสธคำขอเข้าร่วมโครงงาน "${request.title}" ของคุณ`,
+              ],
+              (notificationErr) => {
+                if (notificationErr) {
+                  console.log(
+                    "Reject notification error:",
+                    notificationErr,
+                  );
+                }
+
+                res.json({
+                  success: true,
+                  message:
+                    "ปฏิเสธคำขอเรียบร้อยแล้ว",
+                });
+              },
+            );
+          },
+        );
       },
     );
   },
