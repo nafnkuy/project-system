@@ -16,27 +16,42 @@
   background: #f5f5f5;
 }
 
-/* Sidebar */
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
   width: 250px;
-  background: #fff;
+  height: 100vh;
+
+  background: #ffffff;
   border-right: 1px solid #ddd;
 
   display: grid;
   grid-template-rows: auto 1fr auto;
-  height: 100vh;
+
+  z-index: 100;
 }
 
-nav {
-  margin-top: 8px;
-}
+
+/* =========================
+   LOGO
+========================= */
 
 .logo {
   display: flex;
-  align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
-  gap: 10px; /* ระยะห่างระหว่างรูปกับข้อความ */
+  align-items: center;
+
+  gap: 10px;
+
   padding: 24px 20px;
+
+  margin-bottom: 0;
 }
 
 .logo img {
@@ -46,45 +61,85 @@ nav {
 }
 
 .logo h2 {
+  margin: 0;
+
   font-size: 23px;
   font-weight: 700;
-  margin-bottom: 2px;   /* ลดระยะห่าง */
 }
 
 .logo p {
-  margin-top: 0;        /* ไม่ให้มีระยะด้านบน */
+  margin: 0;
+
   font-size: 9.5px;
-  line-height: 1.2;     /* ลดความสูงของบรรทัด */
+  line-height: 1.2;
+
   color: #666;
 }
 
-.sidebar ul {
+
+/* =========================
+   MENU
+========================= */
+
+nav {
+  margin: 0;
+  width: 100%;
+}
+
+nav ul {
   list-style: none;
+
   padding: 0;
   margin: 0;
 }
 
-.sidebar li {
+nav li {
+  width: 100%;
+
   padding: 18px 0;
+  margin: 0;
+
+  border-radius: 0;
+
+  color: #222;
+
+  font-family: "Prompt", sans-serif;
   font-size: 14px !important;
   font-weight: 400;
-  cursor: pointer;
+  line-height: 1.5;
+
   text-align: center;
+
+  cursor: pointer;
 }
 
-.sidebar li:hover {
+nav li:hover {
   background: #f0f0f0;
 }
 
-.active {
+
+/* =========================
+   ACTIVE MENU
+========================= */
+
+nav li.active {
   background: #2f5d7c;
-  color: white;
-  font-weight: 500;
+
+  color: #ffffff;
+
+  font-weight: 400;
 }
+
+
+/* =========================
+   LOGOUT
+========================= */
 
 .logout-btn {
   width: 190px;
+
   margin: 0 auto 20px;
+
   padding: 12px;
 
   border: none;
@@ -94,6 +149,10 @@ nav {
   color: white;
 
   cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #2f6db5;
 }
 
 /* =========================
@@ -106,71 +165,90 @@ nav {
   background: #f5f5f5;
 }
 
-
 /* =========================
-   Header
+   HEADER
 ========================= */
 
 .header {
-  background: #f0e3a1;
+  width: 100%;
   height: 70px;
-  padding: 0 18px 0 25px;
+
+  padding: 0 20px;
+
+  background: #f0e3a1;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+
+  border: none;
 }
 
 .header h2 {
+  margin: 0;
+
   font-size: 20px !important;
   font-weight: 400;
+
+  color: #111;
 }
 
 
 /* =========================
-   Header Right
+   HEADER RIGHT
 ========================= */
 
 .header-right {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 }
 
-.notification-box {
-  width: 50px;
-  height: 44px;
 
-  background: white;
+/* =========================
+   NOTIFICATION
+========================= */
+
+.notification-btn {
+  width: 50px;
+  height: 50px;
+
   border: 1px solid #ddd;
-  border-radius: 5px;
+
+  border-radius: 4px;
+
+  background: #ffffff;
+  color: #999;
+
+  font-size: 20px;
 
   display: flex;
-  justify-content: center;
+
   align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
 }
+
+
+/* =========================
+   NOTIFICATION WRAPPER
+========================= */
 
 .notification-wrapper {
   position: relative;
 }
 
-.notification-btn {
-  position: relative;
 
-  border: none;
-  background: transparent;
-
-  cursor: pointer;
-
-  font-size: 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* =========================
+   NOTIFICATION COUNT
+========================= */
 
 .notification-count {
   position: absolute;
+
   top: -7px;
   right: -8px;
 
@@ -190,11 +268,14 @@ nav {
 }
 
 
-/* Notification dropdown */
+/* =========================
+   NOTIFICATION DROPDOWN
+========================= */
 
 .notification-dropdown {
   position: absolute;
-  top: 38px;
+
+  top: 58px;
   right: 0;
 
   width: 280px;
@@ -234,22 +315,33 @@ nav {
 }
 
 
-/* User */
+/* =========================
+   USER
+========================= */
 
 .user-info {
-  height: 44px;
+  height: 50px;
+
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
+
   gap: 10px;
 
-  background: white;
+  background: #ffffff;
 
   border: 1px solid #ddd;
-  border-radius: 5px;
 
-  padding: 0 12px;
+  border-radius: 4px;
+
+  font-size: 14px;
 }
+
+
+/* =========================
+   PROFILE IMAGE
+========================= */
 
 .profile-image {
   width: 30px;
@@ -260,7 +352,6 @@ nav {
   object-fit: cover;
 }
 
-
 /* =========================
    Dashboard
 ========================= */
@@ -269,81 +360,122 @@ nav {
   padding: 45px 38px;
 }
 
-
 /* =========================
-   Search
+   SEARCH
 ========================= */
 
 .search-section {
   display: flex;
   justify-content: center;
   align-items: center;
-
   gap: 12px;
 
+  margin-top: -30px;
   margin-bottom: 42px;
 }
 
 .search-box {
-  width: 490px;
-  height: 40px;
-
-  border: 1px solid #aaa;
-  border-radius: 22px;
-
-  background: white;
+  width: 360px;
+  height: 36px;
 
   display: flex;
   align-items: center;
 
-  position: relative;
+  gap: 4px;
+  padding: 0 13px;
+
+  background: #ffffff;
+  border: 1px solid #aaa;
+  border-radius: 20px;
+
+  box-sizing: border-box;
 }
 
 .search-box input {
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  min-width: 0;
 
   border: none;
   outline: none;
 
-  border-radius: 22px;
+  background: transparent;
 
-  padding: 0 48px 0 20px;
+  padding: 0;
+  margin: 0;
 
-  font-size: 14px;
+  font-size: 12px;
+}
+
+.search-box input::placeholder {
+  color: #aaa;
 }
 
 .search-icon {
+  font-size: 15px;
+  color: #999;
+
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* =========================
+   SELECT
+========================= */
+
+.select-wrapper {
+  position: relative;
+  width: 140px;
+  height: 36px;
+}
+
+.status-filter {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 40px 0 12px;
+  text-indent: 4px;
+
+  background: #ffffff;
+
+  border: 1px solid #aaa !important;
+  border-radius: 20px !important;
+
+  color: #999;
+  font-size: 12px;
+  font-family: inherit;
+
+  outline: none;
+  cursor: pointer;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+
+  box-sizing: border-box;
+}
+
+.status-filter:hover,
+.status-filter:focus,
+.status-filter:active {
+  border: 1px solid #aaa !important;
+  border-radius: 20px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.select-arrow {
   position: absolute;
+
   right: 18px;
+  top: 50%;
 
-  font-size: 25px;
+  transform: translateY(-50%);
 
+  font-size: 8px;
   color: #999;
 
   pointer-events: none;
 }
-
-
-/* Filter */
-
-.status-filter {
-  width: 42px;
-  height: 42px;
-
-  border-radius: 50%;
-
-  border: 1px solid #aaa;
-
-  background: white;
-
-  cursor: pointer;
-
-  padding: 0 8px;
-
-  outline: none;
-}
-
 
 /* =========================
    Dashboard Cards
@@ -356,31 +488,39 @@ nav {
 
   gap: 25px;
 
+  margin-top: -30px;
   margin-bottom: 28px;
 }
 
 .dashboard-card {
-  background: white;
+  height: 120px;
 
-  border: 1px solid #bbb;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 
-  border-radius: 9px;
+  padding: 15px 25px;
 
-  min-height: 110px;
-
-  padding: 20px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.card-title {
-  font-size: 15px;
-
-  margin-bottom: 10px;
+.dashboard-card .card-title {
+  color: #222;
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 
-.card-number {
-  font-size: 36px;
+.dashboard-card .card-number {
+  font-size: 35px;
+  font-weight: 600;
+}
 
-  font-weight: 700;
+.dashboard-card .card-status {
+  font-size: 35px;
+  font-weight: 600;
 }
 
 .card-number.blue {
@@ -442,41 +582,87 @@ nav {
 
 .table-container table {
   width: 100%;
-
   border-collapse: collapse;
-
   border: none;
 }
 
+/* =========================
+   TABLE
+========================= */
 
-/* สำคัญ: ล้าง border เก่าทิ้ง */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+}
 
 .table-container th,
 .table-container td {
   border: none;
-
   border-bottom: 1px solid #ddd;
 
-  padding: 15px 8px;
+  padding: 12px 18px;
 
   font-size: 13px;
+  font-family: "Prompt", sans-serif;
 
   text-align: center;
-
   white-space: nowrap;
 }
 
 .table-container th {
   font-weight: 500;
-
-  background: white;
+  background: #ffffff;
 
   padding-top: 10px;
-
   padding-bottom: 12px;
 }
 
 
+/* =========================
+   COLUMN WIDTH
+========================= */
+
+.table-container th:nth-child(1),
+.table-container td:nth-child(1) {
+  min-width: 120px;
+}
+
+.table-container th:nth-child(2),
+.table-container td:nth-child(2) {
+  min-width: 130px;
+}
+
+.table-container th:nth-child(3),
+.table-container td:nth-child(3) {
+  text-align: left;
+  padding-left: 1px;
+}
+
+.table-container th:nth-child(4),
+.table-container td:nth-child(4) {
+  min-width: 220px;
+}
+
+.table-container th:nth-child(5),
+.table-container td:nth-child(5) {
+  min-width: 100px;
+}
+
+.table-container th:nth-child(6),
+.table-container td:nth-child(6) {
+  min-width: 90px;
+}
+
+.table-container th:nth-child(7),
+.table-container td:nth-child(7) {
+  min-width: 110px;
+}
+
+.table-container th:nth-child(8),
+.table-container td:nth-child(8) {
+  min-width: 110px;
+}
 /* =========================
    Request Status
 ========================= */
@@ -623,7 +809,7 @@ nav {
 @media (max-width: 700px) {
 
   .dashboard-content {
-    padding: 25px 15px;
+    padding: 25px 38px;
   }
 
   .dashboard-cards {

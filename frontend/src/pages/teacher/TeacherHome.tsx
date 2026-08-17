@@ -2,7 +2,7 @@ import "./TeacherHome.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react"; //ใช้ตรวจสอบการเข้าสู่ระบบ
 import axios from "axios";
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -225,19 +225,23 @@ function TeacherHome() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
 
-              <span className="search-icon">⌕</span>
+              <FaSearch className="search-icon" />
             </div>
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="status-filter"
-            >
-              <option value="ทั้งหมด">ทั้งหมด</option>
-              <option value="รอพิจารณา">รอพิจารณา</option>
-              <option value="อนุมัติ">อนุมัติ</option>
-              <option value="ปฏิเสธ">ปฏิเสธ</option>
-            </select>
+            <div className="select-wrapper">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="status-filter"
+              >
+                <option value="ทั้งหมด">ทั้งหมด</option>
+                <option value="รอพิจารณา">รอพิจารณา</option>
+                <option value="อนุมัติ">อนุมัติ</option>
+                <option value="ปฏิเสธ">ปฏิเสธ</option>
+              </select>
+
+              <span className="select-arrow">▼</span>
+            </div>
           </div>
 
           {/* Dashboard Cards */}
