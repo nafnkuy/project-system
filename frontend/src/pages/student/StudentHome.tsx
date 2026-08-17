@@ -55,9 +55,9 @@ interface Notification {
 function StudentHome() {
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username"); //ดึงค่ารหัสประจำตัวจาก localStorage
-  const profileImage = localStorage.getItem("profileImage");
+  const userId = sessionStorage.getItem("userId");
+  const username = sessionStorage.getItem("username"); //ดึงค่ารหัสประจำตัวจาก sessionStorage
+  const profileImage = sessionStorage.getItem("profileImage");
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedInvitation, setSelectedInvitation] =
@@ -198,14 +198,14 @@ function StudentHome() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
-    localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
+    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
+    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
   /*const name =
-    localStorage.getItem("name");*/
+    sessionStorage.getItem("name");*/
 
   return (
     <div className="layout">

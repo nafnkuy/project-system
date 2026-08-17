@@ -28,9 +28,9 @@ interface Dashboard {
 function TeacherHome() {
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId"); //ดึงค่ารหัสประจำตัวจาก localStorage
-  const username = localStorage.getItem("username");
-  const profileImage = localStorage.getItem("profileImage");
+  const userId = sessionStorage.getItem("userId"); //ดึงค่ารหัสประจำตัวจาก sessionStorage
+  const username = sessionStorage.getItem("username");
+  const profileImage = sessionStorage.getItem("profileImage");
 
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -106,10 +106,10 @@ function TeacherHome() {
   }, [searchTerm]);
 
   const handleLogout = () => {
-    localStorage.removeItem("userId"); //ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
-    localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
+    sessionStorage.removeItem("userId"); //ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
+    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
@@ -128,7 +128,7 @@ function TeacherHome() {
   }, [userId]);
 
   /*const name =
-    localStorage.getItem("name");*/
+    sessionStorage.getItem("name");*/
 
   return (
     <div className="layout">

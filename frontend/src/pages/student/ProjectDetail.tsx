@@ -36,9 +36,9 @@ function ProjectDetail() {
   // ใช้ useNavigate เพื่อเปลี่ยนหน้า
   const navigate = useNavigate();
 
-  // ดึงค่ารหัสประจำตัวและรูปโปรไฟล์จาก localStorage
-  const username = localStorage.getItem("username"); // ดึงค่ารหัสประจำตัวจาก localStorage
-  const profileImage = localStorage.getItem("profileImage");
+  // ดึงค่ารหัสประจำตัวและรูปโปรไฟล์จาก sessionStorage
+  const username = sessionStorage.getItem("username"); // ดึงค่ารหัสประจำตัวจาก sessionStorage
+  const profileImage = sessionStorage.getItem("profileImage");
 
   // <Project | null> หมายถึง project อาจเป็น Project หรือ null ได้ แล้วใช้ useState เพื่อเก็บสถานะของโครงงานที่ดึงมาจาก API
   const [project, setProject] = useState<Project | null>(null); // สถานะของโครงงานที่ดึงมาจาก API
@@ -67,9 +67,9 @@ function ProjectDetail() {
   }, [id]);
 
   const handleLogout = () => {
-    localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
-    localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
+    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
+    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 

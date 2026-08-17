@@ -39,9 +39,9 @@ function TeacherProjectDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
-  const profileImage = localStorage.getItem("profileImage");
+  const userId = sessionStorage.getItem("userId");
+  const username = sessionStorage.getItem("username");
+  const profileImage = sessionStorage.getItem("profileImage");
 
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,13 +88,14 @@ function TeacherProjectDetail() {
   // Logout
   // =========================
   const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    localStorage.removeItem("name");
-    localStorage.removeItem("profileImage");
+    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("name");
+    sessionStorage.removeItem("profileImage");
 
     navigate("/");
-  };const skillStyles: Record<
+  };
+  const skillStyles: Record<
     string,
     { backgroundColor: string; borderColor: string }
   > = {

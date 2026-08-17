@@ -54,21 +54,21 @@ function Login() {
       const data = res.data;
 
       if (data.user.role === "student") {
-        localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("username", data.user.username);
-        localStorage.setItem("name", res.data.user.name);
-        localStorage.setItem("profileImage", data.user.profileImage);
+        sessionStorage.setItem("userId", data.user.id);
+        sessionStorage.setItem("username", data.user.username);
+        sessionStorage.setItem("name", res.data.user.name);
+        sessionStorage.setItem("profileImage", data.user.profileImage);
 
         navigate("/StudentHome");
         return;
       }
 
       if (data.user.role === "teacher") {
-        localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("username", data.user.username);
-        localStorage.setItem("name", data.user.name);
-        localStorage.setItem("profileImage", data.user.profileImage);
-        localStorage.setItem("major", res.data.user.major);
+        sessionStorage.setItem("userId", data.user.id);
+        sessionStorage.setItem("username", data.user.username);
+        sessionStorage.setItem("name", data.user.name);
+        sessionStorage.setItem("profileImage", data.user.profileImage);
+        sessionStorage.setItem("major", res.data.user.major);
 
         navigate("/teacher-home");
         return;

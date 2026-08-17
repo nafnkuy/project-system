@@ -9,11 +9,11 @@ import logo from "../../assets/Logo.svg";
 function CreateTeacherProject() {
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
-  const name = localStorage.getItem("name");
-  const profileImage = localStorage.getItem("profileImage");
-  const major = localStorage.getItem("major");
+  const userId = sessionStorage.getItem("userId");
+  const username = sessionStorage.getItem("username");
+  const name = sessionStorage.getItem("name");
+  const profileImage = sessionStorage.getItem("profileImage");
+  const major = sessionStorage.getItem("major");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,11 +36,11 @@ function CreateTeacherProject() {
 
   // Logout
   const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    localStorage.removeItem("name");
-    localStorage.removeItem("profileImage");
-    localStorage.removeItem("major");
+    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("name");
+    sessionStorage.removeItem("profileImage");
+    sessionStorage.removeItem("major");
 
     navigate("/");
   };

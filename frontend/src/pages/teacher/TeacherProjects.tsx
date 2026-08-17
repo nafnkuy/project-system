@@ -23,9 +23,9 @@ interface Project {
 function TeacherProjects() {
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
-  const profileImage = localStorage.getItem("profileImage");
+  const userId = sessionStorage.getItem("userId");
+  const username = sessionStorage.getItem("username");
+  const profileImage = sessionStorage.getItem("profileImage");
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,10 +71,10 @@ function TeacherProjects() {
      Logout
   ========================= */
   const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    localStorage.removeItem("name");
-    localStorage.removeItem("profileImage");
+    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("name");
+    sessionStorage.removeItem("profileImage");
 
     navigate("/");
   };

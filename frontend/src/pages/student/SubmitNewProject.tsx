@@ -11,19 +11,18 @@ function SubmitNewProject() {
   // สร้างตัวช่วยเปลี่ยนหน้า (เช่น navigate('/StudentHome'))
   const navigate = useNavigate();
 
-  // อ่านข้อมูลผู้ใช้จาก localStorage (ค่าที่เก็บตอนล็อกอิน)
+  // อ่านข้อมูลผู้ใช้จาก sessionStorage (ค่าที่เก็บตอนล็อกอิน)
   // ค่าที่ได้เป็น string หรือ null ถ้าไม่มีข้อมูล
-  const username = localStorage.getItem("username"); // รหัสประจำตัวผู้ใช้ (เช่น 66160000)
-  const userId = localStorage.getItem("userId"); // id ที่อาจใช้เรียก API
-  const profileImage = localStorage.getItem("profileImage"); // path รูปโปรไฟล์ที่เก็บไว้
-  
+  const username = sessionStorage.getItem("username"); // รหัสประจำตัวผู้ใช้ (เช่น 66160000)
+  const userId = sessionStorage.getItem("userId"); // id ที่อาจใช้เรียก API
+  const profileImage = sessionStorage.getItem("profileImage"); // path รูปโปรไฟล์ที่เก็บไว้
 
   // สถานะภายในคอมโพเนนต์ ใช้ useState เพื่อให้ UI รีเรนเดอร์เมื่อค่ามีการเปลี่ยน
   const [showNotifications, setShowNotifications] = useState(false); // ควบคุมการโชว์ dropdown การแจ้งเตือน
 
   // ข้อมูลฟอร์มและการค้นหาอาจารย์
   const [projectTitle, setProjectTitle] = useState(""); // ชื่อหัวข้อโครงงานที่ผู้ใช้พิมพ์
-  const [projectType, setProjectType] = useState("เดี่ยว"); // ประเภทโครงงาน: 'เดี่ยว' หรือ 'คู่'
+  const [projectType, setProjectType] = useState("โครงงานเดี่ยว"); // ประเภทโครงงาน: 'เดี่ยว' หรือ 'คู่'
   const [projectId, setProjectId] = useState<number | null>(null);
   const [memberId, setMemberId] = useState(""); // username เช่น 66160001
   const [memberUserId, setMemberUserId] = useState<number | null>(null); // users.id
@@ -101,17 +100,17 @@ function SubmitNewProject() {
   }, [teacherKeyword, advisorName]);
 
   // ฟังก์ชันสำหรับล็อกเอาต์ผู้ใช้
-  // - ลบข้อมูลที่เก็บไว้ใน localStorage
+  // - ลบข้อมูลที่เก็บไว้ใน sessionStorage
   // - เปลี่ยนหน้าไปที่หน้าล็อกอิน
   const handleLogout = () => {
-    localStorage.removeItem("username"); // ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("name"); // ลบค่าชื่อผู้ใช้จาก localStorage
-    localStorage.removeItem("profileImage"); // ลบค่าที่เก็บรูปโปรไฟล์
+    sessionStorage.removeItem("username"); // ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("name"); // ลบค่าชื่อผู้ใช้จาก sessionStorage
+    sessionStorage.removeItem("profileImage"); // ลบค่าที่เก็บรูปโปรไฟล์
     navigate("/"); // เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
-  // อ่านชื่อผู้ใช้จาก localStorage เพื่อแสดงในฟอร์ม (ถ้ามี)
-  const name = localStorage.getItem("name");
+  // อ่านชื่อผู้ใช้จาก sessionStorage เพื่อแสดงในฟอร์ม (ถ้ามี)
+  const name = sessionStorage.getItem("name");
   // สถานะสำหรับรายละเอียดโครงงานและวัตถุประสงค์
   const [description, setDescription] = useState(""); // ข้อความรายละเอียด
   const [objective, setObjective] = useState(""); // ข้อความวัตถุประสงค์
@@ -183,7 +182,7 @@ function SubmitNewProject() {
           advisor_id: advisorId,
           major: major,
           project_type: projectType,
-          max_members: projectType === "คู่" ? 2 : 1,
+          max_members: projectType === "โครงงานคู่" ? 2 : 1,
           description: description,
           objectives: objective,
           skills: skills,
@@ -229,7 +228,6 @@ function SubmitNewProject() {
     }
   };
 
-
   // ฟังก์ชันเมื่อกดปุ่มส่งข้อเสนอโครงงาน
   // - ส่งข้อมูลฟอร์มไปยัง backend (สร้าง project)
   const handleSubmit = async () => {
@@ -257,7 +255,7 @@ function SubmitNewProject() {
       // =========================
       // กรณีโครงงานคู่
       // =========================
-      if (projectType === "คู่") {
+      if (projectType === "โครงงานคู่") {
         alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
         return;
       }
@@ -272,7 +270,7 @@ function SubmitNewProject() {
         advisor: advisorName,
         advisor_id: advisorId,
         major: major,
-        project_type: "เดี่ยว",
+        project_type: "โครงงานเดี่ยว",
         max_members: 1,
         description: description,
         objectives: objective,
@@ -414,8 +412,8 @@ function SubmitNewProject() {
             <label>
               <input
                 type="radio"
-                checked={projectType === "เดี่ยว"}
-                onChange={() => setProjectType("เดี่ยว")}
+                checked={projectType === "โครงงานเดี่ยว"}
+                onChange={() => setProjectType("โครงงานเดี่ยว")}
               />
               โครงงานเดี่ยว
             </label>
@@ -423,8 +421,8 @@ function SubmitNewProject() {
             <label>
               <input
                 type="radio"
-                checked={projectType === "คู่"}
-                onChange={() => setProjectType("คู่")}
+                checked={projectType === "โครงงานคู่"}
+                onChange={() => setProjectType("โครงงานคู่")}
               />
               โครงงานคู่
             </label>
@@ -449,7 +447,7 @@ function SubmitNewProject() {
           </div>
 
           {/* เงื่อนไข: ถ้าเลือกเป็นโครงงานคู่ จะแสดงฟอร์มสมาชิกคนที่ 2 */}
-          {projectType === "คู่" && (
+          {projectType === "โครงงานคู่" && (
             <div className="member-card">
               <h5>สมาชิกคนที่ 2</h5>
 

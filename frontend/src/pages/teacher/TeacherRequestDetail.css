@@ -1,243 +1,631 @@
-.request-detail-layout {
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* =========================
+   RESET
+========================= */
+
+.teacher-request-detail-page,
+.teacher-request-detail-page * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
+.teacher-request-detail-page {
   display: flex;
+  width: 100%;
   min-height: 100vh;
   background: #f5f5f5;
 }
 
-.request-sidebar {
-  width: 180px;
-  background: white;
-  min-height: 100vh;
+/* =========================
+   SIDEBAR
+========================= */
+
+.teacher-request-detail-page .sidebar {
   position: fixed;
-  left: 0;
+
   top: 0;
-  border-right: 1px solid #eee;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #ddd;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
 }
 
-.request-logo {
-  padding: 18px 10px;
-  text-align: center;
+/* =========================
+   LOGO
+========================= */
+
+.teacher-request-detail-page .sidebar-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
 }
 
-.request-logo h2 {
+.teacher-request-detail-page .sidebar-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+}
+
+.teacher-request-detail-page .sidebar-logo h2 {
   margin: 0;
-  font-size: 18px;
+
+  font-size: 23px;
+  font-weight: 700;
 }
 
-.request-logo p {
-  font-size: 9px;
-  margin-top: 4px;
+.teacher-request-detail-page .sidebar-logo p {
+  margin: 0;
+
+  font-size: 9.5px;
+  line-height: 1.2;
+
+  color: #666;
 }
 
-.request-sidebar nav ul {
+/* =========================
+   MENU
+========================= */
+
+.teacher-request-detail-page nav {
+  width: 100%;
+  margin: 0;
+}
+
+.teacher-request-detail-page nav ul {
   list-style: none;
+
   padding: 0;
-  margin: 10px 0;
+  margin: 0;
 }
 
-.request-sidebar nav li {
-  padding: 14px 15px;
+.teacher-request-detail-page nav li {
+  width: 100%;
+
+  padding: 18px 0;
+
+  margin: 0;
+
+  color: #222;
+
+  font-size: 14px;
+
+  font-weight: 400;
+
+  line-height: 1.5;
+
   text-align: center;
-  font-size: 13px;
+
   cursor: pointer;
 }
 
-.request-sidebar nav li:hover {
+.teacher-request-detail-page nav li:hover {
   background: #f0f0f0;
 }
 
-.request-sidebar nav li.active {
-  background: #35627d;
-  color: white;
+/* ACTIVE */
+
+.teacher-request-detail-page nav li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
 }
 
-.request-main {
-  margin-left: 180px;
-  width: calc(100% - 180px);
+/* =========================
+   LOGOUT
+========================= */
+
+.teacher-request-detail-page .logout-btn {
+  width: 190px;
+
+  margin: 0 auto 20px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #3b75c4;
+
+  color: #ffffff;
+
+  cursor: pointer;
 }
 
-.request-header {
-  height: 56px;
-  background: #ffedaa;
+.teacher-request-detail-page .logout-btn:hover {
+  background: #2f6db5;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.teacher-request-detail-page .main {
+  width: calc(100% - 250px);
+
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.teacher-request-detail-page .header {
+  width: 100%;
+
+  height: 70px;
+
+  padding: 0 20px;
+
+  background: #f0e3a1;
+
   display: flex;
+
   align-items: center;
-  padding: 0 16px;
+
+  justify-content: space-between;
+
+  border: none;
 }
 
-.request-header h2 {
-  font-size: 16px;
-  font-weight: 500;
+.teacher-request-detail-page .header h2 {
+  margin: 0;
+
+  font-size: 20px;
+
+  font-weight: 400;
+
+  color: #111;
 }
 
-.request-content {
-  max-width: 700px;
-  margin: 25px auto 50px;
-}
+/* =========================
+   HEADER RIGHT
+========================= */
 
-.request-title-row {
-  background: white;
-  padding: 18px 22px;
-  border-radius: 8px 8px 0 0;
-}
-
-.request-title-row h3 {
-  font-size: 15px;
-  margin: 0 0 12px;
-}
-
-.request-meta {
+.teacher-request-detail-page .header-right {
   display: flex;
+
+  align-items: center;
+
   gap: 10px;
+}
+
+/* =========================
+   NOTIFICATION
+========================= */
+
+.teacher-request-detail-page .notification-btn {
+  width: 50px;
+  height: 50px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  color: #999;
+
+  font-size: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.teacher-request-detail-page .notification-btn:hover {
+  background: #f7f7f7;
+}
+
+/* =========================
+   USER
+========================= */
+
+.teacher-request-detail-page .user-info {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+
+  border-radius: 4px;
+
+  font-size: 14px;
+}
+
+.teacher-request-detail-page .profile-image {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.teacher-request-detail-page .request-content {
+  width: min(850px, calc(100% - 70px));
+
+  margin: 35px auto 60px;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.teacher-request-detail-page .request-title-row {
+  background: #ffffff;
+
+  padding: 20px 24px;
+
+  border-radius: 8px;
+
+  border: 1px solid #ddd;
+
+  margin-bottom: 15px;
+}
+
+.teacher-request-detail-page .request-title-row h3 {
+  margin: 0 0 15px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+.teacher-request-detail-page .request-meta {
+  display: flex;
+
+  gap: 10px;
+
   justify-content: flex-end;
+
   flex-wrap: wrap;
 }
 
-.request-meta span {
+.teacher-request-detail-page .request-meta span {
   border: 1px solid #ddd;
+
   padding: 7px 10px;
+
   border-radius: 4px;
+
   font-size: 11px;
+
+  background: #ffffff;
 }
 
-.detail-card {
-  background: white;
+/* =========================
+   CARD
+========================= */
+
+.teacher-request-detail-page .detail-card {
+  width: 100%;
+
+  background: #ffffff;
+
   border: 1px solid #ccc;
+
   border-radius: 8px;
-  margin-top: 14px;
-  padding: 16px;
+
+  margin-top: 15px;
+
+  padding: 20px;
 }
 
-.detail-card h3 {
-  font-size: 14px;
+.teacher-request-detail-page .detail-card h3 {
   margin: 0;
+
+  font-size: 15px;
+
+  font-weight: 600;
 }
 
-.detail-card h4 {
-  font-size: 12px;
+.teacher-request-detail-page .detail-card h4 {
+  font-size: 13px;
+
   margin-top: 22px;
+
   margin-bottom: 10px;
 }
 
-.detail-divider {
+.teacher-request-detail-page .detail-divider {
   border-top: 1px solid #ddd;
-  margin: 10px 0 14px;
+
+  margin: 12px 0 16px;
 }
 
-.project-info p {
-  font-size: 11px;
-  margin: 8px 0;
+/* =========================
+   PROJECT INFO
+========================= */
+
+.teacher-request-detail-page .project-info p {
+  margin: 9px 0;
+
+  font-size: 12px;
 }
 
-.member-row {
-  font-size: 11px;
-  margin: 6px 0;
+.teacher-request-detail-page .project-info strong {
+  font-weight: 500;
 }
 
-.applicant-info {
-  max-width: 650px;
+.teacher-request-detail-page .member-row {
+  margin: 7px 0;
+
+  font-size: 12px;
 }
 
-.applicant-info label,
-.result-section > label {
-  display: block;
-  font-size: 11px;
-  font-weight: bold;
-  margin: 14px 0 6px;
-}
+/* =========================
+   APPLICANT
+========================= */
 
-.readonly-box {
-  background: #e9e9e9;
-  border-radius: 4px;
-  padding: 8px;
-  font-size: 11px;
-}
-
-.applicant-info textarea {
+.teacher-request-detail-page .applicant-info {
   width: 100%;
-  height: 75px;
-  resize: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px;
-  box-sizing: border-box;
 }
 
-.text-section {
-  font-size: 11px;
+.teacher-request-detail-page .applicant-info label,
+.teacher-request-detail-page .result-section > label {
+  display: block;
+
+  margin: 14px 0 6px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+}
+
+.teacher-request-detail-page .readonly-box {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  background: #e9e9e9;
+
+  border-radius: 4px;
+
+  font-size: 12px;
+}
+
+.teacher-request-detail-page .applicant-info textarea {
+  width: 100%;
+
+  height: 85px;
+
+  resize: none;
+
+  padding: 10px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 4px;
+}
+
+/* =========================
+   TEXT
+========================= */
+
+.teacher-request-detail-page .text-section {
+  font-size: 12px;
+
   line-height: 1.7;
 }
 
-.skills {
+.teacher-request-detail-page .text-section p {
+  margin: 0;
+}
+
+/* =========================
+   SKILLS
+========================= */
+
+.teacher-request-detail-page .skills {
   display: flex;
+
   flex-wrap: wrap;
+
   gap: 10px;
 }
 
-.skills span {
+.teacher-request-detail-page .skills span {
+  padding: 5px 14px;
+
   border: 1px solid #aaa;
-  border-radius: 3px;
-  padding: 5px 18px;
-  font-size: 10px;
-}
 
-.radio-row {
-  display: flex;
-  gap: 20px;
-  font-size: 11px;
-}
-
-.radio-row label {
-  cursor: pointer;
-}
-
-.comment-box {
-  width: 100%;
-  height: 70px;
-  resize: none;
-  box-sizing: border-box;
-  border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 10px;
+
+  font-size: 11px;
+
+  background: #ffffff;
 }
 
-.request-actions {
+/* =========================
+   RADIO
+========================= */
+
+.teacher-request-detail-page .radio-row {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 18px;
+
+  align-items: center;
+
+  gap: 25px;
+
+  font-size: 12px;
 }
 
-.request-actions button {
-  border: none;
-  border-radius: 6px;
-  padding: 10px 45px;
-  font-size: 12px;
+.teacher-request-detail-page .radio-row label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
   cursor: pointer;
 }
 
-.cancel-btn {
-  background: #eee;
+/* =========================
+   COMMENT
+========================= */
+
+.teacher-request-detail-page .comment-box {
+  width: 100%;
+
+  height: 80px;
+
+  resize: none;
+
+  padding: 10px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 4px;
 }
 
-.reject-btn {
+/* =========================
+   ACTIONS
+========================= */
+
+.teacher-request-detail-page .request-actions {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+.teacher-request-detail-page .request-actions button {
+  min-width: 140px;
+
+  min-height: 40px;
+
+  padding: 9px 25px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+/* CANCEL */
+
+.teacher-request-detail-page .cancel-btn {
+  background: #eeeeee;
+
+  color: #555;
+}
+
+/* REJECT */
+
+.teacher-request-detail-page .reject-btn {
   background: #ff0000;
-  color: white;
+
+  color: #ffffff;
 }
 
-.approve-btn {
+/* APPROVE */
+
+.teacher-request-detail-page .approve-btn {
   background: #20a66a;
-  color: white;
+
+  color: #ffffff;
 }
 
-.request-actions button:disabled {
+.teacher-request-detail-page .approve-btn:hover:not(:disabled) {
+  background: #188c59;
+}
+
+.teacher-request-detail-page .reject-btn:hover:not(:disabled) {
+  background: #dc0000;
+}
+
+/* DISABLED */
+
+.teacher-request-detail-page .request-actions button:disabled {
   opacity: 0.5;
+
   cursor: not-allowed;
 }
 
+/* =========================
+   LOADING
+========================= */
+
 .request-detail-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+
   min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-family: "Prompt", sans-serif;
+
   font-size: 16px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .teacher-request-detail-page .sidebar {
+    width: 210px;
+  }
+
+  .teacher-request-detail-page .main {
+    width: calc(100% - 210px);
+
+    margin-left: 210px;
+  }
+
+  .teacher-request-detail-page .request-content {
+    width: calc(100% - 30px);
+  }
+
+  .teacher-request-detail-page .header h2 {
+    font-size: 16px;
+  }
 }

@@ -37,15 +37,15 @@ function ApplyProject() {
   //const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
-  const name = localStorage.getItem("name");
-  const profileImage = localStorage.getItem("profileImage");
+  const userId = sessionStorage.getItem("userId");
+  const username = sessionStorage.getItem("username");
+  const name = sessionStorage.getItem("name");
+  const profileImage = sessionStorage.getItem("profileImage");
 
   const handleLogout = () => {
-    localStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก localStorage
-    localStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก localStorage
-    localStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก localStorage
+    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
+    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
+    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
     navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   };
 
