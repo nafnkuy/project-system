@@ -227,17 +227,17 @@ function CreateTeacherProject() {
                 <div className="form-group">
                   <label>ประเภทโครงงาน *</label>
 
-                  <div className="select-wrapper">
+                  <div className="create-select-wrapper">
                     <select
                       value={projectType}
                       onChange={(e) => setProjectType(e.target.value)}
+                      className="create-filter-select"
                     >
                       <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
-
                       <option value="โครงงานคู่">โครงงานคู่</option>
                     </select>
 
-                    <span className="select-arrow">▼</span>
+                    <span className="create-select-arrow">▼</span>
                   </div>
                 </div>
 
@@ -245,10 +245,11 @@ function CreateTeacherProject() {
                 <div className="form-group">
                   <label>ปีการศึกษา / ภาคเรียน *</label>
 
-                  <div className="select-wrapper">
+                  <div className="create-select-wrapper">
                     <select
                       value={academicYear}
                       onChange={(e) => setAcademicYear(e.target.value)}
+                      className="create-filter-select"
                     >
                       <option value="2569/1">2569/1</option>
                       <option value="2569/2">2569/2</option>
@@ -256,12 +257,11 @@ function CreateTeacherProject() {
                       <option value="2570/2">2570/2</option>
                     </select>
 
-                    <span className="select-arrow">▼</span>
+                    <span className="create-select-arrow">▼</span>
                   </div>
                 </div>
               </div>
 
-              {/* จำนวนสมาชิก */}
               <div className="project-member-info">
                 <span>จำนวนที่รับ</span>
 
