@@ -301,7 +301,7 @@ function CreateTeacherProject() {
 
               {/* เทคโนโลยี / ทักษะ */}
               <div className="form-group">
-                <label>เทคโนโลยีหรือทักษะที่จำเป็น *</label>
+                <label>เทคโนโลยีที่ใช้ *</label>
 
                 <textarea
                   value={skills}

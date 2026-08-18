@@ -41,6 +41,7 @@ function TeacherProjectEdit() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // =========================
   // ตรวจสอบ Login
@@ -96,8 +97,9 @@ function TeacherProjectEdit() {
       ...project,
       [field]: value,
     });
-  };
 
+    setHasChanges(true);
+  };
   // =========================
   // บันทึก
   // =========================
@@ -203,7 +205,7 @@ function TeacherProjectEdit() {
 
             <span>&gt;</span>
 
-            <span>รายละเอียด &gt; แก้ไข</span>
+            <span>แก้ไข</span>
           </div>
 
           <div className="header-right">
@@ -281,114 +283,69 @@ function TeacherProjectEdit() {
 
             <section className="form-section">
               <div className="form-row">
-                {/* ประเภท */}
-
+                {/* ประเภทโครงงาน */}
                 <div className="form-group">
                   <label>ประเภทโครงงาน *</label>
 
-                  <div className="select-wrapper">
+                  <div className="edit-select-wrapper">
                     <select
                       value={project.project_type}
-                      onChange={(e) =>
-                        handleChange("project_type", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        handleChange("project_type", value);
+
+                        handleChange(
+                          "max_members",
+                          value === "โครงงานเดี่ยว" ? 1 : 2,
+                        );
+                      }}
+                      className="edit-filter-select"
                     >
                       <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
-
                       <option value="โครงงานคู่">โครงงานคู่</option>
                     </select>
 
-                    <span className="select-arrow">▼</span>
+                    <span className="edit-select-arrow">▼</span>
                   </div>
                 </div>
 
-                {/* ปีการศึกษา */}
-
+                {/* ปีการศึกษา / ภาคเรียน */}
                 <div className="form-group">
                   <label>ปีการศึกษา / ภาคเรียน *</label>
 
-                  <div className="select-wrapper">
+                  <div className="edit-select-wrapper">
                     <select
                       value={project.academic_year}
                       onChange={(e) =>
                         handleChange("academic_year", e.target.value)
                       }
+                      className="edit-filter-select"
                     >
                       <option value="2569/1">2569/1</option>
-
                       <option value="2569/2">2569/2</option>
-
                       <option value="2570/1">2570/1</option>
-
                       <option value="2570/2">2570/2</option>
                     </select>
 
-                    <span className="select-arrow">▼</span>
+                    <span className="edit-select-arrow">▼</span>
                   </div>
                 </div>
               </div>
 
-              {/* จำนวนสมาชิก */}
-
+              {/* จำนวนที่รับ */}
               <div className="project-member-info">
                 <span>จำนวนที่รับ</span>
 
                 <strong>
-                  {project.max_members === 1
+                  {project.project_type === "โครงงานเดี่ยว"
                     ? "รับ 1 คน"
-                    : `รับ ${project.max_members} คน`}
+                    : "รับ 2 คน"}
                 </strong>
 
                 {project.current_members > 0 && (
                   <small>ขณะนี้มีสมาชิกแล้ว {project.current_members} คน</small>
                 )}
-              </div>
-            </section>
-
-            {/* =================================================
-                ข้อมูลโครงงาน + สมาชิก
-            ================================================= */}
-
-            <section className="form-section">
-              <h3>ข้อมูลโครงงาน</h3>
-
-              <div className="project-info-list">
-                <div className="project-info-row">
-                  <span>อาจารย์ที่ปรึกษา :</span>
-
-                  <strong>
-                    {project.advisor_name || project.advisor || "-"}
-                  </strong>
-                </div>
-
-                <div className="project-info-row">
-                  <span>สาขาวิชา :</span>
-
-                  <strong>{project.major || "-"}</strong>
-                </div>
-
-                <div className="project-info-row">
-                  <span>ปีการศึกษา :</span>
-
-                  <strong>{project.academic_year}</strong>
-                </div>
-
-                {/* สมาชิก */}
-
-                <div className="project-member-detail">
-                  <strong>
-                    สมาชิกในโครงงาน ({project.current_members}/
-                    {project.max_members}) :
-                  </strong>
-
-                  {project.current_members === 0 ? (
-                    <p className="empty-member">ยังไม่มีนิสิตเข้าร่วมโครงงาน</p>
-                  ) : (
-                    <p className="member-count">
-                      มีสมาชิกแล้ว {project.current_members} คน
-                    </p>
-                  )}
-                </div>
               </div>
             </section>
 
@@ -418,7 +375,7 @@ function TeacherProjectEdit() {
               </div>
 
               <div className="form-group">
-                <label>เทคโนโลยีหรือทักษะที่จำเป็น *</label>
+                <label>เทคโนโลยีที่ใช้ *</label>
 
                 <div className="example-text">
                   ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS
@@ -442,25 +399,26 @@ function TeacherProjectEdit() {
                   onChange={(e) => handleChange("requirements", e.target.value)}
                 />
               </div>
+
+              {/* ปุ่ม */}
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => navigate("/teacher-projects")}
+                >
+                  ยกเลิก
+                </button>
+
+                <button
+                  type="submit"
+                  className="save-btn"
+                  disabled={saving || !hasChanges}
+                >
+                  {saving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+                </button>
+              </div>
             </section>
-
-            {/* =================================================
-                BUTTON
-            ================================================= */}
-
-            <div className="form-actions">
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={() => navigate("/teacher-projects")}
-              >
-                ยกเลิก
-              </button>
-
-              <button type="submit" className="save-btn" disabled={saving}>
-                {saving ? "กำลังบันทึก..." : "บันทึกข้อแก้ไข"}
-              </button>
-            </div>
           </form>
         </div>
       </main>

@@ -272,7 +272,7 @@ function TeacherProjectDetail() {
               </span>
 
               <span>
-                สถานะ:{" "}
+                สถานะ :{" "}
                 <strong className={`status-text ${project.status}`}>
                   {project.status}
                 </strong>
@@ -348,7 +348,7 @@ function TeacherProjectDetail() {
               SKILLS
           ========================= */}
           <section className="detail-section">
-            <h3>เทคโนโลยี</h3>
+            <h3>เทคโนโลยีที่ใช้</h3>
 
             <div className="tag-list">
               {(project.skills || "").split("|").map((skill, index) => {
@@ -392,7 +392,7 @@ function TeacherProjectDetail() {
             <h3>การแสดงผล</h3>
 
             <p>
-              หัวข้อนี้กำลังตั้งค่าเป็น <strong>{project.visibility}</strong>
+              สถานะการแสดงผล : <strong>{project.visibility}</strong>
             </p>
           </section>
 

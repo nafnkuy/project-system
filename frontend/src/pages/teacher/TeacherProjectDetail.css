@@ -271,6 +271,13 @@
   line-height: 1.8;
 }
 
+.teacher-project-detail-page
+  .project-members-info
+  .empty-member {
+  display: block;
+  padding-left: 30px !important;
+}
+
 /* ================= SKILLS ================= */
 
 .teacher-project-detail-page .tag-list {
@@ -317,12 +324,19 @@
 }
 
 .teacher-project-detail-page .detail-actions button {
-  width: 100px;
-  padding: 8px;
+  width: 140px;
+  height: 36px;
+
+  padding: 0;
+
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+
   color: white;
+  font-size: 13px;
+
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .teacher-project-detail-page .back-btn {
@@ -331,4 +345,24 @@
 
 .teacher-project-detail-page .edit-btn {
   background: #ff0000;
+}
+
+.teacher-project-detail-page .back-btn:hover {
+  background: #128a56;
+}
+
+.teacher-project-detail-page .edit-btn:hover {
+  background: #d90000;
+}
+
+.teacher-project-detail-page .status-text.เปิดรับ {
+  color: #16a34a;
+}
+
+.teacher-project-detail-page .status-text.ใกล้เต็ม {
+  color: #f59e0b;
+}
+
+.teacher-project-detail-page .status-text.ปิดรับ {
+  color: #dc2626;
 }
