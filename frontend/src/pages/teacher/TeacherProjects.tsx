@@ -30,7 +30,7 @@ function TeacherProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortOrder, setSortOrder] = useState("latest");
+  const [sortOrder, setSortOrder] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -197,19 +197,22 @@ function TeacherProjects() {
   /* =========================
      Search + Filter + Sort
   ========================= */
-  const filteredProjects = [...projects] 
+  const filteredProjects = [...projects]
     .filter((project) => {
       // project.title = "สวัสดี WoRlD";
       // project.title.toLowerCase() = "สวัสดี world";
       // searchTerm = "";
       // searchTerm.toLowerCase() = "";
       // "สวัสดี world".includes("") = true
-      const matchSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchSearch = project.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
       let matchStatus = true;
 
       if (statusFilter === "รับนิสิต") {
-        matchStatus = project.status === "เปิดรับ" || project.status === "ใกล้เต็ม";
+        matchStatus =
+          project.status === "เปิดรับ" || project.status === "ใกล้เต็ม";
       } else if (statusFilter === "ปิดรับ") {
         matchStatus = project.status === "ปิดรับ";
       }
@@ -327,37 +330,33 @@ function TeacherProjects() {
             </div>
 
             {/* Status */}
-
-            <div className="select-wrapper">
+            <div className="project-select-wrapper">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                className="project-filter-select"
               >
                 <option value="all">สถานะทั้งหมด</option>
-
                 <option value="รับนิสิต">เปิดรับ</option>
-
                 <option value="ปิดรับ">ปิดรับ</option>
               </select>
 
-              <span className="select-arrow">▼</span>
+              <span className="project-select-arrow">▼</span>
             </div>
 
             {/* Sort */}
-
-            <div className="select-wrapper">
+            <div className="project-select-wrapper">
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
+                className="project-filter-select"
               >
-                <option value="latest">เรียงตาม</option>
-
+                <option value="">เรียงตาม</option>
                 <option value="latest">ล่าสุด</option>
-
                 <option value="oldest">เก่าสุด</option>
               </select>
 
-              <span className="select-arrow">▼</span>
+              <span className="project-select-arrow">▼</span>
             </div>
 
             {/* Create */}
@@ -421,7 +420,7 @@ function TeacherProjects() {
                 <span>
                   {projects.length === 0
                     ? 'กด "สร้างหัวข้อโครงงาน" เพื่อเพิ่มหัวข้อใหม่'
-                    : "ลองเปลี่ยนคำค้นหาหรือสถานะ"}
+                    : "ลองเปลี่ยนคำค้นหาหรือตัวกรองอีกครั้ง"}
                 </span>
               </div>
             )}

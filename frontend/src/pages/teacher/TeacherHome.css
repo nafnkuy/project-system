@@ -403,8 +403,6 @@ nav li.active {
 
   font-size: 12px;
   font-weight: 400;
-
-  color: #555;
 }
 
 .search-box input::placeholder {
