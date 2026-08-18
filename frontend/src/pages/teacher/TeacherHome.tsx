@@ -44,20 +44,27 @@ function TeacherHome() {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
+  const [typeFilter, setTypeFilter] = useState("ทั้งหมด");
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const filteredRequests = requests.filter((item) => {
-    const matchesSearch =
-      item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesSearch =
+    item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "ทั้งหมด" || item.status === statusFilter;
+  const matchesStatus =
+    statusFilter === "ทั้งหมด" || item.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
-  });
+  const requestType =
+    item.source === "student" ? "เสนอหัวข้อโครงงาน" : "สมัครเข้าร่วม";
+
+  const matchesType =
+    typeFilter === "ทั้งหมด" || requestType === typeFilter;
+
+  return matchesSearch && matchesStatus && matchesType;
+});
 
   //const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
@@ -217,32 +224,56 @@ function TeacherHome() {
         <div className="dashboard-content">
           {/* Search */}
           <div className="search-section">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="ค้นหาชื่อนิสิต หรือหัวข้อโครงงาน"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+  <div className="search-box">
+    <input
+      type="text"
+      placeholder="ค้นหาชื่อนิสิต หรือหัวข้อโครงงาน"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
 
-              <FaSearch className="search-icon" />
-            </div>
+    <FaSearch className="search-icon" />
+  </div>
 
-            <div className="select-wrapper">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="status-filter"
-              >
-                <option value="ทั้งหมด">ทั้งหมด</option>
-                <option value="รอพิจารณา">รอพิจารณา</option>
-                <option value="อนุมัติ">อนุมัติ</option>
-                <option value="ปฏิเสธ">ปฏิเสธ</option>
-              </select>
+  {/* ตัวกรองสถานะ */}
+<div className="select-wrapper">
+  <span className="select-label">
+    {statusFilter === "ทั้งหมด" ? "สถานะทั้งหมด" : statusFilter}
+  </span>
 
-              <span className="select-arrow">▼</span>
-            </div>
-          </div>
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="status-filter"
+  >
+    <option value="ทั้งหมด">สถานะทั้งหมด</option>
+    <option value="รอพิจารณา">รอพิจารณา</option>
+    <option value="อนุมัติ">อนุมัติ</option>
+    <option value="ปฏิเสธ">ปฏิเสธ</option>
+  </select>
+
+  <span className="select-arrow">▼</span>
+</div>
+
+{/* ตัวกรองประเภท */}
+<div className="select-wrapper type-select">
+  <span className="select-label">
+    {typeFilter === "ทั้งหมด" ? "ประเภททั้งหมด" : typeFilter}
+  </span>
+
+  <select
+    value={typeFilter}
+    onChange={(e) => setTypeFilter(e.target.value)}
+    className="status-filter"
+  >
+    <option value="ทั้งหมด">ประเภททั้งหมด</option>
+    <option value="สมัครเข้าร่วม">สมัครเข้าร่วม</option>
+    <option value="เสนอหัวข้อโครงงาน">เสนอหัวข้อโครงงาน</option>
+  </select>
+
+  <span className="select-arrow">▼</span>
+</div>
+</div>
 
           {/* Dashboard Cards */}
           <div className="dashboard-cards">
