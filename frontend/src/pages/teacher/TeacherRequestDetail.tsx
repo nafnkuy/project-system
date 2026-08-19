@@ -54,9 +54,7 @@ function TeacherRequestDetail() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
 
-  const [decision, setDecision] = useState<
-    "อนุมัติ" | "ปฏิเสธ" | ""
-  >("");
+  const [decision, setDecision] = useState<"อนุมัติ" | "ปฏิเสธ" | "">("");
 
   // =========================
   // ข้อมูลอาจารย์
@@ -156,10 +154,7 @@ function TeacherRequestDetail() {
       .catch((err) => {
         console.log("Get request detail error =", err);
 
-        alert(
-          err.response?.data?.message ||
-            "ไม่สามารถโหลดรายละเอียดคำขอได้"
-        );
+        alert(err.response?.data?.message || "ไม่สามารถโหลดรายละเอียดคำขอได้");
 
         navigate("/teacher-home");
       })
@@ -175,7 +170,7 @@ function TeacherRequestDetail() {
     if (!request) return;
 
     const confirmApprove = window.confirm(
-      `ต้องการอนุมัติคำขอของ ${request.student_name} หรือไม่?`
+      `ต้องการอนุมัติคำขอของ ${request.student_name} หรือไม่?`,
     );
 
     if (!confirmApprove) return;
@@ -187,7 +182,7 @@ function TeacherRequestDetail() {
         `http://localhost:5000/teacher/request/${request.id}/approve`,
         {
           advisor_id: userId,
-        }
+        },
       );
 
       alert(res.data.message);
@@ -196,10 +191,7 @@ function TeacherRequestDetail() {
     } catch (err: any) {
       console.log("Approve error =", err);
 
-      alert(
-        err.response?.data?.message ||
-          "ไม่สามารถอนุมัติคำขอได้"
-      );
+      alert(err.response?.data?.message || "ไม่สามารถอนุมัติคำขอได้");
     } finally {
       setProcessing(false);
     }
@@ -212,7 +204,7 @@ function TeacherRequestDetail() {
     if (!request) return;
 
     const confirmReject = window.confirm(
-      `ต้องการปฏิเสธคำขอของ ${request.student_name} หรือไม่?`
+      `ต้องการปฏิเสธคำขอของ ${request.student_name} หรือไม่?`,
     );
 
     if (!confirmReject) return;
@@ -224,7 +216,7 @@ function TeacherRequestDetail() {
         `http://localhost:5000/teacher/request/${request.id}/reject`,
         {
           advisor_id: userId,
-        }
+        },
       );
 
       alert(res.data.message);
@@ -233,10 +225,7 @@ function TeacherRequestDetail() {
     } catch (err: any) {
       console.log("Reject error =", err);
 
-      alert(
-        err.response?.data?.message ||
-          "ไม่สามารถปฏิเสธคำขอได้"
-      );
+      alert(err.response?.data?.message || "ไม่สามารถปฏิเสธคำขอได้");
     } finally {
       setProcessing(false);
     }
@@ -265,24 +254,15 @@ function TeacherRequestDetail() {
   // Loading
   // =========================
   if (loading) {
-    return (
-      <div className="request-detail-loading">
-        กำลังโหลดข้อมูล...
-      </div>
-    );
+    return <div className="request-detail-loading">กำลังโหลดข้อมูล...</div>;
   }
 
   if (!request) {
-    return (
-      <div className="request-detail-loading">
-        ไม่พบข้อมูลคำขอ
-      </div>
-    );
+    return <div className="request-detail-loading">ไม่พบข้อมูลคำขอ</div>;
   }
 
   return (
     <div className="teacher-request-detail-page">
-
       {/* ================= SIDEBAR ================= */}
 
       <aside className="sidebar">
@@ -297,17 +277,13 @@ function TeacherRequestDetail() {
 
         <nav>
           <ul>
-            <li onClick={() => navigate("/teacher-home")}>
-              หน้าหลัก
-            </li>
+            <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
 
             <li onClick={() => navigate("/teacher-projects")}>
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li className="active">
-              คำขอเข้าร่วมโครงงาน
-            </li>
+            <li className="active">คำขอเข้าร่วมโครงงาน</li>
 
             <li>ภาระงานที่ปรึกษา</li>
 
@@ -319,10 +295,7 @@ function TeacherRequestDetail() {
           </ul>
         </nav>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
+        <button className="logout-btn" onClick={handleLogout}>
           ออกจากระบบ
         </button>
       </aside>
@@ -330,16 +303,12 @@ function TeacherRequestDetail() {
       {/* ================= MAIN ================= */}
 
       <main className="main">
-
         {/* ================= HEADER ================= */}
 
         <header className="header">
-          <h2>
-            คำขอเข้าร่วมโครงงาน &gt; รายละเอียดคำขอเข้าร่วมโครงงาน
-          </h2>
+          <h2>คำขอเข้าร่วมโครงงาน &gt; รายละเอียดคำขอเข้าร่วมโครงงาน</h2>
 
           <div className="header-right">
-
             {/* Notification */}
             <button className="notification-btn">
               <FaBell />
@@ -349,9 +318,7 @@ function TeacherRequestDetail() {
             <div className="user-info">
               <img
                 src={
-                  profileImage
-                    ? `http://localhost:5000${profileImage}`
-                    : logo
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
                 }
                 alt="Profile"
                 className="profile-image"
@@ -365,281 +332,231 @@ function TeacherRequestDetail() {
         {/* ================= CONTENT ================= */}
 
         <div className="request-content">
+          <div className="request-main-card">
+            {/* ================= TITLE ================= */}
 
-          {/* ================= TITLE ================= */}
+            <div className="request-title-row">
+              <h3>คำขอสมัครเข้าร่วมโครงงาน</h3>
 
-          <div className="request-title-row">
-            <h3>คำขอสมัครเข้าร่วมโครงงาน</h3>
+              <div className="request-meta">
+                <span>
+                  วันที่ส่งคำขอ :{" "}
+                  {new Date(request.request_date).toLocaleDateString("th-TH")}
+                </span>
 
-            <div className="request-meta">
-              <span>
-                วันที่ส่งคำขอ :{" "}
-                {new Date(
-                  request.request_date
-                ).toLocaleDateString("th-TH")}
-              </span>
+                <span>
+                  เวลาส่ง :{" "}
+                  {new Date(request.request_date).toLocaleTimeString("th-TH", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}{" "}
+                  น.
+                </span>
 
-              <span>
-                เวลาส่ง :{" "}
-                {new Date(
-                  request.request_date
-                ).toLocaleTimeString("th-TH", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                น.
-              </span>
-
-              <span>
-                สถานะ : {request.status}
-              </span>
+                <span>
+                  สถานะ :
+                  <strong className={`request-status-text ${request.status}`}>
+                    {request.status}
+                  </strong>
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* =========================
+            {/* =========================
               ข้อมูลโครงงาน
           ========================= */}
 
-          <section className="detail-card">
-            <h3>ข้อมูลโครงงาน</h3>
+            <section className="detail-card">
+              <h3>ข้อมูลโครงงาน</h3>
 
-            <div className="detail-divider" />
+              <div className="detail-divider" />
 
-            <div className="project-info">
+              <div className="project-info">
+                <p>
+                  <strong>ชื่อโครงงาน :</strong> {request.title}
+                </p>
 
-              <p>
-                <strong>ชื่อโครงงาน :</strong>{" "}
-                {request.title}
-              </p>
+                <p>
+                  <strong>อาจารย์ที่ปรึกษา :</strong> {request.advisor_name}
+                </p>
 
-              <p>
-                <strong>อาจารย์ที่ปรึกษา :</strong>{" "}
-                {request.advisor_name}
-              </p>
+                <p>
+                  <strong>ประเภทโครงงาน :</strong> {request.project_type}
+                </p>
 
-              <p>
-                <strong>ประเภทโครงงาน :</strong>{" "}
-                {request.project_type}
-              </p>
+                <p>
+                  <strong>สาขาวิชา :</strong> {request.major}
+                </p>
 
-              <p>
-                <strong>สาขาวิชา :</strong>{" "}
-                {request.major}
-              </p>
+                <p>
+                  <strong>ปีการศึกษา :</strong> {request.academic_year}
+                </p>
 
-              <p>
-                <strong>ปีการศึกษา :</strong>{" "}
-                {request.academic_year}
-              </p>
+                <p>
+                  <strong>รับนิสิต :</strong> {request.current_members} /{" "}
+                  {request.max_members} คน
+                </p>
 
-              <p>
-                <strong>รับนิสิต :</strong>{" "}
-                {request.current_members} /{" "}
-                {request.max_members} คน
-              </p>
+                <h4>สมาชิกโครงงาน</h4>
 
-              <h4>สมาชิกโครงงาน</h4>
+                {request.members.length === 0 ? (
+                  <p>ยังไม่มีสมาชิก</p>
+                ) : (
+                  request.members.map((member, index) => (
+                    <div className="member-row" key={member.id}>
+                      {index + 1}. {member.username} {member.name}
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
 
-              {request.members.length === 0 ? (
-                <p>ยังไม่มีสมาชิก</p>
-              ) : (
-                request.members.map((member, index) => (
-                  <div
-                    className="member-row"
-                    key={member.id}
-                  >
-                    {index + 1}. {member.username}{" "}
-                    {member.name}
-                  </div>
-                ))
-              )}
-
-            </div>
-          </section>
-
-          {/* =========================
+            {/* =========================
               ข้อมูลผู้สมัคร
           ========================= */}
 
-          <section className="detail-card">
-            <h3>ข้อมูลผู้สมัคร</h3>
+            <section className="detail-card">
+              <h3>ข้อมูลผู้สมัคร</h3>
 
-            <div className="detail-divider" />
+              <div className="detail-divider" />
 
-            <div className="applicant-info">
+              <div className="applicant-info">
+                <label>รหัสประจำตัว</label>
 
-              <label>รหัสประจำตัว</label>
+                <div className="readonly-box">{request.student_username}</div>
 
-              <div className="readonly-box">
-                {request.student_username}
+                <label>ชื่อ</label>
+
+                <div className="readonly-box">{request.student_name}</div>
+
+                <label>ช่องทางการติดต่อ</label>
+
+                <div className="readonly-box">
+                  {request.contact_type} : {request.contact_value}
+                </div>
+
+                <label>แนะนำตัว</label>
+
+                <textarea value={request.introduction || ""} readOnly />
               </div>
+            </section>
 
-              <label>ชื่อ</label>
-
-              <div className="readonly-box">
-                {request.student_name}
-              </div>
-
-              <label>ช่องทางการติดต่อ</label>
-
-              <div className="readonly-box">
-                {request.contact_type} :{" "}
-                {request.contact_value}
-              </div>
-
-              <label>แนะนำตัว</label>
-
-              <textarea
-                value={request.introduction || ""}
-                readOnly
-              />
-
-            </div>
-          </section>
-
-          {/* =========================
+            {/* =========================
               รายละเอียดโครงงาน
           ========================= */}
 
-          <section className="detail-card">
-            <h3>รายละเอียดโครงงาน</h3>
+            <section className="detail-card">
+              <h3>รายละเอียดโครงงาน</h3>
 
-            <div className="detail-divider" />
+              <div className="detail-divider" />
 
-            <div className="text-section">
-              <p>{request.description}</p>
-            </div>
+              <div className="text-section">
+                <p>{request.description}</p>
+              </div>
 
-            <h4>วัตถุประสงค์</h4>
+              <h4>วัตถุประสงค์</h4>
 
-            <div className="text-section">
-              <p>{request.objectives}</p>
-            </div>
+              <div className="text-section">
+                <p>{request.objectives}</p>
+              </div>
 
-          <section className="detail-section">
-            <h3>ทักษะที่เกี่ยวข้อง</h3>
+              <section className="detail-section">
+                <h3>เทคโนโลยีที่ใช้</h3>
 
-            <div className="tag-list">
-              {(request.skills || "").split("|").map((skill, index) => {
-                const style = skillStyles[skill] || {
-                  backgroundColor: "#F3F4F6",
-                  borderColor: "#D1D5DB",
-                };
+                <div className="tag-list">
+                  {(request.skills || "").split("|").map((skill, index) => {
+                    const style = skillStyles[skill] || {
+                      backgroundColor: "#F3F4F6",
+                      borderColor: "#D1D5DB",
+                    };
 
-                return (
-                  <span
-                    key={index}
-                    style={{
-                      backgroundColor: style.backgroundColor,
-                      border: `1px solid ${style.borderColor}`,
-                    }}
-                  >
-                    {skill}
-                  </span>
-                );
-              })}
-            </div>
-          </section>
+                    return (
+                      <span
+                        key={index}
+                        style={{
+                          backgroundColor: style.backgroundColor,
+                          border: `1px solid ${style.borderColor}`,
+                        }}
+                      >
+                        {skill}
+                      </span>
+                    );
+                  })}
+                </div>
+              </section>
 
-            <h4>คุณสมบัติผู้สมัคร</h4>
+              <h4>คุณสมบัติผู้สมัคร</h4>
 
-            <div className="text-section">
-              <p>{request.requirements}</p>
-            </div>
-          </section>
+              <div className="text-section">
+                <p>{request.requirements}</p>
+              </div>
+            </section>
 
-          {/* =========================
+            {/* =========================
               ผลการพิจารณา
           ========================= */}
 
-          <section className="detail-card result-card">
-            <h3>ผลการพิจารณา</h3>
+            <section className="detail-card result-card">
+              <h3>ผลการพิจารณา</h3>
 
-            <div className="detail-divider" />
+              <div className="detail-divider" />
 
-            <div className="result-section">
+              <div className="result-section">
+                <label>สถานะ</label>
 
-              <label>สถานะ</label>
+                <div className="radio-row">
+                  <label>
+                    <input
+                      type="radio"
+                      name="decision"
+                      checked={decision === "อนุมัติ"}
+                      onChange={() => setDecision("อนุมัติ")}
+                    />
+                    อนุมัติ
+                  </label>
 
-              <div className="radio-row">
+                  <label>
+                    <input
+                      type="radio"
+                      name="decision"
+                      checked={decision === "ปฏิเสธ"}
+                      onChange={() => setDecision("ปฏิเสธ")}
+                    />
+                    ปฏิเสธ
+                  </label>
+                </div>
 
-                <label>
-                  <input
-                    type="radio"
-                    name="decision"
-                    checked={decision === "อนุมัติ"}
-                    onChange={() =>
-                      setDecision("อนุมัติ")
-                    }
-                  />
+                <label>ความคิดเห็น</label>
 
-                  อนุมัติ
-                </label>
-
-                <label>
-                  <input
-                    type="radio"
-                    name="decision"
-                    checked={decision === "ปฏิเสธ"}
-                    onChange={() =>
-                      setDecision("ปฏิเสธ")
-                    }
-                  />
-
-                  ปฏิเสธ
-                </label>
-
+                <textarea
+                  className="comment-box"
+                  placeholder="ความคิดเห็น"
+                  disabled
+                />
               </div>
+            </section>
 
-              <label>ความคิดเห็น</label>
+            {/* ================= BUTTONS ================= */}
 
-              <textarea
-                className="comment-box"
-                placeholder="ความคิดเห็น"
-                disabled
-              />
+            <div className="request-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => navigate("/teacher-home")}
+                disabled={processing}
+              >
+                ยกเลิก
+              </button>
 
+              <button
+                className="approve-btn"
+                onClick={handleSaveDecision}
+                disabled={
+                  processing || request.status !== "รอพิจารณา" || !decision
+                }
+              >
+                {processing ? "กำลังดำเนินการ..." : "บันทึกผลการพิจารณา"}
+              </button>
             </div>
-          </section>
-
-          {/* ================= BUTTONS ================= */}
-
-          <div className="request-actions">
-
-            <button
-              className="cancel-btn"
-              onClick={() =>
-                navigate("/teacher-home")
-              }
-              disabled={processing}
-            >
-              ยกเลิก
-            </button>
-
-            <button
-              className="reject-btn"
-              onClick={handleReject}
-              disabled={
-                processing ||
-                request.status !== "รอพิจารณา"
-              }
-            >
-              ปฏิเสธ
-            </button>
-
-            <button
-              className="approve-btn"
-              onClick={handleSaveDecision}
-              disabled={
-                processing ||
-                request.status !== "รอพิจารณา"
-              }
-            >
-              {processing
-                ? "กำลังดำเนินการ..."
-                : "บันทึกผลการพิจารณา"}
-            </button>
-
           </div>
         </div>
       </main>

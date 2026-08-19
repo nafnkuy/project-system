@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
-/* =========================
+/* =========================================================
    RESET
-========================= */
+========================================================= */
 
 .teacher-request-detail-page,
 .teacher-request-detail-page * {
@@ -12,14 +12,16 @@
 
 .teacher-request-detail-page {
   display: flex;
+
   width: 100%;
   min-height: 100vh;
+
   background: #f5f5f5;
 }
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .sidebar {
   position: fixed;
@@ -32,7 +34,6 @@
   height: 100vh;
 
   background: #ffffff;
-
   border-right: 1px solid #ddd;
 
   display: grid;
@@ -41,9 +42,9 @@
   z-index: 100;
 }
 
-/* =========================
+/* =========================================================
    LOGO
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .sidebar-logo {
   display: flex;
@@ -77,9 +78,9 @@
   color: #666;
 }
 
-/* =========================
+/* =========================================================
    MENU
-========================= */
+========================================================= */
 
 .teacher-request-detail-page nav {
   width: 100%;
@@ -103,7 +104,6 @@
   color: #222;
 
   font-size: 14px;
-
   font-weight: 400;
 
   line-height: 1.5;
@@ -117,17 +117,14 @@
   background: #f0f0f0;
 }
 
-/* ACTIVE */
-
 .teacher-request-detail-page nav li.active {
   background: #2f5d7c;
-
   color: #ffffff;
 }
 
-/* =========================
+/* =========================================================
    LOGOUT
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .logout-btn {
   width: 190px;
@@ -137,12 +134,12 @@
   padding: 12px;
 
   border: none;
-
   border-radius: 8px;
 
   background: #3b75c4;
-
   color: #ffffff;
+
+  font-size: 13px;
 
   cursor: pointer;
 }
@@ -151,9 +148,9 @@
   background: #2f6db5;
 }
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .main {
   width: calc(100% - 250px);
@@ -165,13 +162,12 @@
   background: #f5f5f5;
 }
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .header {
   width: 100%;
-
   height: 70px;
 
   padding: 0 20px;
@@ -179,9 +175,7 @@
   background: #f0e3a1;
 
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
   border: none;
@@ -190,47 +184,41 @@
 .teacher-request-detail-page .header h2 {
   margin: 0;
 
-  font-size: 20px;
-
+  font-size: 20px !important;
   font-weight: 400;
 
   color: #111;
 }
 
-/* =========================
+/* =========================================================
    HEADER RIGHT
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .header-right {
   display: flex;
-
   align-items: center;
 
   gap: 10px;
 }
 
-/* =========================
+/* =========================================================
    NOTIFICATION
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .notification-btn {
   width: 50px;
   height: 50px;
 
   border: 1px solid #ddd;
-
   border-radius: 4px;
 
   background: #ffffff;
-
   color: #999;
 
   font-size: 20px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   cursor: pointer;
@@ -240,9 +228,9 @@
   background: #f7f7f7;
 }
 
-/* =========================
+/* =========================================================
    USER
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .user-info {
   height: 50px;
@@ -250,7 +238,6 @@
   padding: 0 14px;
 
   display: flex;
-
   align-items: center;
 
   gap: 10px;
@@ -258,7 +245,6 @@
   background: #ffffff;
 
   border: 1px solid #ddd;
-
   border-radius: 4px;
 
   font-size: 14px;
@@ -273,110 +259,173 @@
   object-fit: cover;
 }
 
-/* =========================
+/* =========================================================
    CONTENT
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .request-content {
-  width: min(850px, calc(100% - 70px));
+  width: 990px;
+  max-width: 1100px;
 
-  margin: 35px auto 60px;
+  margin: 45px auto 45px;
 }
 
-/* =========================
-   TITLE
-========================= */
-
-.teacher-request-detail-page .request-title-row {
+.teacher-request-detail-page .request-main-card {
+  width: 100%;
   background: #ffffff;
-
-  padding: 20px 24px;
-
+  border: none;
   border-radius: 8px;
 
-  border: 1px solid #ddd;
+  padding: 28px 18px 18px;
+}
 
-  margin-bottom: 15px;
+/* =========================================================
+   REQUEST TITLE
+========================================================= */
+
+.teacher-request-detail-page .request-title-row {
+  width: 95%;
+  margin: 0 auto 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .teacher-request-detail-page .request-title-row h3 {
-  margin: 0 0 15px;
+  margin: 0;
 
   font-size: 16px;
-
   font-weight: 600;
 }
 
 .teacher-request-detail-page .request-meta {
   display: flex;
+  align-items: center;
 
   gap: 10px;
 
-  justify-content: flex-end;
-
-  flex-wrap: wrap;
+  margin: 0;
 }
 
 .teacher-request-detail-page .request-meta span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 34px;
+
+  padding: 0 12px;
+
   border: 1px solid #ddd;
-
-  padding: 7px 10px;
-
   border-radius: 4px;
 
-  font-size: 11px;
-
   background: #ffffff;
+
+  font-size: 12px;
+
+  white-space: nowrap;
 }
 
-/* =========================
-   CARD
-========================= */
+/* =========================================================
+   STATUS COLOR
+========================================================= */
+
+.teacher-request-detail-page .request-meta span:last-child {
+  color: #333;
+}
+
+.teacher-request-detail-page .request-meta span:last-child {
+  white-space: nowrap;
+}
+
+.teacher-request-detail-page .request-status-text {
+  margin-left: 5px;
+  font-weight: 500;
+}
+
+.teacher-request-detail-page .request-status-text.รอพิจารณา {
+  color: #f4b400;
+}
+
+.teacher-request-detail-page .request-status-text.อนุมัติ {
+  color: #16a34a;
+}
+
+.teacher-request-detail-page .request-status-text.ปฏิเสธ {
+  color: #dc2626;
+}
+
+/* =========================================================
+   DETAIL CARD
+========================================================= */
 
 .teacher-request-detail-page .detail-card {
-  width: 100%;
+  width: 95%;
+  margin: 14px auto 0;
 
   background: #ffffff;
 
   border: 1px solid #ccc;
+  border-radius: 7px;
 
-  border-radius: 8px;
-
-  margin-top: 15px;
-
-  padding: 20px;
+  padding: 18px 20px;
 }
 
 .teacher-request-detail-page .detail-card h3 {
   margin: 0;
 
-  font-size: 15px;
-
+  font-size: 14px;
   font-weight: 600;
+
+  color: #222;
 }
 
-.teacher-request-detail-page .detail-card h4 {
-  font-size: 13px;
+.teacher-request-detail-page .detail-card > h4 {
+  font-size: 14px;
+  font-weight: 600;
 
-  margin-top: 22px;
-
+  margin-top: 30px;
   margin-bottom: 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #ddd;
 }
 
 .teacher-request-detail-page .detail-divider {
+  width: 100%;
+
   border-top: 1px solid #ddd;
 
-  margin: 12px 0 16px;
+  margin: 10px 0 15px;
 }
 
-/* =========================
+/* =========================================================
    PROJECT INFO
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .project-info p {
-  margin: 9px 0;
+  margin: 7px 0;
 
-  font-size: 12px;
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  color: #222;
+}
+
+.teacher-request-detail-page .project-info h4 {
+  margin: 18px 0 7px;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #222;
 }
 
 .teacher-request-detail-page .project-info strong {
@@ -384,106 +433,181 @@
 }
 
 .teacher-request-detail-page .member-row {
-  margin: 7px 0;
+  margin: 6px 0 6px 10px;
 
-  font-size: 12px;
+  font-size: 13px;
+
+  line-height: 1.6;
 }
 
-/* =========================
+/* =========================================================
    APPLICANT
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .applicant-info {
   width: 100%;
 }
 
-.teacher-request-detail-page .applicant-info label,
-.teacher-request-detail-page .result-section > label {
+.teacher-request-detail-page .applicant-info label {
   display: block;
 
-  margin: 14px 0 6px;
+  margin: 11px 0 5px;
 
-  font-size: 12px;
-
+  font-size: 13px;
   font-weight: 500;
+
+  color: #222;
 }
 
-.teacher-request-detail-page .readonly-box {
-  width: 100%;
+/* กล่องข้อมูลผู้สมัครไม่ให้ยาวเต็มเหมือนปัจจุบัน */
 
-  padding: 10px 12px;
+.teacher-request-detail-page .readonly-box {
+  width: 48%;
+  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 6px 10px;
 
   background: #e9e9e9;
 
   border-radius: 4px;
 
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #222;
 }
+
+/* แนะนำตัว */
 
 .teacher-request-detail-page .applicant-info textarea {
   width: 100%;
-
-  height: 85px;
+  height: 80px;
 
   resize: none;
 
-  padding: 10px;
+  padding: 9px 10px;
+
+  background: #ffffff;
 
   border: 1px solid #ddd;
-
   border-radius: 4px;
+
+  outline: none;
+
+  font-size: 13px;
+  line-height: 1.6;
+
+  color: #222;
 }
 
-/* =========================
-   TEXT
-========================= */
+.teacher-request-detail-page .applicant-info label:last-of-type {
+  margin-top: 35px;
+}
+
+/* =========================================================
+   PROJECT DETAIL TEXT
+========================================================= */
 
 .teacher-request-detail-page .text-section {
-  font-size: 12px;
+  font-size: 13px;
 
   line-height: 1.7;
+
+  color: #222;
 }
 
 .teacher-request-detail-page .text-section p {
   margin: 0;
 }
 
-/* =========================
-   SKILLS
-========================= */
+/* =========================================================
+   INNER DETAIL SECTION
+   ใช้ตรงทักษะที่เกี่ยวข้อง
+========================================================= */
 
-.teacher-request-detail-page .skills {
-  display: flex;
-
-  flex-wrap: wrap;
-
-  gap: 10px;
+.teacher-request-detail-page .detail-section {
+  margin-top: 20px;
 }
 
-.teacher-request-detail-page .skills span {
-  padding: 5px 14px;
+.teacher-request-detail-page .detail-section h3 {
+  font-size: 14px;
+  font-weight: 600;
 
-  border: 1px solid #aaa;
+  margin: 0 0 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #ddd;
+}
+
+/* =========================================================
+   SKILL TAG
+========================================================= */
+
+.teacher-request-detail-page .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.teacher-request-detail-page .tag-list span {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+
+  padding: 4px 11px;
 
   border-radius: 4px;
 
   font-size: 11px;
+  font-weight: 500;
 
-  background: #ffffff;
+  color: #222;
 }
 
-/* =========================
+/* =========================================================
+   RESULT CARD
+========================================================= */
+
+.teacher-request-detail-page .result-card {
+  padding-bottom: 18px;
+}
+
+.teacher-request-detail-page .result-section {
+  width: 100%;
+}
+
+.teacher-request-detail-page .result-section > label {
+  display: block;
+
+  margin: 10px 0 6px;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  color: #222;
+}
+
+/* =========================================================
    RADIO
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .radio-row {
   display: flex;
 
   align-items: center;
 
-  gap: 25px;
+  gap: 20px;
 
-  font-size: 12px;
+  margin-bottom: 10px;
+
+  font-size: 13px;
 }
 
 .teacher-request-detail-page .radio-row label {
@@ -493,25 +617,44 @@
 
   gap: 4px;
 
+  margin: 0;
+
   cursor: pointer;
 }
 
-/* =========================
+.teacher-request-detail-page .radio-row input {
+  margin: 0;
+
+  width: 13px;
+  height: 13px;
+
+  cursor: pointer;
+}
+
+/* =========================================================
    COMMENT
-========================= */
+========================================================= */
 
 .teacher-request-detail-page .comment-box {
   width: 100%;
-
   height: 80px;
 
   resize: none;
 
-  padding: 10px;
+  padding: 9px 10px;
+
+  background: #ffffff;
 
   border: 1px solid #ddd;
-
   border-radius: 4px;
+
+  outline: none;
+
+  font-size: 13px;
+}
+
+.teacher-request-detail-page .result-section > label:last-of-type {
+  margin-top: 20px;
 }
 
 /* =========================
@@ -520,53 +663,55 @@
 
 .teacher-request-detail-page .request-actions {
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
-  gap: 10px;
+  gap: 14px;
 
-  margin-top: 20px;
+  margin-top: 22px;
+  margin-bottom: 0;
 }
 
 .teacher-request-detail-page .request-actions button {
-  min-width: 140px;
+  width: 170px;
+  height: 38px;
 
-  min-height: 40px;
-
-  padding: 9px 25px;
+  padding: 0;
 
   border: none;
-
   border-radius: 6px;
 
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 400;
+
+  color: #ffffff;
 
   cursor: pointer;
+
+  transition: background 0.2s ease;
 }
 
-/* CANCEL */
+
+/* =========================
+   CANCEL
+========================= */
 
 .teacher-request-detail-page .cancel-btn {
-  background: #eeeeee;
-
-  color: #555;
-}
-
-/* REJECT */
-
-.teacher-request-detail-page .reject-btn {
   background: #ff0000;
-
   color: #ffffff;
 }
 
-/* APPROVE */
+.teacher-request-detail-page .cancel-btn:hover:not(:disabled) {
+  background: #d90000;
+}
+
+
+/* =========================
+   SAVE
+========================= */
 
 .teacher-request-detail-page .approve-btn {
   background: #20a66a;
-
   color: #ffffff;
 }
 
@@ -574,41 +719,33 @@
   background: #188c59;
 }
 
-.teacher-request-detail-page .reject-btn:hover:not(:disabled) {
-  background: #dc0000;
-}
 
-/* DISABLED */
+/* =========================
+   DISABLED SAVE
+========================= */
 
-.teacher-request-detail-page .request-actions button:disabled {
-  opacity: 0.5;
+.teacher-request-detail-page .approve-btn:disabled {
+  background: #d8d8d8;
+  color: #ffffff;
+
+  opacity: 1;
 
   cursor: not-allowed;
 }
 
-/* =========================
-   LOADING
-========================= */
-
-.request-detail-loading {
-  width: 100%;
-
-  min-height: 100vh;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  font-family: "Prompt", sans-serif;
-
-  font-size: 16px;
-}
-
-/* =========================
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
+
+@media (max-width: 1000px) {
+  .teacher-request-detail-page .request-content {
+    width: calc(100% - 40px);
+  }
+
+  .teacher-request-detail-page .readonly-box {
+    width: 100%;
+  }
+}
 
 @media (max-width: 900px) {
   .teacher-request-detail-page .sidebar {
@@ -621,11 +758,7 @@
     margin-left: 210px;
   }
 
-  .teacher-request-detail-page .request-content {
-    width: calc(100% - 30px);
-  }
-
-  .teacher-request-detail-page .header h2 {
-    font-size: 16px;
+  .teacher-request-detail-page .request-actions {
+    flex-wrap: wrap;
   }
 }
