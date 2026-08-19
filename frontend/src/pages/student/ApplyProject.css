@@ -7,7 +7,7 @@
   padding: 40px;
 
   border-radius: 8px;
-  box-shadow: 0 1px 5px rgba(0,0,0,.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
 }
 
 .apply-card h2 {
@@ -120,34 +120,63 @@
   margin-bottom: 6px;
 }
 
-.select-wrapper {
+.apply-card .apply-select-wrapper {
   position: relative;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-.select-wrapper select {
+.apply-card .apply-select-wrapper select {
+  display: block;
   width: 100%;
-  padding: 10px 45px 10px 12px;
-
-  border: 1px solid #ddd;
-  border-radius: 6px;
-
+  height: 44px;
+  padding: 0 45px 0 12px;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  background: #fff;
+  box-shadow: none !important;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 15px;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
 
-.select-arrow {
+.apply-card .apply-select-wrapper select:focus {
+  outline: none;
+  box-shadow: none;
+  border: 1px solid #aaa !important;
+}
+
+.apply-card .apply-select-arrow {
   position: absolute;
   top: 50%;
-  right: 18px;   /* ปรับเป็น 20px หรือ 25px ได้ */
+  right: 18px;
   transform: translateY(-50%);
   pointer-events: none;
   color: #555;
   font-size: 14px;
 }
 
+.apply-card .select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #555;
+  font-size: 14px;
+}
+
+
 .section input,
-.section select,
 .section textarea {
   width: 100%;
   padding: 10px 12px;

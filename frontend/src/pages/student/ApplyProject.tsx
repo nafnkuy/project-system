@@ -286,7 +286,7 @@ const handleSubmit = async () => {
                 <span style={{ color: "red" }}> *</span>
               </h3>
 
-              <div className="select-wrapper">
+              <div className="apply-select-wrapper">
                 <select
                   value={contactType}
                   onChange={(e) => setContactType(e.target.value)}
@@ -300,7 +300,7 @@ const handleSubmit = async () => {
                   <option>โทรศัพท์</option>
                 </select>
 
-                <FaChevronDown className="select-arrow" />
+                <FaChevronDown className="apply-select-arrow" />
               </div>
 
               {contactType !== "" && (

@@ -344,7 +344,7 @@ function SubmitNewProject() {
       <main className="main">
         {/* Header ของหน้า */}
         <header className="header">
-          <h2>หน้าหลัก</h2>
+          <h2>ส่งคำเสนอโครงงานใหม่</h2>
 
           <div className="header-right">
             <div className="notification-box">
