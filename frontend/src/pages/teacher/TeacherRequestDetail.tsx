@@ -56,6 +56,10 @@ function TeacherRequestDetail() {
 
   const [decision, setDecision] = useState<"อนุมัติ" | "ปฏิเสธ" | "">("");
 
+  const [teacherComment, setTeacherComment] = useState("");
+  const [suggestion, setSuggestion] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+
   // =========================
   // ข้อมูลอาจารย์
   // =========================
@@ -150,6 +154,13 @@ function TeacherRequestDetail() {
       .then((res) => {
         console.log("Request Detail =", res.data);
         setRequest(res.data);
+
+        // โหลดผลการพิจารณาเดิมกลับมา
+        if (res.data.status === "อนุมัติ" || res.data.status === "ปฏิเสธ") {
+          setDecision(res.data.status);
+        } else {
+          setDecision("");
+        }
       })
       .catch((err) => {
         console.log("Get request detail error =", err);
@@ -216,6 +227,9 @@ function TeacherRequestDetail() {
         `http://localhost:5000/teacher/request/${request.id}/reject`,
         {
           advisor_id: userId,
+          teacher_comment: teacherComment,
+          suggestion: suggestion,
+          rejection_reason: rejectionReason,
         },
       );
 
@@ -237,6 +251,12 @@ function TeacherRequestDetail() {
   const handleSaveDecision = () => {
     if (!decision) {
       alert("กรุณาเลือกผลการพิจารณา");
+      return;
+    }
+
+    // ถ้าปฏิเสธ ต้องกรอกเหตุผล
+    if (decision === "ปฏิเสธ" && !rejectionReason.trim()) {
+      alert("กรุณากรอกเหตุผลการปฏิเสธ");
       return;
     }
 
@@ -510,7 +530,11 @@ function TeacherRequestDetail() {
                       type="radio"
                       name="decision"
                       checked={decision === "อนุมัติ"}
-                      onChange={() => setDecision("อนุมัติ")}
+                      disabled={request.status !== "รอพิจารณา"}
+                      onChange={() => {
+                        setDecision("อนุมัติ");
+                        setRejectionReason("");
+                      }}
                     />
                     อนุมัติ
                   </label>
@@ -520,19 +544,48 @@ function TeacherRequestDetail() {
                       type="radio"
                       name="decision"
                       checked={decision === "ปฏิเสธ"}
+                      disabled={request.status !== "รอพิจารณา"}
                       onChange={() => setDecision("ปฏิเสธ")}
                     />
                     ปฏิเสธ
                   </label>
                 </div>
 
+                {/* ความคิดเห็น */}
                 <label>ความคิดเห็น</label>
 
                 <textarea
                   className="comment-box"
-                  placeholder="ความคิดเห็น"
-                  disabled
+                  placeholder="กรอกความคิดเห็น"
+                  value={teacherComment}
+                  onChange={(e) => setTeacherComment(e.target.value)}
                 />
+
+                {/* ข้อเสนอแนะ */}
+                <label>ข้อเสนอแนะ</label>
+
+                <textarea
+                  className="comment-box"
+                  placeholder="กรอกข้อเสนอแนะ"
+                  value={suggestion}
+                  onChange={(e) => setSuggestion(e.target.value)}
+                />
+
+                {/* แสดงเฉพาะตอนเลือกปฏิเสธ */}
+                {decision === "ปฏิเสธ" && (
+                  <>
+                    <label>
+                      เหตุผลการปฏิเสธ <span style={{ color: "red" }}>*</span>
+                    </label>
+
+                    <textarea
+                      className="comment-box"
+                      placeholder="กรุณาระบุเหตุผลการปฏิเสธ"
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                    />
+                  </>
+                )}
               </div>
             </section>
 

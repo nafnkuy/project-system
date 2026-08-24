@@ -803,6 +803,8 @@ app.get("/notifications/:userId", (req, res) => {
   SELECT
     id,
     message,
+    request_id,
+    project_id,
     created_at
   FROM notifications
   WHERE user_id = ?
@@ -1090,7 +1092,6 @@ app.get("/teacher/dashboard/:advisorId", (req, res) => {
     INNER JOIN projects p
       ON pr.project_id = p.id
     WHERE p.advisor_id = ?
-      AND p.source = 'teacher'
       AND pr.status = 'รอพิจารณา'
   `;
 
@@ -1497,23 +1498,32 @@ app.post("/teacher/request/:requestId/approve", (req, res) => {
 // ==========================================
 app.post("/teacher/request/:requestId/reject", (req, res) => {
   const { requestId } = req.params;
-  const { advisor_id } = req.body;
+
+  const { advisor_id, teacher_comment, suggestion, rejection_reason } =
+    req.body;
+
+  if (!rejection_reason || !rejection_reason.trim()) {
+    return res.status(400).json({
+      message: "กรุณาระบุเหตุผลการปฏิเสธ",
+    });
+  }
 
   const getRequestSql = `
-      SELECT
-        pr.id,
-        pr.student_id,
-        pr.status,
-        p.title
-      FROM project_requests pr
+  SELECT
+    pr.id,
+    pr.project_id,
+    pr.student_id,
+    pr.status,
+    p.title
+  FROM project_requests pr
 
-      INNER JOIN projects p
-        ON pr.project_id = p.id
+  INNER JOIN projects p
+    ON pr.project_id = p.id
 
-      WHERE pr.id = ?
-        AND p.advisor_id = ?
-        AND p.source IN ('teacher', 'student')
-    `;
+  WHERE pr.id = ?
+    AND p.advisor_id = ?
+    AND p.source IN ('teacher', 'student')
+`;
 
   db.query(getRequestSql, [requestId, advisor_id], (err, results) => {
     if (err) {
@@ -1539,50 +1549,254 @@ app.post("/teacher/request/:requestId/reject", (req, res) => {
     }
 
     const updateSql = `
-          UPDATE project_requests
-          SET status = 'ปฏิเสธ'
-          WHERE id = ?
+  UPDATE project_requests
+  SET
+    status = 'ปฏิเสธ',
+    teacher_comment = ?,
+    suggestion = ?,
+    rejection_reason = ?
+  WHERE id = ?
         `;
 
-    db.query(updateSql, [requestId], (err) => {
-      if (err) {
-        console.log("Reject request error:", err);
+    db.query(
+      updateSql,
+      [
+        teacher_comment || null,
+        suggestion || null,
+        rejection_reason,
+        requestId,
+      ],
+      (err) => {
+        if (err) {
+          console.log("Reject request error:", err);
 
-        return res.status(500).json({
-          message: "อัปเดตสถานะคำขอไม่สำเร็จ",
-        });
-      }
+          return res.status(500).json({
+            message: "อัปเดตสถานะคำขอไม่สำเร็จ",
+          });
+        }
 
-      // แจ้งเตือนนิสิต
-      const notificationSql = `
+        // แจ้งเตือนนิสิต
+        const notificationSql = `
               INSERT INTO notifications
               (
                 user_id,
-                message
+                message,
+                request_id,
+                project_id
               )
-              VALUES (?, ?)
+              VALUES (?, ?, ?, ?)
             `;
 
-      db.query(
-        notificationSql,
-        [
-          request.student_id,
-          `อาจารย์ปฏิเสธคำขอเข้าร่วมโครงงาน "${request.title}" ของคุณ`,
-        ],
-        (notificationErr) => {
-          if (notificationErr) {
-            console.log("Reject notification error:", notificationErr);
-          }
+        db.query(
+          notificationSql,
+          [
+            request.student_id,
 
-          res.json({
-            success: true,
-            message: "ปฏิเสธคำขอเรียบร้อยแล้ว",
-          });
-        },
-      );
-    });
+            `อาจารย์ปฏิเสธคำขอโครงงาน "${request.title}" ของคุณ
+
+            เหตุผลการปฏิเสธ: ${rejection_reason}
+
+            ความคิดเห็น: ${teacher_comment || "-"}
+
+            ข้อเสนอแนะ: ${suggestion || "-"}`,
+
+            request.id,
+            request.project_id, 
+          ],
+          (notificationErr) => {
+            if (notificationErr) {
+              console.log("Reject notification error:", notificationErr);
+            }
+
+            res.json({
+              success: true,
+              message: "ปฏิเสธคำขอเรียบร้อยแล้ว",
+            });
+          },
+        );
+      },
+    );
   });
 });
+
+// ==========================================
+// นิสิตแก้ไขคำเสนอโครงงานและส่งพิจารณาใหม่
+// ==========================================
+app.put(
+  "/student/project-resubmit/:projectId/:requestId",
+  (req, res) => {
+    const { projectId, requestId } = req.params;
+
+    const {
+      student_id,
+
+      title,
+      advisor,
+      advisor_id,
+      major,
+
+      project_type,
+      max_members,
+
+      description,
+      objectives,
+      skills,
+      requirements,
+
+      contact_type,
+      contact_value,
+      introduction,
+    } = req.body;
+
+    // ตรวจสอบก่อนว่าคำขอนี้เป็นของนิสิตจริง
+    // และต้องถูกปฏิเสธมาก่อน
+    const checkSql = `
+      SELECT
+        pr.id,
+        pr.status,
+        pr.student_id,
+        p.id AS project_id,
+        p.source
+      FROM project_requests pr
+
+      INNER JOIN projects p
+        ON pr.project_id = p.id
+
+      WHERE pr.id = ?
+        AND p.id = ?
+        AND pr.student_id = ?
+        AND p.source = 'student'
+      LIMIT 1
+    `;
+
+    db.query(
+      checkSql,
+      [requestId, projectId, student_id],
+      (err, results) => {
+        if (err) {
+          console.log("Check resubmit error:", err);
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).json({
+            message: "ไม่พบคำเสนอโครงงานของคุณ",
+          });
+        }
+
+        const oldRequest = results[0];
+
+        if (oldRequest.status !== "ปฏิเสธ") {
+          return res.status(400).json({
+            message: "สามารถส่งใหม่ได้เฉพาะคำขอที่ถูกปฏิเสธ",
+          });
+        }
+
+        // =========================
+        // 1. แก้ข้อมูล project เดิม
+        // =========================
+
+        const updateProjectSql = `
+          UPDATE projects
+          SET
+            title = ?,
+            advisor = ?,
+            advisor_id = ?,
+            major = ?,
+            project_type = ?,
+            max_members = ?,
+            description = ?,
+            objectives = ?,
+            skills = ?,
+            requirements = ?,
+            status = 'รออนุมัติ'
+          WHERE id = ?
+            AND source = 'student'
+        `;
+
+        db.query(
+          updateProjectSql,
+          [
+            title,
+            advisor,
+            advisor_id,
+            major,
+            project_type,
+            max_members,
+            description,
+            objectives,
+            skills,
+            requirements || "",
+            projectId,
+          ],
+          (err) => {
+            if (err) {
+              console.log("Update resubmit project error:", err);
+
+              return res.status(500).json({
+                message: "แก้ไขข้อมูลโครงงานไม่สำเร็จ",
+              });
+            }
+
+            // =========================
+            // 2. เปลี่ยน request เดิมกลับมารอพิจารณา
+            // =========================
+
+            const updateRequestSql = `
+              UPDATE project_requests
+              SET
+                contact_type = ?,
+                contact_value = ?,
+                introduction = ?,
+
+                status = 'รอพิจารณา',
+
+                teacher_comment = NULL,
+                suggestion = NULL,
+                rejection_reason = NULL,
+
+                request_date = CURRENT_TIMESTAMP,
+                decision_date = NULL
+              WHERE id = ?
+                AND student_id = ?
+                AND project_id = ?
+            `;
+
+            db.query(
+              updateRequestSql,
+              [
+                contact_type,
+                contact_value,
+                introduction,
+
+                requestId,
+                student_id,
+                projectId,
+              ],
+              (err) => {
+                if (err) {
+                  console.log("Update resubmit request error:", err);
+
+                  return res.status(500).json({
+                    message: "ส่งคำขอใหม่ไม่สำเร็จ",
+                  });
+                }
+
+                res.json({
+                  success: true,
+                  message: "แก้ไขและส่งให้อาจารย์พิจารณาใหม่เรียบร้อยแล้ว",
+                });
+              },
+            );
+          },
+        );
+      },
+    );
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

@@ -465,3 +465,16 @@ table td:nth-child(5) {
   background: #4caf50;
   color: white;
 }
+
+.notification-detail-message {
+  width: 100%;
+  padding: 16px 5px;
+
+  font-size: 13px;
+  line-height: 1.8;
+
+  color: #333;
+
+  white-space: pre-line;
+  text-align: left;
+}

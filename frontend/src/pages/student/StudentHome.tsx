@@ -21,6 +21,8 @@ interface Project {
 interface SystemNotification {
   id: number;
   message: string;
+  request_id: number | null;
+  project_id: number | null;
   created_at: string;
 }
 
@@ -62,6 +64,8 @@ function StudentHome() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedInvitation, setSelectedInvitation] =
     useState<Notification | null>(null);
+  const [selectedSystemNotification, setSelectedSystemNotification] =
+    useState<SystemNotification | null>(null);
 
   const [projects, setProjects] = useState<Project[]>([]);
 
@@ -280,8 +284,12 @@ function StudentHome() {
                       <div
                         key={`notification-${item.id}`}
                         className="notification-item"
+                        onClick={() => {
+                          setSelectedSystemNotification(item);
+                          setShowNotifications(false);
+                        }}
                       >
-                        <p>{item.message}</p>
+                        <p>{item.message.split("\n")[0]}</p>
 
                         <small>{item.created_at}</small>
                       </div>
@@ -423,6 +431,54 @@ function StudentHome() {
                 <button className="accept-btn" onClick={handleAcceptInvitation}>
                   ตกลง
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ==============================
+    System Notification Popup
+============================== */}
+
+        {selectedSystemNotification && (
+          <div
+            className="invitation-overlay"
+            onClick={() => setSelectedSystemNotification(null)}
+          >
+            <div
+              className="invitation-popup"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>ผลการพิจารณาโครงงาน</h3>
+
+              <div className="invitation-divider"></div>
+
+              <div className="notification-detail-message">
+                {selectedSystemNotification.message}
+              </div>
+
+              <div className="invitation-divider"></div>
+
+              <div className="invitation-actions">
+                <button
+                  className="reject-btn"
+                  onClick={() => setSelectedSystemNotification(null)}
+                >
+                  ปิด
+                </button>
+
+                {selectedSystemNotification.project_id && 
+                  selectedSystemNotification.request_id && (
+                  <button
+                    className="accept-btn"
+                    onClick={() => {
+                      navigate(
+                        `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
+                      );
+                    }}
+                  >
+                    แก้ไขและส่งใหม่
+                  </button>
+                )}
               </div>
             </div>
           </div>

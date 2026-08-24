@@ -1,5 +1,5 @@
 import "./SubmitNewProject.css"; // นำไฟล์ CSS สำหรับสไตล์ของหน้านี้เข้ามา
-import { useNavigate } from "react-router-dom"; // hook สำหรับเปลี่ยนหน้า (navigation)
+import { useNavigate, useSearchParams } from "react-router-dom"; // hook สำหรับเปลี่ยนหน้า (navigation)
 import { useEffect, useState } from "react"; // React hooks ที่ใช้งานในคอมโพเนนต์นี้
 import axios from "axios"; // ไลบรารีสำหรับเรียก API (HTTP requests)
 import { FaBell, FaSearch } from "react-icons/fa"; // ไอคอนที่ใช้ใน UI
@@ -10,6 +10,15 @@ import logo from "../../assets/Logo.svg"; // รูปโลโก้ที่�
 function SubmitNewProject() {
   // สร้างตัวช่วยเปลี่ยนหน้า (เช่น navigate('/StudentHome'))
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const mode = searchParams.get("mode");
+  const resubmitProjectId = searchParams.get("projectId");
+  const resubmitRequestId = searchParams.get("requestId");
+
+  const isResubmit =
+    mode === "resubmit" && !!resubmitProjectId && !!resubmitRequestId;
 
   // อ่านข้อมูลผู้ใช้จาก sessionStorage (ค่าที่เก็บตอนล็อกอิน)
   // ค่าที่ได้เป็น string หรือ null ถ้าไม่มีข้อมูล
@@ -121,6 +130,81 @@ function SubmitNewProject() {
   const [contactType, setContactType] = useState("");
   const [contactValue, setContactValue] = useState("");
   const [introduction, setIntroduction] = useState("");
+
+  useEffect(() => {
+    if (!isResubmit || !resubmitProjectId || !userId) {
+      return;
+    }
+
+    const loadResubmitData = async () => {
+      try {
+        console.log("กำลังโหลด project =", resubmitProjectId);
+        console.log("กำลังโหลด request =", resubmitRequestId);
+
+        const [projectRes, requestRes] = await Promise.all([
+          axios.get(`http://localhost:5000/projects/${resubmitProjectId}`),
+
+          axios.get(
+            `http://localhost:5000/project-requests/${resubmitProjectId}/${userId}`,
+          ),
+        ]);
+
+        const projectData = projectRes.data;
+        const requestData = requestRes.data;
+
+        console.log("Project เดิม =", projectData);
+        console.log("Request เดิม =", requestData);
+
+        // =========================
+        // ข้อมูลโครงงานเดิม
+        // =========================
+
+        setProjectId(Number(resubmitProjectId));
+
+        setProjectTitle(projectData.title || "");
+
+        setProjectType(projectData.project_type || "โครงงานเดี่ยว");
+
+        setAdvisorId(
+          projectData.advisor_id ? Number(projectData.advisor_id) : null,
+        );
+
+        setAdvisorName(projectData.advisor_name || projectData.advisor || "");
+
+        setTeacherKeyword(
+          projectData.advisor_name || projectData.advisor || "",
+        );
+
+        setMajor(projectData.major || "");
+
+        setDescription(projectData.description || "");
+
+        setObjective(projectData.objectives || "");
+
+        setSkills(projectData.skills || "");
+
+        // =========================
+        // ข้อมูลคำขอเดิม
+        // =========================
+
+        setContactType(requestData.contact_type || "");
+
+        setContactValue(requestData.contact_value || "");
+
+        setIntroduction(requestData.introduction || "");
+      } catch (err: any) {
+        console.log("Load resubmit data error =", err);
+        console.log(err.response?.data);
+
+        alert(
+          err.response?.data?.message ||
+            "ไม่สามารถโหลดข้อมูลคำเสนอโครงงานเดิมได้",
+        );
+      }
+    };
+
+    loadResubmitData();
+  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId]);
 
   // ฟังก์ชันค้นหานิสิตโดยรหัส (เมื่อกดปุ่มค้นหา)
   // - ตรวจสอบว่าผู้ใช้กรอกรหัสหรือไม่
@@ -253,6 +337,41 @@ function SubmitNewProject() {
       }
 
       // =========================
+      // กรณีแก้ไขและส่งใหม่
+      // =========================
+      if (isResubmit && resubmitProjectId && resubmitRequestId) {
+        const res = await axios.put(
+          `http://localhost:5000/student/project-resubmit/${resubmitProjectId}/${resubmitRequestId}`,
+          {
+            student_id: Number(userId),
+
+            title: projectTitle,
+            advisor: advisorName,
+            advisor_id: advisorId,
+            major: major,
+
+            project_type: projectType,
+            max_members: projectType === "โครงงานคู่" ? 2 : 1,
+
+            description: description,
+            objectives: objective,
+            skills: skills,
+            requirements: "",
+
+            contact_type: contactType,
+            contact_value: contactValue,
+            introduction: introduction,
+          },
+        );
+
+        alert(res.data.message);
+
+        navigate("/StudentHome");
+
+        return;
+      }
+
+      // =========================
       // กรณีโครงงานคู่
       // =========================
       if (projectType === "โครงงานคู่") {
@@ -344,7 +463,7 @@ function SubmitNewProject() {
       <main className="main">
         {/* Header ของหน้า */}
         <header className="header">
-          <h2>ส่งคำเสนอโครงงานใหม่</h2>
+          <h2>{isResubmit ? "แก้ไขคำเสนอโครงงาน" : "ส่งคำเสนอโครงงานใหม่"}</h2>
 
           <div className="header-right">
             <div className="notification-box">
@@ -393,7 +512,7 @@ function SubmitNewProject() {
 
         {/* บัตรฟอร์มสำหรับส่งข้อเสนอ */}
         <div className="proposal-card">
-          <h3>ส่งคำเสนอโครงงานใหม่</h3>
+          <h3>{isResubmit ? "แก้ไขคำเสนอโครงงาน" : "ส่งคำเสนอโครงงานใหม่"}</h3>
 
           <div className="form-group">
             <label>ชื่อหัวข้อโครงงาน</label>
@@ -647,7 +766,7 @@ function SubmitNewProject() {
             </button>
 
             <button className="submit-btn" onClick={handleSubmit}>
-              ส่งข้อเสนอ
+              {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งข้อเสนอ"}
             </button>
           </div>
         </div>
