@@ -6,6 +6,34 @@ import { FaBell, FaSearch } from "react-icons/fa"; // ไอคอนที่�
 
 import logo from "../../assets/Logo.svg"; // รูปโลโก้ที่จะแสดงใน sidebar
 
+interface Notification {
+  id: number;
+  project_id: number;
+
+  sender_id: number;
+  sender_username: string;
+  sender_name: string;
+
+  receiver_id: number;
+  receiver_username: string;
+  receiver_name: string;
+
+  title: string;
+  project_type: string;
+
+  description: string;
+  objectives: string;
+  skills: string;
+  requirements: string;
+
+  contact_type: string;
+  contact_value: string;
+  introduction: string;
+
+  status: string;
+  created_at: string;
+}
+
 // ฟังก์ชันคอมโพเนนต์หลักสำหรับหน้าส่งคำเสนอโครงงานใหม่
 function SubmitNewProject() {
   // สร้างตัวช่วยเปลี่ยนหน้า (เช่น navigate('/StudentHome'))
@@ -375,7 +403,46 @@ function SubmitNewProject() {
       // กรณีโครงงานคู่
       // =========================
       if (projectType === "โครงงานคู่") {
-        alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
+        // ต้องเคยสร้าง project ตอนส่งคำเชิญแล้ว
+        if (!projectId) {
+          alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
+          return;
+        }
+
+        // ตรวจสอบว่าสมาชิกคนที่ 2 ตอบรับหรือยัง
+        const invitationRes = await axios.get(
+          `http://localhost:5000/project-invitations/status/${projectId}/${userId}`,
+        );
+
+        if (invitationRes.data.status === "รอตอบรับ") {
+          alert("สมาชิกคนที่ 2 ยังไม่ได้ตอบรับคำเชิญ");
+          return;
+        }
+
+        if (invitationRes.data.status === "ปฏิเสธ") {
+          alert("สมาชิกคนที่ 2 ปฏิเสธคำเชิญ กรุณาเลือกสมาชิกใหม่");
+          return;
+        }
+
+        if (invitationRes.data.status !== "ตอบรับ") {
+          alert("ไม่สามารถส่งข้อเสนอได้");
+          return;
+        }
+
+        // สมาชิกตอบรับแล้ว
+        // คนที่ 1 เป็นคนกดส่งข้อเสนอให้อาจารย์
+        await axios.post("http://localhost:5000/project-requests", {
+          project_id: projectId,
+          student_id: Number(userId),
+          contact_type: contactType,
+          contact_value: contactValue,
+          introduction: introduction,
+        });
+
+        alert("ส่งข้อเสนอโครงงานสำเร็จ");
+
+        navigate("/StudentHome");
+
         return;
       }
 

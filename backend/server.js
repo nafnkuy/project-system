@@ -645,14 +645,14 @@ app.post("/project-invitations/:id/accept", (req, res) => {
 
     const invitation = invitationResult[0];
 
-    // ตรวจสอบว่าคำเชิญยังรอตอบรับอยู่หรือไม่
+    // ต้องเป็นคำเชิญที่ยังรอตอบรับเท่านั้น
     if (invitation.status !== "รอตอบรับ") {
       return res.status(400).json({
         message: "คำเชิญนี้ถูกตอบไปแล้ว",
       });
     }
 
-    // 2. เปลี่ยนสถานะคำเชิญ
+    // 2. เปลี่ยนสถานะคำเชิญเป็น "ตอบรับ"
     const updateInvitationSql = `
       UPDATE project_invitations
       SET status = 'ตอบรับ'
@@ -668,71 +668,72 @@ app.post("/project-invitations/:id/accept", (req, res) => {
         });
       }
 
-      // 3. สร้าง project_request
-      // student_id = สมาชิกคนที่ 1 (sender_id)
-      const insertRequestSql = `
-          INSERT INTO project_requests
-          (
-            project_id,
-            student_id,
-            contact_type,
-            contact_value,
-            introduction
-          )
-          VALUES (?, ?, ?, ?, ?)
-        `;
+      // 3. แจ้งเตือนกลับไปหาคนที่ 1 เท่านั้น
+      // ยังไม่สร้าง project_request
+      const notificationSql = `
+        INSERT INTO notifications
+        (
+          user_id,
+          message
+        )
+        VALUES (?, ?)
+      `;
 
       db.query(
-        insertRequestSql,
+        notificationSql,
         [
-          invitation.project_id,
           invitation.sender_id,
-          invitation.contact_type,
-          invitation.contact_value,
-          invitation.introduction,
+          `${invitation.receiver_name} ตอบรับคำเชิญเข้าร่วมโครงงาน "${invitation.title}" แล้ว`,
         ],
-        (err, requestResult) => {
-          if (err) {
-            console.log("Create project request error:", err);
-
-            return res.status(500).json({
-              message: "สร้างคำขอไม่สำเร็จ",
-            });
+        (notificationErr) => {
+          if (notificationErr) {
+            console.log("Notification error:", notificationErr);
           }
 
-          // 4. ส่ง notification กลับไปหาสมาชิกคนที่ 1
-          const notificationSql = `
-              INSERT INTO notifications
-              (
-                user_id,
-                message
-              )
-              VALUES (?, ?)
-            `;
-
-          db.query(
-            notificationSql,
-            [
-              invitation.sender_id,
-              `${invitation.receiver_name} ตอบรับคำเชิญเข้าร่วมโครงงาน "${invitation.title}" แล้ว`,
-            ],
-            (notificationErr) => {
-              if (notificationErr) {
-                console.log("Notification error:", notificationErr);
-              }
-
-              // 5. ส่งผลกลับไป Frontend
-              res.json({
-                success: true,
-                message: "ตอบรับคำเชิญเรียบร้อยแล้ว",
-                invitation_id: invitationId,
-                request_id: requestResult.insertId,
-              });
-            },
-          );
+          res.json({
+            success: true,
+            message: "ตอบรับคำเชิญเรียบร้อยแล้ว",
+            invitation_id: invitationId,
+          });
         },
       );
     });
+  });
+});
+
+app.get("/project-invitations/status/:projectId/:senderId", (req, res) => {
+  const { projectId, senderId } = req.params;
+
+  const sql = `
+    SELECT
+      id,
+      project_id,
+      sender_id,
+      receiver_id,
+      status
+    FROM project_invitations
+    WHERE project_id = ?
+      AND sender_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+
+  db.query(sql, [projectId, senderId], (err, result) => {
+    if (err) {
+      console.log("Get invitation status error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบคำเชิญสมาชิก",
+      });
+    }
+
+    res.json(result[0]);
   });
 });
 
