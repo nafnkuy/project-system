@@ -348,16 +348,46 @@ app.get("/teachers/search", (req, res) => {
 
   const sql = `
     SELECT
-      id,
-      name,
-      major
-    FROM users
-    WHERE role = 'teacher'
-      AND name LIKE ?
+      u.id,
+      u.name,
+      u.major,
+
+      COUNT(DISTINCT pm.user_id) AS accepted_students,
+
+      14 AS total_capacity,
+
+      GREATEST(
+        14 - COUNT(DISTINCT pm.user_id),
+        0
+      ) AS remaining_capacity,
+
+      CASE
+        WHEN COUNT(DISTINCT pm.user_id) >= 14
+        THEN 'เต็ม'
+        ELSE 'เปิดรับ'
+      END AS advisor_status
+
+    FROM users u
+
+    LEFT JOIN projects p
+      ON p.advisor_id = u.id
+
+    LEFT JOIN project_members pm
+      ON pm.project_id = p.id
+
+    WHERE u.role = 'teacher'
+      AND u.name LIKE ?
+
+    GROUP BY
+      u.id,
+      u.name,
+      u.major
   `;
 
   db.query(sql, [`%${name}%`], (err, results) => {
     if (err) {
+      console.log("Teacher search error:", err);
+
       return res.status(500).json({
         message: "Database Error",
       });

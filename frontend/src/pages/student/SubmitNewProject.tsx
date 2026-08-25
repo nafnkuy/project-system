@@ -700,28 +700,43 @@ function SubmitNewProject() {
                 </div>
 
                 {/* ถ้ามีรายการ teacherList ให้แสดงเป็นรายการเลือก */}
-                {teacherList.length > 0 && (
-                  <div className="teacher-list">
-                    {teacherList.map((teacher) => (
-                      <div
-                        key={teacher.id}
-                        className="teacher-item"
-                        onClick={() => {
-                          // เมื่อเลือกอาจารย์จากรายการ ให้เซ็ต id, name
-                          setAdvisorId(teacher.id);
-                          setAdvisorName(teacher.name);
-                          setMajor(teacher.major);
-                          // ตั้งค่าช่องค้นหาเป็นชื่อนั้น (เพื่อแสดงใน input)
-                          setTeacherKeyword(teacher.name);
-                          // และเคลียร์รายการผลลัพธ์
-                          setTeacherList([]);
-                        }}
-                      >
-                        {teacher.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {teacherList.map((teacher) => {
+                  const requiredSlots = projectType === "โครงงานคู่" ? 2 : 1;
+
+                  const canAccept =
+                    Number(teacher.remaining_capacity) >= requiredSlots;
+
+                  return (
+                    <div
+                      key={teacher.id}
+                      className={`teacher-item ${!canAccept ? "teacher-full" : ""}`}
+                      onClick={() => {
+                        if (!canAccept) {
+                          alert(
+                            projectType === "โครงงานคู่"
+                              ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
+                              : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
+                          );
+                          return;
+                        }
+
+                        setAdvisorId(teacher.id);
+                        setAdvisorName(teacher.name);
+                        setMajor(teacher.major);
+                        setTeacherKeyword(teacher.name);
+                        setTeacherList([]);
+                      }}
+                    >
+                      <span>{teacher.name}</span>
+
+                      <span>
+                        {canAccept
+                          ? `เปิดรับ (${teacher.accepted_students}/14)`
+                          : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/14)`}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
