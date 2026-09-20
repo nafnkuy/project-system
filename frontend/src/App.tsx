@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import './App.css'
-import Login from './pages/Login'
+import "./App.css";
+import Login from "./pages/Login";
 import StudentHome from "./pages/student/StudentHome";
 import ProjectDetail from "./pages/student/ProjectDetail";
 import ApplyProject from "./pages/student/ApplyProject";
@@ -14,6 +14,7 @@ import TeacherProjectEdit from "./pages/teacher/TeacherProjectEdit";
 import TeacherRequestDetail from "./pages/teacher/TeacherRequestDetail";
 
 import StaffHome from "./pages/Staff/StaffHome";
+import StaffDocumentDetail from "./pages/Staff/StaffDocumentDetail";
 
 function App() {
   return (
@@ -26,13 +27,14 @@ function App() {
         <Route path="/submit-new-project" element={<SubmitNewProject />} />
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
-        <Route path="/create-teacher-project" element={<CreateTeacherProject />} />
-        <Route path="/teacher-project-details/:id" element={<TeacherProjectDetail />} />
-        <Route path="/teacher-project-edit/:id" element={<TeacherProjectEdit />} />
-        <Route path="/teacher-request-details/:id" element={<TeacherRequestDetail />} />
+        <Route path="/create-teacher-project"  element={<CreateTeacherProject />}/>
+        <Route path="/teacher-project-details/:id"  element={<TeacherProjectDetail />}/>
+        <Route  path="/teacher-project-edit/:id"  element={<TeacherProjectEdit />}/>
+        <Route  path="/teacher-request-details/:id"  element={<TeacherRequestDetail />}/>
         <Route path="/staff-home" element={<StaffHome />} />
+        <Route path="/staff-document/:id" element={<StaffDocumentDetail />} />
       </Routes>
     </BrowserRouter>
   );
 }
-export default App
+export default App;

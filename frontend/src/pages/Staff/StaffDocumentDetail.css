@@ -1,0 +1,330 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+
+.staff-detail-page,
+.staff-detail-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.staff-detail-page {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.staff-detail-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 220px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+}
+
+.staff-detail-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 20px 15px;
+}
+
+.staff-detail-logo img {
+  width: 48px;
+  height: 48px;
+}
+
+.staff-detail-logo h2 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.staff-detail-logo p {
+  margin: 2px 0 0;
+
+  font-size: 7px;
+  color: #777;
+}
+
+.staff-detail-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.staff-detail-sidebar li {
+  padding: 15px 8px;
+
+  text-align: center;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.staff-detail-sidebar li.active {
+  background: #32617e;
+  color: white;
+}
+
+.staff-detail-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+
+  padding: 10px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: #3978c8;
+  color: white;
+
+  cursor: pointer;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.staff-detail-main {
+  width: calc(100% - 220px);
+  min-height: 100vh;
+
+  margin-left: 220px;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.staff-detail-header {
+  height: 68px;
+
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f4e49d;
+}
+
+.staff-detail-header h2 {
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.staff-detail-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.staff-detail-bell {
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  background: white;
+  color: #999;
+}
+
+.staff-detail-user {
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 12px;
+
+  background: white;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  font-size: 12px;
+}
+
+.staff-detail-user img {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.staff-detail-content {
+  padding: 30px 40px;
+}
+
+.staff-detail-card {
+  max-width: 1000px;
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  background: white;
+
+  border-radius: 10px;
+}
+
+.staff-detail-card > h3 {
+  margin: 0 0 25px;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.detail-section {
+  margin-bottom: 18px;
+
+  padding: 20px;
+
+  border: 1px solid #bbb;
+  border-radius: 8px;
+}
+
+.detail-section h4 {
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detail-line {
+  width: 100%;
+  height: 1px;
+
+  margin: 12px 0 20px;
+
+  background: #bbb;
+}
+
+.detail-section p {
+  margin: 10px 0;
+
+  font-size: 11px;
+}
+
+.detail-section p span {
+  font-weight: 400;
+}
+
+
+/* =========================
+   MEMBERS
+========================= */
+
+.member-title {
+  margin-top: 28px;
+  margin-bottom: 5px;
+
+  font-size: 11px;
+}
+
+.member-list {
+  padding-left: 30px;
+}
+
+.member-list p {
+  margin: 10px 0;
+}
+
+
+/* =========================
+   SIGNATURE
+========================= */
+
+.signature-status-row {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 10px;
+
+  font-size: 11px;
+}
+
+.signature-complete {
+  padding: 4px 12px;
+
+  border-radius: 20px;
+
+  background: #1ca46a;
+  color: white;
+}
+
+.signature-missing {
+  padding: 4px 12px;
+
+  border-radius: 20px;
+
+  background: #999;
+  color: white;
+}
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+.download-area {
+  display: flex;
+  justify-content: center;
+
+  padding-top: 15px;
+}
+
+.download-document-btn {
+  padding: 8px 18px;
+
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+  background: white;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.download-document-btn:hover {
+  background: #f5f5f5;
+}

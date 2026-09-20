@@ -722,13 +722,13 @@ function SubmitNewProject() {
 
           {/* แนะนำตัว */}
           <div className="form-group">
-            <label>แนะนำตัว / ข้อมูลเพิ่มเติม</label>
+            <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
 
             <textarea
               rows={4}
               value={introduction}
               onChange={(e) => setIntroduction(e.target.value)}
-              placeholder="แนะนำตัวหรือข้อมูลเพิ่มเติมสำหรับอาจารย์"
+              placeholder="กรุณาระบุเหตุผลที่ต้องการเสนอหัวข้อโครงงานนี้"
             />
           </div>
 

@@ -374,35 +374,47 @@
 
 /* COLUMN WIDTH */
 
+/* เลขที่เอกสาร */
 .staff-document-table th:nth-child(1),
 .staff-document-table td:nth-child(1) {
-  width: 23%;
+  width: 15%;
 }
 
+/* อาจารย์ผู้อนุมัติ */
 .staff-document-table th:nth-child(2),
 .staff-document-table td:nth-child(2) {
-  width: 27%;
-}
-
-.staff-document-table th:nth-child(3),
-.staff-document-table td:nth-child(3) {
-  width: 19%;
-}
-
-.staff-document-table th:nth-child(4),
-.staff-document-table td:nth-child(4) {
   width: 18%;
 }
 
+/* ชื่อหัวข้อโครงงาน */
+.staff-document-table th:nth-child(3),
+.staff-document-table td:nth-child(3) {
+  width: 29%;
+}
+
+/* การดาวน์โหลด */
+.staff-document-table th:nth-child(4),
+.staff-document-table td:nth-child(4) {
+  width: 13%;
+}
+
+/* วันที่อนุมัติ */
 .staff-document-table th:nth-child(5),
 .staff-document-table td:nth-child(5) {
-  width: 13%;
+  width: 15%;
+}
+
+/* จัดการ */
+.staff-document-table th:nth-child(6),
+.staff-document-table td:nth-child(6) {
+  width: 10%;
 }
 
 
 /* DETAIL BUTTON */
 
 .staff-detail-btn {
+  white-space: nowrap;
   min-width: 66px;
   height: 27px;
 

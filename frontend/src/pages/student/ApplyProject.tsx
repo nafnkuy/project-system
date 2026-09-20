@@ -120,11 +120,11 @@ function ApplyProject() {
       });
   }, [userId]);
 
-const handleSubmit = async () => {
-  if (!contactType || !contactValue) {
-    alert("กรุณากรอกข้อมูลให้ครบ");
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!contactType || !contactValue) {
+      alert("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
 
     try {
       setPopupType("loading");
@@ -317,11 +317,12 @@ const handleSubmit = async () => {
             </div>
           </div>
           <div className="section">
-            <h3>แนะนำตัว (ไม่บังคับ)</h3>
+            <h3>เหตุผลในการสมัครเข้าร่วมโครงงาน</h3>
 
             <textarea
               value={introduction}
               onChange={(e) => setIntroduction(e.target.value)}
+              placeholder="กรุณาระบุเหตุผลที่ต้องการสมัครเข้าร่วมโครงงานนี้"
             />
           </div>
 
