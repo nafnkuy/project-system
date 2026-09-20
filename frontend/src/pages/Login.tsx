@@ -73,6 +73,16 @@ function Login() {
         navigate("/teacher-home");
         return;
       }
+      /* เจ้าหน้าที่ */
+      if (data.user.role === "staff") {
+        sessionStorage.setItem("userId", data.user.id);
+        sessionStorage.setItem("username", data.user.username);
+        sessionStorage.setItem("name", data.user.name);
+        sessionStorage.setItem("profileImage", data.user.profileImage);
+
+        navigate("/staff-home");
+        return;
+      }
     } catch (error) {
       //ตรวจสอบว่ามีความผิดพลาดในการเข้าสู่ระบบหรือไม่
       setLoginError("รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง");

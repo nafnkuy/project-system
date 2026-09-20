@@ -738,3 +738,644 @@
 .more-menu .delete-option:hover {
   background: #fff1f1;
 }
+
+/* =====================================================
+   TEACHER PROJECTS - TABLE DESIGN
+   ===================================================== */
+
+/* ---------- CONTENT ---------- */
+
+.teacher-projects-page .project-content {
+  width: 100%;
+  padding: 48px 38px;
+}
+
+
+/* ---------- TOOLBAR ---------- */
+
+.teacher-projects-page .project-toolbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-bottom: 42px;
+}
+
+.teacher-projects-page .project-search {
+  width: 380px;
+  height: 39px;
+
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0 14px;
+
+  background: #ffffff;
+  border: 1px solid #b8b8b8;
+  border-radius: 20px;
+}
+
+.teacher-projects-page .project-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+}
+
+.teacher-projects-page .project-search svg {
+  font-size: 16px;
+  color: #a2a2a2;
+}
+
+
+/* ---------- SELECT ---------- */
+
+.teacher-projects-page .project-select-wrapper {
+  position: relative;
+  height: 39px;
+}
+
+.teacher-projects-page .status-select {
+  width: 100px;
+}
+
+.teacher-projects-page .sort-select {
+  width: 105px;
+}
+
+.teacher-projects-page .project-filter-select {
+  width: 100%;
+  height: 39px;
+
+  padding: 0 30px 0 12px;
+
+  border: 1px solid #b8b8b8;
+  border-radius: 20px;
+
+  background: #ffffff;
+  color: #999;
+
+  outline: none;
+  appearance: none;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-projects-page .project-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #999;
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+
+/* ---------- SUMMARY ---------- */
+
+.teacher-projects-page .project-summary {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+
+  margin-bottom: 40px;
+}
+
+.teacher-projects-page .summary-card {
+  height: 108px;
+
+  padding: 18px 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+}
+
+.teacher-projects-page .summary-card span {
+  margin-bottom: 6px;
+
+  color: #222;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.teacher-projects-page .summary-card strong {
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+/* ทั้งหมด */
+.teacher-projects-page .summary-card:nth-child(1) strong {
+  color: #3378bd;
+}
+
+/* เปิดรับ */
+.teacher-projects-page .summary-card:nth-child(2) strong {
+  color: #18a269;
+}
+
+/* ปิดรับ */
+.teacher-projects-page .summary-card:nth-child(3) strong {
+  color: #ff0000;
+}
+
+/* ซ่อน */
+.teacher-projects-page .summary-card:nth-child(4) strong {
+  color: #999999;
+}
+
+
+/* ---------- TABLE CONTAINER ---------- */
+
+.teacher-projects-page .project-list-container {
+  width: 100%;
+
+  padding: 20px 20px 28px;
+
+  background: #ffffff;
+
+  border: none;
+  border-radius: 10px;
+}
+
+
+/* ---------- TABLE HEADER ---------- */
+
+.teacher-projects-page .project-list-header {
+  min-height: 55px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+  padding: 0 10px;
+}
+
+.teacher-projects-page .project-list-header h3 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+/* ---------- CREATE BUTTON ---------- */
+
+.teacher-projects-page .create-project-btn {
+  width: auto;
+  min-width: 160px;
+  height: 36px;
+
+  margin: 0;
+  padding: 0 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #20a36a;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.teacher-projects-page .create-project-btn svg {
+  font-size: 11px;
+}
+
+
+/* ---------- TABLE ---------- */
+
+.teacher-projects-page .project-table-wrapper {
+  width: 100%;
+  overflow: visible;
+}
+
+.teacher-projects-page .project-table {
+  width: 100%;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  border: none !important;
+  outline: none !important;
+
+  font-size: 12px;
+  color: #222;
+}
+
+
+/* ===================================
+   เอาเส้นแนวตั้งออกทั้งหมด
+   =================================== */
+
+.teacher-projects-page .project-table th,
+.teacher-projects-page .project-table td {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+
+/* ---------- HEADER ---------- */
+
+.teacher-projects-page .project-table thead tr {
+  border-top: none !important;
+  border-bottom: 1px solid #bdbdbd !important;
+}
+
+.teacher-projects-page .project-table th {
+  height: 48px;
+
+  padding: 8px 12px;
+
+  border-bottom: none !important;
+
+  text-align: left;
+  vertical-align: middle;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  color: #222;
+  background: transparent;
+}
+
+
+/* ---------- BODY ---------- */
+
+.teacher-projects-page .project-table tbody tr {
+  border-bottom: 1px solid #d2d2d2 !important;
+}
+
+.teacher-projects-page .project-table td {
+  height: 58px;
+
+  padding: 8px 12px;
+
+  border-bottom: none !important;
+
+  text-align: left;
+  vertical-align: middle;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  background: transparent;
+}
+
+
+/* ===================================
+   ความกว้าง Column
+   ให้ใกล้รูปออกแบบ
+   =================================== */
+
+/* ชื่อหัวข้อ */
+.teacher-projects-page .project-table th:nth-child(1),
+.teacher-projects-page .project-table td:nth-child(1) {
+  width: 19%;
+}
+
+/* ปีการศึกษา */
+.teacher-projects-page .project-table th:nth-child(2),
+.teacher-projects-page .project-table td:nth-child(2) {
+  width: 15%;
+}
+
+/* ประเภทโครงงาน */
+.teacher-projects-page .project-table th:nth-child(3),
+.teacher-projects-page .project-table td:nth-child(3) {
+  width: 19%;
+}
+
+/* รับนิสิต */
+.teacher-projects-page .project-table th:nth-child(4),
+.teacher-projects-page .project-table td:nth-child(4) {
+  width: 14%;
+}
+
+/* สถานะ */
+.teacher-projects-page .project-table th:nth-child(5),
+.teacher-projects-page .project-table td:nth-child(5) {
+  width: 12%;
+}
+
+/* จัดการ */
+.teacher-projects-page .project-table th:nth-child(6),
+.teacher-projects-page .project-table td:nth-child(6) {
+  width: 21%;
+}
+
+
+/* ---------- STATUS ---------- */
+
+.teacher-projects-page .table-status {
+  min-width: 58px;
+  height: 25px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px;
+
+  background: #ffffff;
+
+  border-radius: 4px;
+
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* เปิดรับ */
+.teacher-projects-page .table-status.open {
+  color: #16a36a;
+  border: 1px solid #16a36a;
+}
+
+/* ปิดรับ */
+.teacher-projects-page .table-status.closed {
+  color: #ff2525;
+  border: 1px solid #ff2525;
+}
+
+/* ซ่อน */
+.teacher-projects-page .table-status.hidden {
+  color: #888;
+  border: 1px solid #aaa;
+}
+
+
+/* ---------- HIDDEN ROW ---------- */
+
+.teacher-projects-page .hidden-project-row {
+  color: #aaaaaa;
+}
+
+.teacher-projects-page .hidden-project-row .project-title-cell {
+  color: #aaaaaa;
+}
+
+
+/* ---------- ACTION ---------- */
+
+.teacher-projects-page .table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 5px;
+}
+
+.teacher-projects-page .action-btn {
+  height: 27px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 12px;
+
+  border: 1px solid #c9c9c9;
+  border-radius: 5px;
+
+  background: #ffffff;
+  color: #9b9b9b;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+.teacher-projects-page .action-btn:hover {
+  background: #f7f7f7;
+  color: #555;
+}
+
+.teacher-projects-page .detail-btn {
+  min-width: 68px;
+}
+
+.teacher-projects-page .edit-btn {
+  min-width: 60px;
+}
+
+
+/* ---------- MORE BUTTON ---------- */
+
+.teacher-projects-page .more-menu-wrapper {
+  position: relative;
+}
+
+.teacher-projects-page .more-btn {
+  width: 27px;
+  min-width: 27px;
+
+  padding: 0;
+}
+
+
+/* ---------- MORE MENU ---------- */
+
+.teacher-projects-page .more-menu {
+  position: absolute;
+
+  top: 33px;
+  right: 0;
+  bottom: auto;
+
+  width: 140px;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+
+  overflow: hidden;
+
+  z-index: 200;
+}
+
+.teacher-projects-page .more-menu button {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: none;
+
+  background: #ffffff;
+  color: #333;
+
+  text-align: left;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.teacher-projects-page .more-menu button:hover {
+  background: #f5f5f5;
+}
+
+.teacher-projects-page .more-menu .delete-option {
+  color: #e53935;
+  border-top: 1px solid #eeeeee;
+}
+
+
+/* ---------- EMPTY / LOADING ---------- */
+
+.teacher-projects-page .table-message {
+  height: 160px !important;
+
+  text-align: center !important;
+
+  color: #888;
+  font-size: 12px !important;
+}
+
+/* =========================================
+   POPUP CONFIRM ซ่อน / แสดงหัวข้อ
+========================================= */
+
+.teacher-projects-page .confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(255, 255, 255, 0.78);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+/* กล่อง popup */
+.teacher-projects-page .confirm-modal {
+  width: 390px;
+  min-height: 305px;
+
+  padding: 30px 38px;
+
+  background: #ffffff;
+
+  border: 1px solid #777;
+  border-radius: 9px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+/* หัวข้อ */
+.teacher-projects-page .confirm-modal h3 {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #111;
+}
+
+/* เส้นใต้หัวข้อ */
+.teacher-projects-page .confirm-line {
+  width: 100%;
+  height: 1px;
+
+  background: #bdbdbd;
+
+  margin: 18px 0 50px;
+}
+
+/* ข้อความอธิบาย */
+.teacher-projects-page .confirm-modal p {
+  width: 250px;
+
+  margin: 0 0 48px;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.8;
+
+  color: #111;
+}
+
+/* ปุ่ม */
+.teacher-projects-page .confirm-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 14px;
+}
+
+/* ปุ่มยกเลิก + ยืนยัน */
+.teacher-projects-page .confirm-cancel-btn,
+.teacher-projects-page .confirm-submit-btn {
+  width: 90px;
+  height: 36px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-family: "Prompt", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+/* ยกเลิก */
+.teacher-projects-page .confirm-cancel-btn {
+  background: #ff0a0a;
+}
+
+.teacher-projects-page .confirm-cancel-btn:hover {
+  background: #df0000;
+}
+
+/* ซ่อน / แสดง */
+.teacher-projects-page .confirm-submit-btn {
+  background: #20a36a;
+}
+
+.teacher-projects-page .confirm-submit-btn:hover {
+  background: #198d5b;
+}

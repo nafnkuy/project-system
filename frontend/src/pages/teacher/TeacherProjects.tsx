@@ -36,6 +36,25 @@ function TeacherProjects() {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   /* =========================
+   POPUP ซ่อน / แสดงหัวข้อ
+========================= */
+
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    type: "hide" | "show" | "delete" | null;
+    projectId: number | null;
+    projectTitle: string;
+  }>({
+    open: false,
+    type: null,
+    projectId: null,
+    projectTitle: "",
+  });
+
+  /* Popup ลบสำเร็จ */
+  const [deleteSuccessModal, setDeleteSuccessModal] = useState(false);
+
+  /* =========================
      ตรวจสอบ Login
   ========================= */
   useEffect(() => {
@@ -80,17 +99,57 @@ function TeacherProjects() {
   };
 
   /* =========================
+   เปิด / ปิด Popup
+========================= */
+
+  const openHideModal = (projectId: number) => {
+    setConfirmModal({
+      open: true,
+      type: "hide",
+      projectId,
+      projectTitle: "",
+    });
+
+    setOpenMenuId(null);
+  };
+
+  const openShowModal = (projectId: number) => {
+    setConfirmModal({
+      open: true,
+      type: "show",
+      projectId,
+      projectTitle: "",
+    });
+
+    setOpenMenuId(null);
+  };
+
+  const openDeleteModal = (projectId: number, projectTitle: string) => {
+    setConfirmModal({
+      open: true,
+      type: "delete",
+      projectId,
+      projectTitle,
+    });
+
+    setOpenMenuId(null);
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal({
+      open: false,
+      type: null,
+      projectId: null,
+      projectTitle: "",
+    });
+  };
+
+  /* =========================
    ซ่อนหัวข้อโครงงาน
 ========================= */
 
   const handleHideProject = async (projectId: number) => {
     if (!userId) return;
-
-    const confirmHide = window.confirm(
-      "คุณต้องการซ่อนหัวข้อโครงงานนี้ใช่หรือไม่?",
-    );
-
-    if (!confirmHide) return;
 
     try {
       await axios.put(
@@ -100,7 +159,6 @@ function TeacherProjects() {
         },
       );
 
-      // เปลี่ยนข้อมูลบนหน้าทันที
       setProjects((prevProjects) =>
         prevProjects.map((project) =>
           project.id === projectId
@@ -109,12 +167,9 @@ function TeacherProjects() {
         ),
       );
 
-      setOpenMenuId(null);
-
-      alert("ซ่อนหัวข้อโครงงานเรียบร้อยแล้ว");
+      closeConfirmModal();
     } catch (error) {
       console.log("Hide project error:", error);
-
       alert("ไม่สามารถซ่อนหัวข้อโครงงานได้");
     }
   };
@@ -125,12 +180,6 @@ function TeacherProjects() {
   const handleShowProject = async (projectId: number) => {
     if (!userId) return;
 
-    const confirmShow = window.confirm(
-      "คุณต้องการแสดงหัวข้อโครงงานนี้อีกครั้งใช่หรือไม่?",
-    );
-
-    if (!confirmShow) return;
-
     try {
       await axios.put(
         `http://localhost:5000/teacher/projects/${projectId}/${userId}/visibility`,
@@ -139,24 +188,17 @@ function TeacherProjects() {
         },
       );
 
-      // เปลี่ยนข้อมูลบนหน้าทันที
       setProjects((prevProjects) =>
         prevProjects.map((project) =>
           project.id === projectId
-            ? {
-                ...project,
-                visibility: "แสดง",
-              }
+            ? { ...project, visibility: "แสดง" }
             : project,
         ),
       );
 
-      setOpenMenuId(null);
-
-      alert("แสดงหัวข้อโครงงานเรียบร้อยแล้ว");
+      closeConfirmModal();
     } catch (error) {
       console.log("Show project error:", error);
-
       alert("ไม่สามารถแสดงหัวข้อโครงงานได้");
     }
   };
@@ -168,28 +210,22 @@ function TeacherProjects() {
   const handleDeleteProject = async (projectId: number) => {
     if (!userId) return;
 
-    const confirmDelete = window.confirm(
-      "คุณต้องการลบหัวข้อโครงงานนี้ใช่หรือไม่?\nการลบจะไม่สามารถกู้คืนได้",
-    );
-
-    if (!confirmDelete) return;
-
     try {
       await axios.delete(
         `http://localhost:5000/teacher/projects/${projectId}/${userId}`,
       );
 
-      // เอาออกจากรายการทันที
       setProjects((prevProjects) =>
         prevProjects.filter((project) => project.id !== projectId),
       );
 
-      setOpenMenuId(null);
+      /* ปิด popup ยืนยันการลบ */
+      closeConfirmModal();
 
-      alert("ลบหัวข้อโครงงานเรียบร้อยแล้ว");
+      /* เปิด popup ลบสำเร็จ */
+      setDeleteSuccessModal(true);
     } catch (error) {
       console.log("Delete project error:", error);
-
       alert("ไม่สามารถลบหัวข้อโครงงานได้");
     }
   };
@@ -197,37 +233,34 @@ function TeacherProjects() {
   /* =========================
      Search + Filter + Sort
   ========================= */
+
   const filteredProjects = [...projects]
     .filter((project) => {
-      // project.title = "สวัสดี WoRlD";
-      // project.title.toLowerCase() = "สวัสดี world";
-      // searchTerm = "";
-      // searchTerm.toLowerCase() = "";
-      // "สวัสดี world".includes("") = true
       const matchSearch = project.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
       let matchStatus = true;
 
-      if (statusFilter === "รับนิสิต") {
+      if (statusFilter === "open") {
         matchStatus =
-          project.status === "เปิดรับ" || project.status === "ใกล้เต็ม";
-      } else if (statusFilter === "ปิดรับ") {
-        matchStatus = project.status === "ปิดรับ";
+          project.visibility !== "ซ่อน" &&
+          (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม");
+      } else if (statusFilter === "closed") {
+        matchStatus =
+          project.visibility !== "ซ่อน" && project.status === "ปิดรับ";
+      } else if (statusFilter === "hidden") {
+        matchStatus = project.visibility === "ซ่อน";
       }
 
       return matchSearch && matchStatus;
     })
     .sort((a, b) => {
-      if (sortOrder === "title") {
-        return a.title.localeCompare(b.title, "th");
-      }
-
       if (sortOrder === "oldest") {
         return a.id - b.id;
       }
 
+      // ค่า default และ latest
       return b.id - a.id;
     });
 
@@ -238,12 +271,54 @@ function TeacherProjects() {
   const totalProjects = projects.length;
 
   const openProjects = projects.filter(
-    (project) => project.status === "เปิดรับ" || project.status === "ใกล้เต็ม",
+    (project) =>
+      project.visibility !== "ซ่อน" &&
+      (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม"),
   ).length;
 
   const closedProjects = projects.filter(
-    (project) => project.status === "ปิดรับ",
+    (project) => project.visibility !== "ซ่อน" && project.status === "ปิดรับ",
   ).length;
+
+  const hiddenProjects = projects.filter(
+    (project) => project.visibility === "ซ่อน",
+  ).length;
+
+  /* =========================
+     ข้อความที่ใช้แสดงในตาราง
+  ========================= */
+
+  const getDisplayStatus = (project: Project) => {
+    if (project.visibility === "ซ่อน") {
+      return "ซ่อน";
+    }
+
+    // หน้านี้ให้ "ใกล้เต็ม" อยู่ในกลุ่มเปิดรับ
+    if (project.status === "ใกล้เต็ม") {
+      return "เปิดรับ";
+    }
+
+    return project.status;
+  };
+
+  const getStatusClass = (project: Project) => {
+    if (project.visibility === "ซ่อน") {
+      return "hidden";
+    }
+
+    if (project.status === "ปิดรับ") {
+      return "closed";
+    }
+
+    return "open";
+  };
+
+  const getProjectTypeLabel = (type: string) => {
+    if (type === "เดี่ยว") return "โครงงานเดี่ยว";
+    if (type === "คู่") return "โครงงานคู่";
+
+    return type;
+  };
 
   return (
     <div className="teacher-projects-page">
@@ -316,36 +391,35 @@ function TeacherProjects() {
           {/* ================= TOOLBAR ================= */}
 
           <div className="project-toolbar">
-            {/* Search */}
-
             <div className="project-search">
               <FaSearch />
 
               <input
                 type="text"
-                placeholder="ค้นหาหัวข้อโครงงาน"
+                placeholder=""
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            {/* Status */}
-            <div className="project-select-wrapper">
+            {/* STATUS FILTER */}
+            <div className="project-select-wrapper status-select">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="project-filter-select"
               >
-                <option value="all">สถานะทั้งหมด</option>
-                <option value="รับนิสิต">เปิดรับ</option>
-                <option value="ปิดรับ">ปิดรับ</option>
+                <option value="all">สถานะ</option>
+                <option value="open">เปิดรับ</option>
+                <option value="closed">ปิดรับ</option>
+                <option value="hidden">ซ่อน</option>
               </select>
 
               <span className="project-select-arrow">▼</span>
             </div>
 
-            {/* Sort */}
-            <div className="project-select-wrapper">
+            {/* SORT */}
+            <div className="project-select-wrapper sort-select">
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
@@ -358,176 +432,257 @@ function TeacherProjects() {
 
               <span className="project-select-arrow">▼</span>
             </div>
-
-            {/* Create */}
-
-            <button
-              className="create-project-btn"
-              onClick={() => navigate("/create-teacher-project")}
-            >
-              <FaPlus />
-              สร้างหัวข้อโครงงาน
-            </button>
           </div>
 
           {/* ================= SUMMARY ================= */}
 
           <div className="project-summary">
             <div className="summary-card">
-              <span>หัวข้อทั้งหมด</span>
-
+              <span>ทั้งหมด</span>
               <strong>{totalProjects}</strong>
             </div>
 
             <div className="summary-card">
               <span>เปิดรับ</span>
-
               <strong>{openProjects}</strong>
             </div>
 
             <div className="summary-card">
               <span>ปิดรับ</span>
-
               <strong>{closedProjects}</strong>
+            </div>
+
+            <div className="summary-card">
+              <span>ซ่อน</span>
+              <strong>{hiddenProjects}</strong>
             </div>
           </div>
 
-          {/* ================= PROJECT LIST ================= */}
+          {/* ================= PROJECT TABLE ================= */}
 
           <div className="project-list-container">
             <div className="project-list-header">
-              <h3>หัวข้อโครงงานของฉัน</h3>
+              <h3>จัดการหัวข้อโครงงาน</h3>
+
+              <button
+                className="create-project-btn"
+                onClick={() => navigate("/create-teacher-project")}
+              >
+                สร้างหัวข้อโครงงาน
+                <FaPlus />
+              </button>
             </div>
 
-            {/* Loading */}
+            <div className="project-table-wrapper">
+              <table className="project-table">
+                <thead>
+                  <tr>
+                    <th>ชื่อหัวข้อโครงงาน</th>
+                    <th>ปีการศึกษา</th>
+                    <th>ประเภทโครงงาน</th>
+                    <th>รับนิสิต</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
 
-            {loading && (
-              <div className="empty-project">
-                <p>กำลังโหลดข้อมูล...</p>
-              </div>
-            )}
+                <tbody>
+                  {loading && (
+                    <tr>
+                      <td colSpan={6} className="table-message">
+                        กำลังโหลดข้อมูล...
+                      </td>
+                    </tr>
+                  )}
 
-            {/* ไม่มีข้อมูล */}
+                  {!loading && filteredProjects.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="table-message">
+                        {projects.length === 0
+                          ? "ยังไม่มีหัวข้อโครงงาน"
+                          : "ไม่พบหัวข้อโครงงาน"}
+                      </td>
+                    </tr>
+                  )}
 
-            {!loading && filteredProjects.length === 0 && (
-              <div className="empty-project">
-                <p>
-                  {projects.length === 0
-                    ? "ยังไม่มีหัวข้อโครงงาน"
-                    : "ไม่พบหัวข้อโครงงาน"}
-                </p>
-
-                <span>
-                  {projects.length === 0
-                    ? 'กด "สร้างหัวข้อโครงงาน" เพื่อเพิ่มหัวข้อใหม่'
-                    : "ลองเปลี่ยนคำค้นหาหรือตัวกรองอีกครั้ง"}
-                </span>
-              </div>
-            )}
-
-            {/* ================= PROJECT CARDS ================= */}
-
-            {!loading &&
-              filteredProjects.map((project) => (
-                <div className="project-card" key={project.id}>
-                  {/* Card Header */}
-
-                  <div className="project-card-header">
-                    <h4>{project.title}</h4>
-
-                    <span className="project-status">{project.status}</span>
-                  </div>
-
-                  {/* Project Info */}
-
-                  <div className="project-info">
-                    <p>
-                      <strong>ปีการศึกษา :</strong> {project.academic_year}
-                    </p>
-
-                    <p>
-                      <strong>ประเภทโครงงาน :</strong> {project.project_type}
-                    </p>
-
-                    <p>
-                      <strong>รับนิสิต :</strong> {project.max_members} คน
-                    </p>
-
-                    <p>
-                      <strong>สมาชิกในโครงงาน :</strong>{" "}
-                      {project.current_members} / {project.max_members} คน
-                    </p>
-
-                    <p>
-                      <strong>เทคโนโลยีที่ใช้ :</strong> {project.skills || "-"}
-                    </p>
-
-                    <p>
-                      <strong>การแสดงผล :</strong> {project.visibility}
-                    </p>
-                  </div>
-
-                  {/* Card Actions */}
-
-                  <div className="project-card-actions">
-                    <button
-                      onClick={() =>
-                        navigate(`/teacher-project-details/${project.id}`)
-                      }
-                    >
-                      รายละเอียด
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        navigate(`/teacher-project-edit/${project.id}`)
-                      }
-                    >
-                      แก้ไข
-                    </button>
-
-                    <div className="more-menu-wrapper">
-                      <button
-                        className="more-btn"
-                        onClick={() =>
-                          setOpenMenuId(
-                            openMenuId === project.id ? null : project.id,
-                          )
+                  {!loading &&
+                    filteredProjects.map((project) => (
+                      <tr
+                        key={project.id}
+                        className={
+                          project.visibility === "ซ่อน"
+                            ? "hidden-project-row"
+                            : ""
                         }
                       >
-                        <FaEllipsisV />
-                      </button>
-                      {openMenuId === project.id && (
-                        <div className="more-menu">
-                          {project.visibility === "แสดง" ? (
-                            <button
-                              onClick={() => handleHideProject(project.id)}
-                            >
-                              ซ่อนหัวข้อ
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleShowProject(project.id)}
-                            >
-                              แสดงหัวข้อ
-                            </button>
-                          )}
+                        {/* ชื่อหัวข้อ */}
+                        <td className="project-title-cell">{project.title}</td>
 
-                          <button
-                            className="delete-option"
-                            onClick={() => handleDeleteProject(project.id)}
+                        {/* ปี */}
+                        <td>{project.academic_year}</td>
+
+                        {/* ประเภท */}
+                        <td>{getProjectTypeLabel(project.project_type)}</td>
+
+                        {/* รับนิสิต */}
+                        <td>
+                          {project.current_members} / {project.max_members} คน
+                        </td>
+
+                        {/* สถานะ */}
+                        <td>
+                          <span
+                            className={`table-status ${getStatusClass(project)}`}
                           >
-                            ลบหัวข้อ
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                            {getDisplayStatus(project)}
+                          </span>
+                        </td>
+
+                        {/* จัดการ */}
+                        <td>
+                          <div className="table-actions">
+                            <button
+                              className="action-btn detail-btn"
+                              onClick={() =>
+                                navigate(
+                                  `/teacher-project-details/${project.id}`,
+                                )
+                              }
+                            >
+                              รายละเอียด
+                            </button>
+
+                            <button
+                              className="action-btn edit-btn"
+                              onClick={() =>
+                                navigate(`/teacher-project-edit/${project.id}`)
+                              }
+                            >
+                              แก้ไข
+                            </button>
+
+                            <div className="more-menu-wrapper">
+                              <button
+                                className="action-btn more-btn"
+                                onClick={() =>
+                                  setOpenMenuId(
+                                    openMenuId === project.id
+                                      ? null
+                                      : project.id,
+                                  )
+                                }
+                              >
+                                <FaEllipsisV />
+                              </button>
+
+                              {openMenuId === project.id && (
+                                <div className="more-menu">
+                                  {project.visibility === "แสดง" ? (
+                                    <button
+                                      onClick={() => openHideModal(project.id)}
+                                    >
+                                      ซ่อนหัวข้อ
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => openShowModal(project.id)}
+                                    >
+                                      แสดงหัวข้อ
+                                    </button>
+                                  )}
+
+                                  <button
+                                    className="delete-option"
+                                    onClick={() =>
+                                      openDeleteModal(project.id, project.title)
+                                    }
+                                  >
+                                    ลบหัวข้อ
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
+      {/* =========================
+          POPUP ซ่อน / แสดงหัวข้อ
+      ========================= */}
+
+      {confirmModal.open && (
+        <div className="confirm-modal-overlay">
+          <div className="confirm-modal">
+            <h3>
+              {confirmModal.type === "hide"
+                ? "ซ่อนหัวข้อโครงงาน?"
+                : confirmModal.type === "show"
+                  ? "แสดงหัวข้อโครงงาน?"
+                  : "ลบหัวข้อโครงงาน?"}
+            </h3>
+
+            <div className="confirm-line"></div>
+
+            {confirmModal.type === "delete" ? (
+              <div className="delete-confirm-content">
+                <p>คุณกำลังจะลบหัวข้อ</p>
+
+                <p className="delete-project-title">
+                  “{confirmModal.projectTitle}”
+                </p>
+
+                <p>การลบหัวข้อจะทำให้หัวข้อนี้ไม่สามารถใช้งานต่อได้</p>
+
+                <p className="delete-warning">⚠️ กรุณาตรวจสอบข้อมูลก่อนลบ</p>
+              </div>
+            ) : (
+              <p>
+                {confirmModal.type === "hide"
+                  ? "หากซ่อนหัวข้อนี้ นิสิตจะไม่สามารถมองเห็นและสมัครเข้าร่วมโครงงานนี้ได้"
+                  : "หากแสดงหัวข้อนี้ นิสิตจะสามารถมองเห็นและสมัครเข้าร่วมโครงงานนี้ได้"}
+              </p>
+            )}
+
+            <div className="confirm-actions">
+              {/* ปุ่มยกเลิก */}
+              <button
+                className="confirm-cancel-btn"
+                onClick={closeConfirmModal}
+              >
+                ยกเลิก
+              </button>
+
+              {/* ปุ่มยืนยัน */}
+              <button
+                className="confirm-submit-btn"
+                onClick={() => {
+                  if (confirmModal.projectId === null) return;
+
+                  if (confirmModal.type === "hide") {
+                    handleHideProject(confirmModal.projectId);
+                  } else if (confirmModal.type === "show") {
+                    handleShowProject(confirmModal.projectId);
+                  } else if (confirmModal.type === "delete") {
+                    handleDeleteProject(confirmModal.projectId);
+                  }
+                }}
+              >
+                {confirmModal.type === "hide"
+                  ? "ซ่อน"
+                  : confirmModal.type === "show"
+                    ? "แสดง"
+                    : "ลบหัวข้อ"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

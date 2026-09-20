@@ -13,6 +13,8 @@ import TeacherProjectDetail from "./pages/teacher/TeacherProjectDetail";
 import TeacherProjectEdit from "./pages/teacher/TeacherProjectEdit";
 import TeacherRequestDetail from "./pages/teacher/TeacherRequestDetail";
 
+import StaffHome from "./pages/Staff/StaffHome";
+
 function App() {
   return (
     <BrowserRouter>
@@ -28,6 +30,7 @@ function App() {
         <Route path="/teacher-project-details/:id" element={<TeacherProjectDetail />} />
         <Route path="/teacher-project-edit/:id" element={<TeacherProjectEdit />} />
         <Route path="/teacher-request-details/:id" element={<TeacherRequestDetail />} />
+        <Route path="/staff-home" element={<StaffHome />} />
       </Routes>
     </BrowserRouter>
   );
