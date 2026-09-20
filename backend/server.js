@@ -1,16 +1,30 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
+const sharp = require("sharp");
+
+const { PDFDocument } = require("pdf-lib");
+const fontkit = require("@pdf-lib/fontkit");
+
 const db = require("./db");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/generated", express.static(path.join(__dirname, "generated")));
 app.use(
   "/src/assets",
   express.static(path.join(__dirname, "../frontend/src/assets")),
 );
+const getAssetFilePath = (assetUrl) => {
+  if (!assetUrl) return null;
+
+  const relativePath = assetUrl.replace(/^\/src\/assets\//, "");
+
+  return path.join(__dirname, "../frontend/src/assets", relativePath);
+};
 
 app.get("/", (req, res) => {
   res.send("<h1>Backend OK</h1>");
@@ -1912,11 +1926,13 @@ app.get("/staff/dashboard", (req, res) => {
     SELECT
       ad.id,
       ad.document_type,
+      ad.document_code,
       ad.approved_at,
       ad.download_status,
       ad.pdf_path,
 
       p.title AS project_title,
+      p.academic_year,
 
       advisor.name AS advisor_name,
 
@@ -1965,6 +1981,673 @@ app.get("/staff/dashboard", (req, res) => {
         today: Number(summary.today) || 0,
 
         latestDocuments: latestResult,
+      });
+    });
+  });
+});
+
+// ==========================================
+// รายละเอียดเอกสารสำหรับเจ้าหน้าที่
+// ==========================================
+
+app.get("/staff/documents/:documentId", (req, res) => {
+  const { documentId } = req.params;
+
+  const documentSql = `
+  SELECT
+    ad.id,
+    ad.request_id,
+    ad.project_id,
+    ad.student_id,
+    ad.advisor_id,
+    ad.document_type,
+    ad.document_code,
+    ad.approved_at,
+    ad.signature_image,
+    ad.pdf_path,
+    ad.download_status,
+    ad.downloaded_at,
+
+    -- ข้อมูลโครงงาน
+    p.title AS project_title,
+    p.project_type,
+    p.major AS project_major,
+    p.academic_year,
+
+    -- ข้อมูลนิสิตผู้ยื่นคำขอ
+    student.username AS student_username,
+    student.name AS student_name,
+    student.major AS student_major,
+    student.phone AS student_phone,
+    student.email AS student_email,
+    student.signature_image AS student_signature,
+
+    -- ข้อมูลจากคำขอ
+    pr.contact_type,
+    pr.contact_value,
+    pr.introduction,
+
+    -- ข้อมูลอาจารย์
+    advisor.name AS advisor_name,
+    advisor.signature_image AS advisor_signature
+
+  FROM approval_documents ad
+
+  INNER JOIN projects p
+    ON ad.project_id = p.id
+
+  INNER JOIN project_requests pr
+    ON ad.request_id = pr.id
+
+  INNER JOIN users student
+    ON ad.student_id = student.id
+
+  INNER JOIN users advisor
+    ON ad.advisor_id = advisor.id
+
+  WHERE ad.id = ?
+`;
+
+  db.query(documentSql, [documentId], (err, documentResult) => {
+    if (err) {
+      console.log("Get staff document detail error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (documentResult.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบเอกสาร",
+      });
+    }
+
+    const document = documentResult[0];
+
+    // ดึงสมาชิกของโครงงาน
+    const membersSql = `
+      SELECT
+        u.id,
+        u.username,
+        u.name,
+        u.major,
+        u.signature_image
+
+      FROM project_members pm
+
+      INNER JOIN users u
+        ON pm.user_id = u.id
+
+      WHERE pm.project_id = ?
+
+      ORDER BY pm.id ASC
+    `;
+
+    db.query(membersSql, [document.project_id], (memberErr, members) => {
+      if (memberErr) {
+        console.log("Get document members error:", memberErr);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      document.members = members;
+
+      res.json(document);
+    });
+  });
+});
+
+// ==========================================
+// ทดสอบใส่ข้อมูลจริงลง PDF
+// ==========================================
+
+app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
+  const documentId = req.params.documentId;
+  const sql = `
+    SELECT
+      ad.id,
+        ad.document_type,
+        ad.document_code,
+        ad.approved_at,
+
+        p.academic_year,
+
+      student.prefix AS student_prefix,
+      student.name AS student_name,
+      student.username AS student_username,
+      student.major AS student_major,
+      student.phone AS student_phone,
+      student.email AS student_email,
+      student.signature_image AS student_signature,
+
+      pr.introduction,
+
+      advisor.name AS advisor_name,
+      advisor.signature_image AS advisor_signature
+
+    FROM approval_documents ad
+
+    INNER JOIN projects p
+      ON ad.project_id = p.id
+
+    INNER JOIN users student
+      ON ad.student_id = student.id
+
+    INNER JOIN users advisor
+      ON ad.advisor_id = advisor.id
+
+    INNER JOIN project_requests pr
+      ON ad.request_id = pr.id
+
+    WHERE ad.id = ?
+  `;
+
+  db.query(sql, [documentId], async (err, results) => {
+    if (err) {
+      console.log("Get PDF data error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบเอกสาร",
+      });
+    }
+
+    try {
+      const document = results[0];
+
+      /* เปิด PDF ต้นฉบับ */
+      const templatePath = path.join(
+        __dirname,
+        "templates",
+        "RE01-template.pdf",
+      );
+
+      const templateBytes = fs.readFileSync(templatePath);
+
+      const pdfDoc = await PDFDocument.load(templateBytes);
+
+      pdfDoc.registerFontkit(fontkit);
+
+      /* Font ภาษาไทย */
+      const fontPath = path.join(__dirname, "fonts", "ThaiFont.ttf");
+
+      const fontBytes = fs.readFileSync(fontPath);
+
+      const thaiFont = await pdfDoc.embedFont(fontBytes);
+
+      const page = pdfDoc.getPages()[0];
+
+      const wrapText = (text, font, size, maxWidth) => {
+        const lines = [];
+        let currentLine = "";
+
+        const segmenter = new Intl.Segmenter("th", { granularity: "word" });
+        const words = [...segmenter.segment(text)].map((item) => item.segment);
+
+        for (const word of words) {
+          const testLine = currentLine + word;
+          const width = font.widthOfTextAtSize(testLine, size);
+
+          if (width > maxWidth && currentLine) {
+            lines.push(currentLine.trim());
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+
+        if (currentLine.trim()) {
+          lines.push(currentLine.trim());
+        }
+
+        return lines;
+      };
+
+      /* =========================
+         เตรียมข้อมูลจริง
+      ========================= */
+
+      const approvedDate = new Date(document.approved_at);
+
+      const thaiDate = approvedDate.toLocaleDateString("th-TH", {
+        timeZone: "Asia/Bangkok",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      const subject =
+        document.document_type === "เสนอหัวข้อโครงงาน"
+          ? "ขอเสนอหัวข้อโครงงาน"
+          : "ขอสมัครเข้าร่วมโครงงาน";
+      const facultyName = "วิทยาการสารสนเทศ";
+
+      const majorMap = {
+        IT: "เทคโนโลยีสารสนเทศ",
+        CS: "วิทยาการคอมพิวเตอร์",
+        SE: "วิศวกรรมซอฟต์แวร์",
+      };
+
+      const majorName =
+        majorMap[document.student_major] || document.student_major || "-";
+
+      /* =========================
+         ใส่ข้อมูลจริงลงแบบ
+      ========================= */
+
+      // วันที่
+      page.drawText(thaiDate, {
+        x: 115, // ขยับขวา
+        y: 680, // ขยับลง
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // เรื่อง
+      page.drawText(subject, {
+        x: 125,
+        y: 662,
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // เรียน
+      page.drawText(document.advisor_name || "", {
+        x: 115,
+        y: 642,
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // ชื่อนิสิต
+      page.drawText(
+        `${document.student_prefix || ""}${document.student_name || ""}`,
+        {
+          x: 115,
+          y: 624,
+          size: 11.5,
+          font: thaiFont,
+        },
+      );
+
+      // รหัสประจำตัวนิสิต
+      const studentId = String(document.student_username || "");
+
+      const studentIdStartX = 397;
+      const studentIdY = 625;
+      const boxWidth = 21.2;
+
+      for (let i = 0; i < studentId.length; i++) {
+        page.drawText(studentId[i], {
+          x: studentIdStartX + i * boxWidth,
+          y: studentIdY,
+          size: 13,
+          font: thaiFont,
+        });
+      }
+
+      // คณะ
+      page.drawText(facultyName, {
+        x: 130,
+        y: 605,
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // สาขาวิชา
+      page.drawText(majorName, {
+        x: 390,
+        y: 605,
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // หมายเลขโทรศัพท์
+      page.drawText(document.student_phone || "-", {
+        x: 205,
+        y: 586,
+        size: 11.5,
+        font: thaiFont,
+      });
+
+      // E-mail
+      page.drawText(document.student_email || "-", {
+        x: 390,
+        y: 586,
+        size: 10.5,
+        font: thaiFont,
+      });
+
+      // ==========================================
+      // เหตุผลประกอบคำร้อง
+      // ==========================================
+
+      const reasonText = (document.introduction || "-")
+        // ลบช่องว่างแฝงที่อาจติดมากับข้อความ
+        .replace(/[\u200B-\u200D\uFEFF]/g, "")
+        // ช่องว่างหลายตัวให้เหลือแค่ตัวเดียว
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const wrapThaiText = (text, font, size, maxWidth) => {
+        const segmenter = new Intl.Segmenter("th", {
+          granularity: "word",
+        });
+
+        const words = Array.from(
+          segmenter.segment(text),
+          (item) => item.segment,
+        );
+
+        const lines = [];
+        let currentLine = "";
+
+        for (const word of words) {
+          const testLine = currentLine + word;
+
+          const textWidth = font.widthOfTextAtSize(testLine, size);
+
+          if (textWidth <= maxWidth) {
+            currentLine = testLine;
+          } else {
+            if (currentLine.trim()) {
+              lines.push(currentLine.trim());
+            }
+
+            currentLine = word.trimStart();
+          }
+        }
+
+        if (currentLine.trim()) {
+          lines.push(currentLine.trim());
+        }
+
+        return lines;
+      };
+
+      const reasonFontSize = 10.5;
+
+      const reasonLines = wrapThaiText(
+        reasonText,
+        thaiFont,
+        reasonFontSize,
+        390,
+      );
+
+      reasonLines.slice(0, 6).forEach((line, index) => {
+        page.drawText(line, {
+          x: index === 0 ? 65 : 55,
+          y: 535 - index * 20,
+          size: reasonFontSize,
+          font: thaiFont,
+        });
+      });
+
+      // ==========================================
+      // ลายเซ็นนิสิต
+      // ==========================================
+
+      const studentSignaturePath = getAssetFilePath(document.student_signature);
+
+      if (studentSignaturePath && fs.existsSync(studentSignaturePath)) {
+        const signatureBytes = fs.readFileSync(studentSignaturePath);
+
+        // ตัดพื้นที่ว่างรอบลายเซ็นอัตโนมัติ
+        const trimmedSignatureBytes = await sharp(signatureBytes)
+          .trim()
+          .png()
+          .toBuffer();
+
+        const signatureImage = await pdfDoc.embedPng(trimmedSignatureBytes);
+
+        // ตอนนี้ขยายได้โดยไม่บีบรูป
+        const signatureSize = signatureImage.scaleToFit(125, 38);
+
+        page.drawImage(signatureImage, {
+          x: 400,
+          y: 410,
+          width: signatureSize.width,
+          height: signatureSize.height,
+        });
+      }
+
+      // ==========================================
+      // ความเห็นอาจารย์ที่ปรึกษา
+      // ==========================================
+
+      const advisorCommentY = 335;
+      const advisorCommentSize = 11.5;
+
+      const firstText = "ยินดีรับเป็นอาจารย์ที่";
+      const secondText = "ปรึกษา";
+
+      // ขอบเขตช่องความเห็นอาจารย์ฝั่งซ้าย
+      const advisorBoxLeft = 20;
+      const advisorBoxWidth = 285;
+
+      // คำนวณความกว้างข้อความ
+      const firstTextWidth = thaiFont.widthOfTextAtSize(
+        firstText,
+        advisorCommentSize,
+      );
+
+      const secondTextWidth = thaiFont.widthOfTextAtSize(
+        secondText,
+        advisorCommentSize,
+      );
+
+      // รวมความกว้างทั้งหมด
+      const totalTextWidth = firstTextWidth + secondTextWidth - 3;
+
+      // หา x เริ่มต้นให้อยู่กลางกล่อง
+      const advisorCommentX =
+        advisorBoxLeft + (advisorBoxWidth - totalTextWidth) / 2;
+
+      // วาดข้อความ
+      page.drawText(firstText, {
+        x: advisorCommentX,
+        y: advisorCommentY,
+        size: advisorCommentSize,
+        font: thaiFont,
+      });
+
+      page.drawText(secondText, {
+        x: advisorCommentX + firstTextWidth,
+        y: advisorCommentY,
+        size: advisorCommentSize,
+        font: thaiFont,
+      });
+      // ==========================================
+      // ลายเซ็นอาจารย์
+      // ==========================================
+
+      const advisorSignaturePath = getAssetFilePath(document.advisor_signature);
+
+      if (advisorSignaturePath && fs.existsSync(advisorSignaturePath)) {
+        const advisorSignatureBytes = fs.readFileSync(advisorSignaturePath);
+
+        // ตัดขอบว่างรอบลายเซ็น
+        const trimmedAdvisorSignature = await sharp(advisorSignatureBytes)
+          .trim()
+          .png()
+          .toBuffer();
+
+        const advisorSignatureImage = await pdfDoc.embedPng(
+          trimmedAdvisorSignature,
+        );
+
+        const advisorSignatureSize = advisorSignatureImage.scaleToFit(82, 22);
+
+        page.drawImage(advisorSignatureImage, {
+          x: 198,
+          y: 289,
+          width: advisorSignatureSize.width,
+          height: advisorSignatureSize.height,
+        });
+
+        page.drawText(thaiDate, {
+          x: 200, // ขยับขวาจากเดิมนิดเดียว
+          y: 268, // ยกขึ้นอีกนิด
+          size: 10.5,
+          font: thaiFont,
+        });
+      }
+
+      /* ==========================================
+   บันทึก PDF
+========================================== */
+
+      const pdfBytes = await pdfDoc.save();
+
+      // ปีการศึกษา เช่น "2569/1" → เอาเฉพาะ "2569"
+      const academicYear = String(document.academic_year || "unknown").split(
+        "/",
+      )[0];
+
+      // เลขเอกสาร เช่น id = 1 → 001
+      const documentNumber = String(document.id).padStart(3, "0");
+
+      // รหัสเอกสาร เช่น RE01
+      const documentCode = document.document_code || "RE01";
+
+      // ชื่อไฟล์
+      const fileName = `${documentCode}-${academicYear}-${documentNumber}.pdf`;
+
+      // path ที่เก็บไฟล์จริง
+      const outputPath = path.join(__dirname, "generated", fileName);
+
+      // path ที่เก็บลงฐานข้อมูล
+      const pdfPath = `/generated/${fileName}`;
+
+      // เขียนไฟล์ PDF
+      fs.writeFileSync(outputPath, pdfBytes);
+
+      // บันทึก path ลง approval_documents
+      const updatePdfSql = `
+  UPDATE approval_documents
+  SET pdf_path = ?
+  WHERE id = ?
+`;
+
+      db.query(updatePdfSql, [pdfPath, documentId], (updateErr) => {
+        if (updateErr) {
+          console.log("Update PDF path error:", updateErr);
+
+          return res.status(500).json({
+            success: false,
+            message: "สร้าง PDF สำเร็จ แต่บันทึก path ไม่สำเร็จ",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "สร้างและบันทึก PDF เรียบร้อยแล้ว",
+          pdf_path: pdfPath,
+          file_name: fileName,
+        });
+      });
+    } catch (error) {
+      console.log("Test real PDF error:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "สร้าง PDF ไม่สำเร็จ",
+        error: error.message,
+      });
+    }
+  });
+});
+
+// ==========================================
+// เจ้าหน้าที่ดาวน์โหลดเอกสาร PDF
+// ==========================================
+
+app.get("/staff/documents/:documentId/download", (req, res) => {
+  const documentId = req.params.documentId;
+
+  const sql = `
+    SELECT
+      id,
+      pdf_path
+    FROM approval_documents
+    WHERE id = ?
+  `;
+
+  db.query(sql, [documentId], (err, results) => {
+    if (err) {
+      console.log("Get PDF for download error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบเอกสาร",
+      });
+    }
+
+    const document = results[0];
+
+    if (!document.pdf_path) {
+      return res.status(404).json({
+        message: "ยังไม่มีไฟล์ PDF สำหรับเอกสารนี้",
+      });
+    }
+
+    // เช่น /generated/RE01-2569-001.pdf
+    // เอาเฉพาะชื่อไฟล์
+    const fileName = path.basename(document.pdf_path);
+
+    const filePath = path.join(
+      __dirname,
+      "generated",
+      fileName,
+    );
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        message: "ไม่พบไฟล์ PDF ในระบบ",
+      });
+    }
+
+    // ส่งไฟล์ให้ browser ดาวน์โหลด
+    res.download(filePath, fileName, (downloadErr) => {
+      if (downloadErr) {
+        console.log("Download PDF error:", downloadErr);
+        return;
+      }
+
+      // ดาวน์โหลดสำเร็จแล้ว → อัปเดตสถานะ
+      const updateSql = `
+        UPDATE approval_documents
+        SET
+          download_status = 'ดาวน์โหลดแล้ว',
+          downloaded_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+
+      db.query(updateSql, [documentId], (updateErr) => {
+        if (updateErr) {
+          console.log(
+            "Update download status error:",
+            updateErr,
+          );
+          return;
+        }
+
+        console.log(
+          `Document ${documentId} downloaded successfully`,
+        );
       });
     });
   });
