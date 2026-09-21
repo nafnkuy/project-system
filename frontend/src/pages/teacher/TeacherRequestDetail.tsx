@@ -281,6 +281,21 @@ function TeacherRequestDetail() {
     return <div className="request-detail-loading">ไม่พบข้อมูลคำขอ</div>;
   }
 
+  // แยกข้อมูลที่คั่นด้วย | เพื่อแสดงเป็นรายการแบบ bullet
+  const objectives = request.objectives
+    ? request.objectives
+        .split("|")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+  const requirements = request.requirements
+    ? request.requirements
+        .split("|")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
   return (
     <div className="teacher-request-detail-page">
       {/* ================= SIDEBAR ================= */}
@@ -420,11 +435,11 @@ function TeacherRequestDetail() {
                 <h4>สมาชิกโครงงาน</h4>
 
                 {request.members.length === 0 ? (
-                  <p>ยังไม่มีสมาชิก</p>
+                  <p className="empty-member">ยังไม่มีสมาชิก</p>
                 ) : (
-                  request.members.map((member, index) => (
+                  request.members.map((member) => (
                     <div className="member-row" key={member.id}>
-                      {index + 1}. {member.username} {member.name}
+                      {member.username} {member.name}
                     </div>
                   ))
                 )}
@@ -477,38 +492,52 @@ function TeacherRequestDetail() {
               <h4>วัตถุประสงค์</h4>
 
               <div className="text-section">
-                <p>{request.objectives}</p>
+                {objectives.length > 0 ? (
+                  <ul className="detail-list">
+                    {objectives.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>-</p>
+                )}
               </div>
 
-              <section className="detail-section">
-                <h3>เทคโนโลยีที่ใช้</h3>
+              <h4>เทคโนโลยีที่ใช้</h4>
 
-                <div className="tag-list">
-                  {(request.skills || "").split("|").map((skill, index) => {
-                    const style = skillStyles[skill] || {
-                      backgroundColor: "#F3F4F6",
-                      borderColor: "#D1D5DB",
-                    };
+              <div className="tag-list">
+                {(request.skills || "").split("|").map((skill, index) => {
+                  const style = skillStyles[skill] || {
+                    backgroundColor: "#F3F4F6",
+                    borderColor: "#D1D5DB",
+                  };
 
-                    return (
-                      <span
-                        key={index}
-                        style={{
-                          backgroundColor: style.backgroundColor,
-                          border: `1px solid ${style.borderColor}`,
-                        }}
-                      >
-                        {skill}
-                      </span>
-                    );
-                  })}
-                </div>
-              </section>
+                  return (
+                    <span
+                      key={index}
+                      style={{
+                        backgroundColor: style.backgroundColor,
+                        border: `1px solid ${style.borderColor}`,
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  );
+                })}
+              </div>
 
               <h4>คุณสมบัติผู้สมัคร</h4>
 
               <div className="text-section">
-                <p>{request.requirements}</p>
+                {requirements.length > 0 ? (
+                  <ul className="detail-list">
+                    {requirements.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>-</p>
+                )}
               </div>
             </section>
 
@@ -570,7 +599,6 @@ function TeacherRequestDetail() {
                   value={suggestion}
                   onChange={(e) => setSuggestion(e.target.value)}
                 />
-                
 
                 {/* แสดงเฉพาะตอนเลือกปฏิเสธ */}
                 {decision === "ปฏิเสธ" && (

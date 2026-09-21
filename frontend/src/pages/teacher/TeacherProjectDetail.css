@@ -248,15 +248,17 @@
 }
 
 .teacher-project-detail-page .detail-section {
-  margin-top: 35px;
+  margin-top: 14px;
 }
 
 .teacher-project-detail-page .detail-section h3 {
   font-size: 14px;
+  font-weight: 600;
 
-  margin-bottom: 15px;
+  margin-top: 0;
+  margin-bottom: 10px;
 
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 
   border-bottom: 1px solid #ddd;
 }
@@ -275,7 +277,7 @@
 
 .teacher-project-detail-page .detail-section p {
   margin: 8px 0;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
 .teacher-project-detail-page .detail-section ul {
@@ -299,18 +301,24 @@
   display: flex;
   flex-wrap: wrap;
 
-  gap: 10px;
+  gap: 8px;
 }
 
 .teacher-project-detail-page .tag-list span {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 6px 14px;
+  min-width: 48px;
 
-  border-radius: 6px;
+  padding: 4px 11px;
 
-  font-size: 13px;
+  border-radius: 4px;
+
+  font-size: 11px;
   font-weight: 500;
+
+  color: #222;
 }
 
 /* ================= MEMBERS ================= */

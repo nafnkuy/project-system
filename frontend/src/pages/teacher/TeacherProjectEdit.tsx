@@ -205,7 +205,7 @@ function TeacherProjectEdit() {
 
             <span>&gt;</span>
 
-            <span>แก้ไข</span>
+            <span>แก้ไขหัวข้อโครงงาน</span>
           </div>
 
           <div className="header-right">
@@ -391,7 +391,7 @@ function TeacherProjectEdit() {
               </div>
 
               <div className="form-group">
-                <label>คุณสมบัติ/ข้อกำหนดของนิสิต</label>
+                <label>คุณสมบัติผู้สมัคร *</label>
 
                 <textarea
                   rows={4}

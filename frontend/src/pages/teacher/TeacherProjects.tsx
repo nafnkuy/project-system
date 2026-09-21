@@ -500,7 +500,15 @@ function TeacherProjects() {
                       <td colSpan={6} className="table-message">
                         {projects.length === 0
                           ? "ยังไม่มีหัวข้อโครงงาน"
-                          : "ไม่พบหัวข้อโครงงาน"}
+                          : statusFilter === "closed"
+                            ? "ไม่พบหัวข้อโครงงานที่มีสถานะปิดรับ"
+                            : statusFilter === "open"
+                              ? "ไม่พบหัวข้อโครงงานที่มีสถานะเปิดรับ"
+                              : statusFilter === "hidden"
+                                ? "ไม่พบหัวข้อโครงงานที่ถูกซ่อน"
+                                : searchTerm
+                                  ? "ไม่พบหัวข้อโครงงานที่ตรงกับการค้นหา"
+                                  : "ไม่พบหัวข้อโครงงาน"}
                       </td>
                     </tr>
                   )}
@@ -561,7 +569,11 @@ function TeacherProjects() {
                               แก้ไข
                             </button>
 
-                            <div className="more-menu-wrapper">
+                            <div
+                              className={`more-menu-wrapper ${
+                                openMenuId === project.id ? "menu-open" : ""
+                              }`}
+                            >
                               <button
                                 className="action-btn more-btn"
                                 onClick={() =>
@@ -621,10 +633,10 @@ function TeacherProjects() {
           <div className="confirm-modal">
             <h3>
               {confirmModal.type === "hide"
-                ? "ซ่อนหัวข้อโครงงาน?"
+                ? "ยืนยันการซ่อนหัวข้อโครงงาน"
                 : confirmModal.type === "show"
-                  ? "แสดงหัวข้อโครงงาน?"
-                  : "ลบหัวข้อโครงงาน?"}
+                  ? "ยืนยันการแสดงหัวข้อโครงงาน"
+                  : "ยืนยันการลบหัวข้อโครงงาน"}
             </h3>
 
             <div className="confirm-line"></div>
@@ -644,13 +656,12 @@ function TeacherProjects() {
             ) : (
               <p>
                 {confirmModal.type === "hide"
-                  ? "หากซ่อนหัวข้อนี้ นิสิตจะไม่สามารถมองเห็นและสมัครเข้าร่วมโครงงานนี้ได้"
+                  ? "หากซ่อนหัวข้อนี้ นิสิตจะไม่สามารถมองเห็นหรือสมัครเข้าร่วมโครงงานนี้ได้"
                   : "หากแสดงหัวข้อนี้ นิสิตจะสามารถมองเห็นและสมัครเข้าร่วมโครงงานนี้ได้"}
               </p>
             )}
 
             <div className="confirm-actions">
-              {/* ปุ่มยกเลิก */}
               <button
                 className="confirm-cancel-btn"
                 onClick={closeConfirmModal}
@@ -658,9 +669,10 @@ function TeacherProjects() {
                 ยกเลิก
               </button>
 
-              {/* ปุ่มยืนยัน */}
               <button
-                className="confirm-submit-btn"
+                className={`confirm-submit-btn ${
+                  confirmModal.type === "delete" ? "delete-confirm-btn" : ""
+                }`}
                 onClick={() => {
                   if (confirmModal.projectId === null) return;
 

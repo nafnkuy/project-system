@@ -50,21 +50,20 @@ function TeacherHome() {
   const itemsPerPage = 10;
 
   const filteredRequests = requests.filter((item) => {
-  const matchesSearch =
-    item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const matchesStatus =
-    statusFilter === "ทั้งหมด" || item.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "ทั้งหมด" || item.status === statusFilter;
 
-  const requestType =
-    item.source === "student" ? "เสนอหัวข้อโครงงาน" : "สมัครเข้าร่วม";
+    const requestType =
+      item.source === "student" ? "เสนอหัวข้อโครงงาน" : "สมัครเข้าร่วม";
 
-  const matchesType =
-    typeFilter === "ทั้งหมด" || requestType === typeFilter;
+    const matchesType = typeFilter === "ทั้งหมด" || requestType === typeFilter;
 
-  return matchesSearch && matchesStatus && matchesType;
-});
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   //const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
@@ -72,6 +71,35 @@ function TeacherHome() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+
+  const getEmptyMessage = () => {
+    // ไม่มีคำขอในระบบเลย
+    if (requests.length === 0) {
+      return "ยังไม่มีคำขอเข้าร่วมโครงงาน";
+    }
+
+    // ค้นหาด้วยข้อความแล้วไม่เจอ
+    if (searchTerm.trim() !== "") {
+      return "ไม่พบคำขอที่ตรงกับการค้นหา";
+    }
+
+    // กรองทั้งสถานะและประเภท
+    if (statusFilter !== "ทั้งหมด" && typeFilter !== "ทั้งหมด") {
+      return `ไม่พบคำขอประเภท${typeFilter}ที่มีสถานะ${statusFilter}`;
+    }
+
+    // กรองเฉพาะสถานะ
+    if (statusFilter !== "ทั้งหมด") {
+      return `ไม่พบคำขอที่มีสถานะ${statusFilter}`;
+    }
+
+    // กรองเฉพาะประเภท
+    if (typeFilter !== "ทั้งหมด") {
+      return `ไม่พบคำขอประเภท${typeFilter}`;
+    }
+
+    return "ไม่พบคำขอ";
+  };
 
   const notifications = [
     {
@@ -108,9 +136,8 @@ function TeacherHome() {
   }, []);
 
   useEffect(() => {
-    //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, statusFilter, typeFilter]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("userId"); //ลบค่ารหัสประจำตัวจาก sessionStorage
@@ -224,56 +251,56 @@ function TeacherHome() {
         <div className="dashboard-content">
           {/* Search */}
           <div className="search-section">
-  <div className="search-box">
-    <input
-      type="text"
-      placeholder="ค้นหาชื่อนิสิต หรือหัวข้อโครงงาน"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อนิสิต หรือหัวข้อโครงงาน"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
 
-    <FaSearch className="search-icon" />
-  </div>
+              <FaSearch className="search-icon" />
+            </div>
 
-  {/* ตัวกรองสถานะ */}
-<div className="select-wrapper">
-  <span className="select-label">
-    {statusFilter === "ทั้งหมด" ? "สถานะทั้งหมด" : statusFilter}
-  </span>
+            {/* ตัวกรองสถานะ */}
+            <div className="select-wrapper">
+              <span className="select-label">
+                {statusFilter === "ทั้งหมด" ? "สถานะทั้งหมด" : statusFilter}
+              </span>
 
-  <select
-    value={statusFilter}
-    onChange={(e) => setStatusFilter(e.target.value)}
-    className="status-filter"
-  >
-    <option value="ทั้งหมด">สถานะทั้งหมด</option>
-    <option value="รอพิจารณา">รอพิจารณา</option>
-    <option value="อนุมัติ">อนุมัติ</option>
-    <option value="ปฏิเสธ">ปฏิเสธ</option>
-  </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="status-filter"
+              >
+                <option value="ทั้งหมด">สถานะทั้งหมด</option>
+                <option value="รอพิจารณา">รอพิจารณา</option>
+                <option value="อนุมัติ">อนุมัติ</option>
+                <option value="ปฏิเสธ">ปฏิเสธ</option>
+              </select>
 
-  <span className="select-arrow">▼</span>
-</div>
+              <span className="select-arrow">▼</span>
+            </div>
 
-{/* ตัวกรองประเภท */}
-<div className="select-wrapper type-select">
-  <span className="select-label">
-    {typeFilter === "ทั้งหมด" ? "ประเภททั้งหมด" : typeFilter}
-  </span>
+            {/* ตัวกรองประเภท */}
+            <div className="select-wrapper type-select">
+              <span className="select-label">
+                {typeFilter === "ทั้งหมด" ? "ประเภททั้งหมด" : typeFilter}
+              </span>
 
-  <select
-    value={typeFilter}
-    onChange={(e) => setTypeFilter(e.target.value)}
-    className="status-filter"
-  >
-    <option value="ทั้งหมด">ประเภททั้งหมด</option>
-    <option value="สมัครเข้าร่วม">สมัครเข้าร่วม</option>
-    <option value="เสนอหัวข้อโครงงาน">เสนอหัวข้อโครงงาน</option>
-  </select>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="status-filter"
+              >
+                <option value="ทั้งหมด">ประเภททั้งหมด</option>
+                <option value="สมัครเข้าร่วม">สมัครเข้าร่วม</option>
+                <option value="เสนอหัวข้อโครงงาน">เสนอหัวข้อโครงงาน</option>
+              </select>
 
-  <span className="select-arrow">▼</span>
-</div>
-</div>
+              <span className="select-arrow">▼</span>
+            </div>
+          </div>
 
           {/* Dashboard Cards */}
           <div className="dashboard-cards">
@@ -333,14 +360,8 @@ function TeacherHome() {
               <tbody>
                 {currentRequests.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      style={{
-                        textAlign: "center",
-                        padding: "30px",
-                      }}
-                    >
-                      ไม่พบคำขอ
+                    <td colSpan={8} className="empty-request-cell">
+                      {getEmptyMessage()}
                     </td>
                   </tr>
                 ) : (
@@ -406,11 +427,13 @@ function TeacherHome() {
               </tbody>
             </table>
 
-            <div className="view-all">
-              <button onClick={() => navigate("/teacher/requests")}>
-                ดูทั้งหมด →
-              </button>
-            </div>
+            {filteredRequests.length > 0 && (
+              <div className="view-all">
+                <button onClick={() => navigate("/teacher/requests")}>
+                  ดูทั้งหมด →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>

@@ -849,3 +849,14 @@ nav li.active {
   }
 
 }
+
+.empty-request-cell {
+  text-align: center;
+  padding: 30px !important;
+
+  border-bottom: none !important;
+
+  color: #888;
+  font-size: 13px;
+  font-weight: 400;
+}
