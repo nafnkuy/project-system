@@ -1,8 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
-/* =========================
+
+/* =========================================================
    RESET
-========================= */
+========================================================= */
 
 .staff-home-page,
 .staff-home-page * {
@@ -11,28 +12,32 @@
 }
 
 .staff-home-page {
-  display: flex;
   width: 100%;
   min-height: 100vh;
+
+  display: flex;
+
   background: #f5f5f5;
 }
 
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
-.staff-sidebar {
+.staff-home-page .staff-sidebar {
   position: fixed;
+
   top: 0;
   left: 0;
   bottom: 0;
 
-  width: 230px;
+  width: 250px;
   height: 100vh;
 
   background: #ffffff;
-  border-right: 1px solid #dddddd;
+
+  border-right: 1px solid #ddd;
 
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -41,434 +46,728 @@
 }
 
 
-/* LOGO */
+/* ---------- LOGO ---------- */
 
-.staff-logo {
+.staff-home-page .staff-logo {
   display: flex;
   align-items: center;
+
   gap: 10px;
 
-  padding: 22px 18px;
+  padding: 24px 20px;
+
+  margin: 0;
 }
 
-.staff-logo img {
-  width: 48px;
-  height: 48px;
+.staff-home-page .staff-logo img {
+  width: 55px;
+  height: 55px;
+
   object-fit: contain;
 }
 
-.staff-logo h2 {
+.staff-home-page .staff-logo h2 {
   margin: 0;
-  font-size: 21px;
-  font-weight: 600;
-  color: #111111;
+
+  color: #111;
+
+  font-size: 23px;
+  font-weight: 700;
 }
 
-.staff-logo p {
-  margin: 2px 0 0;
-  font-size: 8px;
-  line-height: 1.25;
-  color: #666666;
+.staff-home-page .staff-logo p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
 }
 
 
-/* =========================
+/* =========================================================
    NAVIGATION
-========================= */
+========================================================= */
 
-.staff-sidebar nav {
+.staff-home-page .staff-sidebar nav {
   width: 100%;
+
+  margin: 0;
 }
 
-.staff-sidebar ul {
+.staff-home-page .staff-sidebar ul {
   list-style: none;
+
   margin: 0;
   padding: 0;
 }
 
-.staff-sidebar li {
+.staff-home-page .staff-sidebar li {
   width: 100%;
 
-  padding: 16px 10px;
+  margin: 0;
+  padding: 18px 0;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
 
   text-align: center;
-
-  color: #222222;
-
-  font-size: 13px;
-  font-weight: 400;
 
   cursor: pointer;
 }
 
-.staff-sidebar li:hover {
+.staff-home-page .staff-sidebar li:hover {
   background: #f0f0f0;
 }
 
-.staff-sidebar li.active {
+.staff-home-page .staff-sidebar li.active {
   background: #2f5d7c;
   color: #ffffff;
 }
 
 
-/* LOGOUT */
+/* ---------- LOGOUT ---------- */
 
-.staff-logout-btn {
-  width: 185px;
+.staff-home-page .staff-logout-btn {
+  width: 190px;
 
   margin: 0 auto 20px;
-  padding: 11px;
+  padding: 12px;
 
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
 
-  background: #3977c6;
+  background: #3b75c4;
   color: #ffffff;
 
   font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-.staff-logout-btn:hover {
-  background: #2d69b4;
+.staff-home-page .staff-logout-btn:hover {
+  background: #2f6db5;
 }
 
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+========================================================= */
 
-.staff-main {
-  width: calc(100% - 230px);
+.staff-home-page .staff-main {
+  width: calc(100% - 250px);
   min-height: 100vh;
 
-  margin-left: 230px;
+  margin-left: 250px;
 
   background: #f5f5f5;
 }
 
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
-.staff-header {
+.staff-home-page .staff-header {
   width: 100%;
-  height: 69px;
+  height: 70px;
 
-  padding: 0 16px 0 24px;
+  padding: 0 20px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: #f2e4a0;
+  background: #f0e3a1;
+
+  border: none;
 }
 
-.staff-header h2 {
+.staff-home-page .staff-header h2 {
   margin: 0;
+  padding: 0;
+
+  color: #111;
 
   font-size: 20px;
   font-weight: 400;
-
-  color: #111111;
 }
 
-.staff-header-right {
+.staff-home-page .staff-header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+
+  gap: 10px;
 }
 
 
-/* NOTIFICATION */
+/* =========================================================
+   NOTIFICATION
+========================================================= */
 
-.staff-notification-btn {
-  width: 43px;
-  height: 43px;
+.staff-home-page .staff-notification-btn {
+  width: 50px;
+  height: 50px;
+
+  padding: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #dddddd;
+  background: #ffffff;
+  color: #999;
+
+  border: 1px solid #ddd;
   border-radius: 4px;
 
-  background: #ffffff;
-  color: #999999;
-
-  font-size: 17px;
+  font-size: 20px;
 
   cursor: pointer;
 }
 
+.staff-home-page .staff-notification-btn svg {
+  color: #999;
+}
 
-/* USER */
 
-.staff-user-info {
-  height: 43px;
+/* =========================================================
+   USER
+========================================================= */
+
+.staff-home-page .staff-user-info {
+  height: 50px;
+
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
 
-  gap: 9px;
-
-  padding: 0 12px;
-
-  border: 1px solid #dddddd;
-  border-radius: 4px;
+  gap: 10px;
 
   background: #ffffff;
 
-  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.staff-user-info img {
-  width: 28px;
-  height: 28px;
+.staff-home-page .staff-user-info img {
+  width: 30px;
+  height: 30px;
 
   border-radius: 50%;
+
   object-fit: cover;
 }
 
 
-/* =========================
+/* =========================================================
    CONTENT
-========================= */
+========================================================= */
 
-.staff-content {
+.staff-home-page .staff-content {
   width: 100%;
 
-  padding: 32px 34px;
+  padding: 62px 38px 40px;
 }
 
 
-/* =========================
-   SUMMARY
-========================= */
+/* =========================================================
+   SEARCH + FILTER
+   Scale เดียวกับ TeacherHome
+========================================================= */
 
-.staff-summary {
+.staff-home-page .staff-toolbar {
   width: 100%;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 34px;
-
-  margin-bottom: 27px;
-}
-
-.staff-summary-card {
-  height: 103px;
 
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
 
-  padding: 18px 25px;
+  gap: 10px;
+
+  margin-top: 0;
+  margin-bottom: 60px;
+}
+
+
+/* ---------- SEARCH ---------- */
+
+.staff-home-page .staff-search {
+  width: 450px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+
+  /* icon อยู่ด้านขวา */
+  flex-direction: row-reverse;
+
+  padding: 0 14px;
 
   background: #ffffff;
 
-  border: 1px solid #bdbdbd;
-  border-radius: 7px;
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
 }
 
-.staff-summary-card span {
-  margin-bottom: 5px;
+.staff-home-page .staff-search input {
+  flex: 1;
+  min-width: 0;
 
-  color: #222222;
+  margin: 0;
+  padding: 0;
 
-  font-size: 13px;
-}
+  border: none;
+  outline: none;
 
-.staff-summary-card strong {
-  font-size: 31px;
-  font-weight: 600;
-  line-height: 1;
-}
+  background: transparent;
 
-.staff-total {
-  color: #3379bd;
-}
-
-.staff-month {
-  color: #ef7600;
-}
-
-.staff-today {
-  color: #14a16a;
-}
-
-
-/* =========================
-   LATEST DOCUMENTS
-========================= */
-
-.latest-documents {
-  width: 100%;
-
-  padding: 23px 25px 24px;
-
-  background: #ffffff;
-
-  border: 1px solid #bdbdbd;
-  border-radius: 7px;
-}
-
-.latest-documents h3 {
-  margin: 0 0 13px;
-
-  color: #222222;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-
-/* =========================
-   TABLE
-========================= */
-
-.staff-document-table {
-  width: 100%;
-
-  border-collapse: collapse;
-  table-layout: fixed;
-
-  color: #222222;
-}
-
-.staff-document-table th,
-.staff-document-table td {
-  border-left: none;
-  border-right: none;
-
-  text-align: center;
-  vertical-align: middle;
-}
-
-.staff-document-table th {
-  height: 45px;
-
-  padding: 8px 10px;
-
-  border-bottom: 1px solid #aaaaaa;
+  color: #222;
 
   font-size: 12px;
   font-weight: 400;
 }
 
-.staff-document-table td {
-  height: 58px;
+.staff-home-page .staff-search input::placeholder {
+  color: #999;
 
-  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 400;
+}
 
-  border-bottom: 1px solid #c9c9c9;
+.staff-home-page .staff-search svg {
+  flex-shrink: 0;
 
+  color: #999;
+
+  font-size: 15px;
+}
+
+
+/* ---------- FILTER ---------- */
+
+.staff-home-page .staff-select-wrapper {
+  position: relative;
+
+  width: 180px;
+  height: 36px;
+}
+
+.staff-home-page .staff-filter-select {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 34px 0 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+
+  color: #777;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.staff-home-page .staff-filter-select:hover,
+.staff-home-page .staff-filter-select:focus {
+  border-color: #b7b7b7;
+
+  outline: none;
+  box-shadow: none;
+}
+
+.staff-home-page .staff-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  color: #999;
+
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+.staff-home-page .staff-filter-select option {
   font-size: 11px;
+}
+
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.staff-home-page .staff-summary {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 20px;
+
+  margin: 0 0 20px;
+}
+
+.staff-home-page .staff-summary-card {
+  height: 120px;
+
+  padding: 22px 22px 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.staff-home-page .staff-summary-card span {
+  margin-bottom: 8px;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.staff-home-page .staff-summary-card strong {
+  font-size: 35px;
+  font-weight: 600;
+
+  line-height: normal;
+}
+
+
+/* ---------- CARD COLORS ---------- */
+
+.staff-home-page .staff-total {
+  color: #3678c5;
+}
+
+.staff-home-page .staff-month {
+  color: #f07800;
+}
+
+.staff-home-page .staff-today {
+  color: #159c68;
+}
+
+
+/* =========================================================
+   LATEST DOCUMENTS
+========================================================= */
+
+.staff-home-page .latest-documents {
+  width: 100%;
+
+  margin: 0;
+
+  padding: 22px 26px 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbb;
+  border-radius: 9px;
+
+  box-shadow: none;
+}
+
+.staff-home-page .latest-documents h3 {
+  margin: 0 0 14px;
+  padding: 0;
+
+  color: #222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.staff-home-page .staff-document-table {
+  width: 100%;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  color: #222;
+}
+
+.staff-home-page .staff-document-table th,
+.staff-home-page .staff-document-table td {
+  border-left: none;
+  border-right: none;
+  border-top: none;
+
+  border-bottom: 1px solid #ddd;
+
+  padding: 9px 5px;
+
+  background: #ffffff;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+.staff-home-page .staff-document-table th {
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.staff-home-page .staff-document-table td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+
+  font-size: 13px;
   font-weight: 400;
 }
 
 
-/* COLUMN WIDTH */
+/* ---------- แถวสุดท้ายไม่มีเส้น ---------- */
+
+.staff-home-page
+  .staff-document-table
+  tbody
+  tr:last-child
+  td {
+  border-bottom: none;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
 
 /* เลขที่เอกสาร */
-.staff-document-table th:nth-child(1),
-.staff-document-table td:nth-child(1) {
+
+.staff-home-page .staff-document-table th:nth-child(1),
+.staff-home-page .staff-document-table td:nth-child(1) {
   width: 15%;
 }
 
+
 /* อาจารย์ผู้อนุมัติ */
-.staff-document-table th:nth-child(2),
-.staff-document-table td:nth-child(2) {
+
+.staff-home-page .staff-document-table th:nth-child(2),
+.staff-home-page .staff-document-table td:nth-child(2) {
   width: 18%;
 }
 
+
 /* ชื่อหัวข้อโครงงาน */
-.staff-document-table th:nth-child(3),
-.staff-document-table td:nth-child(3) {
+
+.staff-home-page .staff-document-table th:nth-child(3),
+.staff-home-page .staff-document-table td:nth-child(3) {
   width: 29%;
 }
 
+
 /* การดาวน์โหลด */
-.staff-document-table th:nth-child(4),
-.staff-document-table td:nth-child(4) {
+
+.staff-home-page .staff-document-table th:nth-child(4),
+.staff-home-page .staff-document-table td:nth-child(4) {
   width: 13%;
 }
 
+
 /* วันที่อนุมัติ */
-.staff-document-table th:nth-child(5),
-.staff-document-table td:nth-child(5) {
+
+.staff-home-page .staff-document-table th:nth-child(5),
+.staff-home-page .staff-document-table td:nth-child(5) {
   width: 15%;
 }
 
+
 /* จัดการ */
-.staff-document-table th:nth-child(6),
-.staff-document-table td:nth-child(6) {
+
+.staff-home-page .staff-document-table th:nth-child(6),
+.staff-home-page .staff-document-table td:nth-child(6) {
   width: 10%;
 }
 
 
-/* DETAIL BUTTON */
+/* =========================================================
+   PROJECT TITLE
+========================================================= */
 
-.staff-detail-btn {
+.staff-home-page .staff-project-title {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
   white-space: nowrap;
-  min-width: 66px;
-  height: 27px;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.staff-home-page .staff-detail-btn {
+  min-width: 74px;
+  height: 28px;
 
   padding: 0 10px;
 
-  border: 1px solid #bbbbbb;
-  border-radius: 3px;
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
 
   background: #ffffff;
-  color: #999999;
+  color: #222;
 
-  font-size: 10px;
-
-  cursor: pointer;
-}
-
-.staff-detail-btn:hover {
-  color: #555555;
-  background: #f7f7f7;
-}
-
-
-/* VIEW ALL */
-
-.staff-view-all-btn {
-  display: block;
-
-  margin: 20px auto 0;
-
-  border: none;
-  background: transparent;
-
-  color: #222222;
+  border: 1px solid #bbb;
+  border-radius: 3px;
 
   font-size: 11px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-.staff-view-all-btn:hover {
-  text-decoration: underline;
+.staff-home-page .staff-detail-btn:hover {
+  background: #f2f2f2;
 }
 
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* =========================================================
+   VIEW ALL
+========================================================= */
 
-@media (max-width: 1000px) {
-  .staff-summary {
-    gap: 15px;
+.staff-home-page .staff-view-all-btn {
+  display: block;
+
+  width: 100%;
+
+  margin: 0;
+  padding: 18px 0 0;
+
+  border: none;
+  border-top: 1px solid #ddd;
+
+  background: transparent;
+
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.staff-home-page .staff-view-all-btn:hover {
+  text-decoration: none;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.staff-home-page .staff-table-message {
+  height: 80px !important;
+
+  color: #888 !important;
+
+  font-size: 13px !important;
+  font-weight: 400 !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  border-bottom: none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .staff-home-page .staff-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media (max-width: 700px) {
+  .staff-home-page .staff-sidebar {
+    width: 250px;
   }
 
-  .staff-content {
-    padding: 25px 20px;
+  .staff-home-page .staff-main {
+    width: calc(100% - 250px);
+
+    margin-left: 250px;
+  }
+
+  .staff-home-page .staff-content {
+    padding: 25px 38px;
+  }
+
+  .staff-home-page .staff-toolbar {
+    justify-content: flex-start;
+
+    flex-wrap: nowrap;
+  }
+
+  .staff-home-page .staff-search {
+    width: 450px;
+
+    flex-shrink: 0;
+  }
+
+  .staff-home-page .staff-select-wrapper {
+    flex-shrink: 0;
+  }
+
+  .staff-home-page .staff-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-home-page .latest-documents {
+    overflow-x: auto;
   }
 }

@@ -1,7 +1,7 @@
 import "./StaffHome.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaSearch } from "react-icons/fa";
 import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
@@ -56,6 +56,9 @@ function StaffHome() {
 
   const [loading, setLoading] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [downloadFilter, setDownloadFilter] = useState("ทั้งหมด");
+
   /* =========================
      ตรวจสอบ Login
   ========================= */
@@ -67,7 +70,7 @@ function StaffHome() {
   }, [userId, navigate]);
 
   /* =========================
-     ดึงข้อมูล Dashboard จริง
+     ดึงข้อมูล Dashboard
   ========================= */
 
   useEffect(() => {
@@ -103,8 +106,8 @@ function StaffHome() {
   };
 
   /* =========================
-   เลขที่เอกสาร
-========================= */
+     เลขที่เอกสาร
+  ========================= */
 
   const getDocumentNumber = (document: LatestDocument) => {
     const academicYear =
@@ -114,6 +117,49 @@ function StaffHome() {
     return `${document.document_code}-${academicYear}-${String(
       document.id,
     ).padStart(3, "0")}`;
+  };
+
+  /* =========================
+     SEARCH + FILTER
+  ========================= */
+
+  const filteredDocuments = dashboard.latestDocuments.filter((document) => {
+    const keyword = searchTerm.toLowerCase().trim();
+
+    const matchesSearch =
+      getDocumentNumber(document).toLowerCase().includes(keyword) ||
+      (document.advisor_name || "").toLowerCase().includes(keyword) ||
+      (document.project_title || "").toLowerCase().includes(keyword);
+
+    const matchesDownload =
+      downloadFilter === "ทั้งหมด" ||
+      document.download_status === downloadFilter;
+
+    return matchesSearch && matchesDownload;
+  });
+
+  /* =========================
+     EMPTY MESSAGE
+  ========================= */
+
+  const getEmptyMessage = () => {
+    if (dashboard.latestDocuments.length === 0) {
+      return "ยังไม่มีเอกสาร";
+    }
+
+    if (searchTerm.trim() !== "") {
+      return "ไม่พบเอกสารที่ตรงกับการค้นหา";
+    }
+
+    if (downloadFilter === "ดาวน์โหลดแล้ว") {
+      return "ไม่พบเอกสารที่ดาวน์โหลดแล้ว";
+    }
+
+    if (downloadFilter === "ยังไม่ดาวน์โหลด") {
+      return "ไม่พบเอกสารที่ยังไม่ดาวน์โหลด";
+    }
+
+    return "ไม่พบเอกสาร";
   };
 
   /* =========================
@@ -179,7 +225,9 @@ function StaffHome() {
             <div className="staff-user-info">
               <img
                 src={
-                  profileImage ? `http://localhost:5000${profileImage}` : logo
+                  profileImage
+                    ? `http://localhost:5000${profileImage}`
+                    : logo
                 }
                 alt="Profile"
               />
@@ -192,6 +240,45 @@ function StaffHome() {
         {/* ================= CONTENT ================= */}
 
         <div className="staff-content">
+          {/* ================= SEARCH + FILTER ================= */}
+
+          <div className="staff-toolbar">
+            {/* SEARCH */}
+
+            <div className="staff-search">
+              <FaSearch />
+
+              <input
+                type="text"
+                placeholder="ค้นหาเลขที่เอกสาร อาจารย์ หรือชื่อหัวข้อโครงงาน"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* FILTER */}
+
+            <div className="staff-select-wrapper">
+              <select
+                value={downloadFilter}
+                onChange={(e) => setDownloadFilter(e.target.value)}
+                className="staff-filter-select"
+              >
+                <option value="ทั้งหมด">การดาวน์โหลดทั้งหมด</option>
+
+                <option value="ดาวน์โหลดแล้ว">
+                  ดาวน์โหลดแล้ว
+                </option>
+
+                <option value="ยังไม่ดาวน์โหลด">
+                  ยังไม่ดาวน์โหลด
+                </option>
+              </select>
+
+              <span className="staff-select-arrow">▼</span>
+            </div>
+          </div>
+
           {/* ================= SUMMARY ================= */}
 
           <div className="staff-summary">
@@ -206,13 +293,17 @@ function StaffHome() {
             <div className="staff-summary-card">
               <span>เอกสารที่ได้รับเดือนนี้</span>
 
-              <strong className="staff-month">{dashboard.thisMonth}</strong>
+              <strong className="staff-month">
+                {dashboard.thisMonth}
+              </strong>
             </div>
 
             <div className="staff-summary-card">
               <span>เอกสารที่ได้รับวันนี้</span>
 
-              <strong className="staff-today">{dashboard.today}</strong>
+              <strong className="staff-today">
+                {dashboard.today}
+              </strong>
             </div>
           </div>
 
@@ -234,26 +325,38 @@ function StaffHome() {
               </thead>
 
               <tbody>
+                {/* กำลังโหลด */}
+
                 {loading && (
                   <tr>
-                    <td colSpan={6}>กำลังโหลดข้อมูล...</td>
+                    <td colSpan={6} className="staff-table-message">
+                      กำลังโหลดข้อมูล...
+                    </td>
                   </tr>
                 )}
 
-                {!loading && dashboard.latestDocuments.length === 0 && (
+                {/* ไม่พบข้อมูล */}
+
+                {!loading && filteredDocuments.length === 0 && (
                   <tr>
-                    <td colSpan={6}>ยังไม่มีเอกสาร</td>
+                    <td colSpan={6} className="staff-table-message">
+                      {getEmptyMessage()}
+                    </td>
                   </tr>
                 )}
+
+                {/* มีข้อมูล */}
 
                 {!loading &&
-                  dashboard.latestDocuments.map((document) => (
+                  filteredDocuments.map((document) => (
                     <tr key={document.id}>
                       <td>{getDocumentNumber(document)}</td>
 
                       <td>{document.advisor_name}</td>
 
-                      <td>{document.project_title}</td>
+                      <td className="staff-project-title">
+                        {document.project_title}
+                      </td>
 
                       <td>{document.download_status}</td>
 
@@ -274,7 +377,13 @@ function StaffHome() {
               </tbody>
             </table>
 
-            <button className="staff-view-all-btn">ดูทั้งหมด →</button>
+            {/* แสดงเฉพาะตอนมีข้อมูล */}
+
+            {filteredDocuments.length > 0 && (
+              <button className="staff-view-all-btn">
+                ดูทั้งหมด →
+              </button>
+            )}
           </div>
         </div>
       </main>
