@@ -1,39 +1,37 @@
-@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
-* {
+
+/* =========================================================
+   RESET
+   จำกัด CSS ให้อยู่เฉพาะหน้า StudentHome
+========================================================= */
+
+.student-home-page,
+.student-home-page * {
+  box-sizing: border-box;
   font-family: "Prompt", sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100%;
-}
-
-body {
-  margin: 0;
-}
-
-.layout {
+.student-home-page {
   display: flex;
+
   width: 100%;
   min-height: 100vh;
+
+  margin: 0;
+
   background: #f5f5f5;
 }
 
-/* Sidebar */
 
-.sidebar {
+/* =========================================================
+   SIDEBAR
+   Scale เดียวกับ TeacherHome
+========================================================= */
+
+.student-home-page .sidebar {
   position: fixed;
+
   top: 0;
   left: 0;
   bottom: 0;
@@ -41,7 +39,8 @@ body {
   width: 250px;
   height: 100vh;
 
-  background: #fff;
+  background: #ffffff;
+
   border-right: 1px solid #ddd;
 
   display: grid;
@@ -50,69 +49,101 @@ body {
   z-index: 100;
 }
 
-.main {
-  margin-left: 250px;
-  width: calc(100% - 250px);
-  min-height: 100vh;
-  padding-bottom: 0;
-}
 
-nav {
-  margin-top: 8px;
-}
+/* ---------- LOGO ---------- */
 
-.logo {
+.student-home-page .logo {
   display: flex;
-  align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
-  gap: 10px; /* ระยะห่างระหว่างรูปกับข้อความ */
+  align-items: center;
+
+  gap: 10px;
+
   padding: 24px 20px;
-}
 
-.logo img {
-  width: 55px;
-  height: 55px;
-  object-fit: contain;
-}
-
-.logo h2 {
-  font-size: 23px;
-  font-weight: 700;
-  margin-bottom: 2px;   /* ลดระยะห่าง */
-}
-
-.logo p {
-  margin-top: 0;        /* ไม่ให้มีระยะด้านบน */
-  font-size: 9.5px;
-  line-height: 1.2;     /* ลดความสูงของบรรทัด */
-  color: #666;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
   margin: 0;
 }
 
-.sidebar li {
-  padding: 18px 0;
-  font-size: 15px;
-  font-weight: 400;
-  cursor: pointer;
-  text-align: center;
+.student-home-page .logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
 }
 
-.sidebar li:hover {
+.student-home-page .logo h2 {
+  margin: 0;
+
+  color: #111;
+
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.student-home-page .logo p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.student-home-page .sidebar nav {
+  width: 100%;
+
+  margin: 0;
+}
+
+.student-home-page .sidebar ul {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+}
+
+.student-home-page .sidebar li {
+  width: 100%;
+
+  margin: 0;
+  padding: 18px 0;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.student-home-page .sidebar li:hover {
   background: #f0f0f0;
 }
 
-.active {
+.student-home-page .sidebar li.active {
   background: #2f5d7c;
-  color: white;
-  font-weight: 500;
+
+  color: #ffffff;
+
+  font-weight: 400;
 }
 
-.logout-btn {
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.student-home-page .logout-btn {
   width: 190px;
+
   margin: 0 auto 20px;
   padding: 12px;
 
@@ -120,361 +151,835 @@ nav {
   border-radius: 8px;
 
   background: #3b75c4;
-  color: white;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-.header {
-  background: #f0e3a1;
-  height: 70px;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.student-home-page .logout-btn:hover {
+  background: #2f6db5;
 }
 
-.header h2 {
-  font-size: 22px;
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.student-home-page .main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.student-home-page .header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+
+  border: none;
+}
+
+.student-home-page .header h2 {
+  margin: 0;
+
+  color: #111;
+
+  font-size: 20px;
   font-weight: 400;
 }
 
-.user-info {
+.student-home-page .header-right {
   display: flex;
-  gap: 20px;
   align-items: center;
+
+  gap: 10px;
 }
 
-.search-box {
+
+/* =========================================================
+   NOTIFICATION BOX
+========================================================= */
+
+.student-home-page .notification-box {
+  width: 50px;
+  height: 50px;
+
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin: 30px 0;
-}
 
-.search-box input {
-  width: 430px !important;
-  max-width: 430px !important;
-  height: 36px;
-
-  border: 1px solid #ccc;
-  border-radius: 20px;
-
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-
-.table-container {
-  width: 90%;
-  margin: 30px auto 0;
-
-  background: #fff;
-
-  padding: 18px;
-  border-radius: 8px;
-
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-}
-
-.table-container h3 {
-  margin-bottom: 20px;   /* เพิ่มระยะห่างระหว่างหัวข้อกับตาราง */
-  font-size: 16px;
-  font-weight: 600;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-th,
-td {
-  font-size: 14px;
+  background: #ffffff;
 
   border: 1px solid #ddd;
-
-  padding: 12px;
-
-  text-align: center;
-
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+  border-radius: 4px;
 }
 
-th {
-  background: #fafafa;
-}
-
-/* =========================
-   กำหนดความกว้างแต่ละคอลัมน์
-========================= */
-
-/* ชื่อหัวข้อ */
-table th:nth-child(1),
-table td:nth-child(1) {
-  width: 45%;
-}
-
-/* อาจารย์ที่ปรึกษา */
-table th:nth-child(2),
-table td:nth-child(2) {
-  width: 20%;
-}
-
-/* สาขาวิชา */
-table th:nth-child(3),
-table td:nth-child(3) {
-  width: 10%;
-}
-
-/* รับนิสิต */
-table th:nth-child(4),
-table td:nth-child(4) {
-  width: 10%;
-}
-
-/* รายละเอียด */
-table th:nth-child(5),
-table td:nth-child(5) {
-  width: 15%;
-}
-
-/*เพิ่มตรงนี้เข้ามาเป็นของ 🔔 กับรูปโปรไฟล์ */
-.notification-wrapper {
+.student-home-page .notification-wrapper {
   position: relative;
 }
 
-.notification-btn {
+.student-home-page .notification-btn {
   position: relative;
-  border: none;
-  background: transparent;
-  cursor: pointer;
 
-  font-size: 22px;
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  border: none;
+
+  background: transparent;
+  color: #999;
+
+  font-size: 20px;
+
+  cursor: pointer;
 }
 
-.notification-count {
+.student-home-page .notification-btn svg {
+  color: #999;
+}
+
+
+/* ---------- NOTIFICATION COUNT ---------- */
+
+.student-home-page .notification-count {
   position: absolute;
-  top: -6px;
+
+  top: -8px;
   right: -8px;
-
-  background: red;
-  color: white;
-
-  border-radius: 50%;
 
   min-width: 18px;
   height: 18px;
 
+  padding: 0 4px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
+  border-radius: 50%;
+
+  background: red;
+  color: white;
+
   font-size: 11px;
+  font-weight: 500;
 }
 
-.notification-dropdown {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  width: 280px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 1000;
-}
 
-.notification-dropdown h4 {
-  font-size: 16px;
-  padding: 12px;
-  margin: 0;
-  border-bottom: 1px solid #eee;
-}
+/* =========================================================
+   USER
+========================================================= */
 
-.notification-item {
-  font-size: 14px;
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-}
+.student-home-page .user-info {
+  height: 50px;
 
-.notification-item p {
-  margin: 0;
-}
+  padding: 0 14px;
 
-.notification-item small {
-  color: gray;
-}
-
-.notification-item:hover {
-  background: #f5f5f5;
-}
-
-.user-info {
   display: flex;
   align-items: center;
+
   gap: 10px;
 
-  background: white;
+  background: #ffffff;
+
   border: 1px solid #ddd;
   border-radius: 4px;
 
-  height: 60px;
-  padding: 0 14px;
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.profile-image {
+.student-home-page .profile-image {
   width: 30px;
   height: 30px;
+
   border-radius: 50%;
+
   object-fit: cover;
 }
 
-.header-right {
+
+/* =========================================================
+   SEARCH
+   เหมือน TeacherHome
+========================================================= */
+
+.student-home-page .search-box {
+  width: 100%;
+
+  margin: 62px 0 60px;
+
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.notification-box {
-  width: 50px;
-  height: 60px;
-
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-
-  display: flex;
   justify-content: center;
-  align-items: center;
 }
 
-.notification-box,
-.user-info {
-  height: 50px;
-}
+.student-home-page .student-search {
+  width: 450px;
+  height: 36px;
 
-/*  < 1 of 3 > */
-.pagination {
+  padding: 0 14px;
+
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 12px;
-  margin-top: 15px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
 }
 
-.pagination button {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s;
+.student-home-page .student-search input {
+  flex: 1;
+  min-width: 0;
+
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 400;
 }
 
-.pagination button:hover:not(:disabled) {
-  background: #f2f2f2;
+.student-home-page .student-search input::placeholder {
+  color: #999;
+
+  font-size: 12px;
+  font-weight: 400;
 }
 
-.pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.student-home-page .student-search svg {
+  flex-shrink: 0;
+
+  color: #999;
+
+  font-size: 15px;
 }
 
-.pagination span {
-  font-size: 14px;
+
+/* =========================================================
+   TABLE CONTAINER
+   เหมือน TeacherHome
+========================================================= */
+
+.student-home-page .table-container {
+  width: calc(100% - 76px);
+
+  margin: 0 38px;
+
+  padding: 22px 26px 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbb;
+  border-radius: 9px;
+
+  box-shadow: none;
+}
+
+.student-home-page .table-container h3 {
+  margin: 0 0 14px;
+
+  padding: 0;
+
+  color: #222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.student-home-page .table-container table {
+  width: 100%;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  color: #222;
+}
+
+.student-home-page .table-container th,
+.student-home-page .table-container td {
+  padding: 9px 5px;
+
+  border-left: none;
+  border-right: none;
+  border-top: none;
+
+  border-bottom: 1px solid #ddd;
+
+  background: #ffffff;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+.student-home-page .table-container th {
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  font-size: 13px;
   font-weight: 500;
 }
 
-/* =========================
-   Invitation Popup
-========================= */
+.student-home-page .table-container td {
+  padding-top: 9px;
+  padding-bottom: 9px;
 
-.invitation-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
+
+/* ชื่อหัวข้อ */
+
+.student-home-page .table-container th:nth-child(1),
+.student-home-page .table-container td:nth-child(1) {
+  width: 32%;
+}
+
+
+/* อาจารย์ */
+
+.student-home-page .table-container th:nth-child(2),
+.student-home-page .table-container td:nth-child(2) {
+  width: 23%;
+}
+
+
+/* สาขาวิชา */
+
+.student-home-page .table-container th:nth-child(3),
+.student-home-page .table-container td:nth-child(3) {
+  width: 13%;
+}
+
+
+/* รับนิสิต */
+
+.student-home-page .table-container th:nth-child(4),
+.student-home-page .table-container td:nth-child(4) {
+  width: 16%;
+}
+
+
+/* จัดการ */
+
+.student-home-page .table-container th:nth-child(5),
+.student-home-page .table-container td:nth-child(5) {
+  width: 16%;
+}
+
+
+/* =========================================================
+   PROJECT TITLE
+   ชื่อยาวไม่ทะลุคอลัมน์
+========================================================= */
+
+.student-home-page .student-project-title {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.student-home-page .student-detail-btn {
+  min-width: 74px;
+  height: 28px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #222;
+
+  border: 1px solid #bbb;
+  border-radius: 3px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-home-page .student-detail-btn:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.student-home-page .student-empty-cell {
+  height: 80px !important;
+
+  color: #888 !important;
+
+  font-size: 13px !important;
+  font-weight: 400 !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  border-bottom: none !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.student-home-page .pagination {
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+
+  margin-top: 12px;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.student-home-page .pagination button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #222;
+
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.student-home-page .pagination button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+.student-home-page .pagination button:disabled {
+  color: #aaa;
+
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.student-home-page .pagination span {
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   NOTIFICATION DROPDOWN
+========================================================= */
+
+.student-home-page .notification-dropdown {
+  position: absolute;
+
+  top: 42px;
+  right: 0;
+
+  width: 300px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   z-index: 1000;
 }
 
-.invitation-popup {
-  width: 500px;
+.student-home-page .notification-dropdown h4 {
+  margin: 0;
+
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #eee;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-home-page .notification-item {
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #eee;
+
+  color: #222;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.student-home-page .notification-item:last-child {
+  border-bottom: none;
+}
+
+.student-home-page .notification-item:hover {
+  background: #f5f5f5;
+}
+
+.student-home-page .notification-item p {
+  margin: 0 0 4px;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  line-height: 1.5;
+}
+
+.student-home-page .notification-item small {
+  color: #888;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   INVITATION / NOTIFICATION MODAL
+========================================================= */
+
+.student-home-page .invitation-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.82);
+
+  z-index: 2000;
+}
+
+.student-home-page .invitation-popup {
+  width: 430px;
   max-width: 90%;
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
+  padding: 30px 38px;
 
-.invitation-popup h3 {
+  background: #ffffff;
+
+  border: 1px solid #777;
+  border-radius: 9px;
+
   text-align: center;
-  margin-bottom: 20px;
+
+  box-shadow: none;
 }
 
-.invitation-divider {
-  border-top: 1px solid #ddd;
-  margin: 15px 0;
+.student-home-page .invitation-popup h3 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.invitation-detail {
-  margin: 18px 0;
+.student-home-page .invitation-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 18px 0 24px;
+
+  background: #ddd;
+
+  border: none;
 }
 
-.invitation-detail p {
+.student-home-page .invitation-detail {
+  margin: 14px 0;
+
+  text-align: left;
+}
+
+.student-home-page .invitation-detail p {
   margin: 5px 0;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.6;
 }
 
-.invitation-question {
-  text-align: center;
-  margin: 25px 0 15px;
+.student-home-page .invitation-detail strong {
+  font-size: 13px;
   font-weight: 500;
 }
 
-.invitation-actions {
+.student-home-page .invitation-question {
+  margin: 24px 0 18px;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   POPUP ACTIONS
+========================================================= */
+
+.student-home-page .invitation-actions {
   display: flex;
+  align-items: center;
   justify-content: center;
+
   gap: 15px;
 }
 
-.invitation-actions button {
-  padding: 10px 30px;
+.student-home-page .invitation-actions button {
+  width: 100px;
+  height: 36px;
+
+  padding: 0;
+
   border: none;
-  border-radius: 6px;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 400;
+
   cursor: pointer;
-  font-size: 16px;
 }
 
-.reject-btn {
-  background: #ddd;
+
+/* ปฏิเสธ / ปิด */
+
+.student-home-page .reject-btn {
+  background: #ff0000;
+  color: #ffffff;
 }
 
-.accept-btn {
-  background: #4caf50;
-  color: white;
+.student-home-page .reject-btn:hover {
+  background: #d90000;
 }
 
-.notification-detail-message {
+
+/* ตกลง */
+
+.student-home-page .accept-btn {
+  background: #20a36a;
+  color: #ffffff;
+}
+
+.student-home-page .accept-btn:hover {
+  background: #188c59;
+}
+
+
+/* =========================================================
+   SYSTEM NOTIFICATION MESSAGE
+========================================================= */
+
+.student-home-page .notification-detail-message {
   width: 100%;
-  padding: 16px 5px;
 
-  font-size: 13px;
-  line-height: 1.8;
+  padding: 5px 0;
 
   color: #333;
 
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.8;
+
   white-space: pre-line;
+
   text-align: left;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .student-home-page .student-search {
+    width: 450px;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .student-home-page .sidebar {
+    width: 250px;
+  }
+
+  .student-home-page .main {
+    width: calc(100% - 250px);
+
+    margin-left: 250px;
+  }
+
+  .student-home-page .search-box {
+    justify-content: flex-start;
+
+    padding: 0 38px;
+  }
+
+  .student-home-page .student-search {
+    flex-shrink: 0;
+
+    width: 450px;
+  }
+
+  .student-home-page .table-container {
+    min-width: 850px;
+  }
+}
+
+/* =========================================================
+   FIX SEARCH - กัน CSS หน้าอื่นมาชน
+========================================================= */
+
+.student-home-page .search-box {
+  width: 100% !important;
+  height: auto !important;
+
+  margin: 62px 0 60px !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: transparent !important;
+
+  border: none !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.student-home-page .student-search {
+  width: 450px !important;
+  height: 36px !important;
+
+  padding: 0 14px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid #b7b7b7 !important;
+  border-radius: 20px !important;
+
+  box-shadow: none !important;
+}
+
+.student-home-page .student-search input {
+  flex: 1 !important;
+  min-width: 0 !important;
+
+  width: auto !important;
+  height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+
+  font-size: 12px !important;
+}
+
+.student-home-page .student-search svg {
+  flex-shrink: 0;
+
+  color: #999;
+
+  font-size: 15px;
 }

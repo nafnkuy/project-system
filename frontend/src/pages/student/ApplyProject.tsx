@@ -147,7 +147,7 @@ function ApplyProject() {
   };
 
   return (
-    <div className="layout">
+    <div className="student-apply-project-page">
       {/* Sidebar */}
 
       <aside className="sidebar">

@@ -1,96 +1,105 @@
-@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
-* {
+.student-project-detail-page,
+.student-project-detail-page * {
+  box-sizing: border-box;
   font-family: "Prompt", sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.layout {
+.student-project-detail-page {
   display: flex;
-  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
   background: #f5f5f5;
 }
 
-/* Sidebar */
+/* ================= SIDEBAR ================= */
 
-.sidebar {
+.student-project-detail-page .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
   width: 250px;
-  background: #fff;
+  height: 100vh;
+
+  background: #ffffff;
   border-right: 1px solid #ddd;
 
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
+}
+
+.student-project-detail-page .logo {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 
-  align-self: stretch;   /* ยืดตามความสูงของ .layout */
-}
-
-.sidebar nav {
-  flex: 1;
-}
-
-nav {
-  margin-top: 8px;
-  flex: 1;
-}
-
-.logo {
-  display: flex;
-  align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
-  gap: 10px; /* ระยะห่างระหว่างรูปกับข้อความ */
   padding: 24px 20px;
+  margin: 0;
 }
 
-.logo img {
+.student-project-detail-page .logo img {
   width: 55px;
   height: 55px;
   object-fit: contain;
 }
 
-.logo h2 {
+.student-project-detail-page .logo h2 {
+  margin: 0;
   font-size: 23px;
   font-weight: 700;
-  margin-bottom: 2px; /* ลดระยะห่าง */
+  color: #111;
 }
 
-.logo p {
-  margin-top: 0; /* ไม่ให้มีระยะด้านบน */
+.student-project-detail-page .logo p {
+  margin: 0;
   font-size: 9.5px;
-  line-height: 1.2; /* ลดความสูงของบรรทัด */
+  line-height: 1.2;
   color: #666;
 }
 
-.sidebar ul {
+.student-project-detail-page .sidebar nav {
+  width: 100%;
+  margin: 0;
+}
+
+.student-project-detail-page .sidebar ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar li {
+.student-project-detail-page .sidebar li {
+  width: 100%;
   padding: 18px 0;
-  font-size: 15px;
+  margin: 0;
+
+  color: #222;
+
+  font-size: 14px;
   font-weight: 400;
-  cursor: pointer;
+
   text-align: center;
+  cursor: pointer;
 }
 
-.sidebar li:hover {
+.student-project-detail-page .sidebar li:hover {
   background: #f0f0f0;
 }
 
-.active {
+.student-project-detail-page .sidebar li.active {
   background: #2f5d7c;
-  color: white;
-  font-weight: 500;
+  color: #fff;
 }
 
-.logout-btn {
+.student-project-detail-page .logout-btn {
   width: 190px;
-  margin: 20px auto;
+
+  margin: 0 auto 20px;
   padding: 12px;
 
   border: none;
@@ -99,61 +108,106 @@ nav {
   background: #3b75c4;
   color: white;
 
+  font-size: 13px;
+
   cursor: pointer;
 }
 
-/* Main */
+/* ================= MAIN ================= */
 
-.main {
-  flex: 1;
+.student-project-detail-page .main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
 }
 
-.header {
-  background: #f0e3a1;
+/* ================= HEADER ================= */
 
+.student-project-detail-page .header {
+  width: 100%;
   height: 70px;
+
   padding: 0 20px;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
 
   position: relative;
-  z-index: 100;
+  z-index: 50;
 }
 
-.header h2 {
-  font-size: 22px;
+.student-project-detail-page .breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #111;
+
+  font-size: 20px;
   font-weight: 400;
 }
 
-/*เพิ่มตรงนี้เข้ามาเป็นของ 🔔 กับรูปโปรไฟล์ */
-.notification-wrapper {
-  position: relative;
+.student-project-detail-page .breadcrumb span:first-child {
+  cursor: pointer;
 }
 
-.notification-btn {
-  position: relative;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+.student-project-detail-page .header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  font-size: 22px;
+.student-project-detail-page .notification-box {
+  width: 50px;
+  height: 50px;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background: #fff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-.notification-count {
+.student-project-detail-page .notification-wrapper {
+  position: relative;
+}
+
+.student-project-detail-page .notification-btn {
+  position: relative;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  color: #999;
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.student-project-detail-page .notification-btn svg {
+  color: #999;
+}
+
+.student-project-detail-page .notification-count {
   position: absolute;
-  top: -6px;
-  right: -8px;
-
-  background: red;
-  color: white;
-
-  border-radius: 50%;
+  top: -7px;
+  right: -7px;
 
   min-width: 18px;
   height: 18px;
@@ -162,258 +216,367 @@ nav {
   align-items: center;
   justify-content: center;
 
+  border-radius: 50%;
+
+  background: red;
+  color: white;
+
   font-size: 11px;
 }
 
-.notification-dropdown {
-  position: absolute;
-  top: 45px;
-  right: 0;
+.student-project-detail-page .user-info {
+  height: 50px;
 
-  width: 280px;
+  padding: 0 14px;
 
-  background: white;
-
-  border-radius: 10px;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  z-index: 9999;
-
-  overflow: hidden;
-}
-
-.notification-dropdown h4 {
-  font-size: 16px;
-  padding: 12px;
-  margin: 0;
-  border-bottom: 1px solid #eee;
-}
-
-.notification-item {
-  font-size: 14px;
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-}
-
-.notification-item p {
-  margin: 0;
-}
-
-.notification-item small {
-  color: gray;
-}
-
-.notification-item:hover {
-  background: #f5f5f5;
-}
-
-.user-info {
   display: flex;
   align-items: center;
   gap: 10px;
 
-  background: white;
+  background: #fff;
+
   border: 1px solid #ddd;
   border-radius: 4px;
 
-  height: 60px;
-  padding: 0 14px;
+  font-size: 14px;
 }
 
-.profile-image {
+.student-project-detail-page .profile-image {
   width: 30px;
   height: 30px;
+
   border-radius: 50%;
   object-fit: cover;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* ================= NOTIFICATION ================= */
 
-.notification-box {
-  width: 50px;
-  height: 60px;
+.student-project-detail-page .notification-dropdown {
+  position: absolute;
 
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  top: 42px;
+  right: 0;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  width: 300px;
 
-.notification-box,
-.user-info {
-  height: 50px;
-}
+  overflow: hidden;
 
-.project-detail-card {
-  width: 90%;
-  margin: 25px auto;
-  margin-top: 40px;
   background: #fff;
-  padding: 40px;
+
+  border: 1px solid #ddd;
   border-radius: 8px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  z-index: 1000;
+}
+
+.student-project-detail-page .notification-dropdown h4 {
+  margin: 0;
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #eee;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-project-detail-page .notification-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+
+  font-size: 12px;
+}
+
+.student-project-detail-page .notification-item:hover {
+  background: #f5f5f5;
+}
+
+.student-project-detail-page .notification-item p {
+  margin: 0 0 4px;
+}
+
+.student-project-detail-page .notification-item small {
+  color: #888;
+  font-size: 10px;
+}
+
+/* ================= CARD ================= */
+
+.student-project-detail-page .project-detail-card {
+  width: 80%;
+
+  margin: 40px auto 25px;
+
+  padding: 40px;
+
+  background: #ffffff;
+
+  border-radius: 8px;
+
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
 }
 
-.project-top {
+/* ================= TOP ================= */
+
+.student-project-detail-page .project-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+
+  gap: 30px;
+
   margin-bottom: 30px;
 }
 
-.project-top h2 {
+.student-project-detail-page .project-top h2 {
+  flex: 1;
+  min-width: 0;
+
+  margin: 0;
+
+  color: #111;
+
   font-size: 18px;
   font-weight: 600;
+
+  line-height: 1.5;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
-.project-badges {
+.student-project-detail-page .project-badges {
   display: flex;
+  align-items: stretch;
   gap: 10px;
+
+  flex-shrink: 0;
 }
 
-.project-badges span {
-  border: 1.5px solid #ddd;
+.student-project-detail-page .project-badges > span {
   padding: 8px 14px;
-  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+
   background: #fff;
-  font-size: 14px;
+
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  white-space: nowrap;
 }
 
-/* สีสถานะ */
-.status {
-  margin-left: 6px;
+.student-project-detail-page .status {
+  margin-left: 5px;
   font-weight: 600;
 }
 
-/* เปิดรับ */
-.status.เปิดรับ {
-  color: #16a34a; /* เขียว */
+.student-project-detail-page .status.เปิดรับ {
+  color: #16a34a;
 }
 
-/* ใกล้เต็ม */
-.status.ใกล้เต็ม {
-  color: #f59e0b; /* ส้ม */
+.student-project-detail-page .status.ใกล้เต็ม {
+  color: #f59e0b;
 }
 
-/* ปิดรับ */
-.status.ปิดรับ {
-  color: #dc2626; /* แดง */
+.student-project-detail-page .status.ปิดรับ {
+  color: #dc2626;
 }
 
-.skill-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+/* ================= DETAIL SECTION ================= */
+
+.student-project-detail-page .detail-section {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 22px;
+
+  background: #fff;
+
+  border: 1px solid #bbb;
+  border-radius: 8px;
 }
 
-.skill-tags span {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 6px;
+.student-project-detail-page .detail-section h4 {
+  margin: 0 0 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #ddd;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-project-detail-page .detail-section p,
+.student-project-detail-page .detail-section span,
+.student-project-detail-page .detail-section li {
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.student-project-detail-page .detail-section strong {
   font-size: 13px;
   font-weight: 500;
 }
 
-.apply-btn {
-  background: #2cab63;
-  color: white;
-  margin-top: 10px;
+.student-project-detail-page .detail-section p {
+  margin: 8px 0;
+
+  line-height: 1.7;
+}
+
+.student-project-detail-page .detail-section ul {
+  margin: 10px 0 0 20px;
+  padding-left: 20px;
+
+  line-height: 1.8;
+}
+
+/* ================= PROJECT INFO ================= */
+
+.student-project-detail-page .project-meta {
+  display: grid;
+
+  grid-template-columns: 150px 1fr;
+
+  row-gap: 8px;
+
+  line-height: 1.7;
+}
+
+.student-project-detail-page .project-meta strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-project-detail-page .project-meta span {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ================= MEMBERS ================= */
+
+.student-project-detail-page .member-list {
+  margin-top: 5px;
+  padding-left: 30px;
+}
+
+.student-project-detail-page .member-list p {
+  margin: 5px 0;
+}
+
+/* ================= SKILLS ================= */
+
+.student-project-detail-page .skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.student-project-detail-page .skill-tags span {
+  min-width: 48px;
+
+  padding: 4px 11px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 4px;
+
+  color: #222;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ================= REQUIREMENTS ================= */
+
+.student-project-detail-page .requirement-list {
+  margin: 10px 0 0 20px;
+  padding-left: 20px;
+}
+
+.student-project-detail-page .requirement-list li {
+  margin: 4px 0;
+
+  font-size: 13px;
+
+  line-height: 1.8;
+}
+
+/* ================= FILE ================= */
+
+.student-project-detail-page .file-box {
+  display: inline-flex;
+  align-items: center;
+
+  margin-top: 6px;
+
+  padding: 7px 12px;
+
+  background: #fff;
+
+  border: 1px solid #ddd;
+  border-radius: 5px;
+
+  font-size: 12px;
+}
+
+/* ================= APPLY ================= */
+
+.student-project-detail-page .apply-section {
+  margin-top: 30px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.student-project-detail-page .apply-btn {
+  width: 180px;
+  height: 36px;
+
+  margin: 0;
+  padding: 0;
+
   border: none;
-  padding: 12px 28px;
   border-radius: 6px;
+
+  background: #20a36a;
+  color: #fff;
+
+  font-size: 12px;
+  font-weight: 400;
+
   cursor: pointer;
 }
 
-.apply-btn:hover {
-  background: #239455;
+.student-project-detail-page .apply-btn:hover {
+  background: #188c59;
 }
 
-.requirement-list li {
-  font-size: 16px;
-  line-height: 2;
-  margin-bottom: 6px;
-  padding-left: 6px;
-}
+@media (max-width: 1100px) {
+  .student-project-detail-page .project-detail-card {
+    width: 88%;
+  }
 
-.detail-section {
-  margin-top: 35px;
-}
+  .student-project-detail-page .project-top {
+    flex-direction: column;
+  }
 
-.detail-section h4 {
-  font-size: 16px;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.detail-section p {
-  margin: 8px 0;
-  line-height: 1.8;
-}
-
-.detail-section ul {
-  margin: 10px 0 0 20px;
-  padding-left: 20px;
-  line-height: 1.8;
-}
-
-.member-list {
-  margin-top: 8px;
-  margin-left: 20px;
-}
-
-.file-box {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 14px;
-}
-
-.apply-section { 
-  margin-top: 40px; 
-  text-align: center; 
-} 
-
-.apply-btn { 
-  width: 180px; 
-  height: 42px;
-}
-
-.project-meta {
-  display: grid;
-  grid-template-columns: 170px 1fr;
-  row-gap: 10px;
-}
-
-/* Breadcrumb */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  font-size: 22px;
-  font-weight: 400;
-}
-
-.detail-section p,
-.detail-section span,
-.detail-section li {
-  font-size: 15px;
-  font-weight: 400;
-}
-
-.detail-section strong {
-  font-size: 15px;
-  font-weight: 500;
+  .student-project-detail-page .project-badges {
+    flex-wrap: wrap;
+  }
 }

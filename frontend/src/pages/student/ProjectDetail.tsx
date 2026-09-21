@@ -140,7 +140,7 @@ function ProjectDetail() {
     project.max_members ?? (project.project_type === "โครงงานคู่" ? 2 : 1);
 
   return (
-    <div className="layout">
+    <div className="student-project-detail-page">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">

@@ -1,330 +1,622 @@
-.apply-card {
-  width: 90%;
-  margin: 25px auto;
-  margin-top: 40px;
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+.student-apply-project-page,
+.student-apply-project-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.student-apply-project-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  background: #f5f5f5;
+}
+
+/* ================= SIDEBAR ================= */
+
+.student-apply-project-page .sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
 
   background: #fff;
-  padding: 40px;
 
+  border-right: 1px solid #ddd;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
+}
+
+.student-apply-project-page .logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+}
+
+.student-apply-project-page .logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+}
+
+.student-apply-project-page .logo h2 {
+  margin: 0;
+
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.student-apply-project-page .logo p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 9.5px;
+  line-height: 1.2;
+}
+
+.student-apply-project-page .sidebar nav {
+  width: 100%;
+  margin: 0;
+}
+
+.student-apply-project-page .sidebar ul {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+}
+
+.student-apply-project-page .sidebar li {
+  width: 100%;
+
+  padding: 18px 0;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.student-apply-project-page .sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.student-apply-project-page .sidebar li.active {
+  background: #2f5d7c;
+  color: #fff;
+}
+
+.student-apply-project-page .logout-btn {
+  width: 190px;
+
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+  background: #3b75c4;
+  color: #fff;
+
+  font-size: 13px;
+
+  cursor: pointer;
 }
 
-.apply-card h2 {
-  font-size: 18px;
-  margin-bottom: 24px;
+/* ================= MAIN ================= */
+
+.student-apply-project-page .main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
 }
 
-.section {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
+/* ================= HEADER ================= */
+
+.student-apply-project-page .header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+
+  position: relative;
+  z-index: 50;
 }
 
-.section h3 {
-  margin-bottom: 15px;
-  font-size: 16px;
-}
+.student-apply-project-page .breadcrumb {
+  display: flex;
+  align-items: center;
 
-.section p,
-.section strong {
-  font-size: 15px;
+  gap: 8px;
+
+  color: #111;
+
+  font-size: 20px;
   font-weight: 400;
 }
 
-.section p {
-  margin-bottom: 4px;
+.student-apply-project-page .header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
 }
 
-.notification-box {
+.student-apply-project-page .notification-box {
   width: 50px;
-  height: 60px;
-
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  height: 50px;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  background: #fff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-.notification-box,
-.user-info {
-  height: 50px;
-}
-
-.notification-wrapper {
+.student-apply-project-page .notification-wrapper {
   position: relative;
 }
 
-.notification-dropdown {
+.student-apply-project-page .notification-btn {
+  position: relative;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  background: transparent;
+  color: #999;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.student-apply-project-page .notification-btn svg {
+  color: #999;
+}
+
+.student-apply-project-page .notification-count {
   position: absolute;
-  top: 40px;
+
+  top: -7px;
+  right: -7px;
+
+  min-width: 18px;
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: red;
+  color: #fff;
+
+  font-size: 11px;
+}
+
+.student-apply-project-page .user-info {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #fff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  font-size: 14px;
+}
+
+.student-apply-project-page .profile-image {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ================= NOTIFICATION ================= */
+
+.student-apply-project-page .notification-dropdown {
+  position: absolute;
+
+  top: 42px;
   right: 0;
 
-  width: 280px;
+  width: 300px;
 
-  background: white;
+  overflow: hidden;
 
-  border-radius: 10px;
+  background: #fff;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
   z-index: 1000;
 }
 
-.notification-dropdown h4 {
-  font-size: 16px;
-  padding: 12px;
+.student-apply-project-page .notification-dropdown h4 {
   margin: 0;
-  border-bottom: 1px solid #eee;
-}
+  padding: 12px 14px;
 
-.notification-item {
+  border-bottom: 1px solid #eee;
+
   font-size: 14px;
-  padding: 12px;
+  font-weight: 600;
+}
+
+.student-apply-project-page .notification-item {
+  padding: 12px 14px;
+
   border-bottom: 1px solid #eee;
+
+  font-size: 12px;
 }
 
-.notification-item p {
-  margin: 0;
+.student-apply-project-page .notification-item p {
+  margin: 0 0 4px;
 }
 
-.notification-item small {
-  color: gray;
+.student-apply-project-page .notification-item small {
+  color: #888;
+  font-size: 10px;
 }
 
-.notification-item:hover {
-  background: #f5f5f5;
+/* ================= APPLY CARD ================= */
+
+.student-apply-project-page .apply-card {
+  width: 80%;
+
+  margin: 40px auto 25px;
+
+  padding: 40px;
+
+  background: #fff;
+
+  border-radius: 8px;
+
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
 }
 
-/* แถวข้อมูลผู้สมัคร + ช่องทางการติดต่อ */
-.apply-row {
-  display: flex;
+.student-apply-project-page .apply-card > h2 {
+  margin: 0 0 24px;
+
+  color: #222;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ================= SECTION ================= */
+
+.student-apply-project-page .section {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 22px;
+
+  background: #fff;
+
+  border: 1px solid #bbb;
+  border-radius: 8px;
+}
+
+.student-apply-project-page .section h3 {
+  margin: 0 0 14px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #ddd;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-apply-project-page .section p {
+  margin: 8px 0;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.7;
+}
+
+.student-apply-project-page .section strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ================= TWO COLUMN ================= */
+
+.student-apply-project-page .apply-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
   gap: 20px;
-  margin-top: 20px;
+
+  margin-top: 14px;
 }
 
-.apply-row .section {
-  flex: 1;
+.student-apply-project-page .apply-row .section {
   margin-top: 0;
 }
 
-/* ฟอร์ม */
-.section label {
+/* ================= FORM ================= */
+
+.student-apply-project-page .section label {
   display: block;
-  font-size: 12px;
-  margin-top: 10px;
+
+  margin-top: 12px;
   margin-bottom: 6px;
+
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.apply-card .apply-select-wrapper {
-  position: relative;
+.student-apply-project-page .section input,
+.student-apply-project-page .section textarea {
   width: 100%;
-  padding: 0;
-  margin: 0;
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
 
-.apply-card .apply-select-wrapper select {
-  display: block;
-  width: 100%;
-  height: 44px;
-  padding: 0 45px 0 12px;
-  border: 1px solid #ddd !important;
-  border-radius: 6px !important;
-  background: #fff;
-  box-shadow: none !important;
-  outline: none;
-  box-sizing: border-box;
-  font-size: 15px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-}
-
-.apply-card .apply-select-wrapper select:focus {
-  outline: none;
-  box-shadow: none;
-  border: 1px solid #aaa !important;
-}
-
-.apply-card .apply-select-arrow {
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #555;
-  font-size: 14px;
-}
-
-.apply-card .select-arrow {
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #555;
-  font-size: 14px;
-}
-
-
-.section input,
-.section textarea {
-  width: 100%;
   padding: 10px 12px;
+
+  background: #fff;
+  color: #222;
+
   border: 1px solid #ddd;
   border-radius: 6px;
-  box-sizing: border-box;
-  font-size: 15px;
+
+  outline: none;
+
+  font-size: 13px;
+  font-weight: 400;
 }
 
-.section input:disabled {
+.student-apply-project-page .section input {
+  height: 42px;
+}
+
+.student-apply-project-page .section input:disabled {
   background: #f3f3f3;
   color: #555;
 }
 
-.section textarea {
-  resize: none;
-  min-height: 90px;
+.student-apply-project-page .section textarea {
+  min-height: 100px;
+
+  resize: vertical;
+
+  line-height: 1.6;
 }
 
-/* ปุ่ม */
-.button-group {
-  margin-top: 40px;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
+/* ================= SELECT ================= */
 
-.cancel-btn {
-  background: #ef2d2d;
-  color: #fff;
-  border: none;
-  padding: 12px 35px;
-  border-radius: 8px;
-  cursor: pointer;
-}
+.student-apply-project-page .apply-select-wrapper {
+  position: relative;
 
-/* ปุ่มส่งคำขอ */
-.submit-btn {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.submit-btn:disabled {
-  background-color: #bdbdbd;
-  color: white;
-  cursor: not-allowed;
-  opacity: 1;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+
+  margin: 0;
+  padding: 0;
+}
+
+.student-apply-project-page .apply-select-wrapper select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 45px 0 12px;
+
+  background: #fff;
+  color: #222;
+
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.student-apply-project-page .apply-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 16px;
+
+  transform: translateY(-50%);
+
+  color: #777;
+
+  font-size: 12px;
+
+  pointer-events: none;
+}
+
+/* ================= BUTTON ================= */
+
+.student-apply-project-page .button-group {
+  margin-top: 30px;
+
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 9999;
+
+  gap: 10px;
 }
 
-.popup-card {
-  width: 450px;
-  max-width: 90%;
-  background: #fff;
-  border: 1px solid #7d7d7d;
-  border-radius: 10px;
-  padding: 35px 40px 38px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
+.student-apply-project-page .cancel-btn,
+.student-apply-project-page .submit-btn {
+  min-width: 140px;
+  height: 36px;
 
-.popup-title {
-  font-size: 16px;
-  font-weight: 700;
-
-  margin-bottom: 25px;
-}
-
-.popup-divider {
-  width: 85%;
-  height: 1px;
-
-  margin: 0 auto 40px;
-
-  background: #bdbdbd;
-}
-
-.popup-message {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.8;
-  color: #222;
-  margin-bottom: 50px;
-}
-
-.popup-message p {
-  margin: 35px 0;
-}
-
-.popup-message p:first-child {
-  margin-top: 0;
-}
-
-.popup-message p:last-child {
-  margin-bottom: 0;
-}
-
-.popup-btn {
-  width: 120px;
-  height: 45px;
+  padding: 0 18px;
 
   border: none;
-  border-radius: 12px;
+  border-radius: 6px;
 
-  background: #29a96b;
-  color: white;
+  color: #fff;
 
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 400;
 
   cursor: pointer;
 }
 
-.loader {
-  width: 55px;
-  height: 55px;
-
-  margin: 0 auto 20px;
-
-  border: 5px solid #ddd;
-  border-top: 5px solid #2eb872;
-  border-radius: 50%;
-
-  animation: spin 1s linear infinite;
+.student-apply-project-page .cancel-btn {
+  background: #ff0000;
 }
 
-@keyframes spin {
+.student-apply-project-page .submit-btn {
+  background: #20a36a;
+}
+
+.student-apply-project-page .cancel-btn:hover {
+  background: #d90000;
+}
+
+.student-apply-project-page .submit-btn:hover:not(:disabled) {
+  background: #188c59;
+}
+
+.student-apply-project-page .submit-btn:disabled {
+  background: #aaa;
+
+  cursor: not-allowed;
+}
+
+/* ================= POPUP ================= */
+
+.student-apply-project-page .popup-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.82);
+
+  z-index: 9999;
+}
+
+.student-apply-project-page .popup-card {
+  width: 430px;
+  max-width: 90%;
+
+  padding: 32px 38px;
+
+  background: #fff;
+
+  border: 1px solid #777;
+  border-radius: 9px;
+
+  text-align: center;
+}
+
+.student-apply-project-page .popup-card h3 {
+  margin: 12px 0;
+
+  color: #222;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-apply-project-page .popup-card p {
+  margin: 10px 0 20px;
+
+  color: #333;
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.student-apply-project-page .loader {
+  width: 48px;
+  height: 48px;
+
+  margin: 0 auto 18px;
+
+  border: 4px solid #ddd;
+  border-top: 4px solid #20a36a;
+  border-radius: 50%;
+
+  animation: studentApplySpin 1s linear infinite;
+}
+
+@keyframes studentApplySpin {
   from {
     transform: rotate(0deg);
   }
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1100px) {
+  .student-apply-project-page .apply-card {
+    width: 88%;
+  }
+
+  .student-apply-project-page .apply-row {
+    grid-template-columns: 1fr;
   }
 }

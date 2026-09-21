@@ -489,7 +489,7 @@ function SubmitNewProject() {
   };
   // ส่วน JSX: โครงสร้าง HTML ของหน้า
   return (
-    <div className="layout">
+    <div className="student-submit-project-page">
       {/* ส่วน Sidebar ทางซ้ายของหน้า */}
       <aside className="sidebar">
         <div className="logo">

@@ -1,150 +1,289 @@
 import "./StudentHome.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react"; //ใช้ตรวจสอบการเข้าสู่ระบบ
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBell } from "react-icons/fa";
-
+import { FaBell, FaSearch } from "react-icons/fa";
 import logo from "../../assets/Logo.svg";
+
+
+/* =========================================================
+   TYPE
+========================================================= */
 
 interface Project {
   id: number;
+
   title: string;
+
   advisor: string;
+
   major: string;
+
   max_members: number;
+
   current_members: number;
+
   source: string;
+
   status: string;
+
   visibility: "แสดง" | "ซ่อน";
 }
 
+
 interface SystemNotification {
   id: number;
+
   message: string;
+
   request_id: number | null;
+
   project_id: number | null;
+
   created_at: string;
 }
+
 
 interface Notification {
   id: number;
+
   project_id: number;
 
   sender_id: number;
+
   sender_username: string;
+
   sender_name: string;
 
   receiver_id: number;
+
   receiver_username: string;
+
   receiver_name: string;
 
   title: string;
+
   project_type: string;
 
   description: string;
+
   objectives: string;
+
   skills: string;
+
   requirements: string;
 
   contact_type: string;
+
   contact_value: string;
+
   introduction: string;
 
   status: string;
+
   created_at: string;
 }
+
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 function StudentHome() {
   const navigate = useNavigate();
 
+
+  /* =========================================================
+     SESSION
+  ========================================================= */
+
   const userId = sessionStorage.getItem("userId");
-  const username = sessionStorage.getItem("username"); //ดึงค่ารหัสประจำตัวจาก sessionStorage
+
+  const username = sessionStorage.getItem("username");
+
   const profileImage = sessionStorage.getItem("profileImage");
 
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [selectedInvitation, setSelectedInvitation] =
-    useState<Notification | null>(null);
-  const [selectedSystemNotification, setSelectedSystemNotification] =
-    useState<SystemNotification | null>(null);
+
+  /* =========================================================
+     STATE
+  ========================================================= */
 
   const [projects, setProjects] = useState<Project[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 10;
 
-  const filteredProjects = projects.filter(
-    (project) =>
+
+  /* ---------- NOTIFICATION ---------- */
+
+  const [showNotifications, setShowNotifications] =
+    useState(false);
+
+  const [notifications, setNotifications] = useState<
+    Notification[]
+  >([]);
+
+  const [systemNotifications, setSystemNotifications] =
+    useState<SystemNotification[]>([]);
+
+
+  /* ---------- SELECTED POPUP ---------- */
+
+  const [
+    selectedInvitation,
+    setSelectedInvitation,
+  ] = useState<Notification | null>(null);
+
+  const [
+    selectedSystemNotification,
+    setSelectedSystemNotification,
+  ] = useState<SystemNotification | null>(null);
+
+
+  /* =========================================================
+     FILTER PROJECT
+  ========================================================= */
+
+  const filteredProjects = projects.filter((project) => {
+    const keyword = searchTerm.toLowerCase().trim();
+
+    const matchesSearch =
+      project.title
+        .toLowerCase()
+        .includes(keyword) ||
+      project.advisor
+        .toLowerCase()
+        .includes(keyword);
+
+    const canDisplay =
       project.source === "teacher" &&
       project.visibility === "แสดง" &&
-      (project.status === "เปิดรับ" || project.status === "ใกล้เต็ม") &&
-      (project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.advisor.toLowerCase().includes(searchTerm.toLowerCase())),
-  );
+      (
+        project.status === "เปิดรับ" ||
+        project.status === "ใกล้เต็ม"
+      );
 
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+    return canDisplay && matchesSearch;
+  });
+
+
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
+
+  const totalPages = Math.ceil(
+    filteredProjects.length / itemsPerPage,
+  );
 
   const currentProjects = filteredProjects.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [systemNotifications, setSystemNotifications] = useState<
-    SystemNotification[]
-  >([]);
-  useEffect(() => {
-    //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
-    //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
-    if (!username) {
-      //ถ้าไม่มีรหัสประจำตัวให้เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
-      navigate("/");
-    }
-  }, [username, navigate]); //ตรวจสอบค่ารหัสประจำตัวและฟังก์ชัน navigate
+
+  /* =========================================================
+     ตรวจสอบ LOGIN
+  ========================================================= */
 
   useEffect(() => {
-    //ดึงข้อมูลโครงงานจาก backend
+    if (!username) {
+      navigate("/");
+    }
+  }, [username, navigate]);
+
+
+  /* =========================================================
+     ดึง PROJECT
+  ========================================================= */
+
+  useEffect(() => {
     axios
       .get("http://localhost:5000/projects")
       .then((res) => {
+        console.log("Projects =", res.data);
+
         setProjects(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("Get projects error:", err);
       });
   }, []);
 
+
+  /* =========================================================
+     RESET PAGE ตอน SEARCH
+  ========================================================= */
+
   useEffect(() => {
-    //รีเซ็ตหน้าปัจจุบันเมื่อมีการค้นหา
     setCurrentPage(1);
   }, [searchTerm]);
 
-  useEffect(() => {
-    axios
-      .get(`http://localhost:5000/project-invitations/${userId}`)
-      .then((res) => {
-        setNotifications(res.data);
-      });
-  }, []);
+
+  /* =========================================================
+     PROJECT INVITATION
+  ========================================================= */
 
   useEffect(() => {
     if (!userId) return;
 
     axios
-      .get(`http://localhost:5000/notifications/${userId}`)
+      .get(
+        `http://localhost:5000/project-invitations/${userId}`,
+      )
       .then((res) => {
-        setSystemNotifications(res.data);
+        console.log(
+          "Project Invitations =",
+          res.data,
+        );
+
+        setNotifications(res.data);
       })
       .catch((err) => {
-        console.log("Get notifications error:", err);
+        console.log(
+          "Get project invitations error:",
+          err,
+        );
       });
   }, [userId]);
 
+
+  /* =========================================================
+     SYSTEM NOTIFICATION
+  ========================================================= */
+
+  useEffect(() => {
+    if (!userId) return;
+
+    axios
+      .get(
+        `http://localhost:5000/notifications/${userId}`,
+      )
+      .then((res) => {
+        console.log(
+          "System Notifications =",
+          res.data,
+        );
+
+        setSystemNotifications(res.data);
+      })
+      .catch((err) => {
+        console.log(
+          "Get notifications error:",
+          err,
+        );
+      });
+  }, [userId]);
+
+
+  /* =========================================================
+     ACCEPT INVITATION
+  ========================================================= */
+
   const handleAcceptInvitation = async () => {
-    if (!selectedInvitation) {
-      return;
-    }
+    if (!selectedInvitation) return;
 
     try {
       const res = await axios.post(
@@ -153,28 +292,44 @@ function StudentHome() {
 
       alert(res.data.message);
 
-      // เอาคำเชิญที่ตอบรับแล้วออกจากรายการแจ้งเตือน
+
+      /* เอาคำเชิญออกจากรายการ */
+
       setNotifications((prev) =>
-        prev.filter((item) => item.id !== selectedInvitation.id),
+        prev.filter(
+          (item) =>
+            item.id !== selectedInvitation.id,
+        ),
       );
 
-      // ปิด Popup
+
+      /* ปิด popup */
+
       setSelectedInvitation(null);
 
-      // ปิด dropdown แจ้งเตือน
       setShowNotifications(false);
     } catch (err: any) {
-      console.log("Accept invitation error:", err);
+      console.log(
+        "Accept invitation error:",
+        err,
+      );
+
       console.log(err.response?.data);
 
-      alert(err.response?.data?.message || "ไม่สามารถตอบรับคำเชิญได้");
+      alert(
+        err.response?.data?.message ||
+          "ไม่สามารถตอบรับคำเชิญได้",
+      );
     }
   };
 
+
+  /* =========================================================
+     REJECT INVITATION
+  ========================================================= */
+
   const handleRejectInvitation = async () => {
-    if (!selectedInvitation) {
-      return;
-    }
+    if (!selectedInvitation) return;
 
     try {
       const res = await axios.post(
@@ -183,309 +338,722 @@ function StudentHome() {
 
       alert(res.data.message);
 
-      // เอาคำเชิญที่ปฏิเสธแล้วออกจากรายการแจ้งเตือน
+
+      /* เอาคำเชิญออกจากรายการ */
+
       setNotifications((prev) =>
-        prev.filter((item) => item.id !== selectedInvitation.id),
+        prev.filter(
+          (item) =>
+            item.id !== selectedInvitation.id,
+        ),
       );
 
-      // ปิด Popup
+
+      /* ปิด popup */
+
       setSelectedInvitation(null);
 
-      // ปิด dropdown แจ้งเตือน
       setShowNotifications(false);
     } catch (err: any) {
-      console.log("Reject invitation error:", err);
+      console.log(
+        "Reject invitation error:",
+        err,
+      );
+
       console.log(err.response?.data);
 
-      alert(err.response?.data?.message || "ไม่สามารถปฏิเสธคำเชิญได้");
+      alert(
+        err.response?.data?.message ||
+          "ไม่สามารถปฏิเสธคำเชิญได้",
+      );
     }
   };
 
+
+  /* =========================================================
+     LOGOUT
+  ========================================================= */
+
   const handleLogout = () => {
-    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
-    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
-    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
-    navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
+    sessionStorage.removeItem("userId");
+
+    sessionStorage.removeItem("username");
+
+    sessionStorage.removeItem("name");
+
+    sessionStorage.removeItem("profileImage");
+
+    sessionStorage.removeItem("major");
+
+    navigate("/");
   };
 
-  /*const name =
-    sessionStorage.getItem("name");*/
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
-    <div className="layout">
-      {/* Sidebar */}
+    <div className="student-home-page">
+
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
+
       <aside className="sidebar">
+
+        {/* LOGO */}
+
         <div className="logo">
-          <img src={logo} alt="Logo" />
+          <img
+            src={logo}
+            alt="SPTC Logo"
+          />
 
           <div>
             <h2>SPTC System</h2>
-            <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+
+            <p>
+              ระบบติดตามและสื่อสารโครงงานนิสิต
+            </p>
           </div>
         </div>
 
+
+        {/* MENU */}
+
         <nav>
           <ul>
-            <li className="active">หน้าหลัก</li>
-            <li>รายชื่ออาจารย์</li>
-            <li onClick={() => navigate("/submit-new-project")}>
+
+            <li className="active">
+              หน้าหลัก
+            </li>
+
+            <li>
+              รายชื่ออาจารย์
+            </li>
+
+            <li
+              onClick={() =>
+                navigate("/submit-new-project")
+              }
+            >
               ส่งคำเสนอโครงงานใหม่
             </li>
-            <li>โครงงานของฉัน</li>
-            <li>การแจ้งเตือน</li>
-            <li>ข้อมูลส่วนตัว</li>
+
+            <li>
+              โครงงานของฉัน
+            </li>
+
+            <li>
+              การแจ้งเตือน
+            </li>
+
+            <li>
+              ข้อมูลส่วนตัว
+            </li>
+
           </ul>
         </nav>
 
-        <button className="logout-btn" onClick={handleLogout}>
+
+        {/* LOGOUT */}
+
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
           ออกจากระบบ
         </button>
+
       </aside>
 
-      {/* Main */}
+
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
+
       <main className="main">
-        {/* Header */}
+
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
         <header className="header">
+
           <h2>หน้าหลัก</h2>
 
+
           <div className="header-right">
+
+            {/* NOTIFICATION */}
+
             <div className="notification-box">
+
               <div className="notification-wrapper">
+
                 <button
                   className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() =>
+                    setShowNotifications(
+                      !showNotifications,
+                    )
+                  }
                 >
                   <FaBell />
 
-                  <span className="notification-count">
-                    {notifications.length + systemNotifications.length}
-                  </span>
+
+                  {/* จำนวนแจ้งเตือน */}
+
+                  {(notifications.length +
+                    systemNotifications.length) >
+                    0 && (
+                    <span className="notification-count">
+                      {notifications.length +
+                        systemNotifications.length}
+                    </span>
+                  )}
+
                 </button>
+
+
+                {/* ===========================================
+                    NOTIFICATION DROPDOWN
+                =========================================== */}
 
                 {showNotifications && (
                   <div className="notification-dropdown">
+
                     <h4>การแจ้งเตือน</h4>
 
-                    {/* คำเชิญเข้าร่วมโครงงาน */}
+
+                    {/* PROJECT INVITATION */}
+
                     {notifications.map((item) => (
                       <div
                         key={`invitation-${item.id}`}
                         className="notification-item"
-                        onClick={() => setSelectedInvitation(item)}
-                      >
-                        <p>{item.sender_name} ได้เชิญคุณเข้าร่วมโครงงาน</p>
-
-                        <small>{item.created_at}</small>
-                      </div>
-                    ))}
-
-                    {/* Notification จากระบบ */}
-                    {systemNotifications.map((item) => (
-                      <div
-                        key={`notification-${item.id}`}
-                        className="notification-item"
                         onClick={() => {
-                          setSelectedSystemNotification(item);
-                          setShowNotifications(false);
+                          setSelectedInvitation(
+                            item,
+                          );
+
+                          setShowNotifications(
+                            false,
+                          );
                         }}
                       >
-                        <p>{item.message.split("\n")[0]}</p>
+                        <p>
+                          {item.sender_name}{" "}
+                          ได้เชิญคุณเข้าร่วมโครงงาน
+                        </p>
 
-                        <small>{item.created_at}</small>
+                        <small>
+                          {item.created_at}
+                        </small>
                       </div>
                     ))}
 
-                    {notifications.length === 0 &&
-                      systemNotifications.length === 0 && (
-                        <p>ไม่มีการแจ้งเตือน</p>
+
+                    {/* SYSTEM NOTIFICATION */}
+
+                    {systemNotifications.map(
+                      (item) => (
+                        <div
+                          key={`notification-${item.id}`}
+                          className="notification-item"
+                          onClick={() => {
+                            setSelectedSystemNotification(
+                              item,
+                            );
+
+                            setShowNotifications(
+                              false,
+                            );
+                          }}
+                        >
+                          <p>
+                            {
+                              item.message.split(
+                                "\n",
+                              )[0]
+                            }
+                          </p>
+
+                          <small>
+                            {item.created_at}
+                          </small>
+                        </div>
+                      ),
+                    )}
+
+
+                    {/* ไม่มีแจ้งเตือน */}
+
+                    {notifications.length ===
+                      0 &&
+                      systemNotifications.length ===
+                        0 && (
+                        <div className="notification-item">
+                          <p>
+                            ไม่มีการแจ้งเตือน
+                          </p>
+                        </div>
                       )}
+
                   </div>
                 )}
+
               </div>
             </div>
 
+
+            {/* USER */}
+
             <div className="user-info">
+
               <img
-                src={`http://localhost:5000${profileImage}`}
+                src={
+                  profileImage
+                    ? `http://localhost:5000${profileImage}`
+                    : logo
+                }
                 alt="Profile"
                 className="profile-image"
               />
+
               <span>{username}</span>
+
             </div>
+
           </div>
+
         </header>
 
-        {/* Search */}
+
+        {/* ===================================================
+            SEARCH
+        =================================================== */}
+
         <div className="search-box">
-          <input
-            type="text"
-            placeholder="ค้นหาโครงงาน/อาจารย์"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+
+          <div className="student-search">
+
+            <input
+              type="text"
+              placeholder="ค้นหาชื่อโครงงาน หรืออาจารย์"
+              value={searchTerm}
+              onChange={(e) =>
+                setSearchTerm(
+                  e.target.value,
+                )
+              }
+            />
+
+            <FaSearch />
+
+          </div>
+
         </div>
 
-        {/* Table */}
+
+        {/* ===================================================
+            PROJECT TABLE
+        =================================================== */}
+
         <div className="table-container">
+
           <h3>รายการหัวข้อโครงงาน</h3>
 
+
           <table>
+
+            {/* TABLE HEADER */}
+
             <thead>
               <tr>
-                <th>ชื่อหัวข้อ</th>
-                <th>อาจารย์ที่ปรึกษา</th>
-                <th>สาขาวิชา</th>
-                <th>รับนิสิต</th>
-                <th>รายละเอียด</th>
+
+                <th>
+                  ชื่อหัวข้อโครงงาน
+                </th>
+
+                <th>
+                  อาจารย์ที่ปรึกษา
+                </th>
+
+                <th>
+                  สาขาวิชา
+                </th>
+
+                <th>
+                  รับนิสิต
+                </th>
+
+                <th>
+                  จัดการ
+                </th>
+
               </tr>
             </thead>
 
+
+            {/* TABLE BODY */}
+
             <tbody>
-              {currentProjects.map((project) => (
-                <tr key={project.id}>
-                  <td>{project.title}</td>
-                  <td>{project.advisor}</td>
-                  <td>{project.major}</td>
-                  <td>
-                    {project.current_members}/{project.max_members} คน
+
+              {currentProjects.length === 0 ? (
+
+                <tr>
+
+                  <td
+                    colSpan={5}
+                    className="student-empty-cell"
+                  >
+                    {searchTerm.trim() !== ""
+                      ? "ไม่พบหัวข้อโครงงานที่ตรงกับการค้นหา"
+                      : "ยังไม่มีหัวข้อโครงงาน"}
                   </td>
-                  <td>
-                    <button
-                      onClick={() => navigate(`/project-details/${project.id}`)}
-                    >
-                      ดูรายละเอียด
-                    </button>
-                  </td>
+
                 </tr>
-              ))}
+
+              ) : (
+
+                currentProjects.map(
+                  (project) => (
+
+                    <tr key={project.id}>
+
+                      {/* ชื่อโครงงาน */}
+
+                      <td
+                        className="student-project-title"
+                        title={project.title}
+                      >
+                        {project.title}
+                      </td>
+
+
+                      {/* อาจารย์ */}
+
+                      <td>
+                        {project.advisor}
+                      </td>
+
+
+                      {/* สาขา */}
+
+                      <td>
+                        {project.major}
+                      </td>
+
+
+                      {/* จำนวนรับ */}
+
+                      <td>
+                        {
+                          project.current_members
+                        }{" "}
+                        /{" "}
+                        {
+                          project.max_members
+                        }{" "}
+                        คน
+                      </td>
+
+
+                      {/* DETAIL */}
+
+                      <td>
+                        <button
+                          className="student-detail-btn"
+                          onClick={() =>
+                            navigate(
+                              `/project-details/${project.id}`,
+                            )
+                          }
+                        >
+                          รายละเอียด
+                        </button>
+                      </td>
+
+                    </tr>
+                  ),
+                )
+
+              )}
+
             </tbody>
+
           </table>
-          <div className="pagination">
-            <button
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              &lt;
-            </button>
 
-            <span>
-              {currentPage} of {totalPages}
-            </span>
 
-            <button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              &gt;
-            </button>
-          </div>
+          {/* =================================================
+              PAGINATION
+          ================================================= */}
+
+          {filteredProjects.length > 0 && (
+
+            <div className="pagination">
+
+              {/* PREVIOUS */}
+
+              <button
+                onClick={() =>
+                  setCurrentPage(
+                    currentPage - 1,
+                  )
+                }
+                disabled={
+                  currentPage === 1
+                }
+              >
+                &lt;
+              </button>
+
+
+              {/* PAGE */}
+
+              <span>
+                {currentPage} of{" "}
+                {Math.max(
+                  totalPages,
+                  1,
+                )}
+              </span>
+
+
+              {/* NEXT */}
+
+              <button
+                onClick={() =>
+                  setCurrentPage(
+                    currentPage + 1,
+                  )
+                }
+                disabled={
+                  currentPage ===
+                    totalPages ||
+                  totalPages === 0
+                }
+              >
+                &gt;
+              </button>
+
+            </div>
+
+          )}
+
         </div>
 
-        {/* Invitation Popup */}
+
+        {/* ===================================================
+            INVITATION POPUP
+        =================================================== */}
+
         {selectedInvitation && (
+
           <div className="invitation-overlay">
+
             <div className="invitation-popup">
-              <h3>คำเชิญเข้าร่วมโครงงาน</h3>
+
+              <h3>
+                คำเชิญเข้าร่วมโครงงาน
+              </h3>
+
 
               <div className="invitation-divider"></div>
 
-              <div className="invitation-detail">
-                <p>
-                  <strong>ชื่อหัวข้อโครงงาน</strong>
-                </p>
 
-                <p>{selectedInvitation.title}</p>
-              </div>
+              {/* PROJECT */}
 
               <div className="invitation-detail">
+
                 <p>
-                  <strong>สมาชิกคนที่ 1</strong>
+                  <strong>
+                    ชื่อหัวข้อโครงงาน
+                  </strong>
                 </p>
 
                 <p>
-                  {selectedInvitation.sender_username}{" "}
-                  {selectedInvitation.sender_name}
+                  {
+                    selectedInvitation.title
+                  }
                 </p>
+
               </div>
+
+
+              {/* MEMBER 1 */}
 
               <div className="invitation-detail">
+
                 <p>
-                  <strong>สมาชิกคนที่ 2</strong>
+                  <strong>
+                    สมาชิกคนที่ 1
+                  </strong>
                 </p>
 
                 <p>
-                  {selectedInvitation.receiver_username}{" "}
-                  {selectedInvitation.receiver_name}
+                  {
+                    selectedInvitation.sender_username
+                  }{" "}
+                  {
+                    selectedInvitation.sender_name
+                  }
                 </p>
+
               </div>
+
+
+              {/* MEMBER 2 */}
+
+              <div className="invitation-detail">
+
+                <p>
+                  <strong>
+                    สมาชิกคนที่ 2
+                  </strong>
+                </p>
+
+                <p>
+                  {
+                    selectedInvitation.receiver_username
+                  }{" "}
+                  {
+                    selectedInvitation.receiver_name
+                  }
+                </p>
+
+              </div>
+
 
               <div className="invitation-divider"></div>
 
-              <p className="invitation-question">คุณต้องการเข้าร่วมหรือไม่</p>
+
+              <p className="invitation-question">
+                คุณต้องการเข้าร่วมโครงงานนี้หรือไม่
+              </p>
+
+
+              {/* ACTION */}
 
               <div className="invitation-actions">
-                <button className="reject-btn" onClick={handleRejectInvitation}>
+
+                <button
+                  className="reject-btn"
+                  onClick={
+                    handleRejectInvitation
+                  }
+                >
                   ปฏิเสธ
                 </button>
 
-                <button className="accept-btn" onClick={handleAcceptInvitation}>
+
+                <button
+                  className="accept-btn"
+                  onClick={
+                    handleAcceptInvitation
+                  }
+                >
                   ตกลง
                 </button>
+
               </div>
+
             </div>
+
           </div>
+
         )}
-        {/* ==============================
-    System Notification Popup
-============================== */}
+
+
+        {/* ===================================================
+            SYSTEM NOTIFICATION POPUP
+        =================================================== */}
 
         {selectedSystemNotification && (
+
           <div
             className="invitation-overlay"
-            onClick={() => setSelectedSystemNotification(null)}
+            onClick={() =>
+              setSelectedSystemNotification(
+                null,
+              )
+            }
           >
+
             <div
               className="invitation-popup"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) =>
+                e.stopPropagation()
+              }
             >
-              <h3>ผลการพิจารณาโครงงาน</h3>
+
+              <h3>
+                ผลการพิจารณาโครงงาน
+              </h3>
+
 
               <div className="invitation-divider"></div>
+
 
               <div className="notification-detail-message">
-                {selectedSystemNotification.message}
+                {
+                  selectedSystemNotification.message
+                }
               </div>
+
 
               <div className="invitation-divider"></div>
 
+
               <div className="invitation-actions">
+
+                {/* CLOSE */}
+
                 <button
                   className="reject-btn"
-                  onClick={() => setSelectedSystemNotification(null)}
+                  onClick={() =>
+                    setSelectedSystemNotification(
+                      null,
+                    )
+                  }
                 >
                   ปิด
                 </button>
 
-                {selectedSystemNotification.project_id && 
+
+                {/* RESUBMIT */}
+
+                {selectedSystemNotification.project_id &&
                   selectedSystemNotification.request_id && (
-                  <button
-                    className="accept-btn"
-                    onClick={() => {
-                      navigate(
-                        `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
-                      );
-                    }}
-                  >
-                    แก้ไขและส่งใหม่
-                  </button>
-                )}
+
+                    <button
+                      className="accept-btn"
+                      onClick={() => {
+                        navigate(
+                          `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
+                        );
+                      }}
+                    >
+                      แก้ไขและส่งใหม่
+                    </button>
+
+                  )}
+
               </div>
+
             </div>
+
           </div>
+
         )}
+
       </main>
+
     </div>
   );
 }
+
 
 export default StudentHome;
