@@ -396,7 +396,7 @@ function TeacherProjects() {
 
               <input
                 type="text"
-                placeholder=""
+                placeholder="ค้นหาชื่อหัวข้อโครงงาน"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

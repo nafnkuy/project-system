@@ -289,7 +289,7 @@ function CreateTeacherProject() {
 
               {/* วัตถุประสงค์ */}
               <div className="form-group">
-                <label>วัตถุประสงค์</label>
+                <label>วัตถุประสงค์ *</label>
 
                 <textarea
                   value={objectives}
@@ -303,22 +303,28 @@ function CreateTeacherProject() {
               <div className="form-group">
                 <label>เทคโนโลยีที่ใช้ *</label>
 
-                <textarea
+                <div className="example-text">
+                  ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS
+                  <br />
+                  <strong>ห้ามเว้นวรรคระหว่างเครื่องหมาย |</strong>
+                </div>
+
+                <input
+                  type="text"
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
-                  placeholder="เช่น React, Node.js, MySQL"
-                  rows={3}
+                  placeholder="กรอกเทคโนโลยีที่ใช้ในโครงงาน"
                 />
               </div>
 
               {/* คุณสมบัติ */}
               <div className="form-group">
-                <label>คุณสมบัติ/ข้อกำหนดของนิสิต</label>
+                <label>คุณสมบัติผู้สมัคร *</label>
 
                 <textarea
                   value={requirements}
                   onChange={(e) => setRequirements(e.target.value)}
-                  placeholder="เช่น มีพื้นฐานการเขียนโปรแกรม"
+                  placeholder="กรอกคุณสมบัติของผู้สมัครเข้าร่วมโครงงาน"
                   rows={3}
                 />
               </div>

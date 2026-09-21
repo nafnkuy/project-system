@@ -394,6 +394,19 @@
   color: #222;
 }
 
+.teacher-project-page .example-text {
+  font-size: 10px;
+  color: #666;
+
+  margin-bottom: 6px;
+
+  line-height: 1.6;
+}
+
+.teacher-project-page .example-text strong {
+  font-weight: 400;
+  color: #777;
+}
 
 /* =========================================================
    INPUT / TEXTAREA / SELECT

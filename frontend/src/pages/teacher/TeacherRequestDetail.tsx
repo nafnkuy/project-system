@@ -570,6 +570,7 @@ function TeacherRequestDetail() {
                   value={suggestion}
                   onChange={(e) => setSuggestion(e.target.value)}
                 />
+                
 
                 {/* แสดงเฉพาะตอนเลือกปฏิเสธ */}
                 {decision === "ปฏิเสธ" && (
