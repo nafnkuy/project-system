@@ -1,411 +1,893 @@
 import "./ApplyProject.css";
-import { useNavigate } from "react-router-dom";
-import { FaBell } from "react-icons/fa";
-import { FaChevronDown } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-
+import { FaBell, FaChevronDown } from "react-icons/fa";
 import logo from "../../assets/Logo.svg";
 
 interface Project {
   id: number;
+
   title: string;
+
   advisor: string;
+
   advisor_name: string;
+
   max_members: number;
+
   current_members: number;
 }
 
 function ApplyProject() {
   const navigate = useNavigate();
 
-  const { id } = useParams(); //คือการดึงค่าพารามิเตอร์จาก URL โดยในที่นี้คือ id ของโครงงานที่ต้องการสมัครเข้าร่วม
+  const { id } = useParams();
 
-  // <Project | null> หมายถึงค่าของ state project สามารถเป็นได้ทั้ง object ของ Project หรือ null ซึ่ง null จะใช้ในกรณีที่ยังไม่มีข้อมูลโครงงานถูกโหลดเข้ามา
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] =
+    useState<Project | null>(null);
 
-  // State สำหรับการแสดงผลการแจ้งเตือน
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] =
+    useState(false);
 
-  // State สำหรับเก็บค่าช่องทางการติดต่อและข้อมูลอื่น ๆ ของผู้สมัคร
-  const [contactType, setContactType] = useState("");
-  const [contactValue, setContactValue] = useState("");
-  const [introduction, setIntroduction] = useState("");
+  const [contactType, setContactType] =
+    useState("");
 
-  const [showPopup, setShowPopup] = useState(false);
-  //const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [contactValue, setContactValue] =
+    useState("");
 
-  const userId = sessionStorage.getItem("userId");
-  const username = sessionStorage.getItem("username");
-  const name = sessionStorage.getItem("name");
-  const profileImage = sessionStorage.getItem("profileImage");
+  const [introduction, setIntroduction] =
+    useState("");
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("username"); //ลบค่ารหัสประจำตัวจาก sessionStorage
-    sessionStorage.removeItem("name"); //ลบค่าชื่อผู้ใช้จาก sessionStorage
-    sessionStorage.removeItem("profileImage"); //ลบค่ารูปโปรไฟล์จาก sessionStorage
-    navigate("/"); //เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
-  };
+  const [showPopup, setShowPopup] =
+    useState(false);
 
-  // State สำหรับตรวจสอบว่าผู้ใช้มีคำขอที่รอดำเนินการอยู่หรือไม่
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [popupType, setPopupType] =
+    useState<"loading" | "success" | "error">(
+      "loading",
+    );
 
-  const [popupType, setPopupType] = useState<"loading" | "success" | "error">(
-    "loading",
-  );
+  const [popupMessage, setPopupMessage] =
+    useState("");
 
-  const [popupMessage, setPopupMessage] = useState("");
+  const [isSubmitted, setIsSubmitted] =
+    useState(false);
+
+  const [
+    hasPendingRequest,
+    setHasPendingRequest,
+  ] = useState(false);
+
+  const userId =
+    sessionStorage.getItem("userId");
+
+  const username =
+    sessionStorage.getItem("username");
+
+  const name =
+    sessionStorage.getItem("name");
+
+  const profileImage =
+    sessionStorage.getItem("profileImage");
 
   const notifications = [
     {
       id: 1,
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-      time: "2 ชั่วโมงที่แล้ว",
+
+      message:
+        "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
+
+      time:
+        "2 ชั่วโมงที่แล้ว",
     },
+
     {
       id: 2,
-      message: "ส่งคำขอเลือกหัวข้อสำเร็จ",
-      time: "1 วันที่แล้ว",
+
+      message:
+        "ส่งคำขอเลือกหัวข้อสำเร็จ",
+
+      time:
+        "1 วันที่แล้ว",
     },
   ];
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("userId");
+
+    sessionStorage.removeItem("username");
+
+    sessionStorage.removeItem("name");
+
+    sessionStorage.removeItem(
+      "profileImage",
+    );
+
+    sessionStorage.removeItem("major");
+
+    navigate("/");
+  };
+
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/projects/${id}`)
+      .get(
+        `http://localhost:5000/projects/${id}`,
+      )
       .then((res) => {
+        console.log(
+          "Project Detail =",
+          res.data,
+        );
+
         setProject(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(
+          "Get project error:",
+          err,
+        );
       });
   }, [id]);
 
   useEffect(() => {
-    if (!project?.id || !userId) return;
+    if (!project?.id || !userId) {
+      return;
+    }
 
     axios
       .get(
         `http://localhost:5000/project-requests/check/${project.id}/${userId}`,
       )
       .then((res) => {
-        setIsSubmitted(res.data.submitted);
+        setIsSubmitted(
+          res.data.submitted,
+        );
       })
       .catch((err) => {
-        console.log(err);
+        console.log(
+          "Check submitted error:",
+          err,
+        );
       });
   }, [project, userId]);
 
   useEffect(() => {
-    if (!project?.id || !userId) return;
+    if (!project?.id || !userId) {
+      return;
+    }
 
     axios
-      .get(`http://localhost:5000/project-requests/${project.id}/${userId}`)
+      .get(
+        `http://localhost:5000/project-requests/${project.id}/${userId}`,
+      )
       .then((res) => {
-        setContactType(res.data.contact_type);
-        setContactValue(res.data.contact_value);
-        setIntroduction(res.data.introduction || "");
+        setContactType(
+          res.data.contact_type || "",
+        );
+
+        setContactValue(
+          res.data.contact_value || "",
+        );
+
+        setIntroduction(
+          res.data.introduction || "",
+        );
       })
-      .catch(() => {});
+      .catch(() => {
+        /* ถ้ายังไม่มีข้อมูลคำขอ ไม่ต้องทำอะไร */
+      });
   }, [project, userId]);
 
+
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     axios
-      .get(`http://localhost:5000/project-requests/student/${userId}`)
+      .get(
+        `http://localhost:5000/project-requests/student/${userId}`,
+      )
       .then((res) => {
-        setHasPendingRequest(res.data.hasPending);
+        setHasPendingRequest(
+          res.data.hasPending,
+        );
+      })
+      .catch((err) => {
+        console.log(
+          "Check pending request error:",
+          err,
+        );
       });
   }, [userId]);
 
   const handleSubmit = async () => {
-    if (!contactType || !contactValue) {
-      alert("กรุณากรอกข้อมูลให้ครบ");
+    if (
+      !contactType ||
+      !contactValue
+    ) {
+      alert(
+        "กรุณากรอกข้อมูลให้ครบ",
+      );
+
       return;
     }
 
     try {
+      /* ---------- Loading ---------- */
+
       setPopupType("loading");
+
       setShowPopup(true);
 
-      await axios.post("http://localhost:5000/project-requests", {
-        project_id: project?.id,
-        student_id: Number(userId),
-        contact_type: contactType,
-        contact_value: contactValue,
-        introduction,
-      });
+
+      /* ---------- POST ---------- */
+
+      await axios.post(
+        "http://localhost:5000/project-requests",
+        {
+          project_id: project?.id,
+
+          student_id:
+            Number(userId),
+
+          contact_type:
+            contactType,
+
+          contact_value:
+            contactValue,
+
+          introduction:
+            introduction,
+        },
+      );
+
+
+      /* ---------- Success ---------- */
 
       setPopupType("success");
+
       setIsSubmitted(true);
+
+      setHasPendingRequest(true);
     } catch (err: any) {
+      console.log(
+        "Submit project request error:",
+        err,
+      );
+
+
+      /* ---------- Error ---------- */
+
       setPopupType("error");
-      setPopupMessage(err.response?.data?.message || "ส่งใบสมัครไม่สำเร็จ");
+
+      setPopupMessage(
+        err.response?.data?.message ||
+          "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง",
+      );
     }
   };
 
   return (
     <div className="student-apply-project-page">
-      {/* Sidebar */}
 
       <aside className="sidebar">
+
+        {/* LOGO */}
+
         <div className="logo">
-          <img src={logo} alt="Logo" />
+
+          <img
+            src={logo}
+            alt="SPTC Logo"
+          />
 
           <div>
-            <h2>SPTC System</h2>
-            <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+
+            <h2>
+              SPTC System
+            </h2>
+
+            <p>
+              ระบบติดตามและสื่อสารโครงงานนิสิต
+            </p>
+
           </div>
+
         </div>
+
+
+        {/* MENU */}
 
         <nav>
           <ul>
-            <li className="active" onClick={() => navigate("/StudentHome")}>
+
+            <li
+              className="active"
+              onClick={() =>
+                navigate(
+                  "/StudentHome",
+                )
+              }
+            >
               หน้าหลัก
             </li>
 
-            <li>รายชื่ออาจารย์</li>
 
-            <li onClick={() => navigate("/submit-new-project")}>
+            <li>
+              รายชื่ออาจารย์
+            </li>
+
+
+            <li
+              onClick={() =>
+                navigate(
+                  "/submit-new-project",
+                )
+              }
+            >
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li>โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li>
+              โครงงานของฉัน
+            </li>
 
-            <li>ข้อมูลส่วนตัว</li>
+
+            <li>
+              การแจ้งเตือน
+            </li>
+
+
+            <li>
+              ข้อมูลส่วนตัว
+            </li>
+
           </ul>
         </nav>
 
-        <button className="logout-btn" onClick={handleLogout}>
+
+        {/* LOGOUT */}
+
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
           ออกจากระบบ
         </button>
+
       </aside>
 
-      {/* Main */}
-
       <main className="main">
+
         <header className="header">
+
+          {/* BREADCRUMB */}
+
           <div className="breadcrumb">
-            <span onClick={() => navigate("/StudentHome")}>หน้าหลัก</span>
 
-            <span> &gt; </span>
-
-            <span onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
-              รายละเอียด
+            <span
+              onClick={() =>
+                navigate(
+                  "/StudentHome",
+                )
+              }
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              หน้าหลัก
             </span>
 
-            <span> &gt; </span>
 
-            <span>สมัครเข้าร่วมโครงงาน</span>
+            <span>
+              &gt;
+            </span>
+
+
+            <span
+              onClick={() =>
+                navigate(-1)
+              }
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              รายละเอียดโครงงาน
+            </span>
+
+
+            <span>
+              &gt;
+            </span>
+
+
+            <span>
+              สมัครเข้าร่วมโครงงาน
+            </span>
+
           </div>
 
+
+          {/* HEADER RIGHT */}
+
           <div className="header-right">
+
+            {/* NOTIFICATION */}
+
             <div className="notification-box">
+
               <div className="notification-wrapper">
+
                 <button
                   className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() =>
+                    setShowNotifications(
+                      !showNotifications,
+                    )
+                  }
                 >
                   <FaBell />
 
-                  <span className="notification-count">
-                    {notifications.length}
-                  </span>
+
+                  {notifications.length >
+                    0 && (
+                    <span className="notification-count">
+                      {
+                        notifications.length
+                      }
+                    </span>
+                  )}
+
                 </button>
+
+
+                {/* DROPDOWN */}
 
                 {showNotifications && (
                   <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
 
-                    {notifications.map((item) => (
-                      <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-                        <small>{item.time}</small>
-                      </div>
-                    ))}
+                    <h4>
+                      การแจ้งเตือน
+                    </h4>
+
+
+                    {notifications.map(
+                      (item) => (
+                        <div
+                          key={
+                            item.id
+                          }
+                          className="notification-item"
+                        >
+                          <p>
+                            {
+                              item.message
+                            }
+                          </p>
+
+                          <small>
+                            {
+                              item.time
+                            }
+                          </small>
+                        </div>
+                      ),
+                    )}
+
                   </div>
                 )}
+
               </div>
+
             </div>
 
+
+            {/* USER */}
+
             <div className="user-info">
+
               <img
-                src={`http://localhost:5000${profileImage}`}
+                src={
+                  profileImage
+                    ? `http://localhost:5000${profileImage}`
+                    : logo
+                }
                 className="profile-image"
                 alt="Profile"
               />
 
-              <span>{username}</span>
+              <span>
+                {username}
+              </span>
+
             </div>
+
           </div>
+
         </header>
 
-        {/* Card */}
-
         <div className="apply-card">
-          <h2>สมัครเข้าร่วมโครงงาน</h2>
+
+          <h2>
+            สมัครเข้าร่วมโครงงาน
+          </h2>
 
           <div className="section">
-            <h3>ข้อมูลโครงงาน</h3>
+
+            <h3>
+              ข้อมูลโครงงาน
+            </h3>
+
 
             <p>
-              <strong>ชื่อโครงงาน :</strong> {project?.title}
+              <strong>
+                ชื่อโครงงาน :
+              </strong>{" "}
+              {project?.title || "-"}
             </p>
 
-            <p>
-              <strong>อาจารย์ที่ปรึกษา :</strong> {project?.advisor_name}
-            </p>
 
             <p>
-              <strong>สมาชิกโครงงาน :</strong> {project?.current_members}/
-              {project?.max_members}
+              <strong>
+                อาจารย์ที่ปรึกษา :
+              </strong>{" "}
+              {project?.advisor_name ||
+                project?.advisor ||
+                "-"}
             </p>
+
+
+            <p>
+              <strong>
+                รับนิสิต :
+              </strong>{" "}
+              {project?.current_members ??
+                0}{" "}
+              /{" "}
+              {project?.max_members ??
+                0}{" "}
+              คน
+            </p>
+
           </div>
+
           <div className="apply-row">
-            {/* ผู้สมัคร */}
+
             <div className="section">
-              <h3>ข้อมูลผู้สมัคร</h3>
 
-              <label>รหัสประจำตัว</label>
-
-              <input value={username || ""} disabled />
-
-              <label>ชื่อ</label>
-
-              <input value={name || ""} disabled />
-            </div>
-
-            {/* ช่องทางการติดต่อ */}
-            <div className="section">
               <h3>
-                ช่องทางการติดต่อ
-                <span style={{ color: "red" }}> *</span>
+                ข้อมูลผู้สมัคร
               </h3>
 
-              <div className="apply-select-wrapper">
-                <select
-                  value={contactType}
-                  onChange={(e) => setContactType(e.target.value)}
+
+              <label>
+                รหัสประจำตัว
+              </label>
+
+
+              <input
+                value={
+                  username || ""
+                }
+                disabled
+              />
+
+
+              <label>
+                ชื่อ
+              </label>
+
+
+              <input
+                value={
+                  name || ""
+                }
+                disabled
+              />
+
+            </div>
+
+            <div className="section">
+
+              <h3>
+                ช่องทางการติดต่อ
+                <span
+                  style={{
+                    color: "red",
+                  }}
                 >
-                  <option value="">เลือกช่องทางการติดต่อ</option>
-                  <option>Email</option>
-                  <option>Line ID</option>
-                  <option>Facebook</option>
-                  <option>Instagram</option>
-                  <option>Discord</option>
-                  <option>โทรศัพท์</option>
+                  {" "}
+                  *
+                </span>
+              </h3>
+
+
+              {/* SELECT */}
+
+              <div className="apply-select-wrapper">
+
+                <select
+                  value={
+                    contactType
+                  }
+                  onChange={(e) => {
+                    setContactType(
+                      e.target.value,
+                    );
+
+                    setContactValue(
+                      "",
+                    );
+                  }}
+                  disabled={
+                    isSubmitted
+                  }
+                >
+
+                  <option value="">
+                    เลือกช่องทางการติดต่อ
+                  </option>
+
+                  <option value="Email">
+                    Email
+                  </option>
+
+                  <option value="Line ID">
+                    Line ID
+                  </option>
+
+                  <option value="Facebook">
+                    Facebook
+                  </option>
+
+                  <option value="Instagram">
+                    Instagram
+                  </option>
+
+                  <option value="Discord">
+                    Discord
+                  </option>
+
+                  <option value="โทรศัพท์">
+                    โทรศัพท์
+                  </option>
+
                 </select>
 
-                <FaChevronDown className="apply-select-arrow" />
+
+                <FaChevronDown
+                  className="apply-select-arrow"
+                />
+
               </div>
+
+
+              {/* CONTACT VALUE */}
 
               {contactType !== "" && (
                 <>
-                  <label>{contactType}</label>
+
+                  <label>
+                    {contactType}
+                  </label>
+
 
                   <input
-                    value={contactValue}
-                    onChange={(e) => setContactValue(e.target.value)}
+                    value={
+                      contactValue
+                    }
+                    onChange={(e) =>
+                      setContactValue(
+                        e.target.value,
+                      )
+                    }
                     placeholder={`กรอก ${contactType}`}
+                    disabled={
+                      isSubmitted
+                    }
                   />
+
                 </>
               )}
+
             </div>
+
           </div>
+
           <div className="section">
-            <h3>เหตุผลในการสมัครเข้าร่วมโครงงาน</h3>
+
+            <h3>
+              เหตุผลในการสมัครเข้าร่วมโครงงาน
+            </h3>
+
 
             <textarea
-              value={introduction}
-              onChange={(e) => setIntroduction(e.target.value)}
+              value={
+                introduction
+              }
+              onChange={(e) =>
+                setIntroduction(
+                  e.target.value,
+                )
+              }
               placeholder="กรุณาระบุเหตุผลที่ต้องการสมัครเข้าร่วมโครงงานนี้"
+              disabled={
+                isSubmitted
+              }
             />
+
           </div>
 
           <div className="button-group">
+
             {isSubmitted ? (
-              <button className="submit-btn" disabled>
+
+              <button
+                className="submit-btn"
+                disabled
+              >
                 ✓ ส่งใบสมัครแล้ว
               </button>
+
             ) : (
+
               <>
-                <button className="cancel-btn" onClick={() => navigate(-1)}>
+
+                {/* CANCEL */}
+
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() =>
+                    navigate(-1)
+                  }
+                >
                   ยกเลิก
                 </button>
 
+
+                {/* SUBMIT */}
+
                 <button
+                  type="button"
                   className="submit-btn"
-                  disabled={!contactType || !contactValue || hasPendingRequest}
-                  onClick={handleSubmit}
+                  disabled={
+                    !contactType ||
+                    !contactValue ||
+                    hasPendingRequest
+                  }
+                  onClick={
+                    handleSubmit
+                  }
                 >
                   {hasPendingRequest
                     ? "มีใบสมัครที่กำลังรอพิจารณา"
                     : "ส่งคำขอสมัครเข้าร่วมโครงงาน"}
                 </button>
+
               </>
+
             )}
+
           </div>
+
         </div>
+
       </main>
+
       {showPopup && (
         <div className="popup-overlay">
+
           <div className="popup-card">
-            {popupType === "loading" && (
+
+            {popupType ===
+              "loading" && (
               <>
+
                 <div className="loader"></div>
 
-                <h3>กำลังส่งใบสมัคร...</h3>
 
-                <p>กรุณารอสักครู่</p>
+                <h3 className="popup-title">
+                  กำลังส่งใบสมัคร
+                </h3>
+
+
+                <div className="popup-divider"></div>
+
+
+                <p className="popup-message">
+                  กรุณารอสักครู่
+                </p>
+
               </>
             )}
 
-            {popupType === "success" && (
+            {popupType ===
+              "success" && (
               <>
-                <div style={{ fontSize: 60 }}>✅</div>
 
-                <h3>ส่งใบสมัครสำเร็จ</h3>
+                <div className="popup-status-icon success">
+                  ✓
+                </div>
 
-                <p>
+
+                <h3 className="popup-title">
+                  ส่งใบสมัครสำเร็จ
+                </h3>
+
+
+                <div className="popup-divider"></div>
+
+
+                <p className="popup-message">
                   ใบสมัครของคุณถูกส่งไปยังอาจารย์แล้ว
                   <br />
                   กรุณารอการพิจารณา
                 </p>
 
+
                 <button
-                  className="submit-btn"
-                  onClick={() => setShowPopup(false)}
+                  type="button"
+                  className="popup-action-btn success-btn"
+                  onClick={() =>
+                    setShowPopup(
+                      false,
+                    )
+                  }
                 >
                   ตกลง
                 </button>
+
               </>
             )}
 
-            {popupType === "error" && (
+            {popupType ===
+              "error" && (
               <>
-                <div style={{ fontSize: 60 }}>❌</div>
 
-                <h3>ไม่สามารถส่งใบสมัครได้</h3>
+                <div className="popup-status-icon error">
+                  !
+                </div>
 
-                <p>{popupMessage}</p>
+
+                <h3 className="popup-title">
+                  ไม่สามารถส่งใบสมัครได้
+                </h3>
+
+
+                <div className="popup-divider"></div>
+
+
+                <p className="popup-message">
+                  {popupMessage}
+                </p>
+
 
                 <button
-                  className="cancel-btn"
-                  onClick={() => setShowPopup(false)}
+                  type="button"
+                  className="popup-action-btn error-btn"
+                  onClick={() =>
+                    setShowPopup(
+                      false,
+                    )
+                  }
                 >
                   ปิด
                 </button>
+
               </>
             )}
+
           </div>
+
         </div>
       )}
+
     </div>
   );
 }
+
 
 export default ApplyProject;
