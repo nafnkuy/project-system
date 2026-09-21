@@ -1,4 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+/* =========================================================
+   RESET
+========================================================= */
 
 .staff-detail-page,
 .staff-detail-page * {
@@ -8,323 +13,576 @@
 
 .staff-detail-page {
   display: flex;
+
+  width: 100%;
   min-height: 100vh;
+
   background: #f5f5f5;
 }
 
 
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
-.staff-detail-sidebar {
+.staff-detail-page .staff-detail-sidebar {
   position: fixed;
+
   top: 0;
   left: 0;
   bottom: 0;
 
-  width: 220px;
+  width: 250px;
   height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #ddd;
 
   display: grid;
   grid-template-rows: auto 1fr auto;
 
-  background: #ffffff;
-  border-right: 1px solid #ddd;
+  z-index: 100;
 }
 
-.staff-detail-logo {
+
+/* ---------- LOGO ---------- */
+
+.staff-detail-page .staff-detail-logo {
   display: flex;
   align-items: center;
 
-  gap: 8px;
+  gap: 10px;
 
-  padding: 20px 15px;
+  padding: 24px 20px;
+
+  margin: 0;
 }
 
-.staff-detail-logo img {
-  width: 48px;
-  height: 48px;
+.staff-detail-page .staff-detail-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
 }
 
-.staff-detail-logo h2 {
+.staff-detail-page .staff-detail-logo h2 {
   margin: 0;
 
-  font-size: 20px;
-  font-weight: 600;
+  color: #111;
+
+  font-size: 23px;
+  font-weight: 700;
 }
 
-.staff-detail-logo p {
-  margin: 2px 0 0;
+.staff-detail-page .staff-detail-logo p {
+  margin: 0;
 
-  font-size: 7px;
-  color: #777;
+  color: #666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
 }
 
-.staff-detail-sidebar ul {
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.staff-detail-page .staff-detail-sidebar nav {
+  width: 100%;
+
+  margin: 0;
+}
+
+.staff-detail-page .staff-detail-sidebar ul {
   list-style: none;
-  padding: 0;
+
   margin: 0;
+  padding: 0;
 }
 
-.staff-detail-sidebar li {
-  padding: 15px 8px;
+.staff-detail-page .staff-detail-sidebar li {
+  width: 100%;
+
+  margin: 0;
+  padding: 18px 0;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
 
   text-align: center;
 
-  font-size: 12px;
-
   cursor: pointer;
 }
 
-.staff-detail-sidebar li.active {
-  background: #32617e;
-  color: white;
+.staff-detail-page .staff-detail-sidebar li:hover {
+  background: #f0f0f0;
 }
 
-.staff-detail-logout {
+.staff-detail-page .staff-detail-sidebar li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.staff-detail-page .staff-detail-logout {
   width: 190px;
 
   margin: 0 auto 20px;
+  padding: 12px;
 
-  padding: 10px;
+  border: none;
+  border-radius: 8px;
 
-  border: 0;
-  border-radius: 6px;
+  background: #3b75c4;
+  color: #ffffff;
 
-  background: #3978c8;
-  color: white;
+  font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-
-/* =========================
-   MAIN
-========================= */
-
-.staff-detail-main {
-  width: calc(100% - 220px);
-  min-height: 100vh;
-
-  margin-left: 220px;
+.staff-detail-page .staff-detail-logout:hover {
+  background: #2f6db5;
 }
 
 
-/* =========================
+/* =========================================================
+   MAIN
+========================================================= */
+
+.staff-detail-page .staff-detail-main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
-.staff-detail-header {
-  height: 68px;
+.staff-detail-page .staff-detail-header {
+  width: 100%;
+  height: 70px;
 
-  padding: 0 18px;
+  padding: 0 20px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: #f4e49d;
+  background: #f0e3a1;
+
+  border: none;
 }
 
-.staff-detail-header h2 {
+.staff-detail-page .staff-detail-header h2 {
   margin: 0;
 
-  font-size: 18px;
+  color: #111;
+
+  font-size: 20px;
   font-weight: 400;
 }
 
-.staff-detail-header-right {
+.staff-detail-page .staff-detail-header-right {
   display: flex;
   align-items: center;
 
-  gap: 8px;
+  gap: 10px;
 }
 
-.staff-detail-bell {
-  width: 42px;
-  height: 42px;
+
+/* ---------- BELL ---------- */
+
+.staff-detail-page .staff-detail-bell {
+  width: 50px;
+  height: 50px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #999;
 
   border: 1px solid #ddd;
   border-radius: 4px;
 
-  background: white;
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.staff-detail-page .staff-detail-bell svg {
   color: #999;
 }
 
-.staff-detail-user {
-  height: 42px;
+
+/* ---------- USER ---------- */
+
+.staff-detail-page .staff-detail-user {
+  height: 50px;
+
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
 
-  gap: 8px;
+  gap: 10px;
 
-  padding: 0 12px;
-
-  background: white;
+  background: #ffffff;
 
   border: 1px solid #ddd;
   border-radius: 4px;
 
-  font-size: 12px;
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.staff-detail-user img {
-  width: 28px;
-  height: 28px;
+.staff-detail-page .staff-detail-user img {
+  width: 30px;
+  height: 30px;
 
   border-radius: 50%;
+
   object-fit: cover;
 }
 
 
-/* =========================
+/* =========================================================
    CONTENT
-========================= */
+========================================================= */
 
-.staff-detail-content {
-  padding: 30px 40px;
+.staff-detail-page .staff-detail-content {
+  width: 100%;
+
+  padding: 40px 0 25px;
 }
 
-.staff-detail-card {
-  max-width: 1000px;
+
+/* =========================================================
+   MAIN WHITE CARD
+========================================================= */
+
+.staff-detail-page .staff-detail-card {
+  width: 80%;
 
   margin: 0 auto;
 
-  padding: 30px;
+  padding: 40px;
 
-  background: white;
+  background: #ffffff;
 
-  border-radius: 10px;
+  border-radius: 8px;
+
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
 }
 
-.staff-detail-card > h3 {
-  margin: 0 0 25px;
+
+/* ---------- MAIN TITLE ---------- */
+
+.staff-detail-page .staff-detail-card > h3 {
+  margin: 0 0 30px;
+
+  color: #222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   DETAIL SECTION
+========================================================= */
+
+.staff-detail-page .detail-section {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbb;
+  border-radius: 8px;
+}
+
+
+/* ---------- SECTION TITLE ---------- */
+
+.staff-detail-page .detail-section h4 {
+  margin: 0 0 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #ddd;
+
+  color: #222;
 
   font-size: 14px;
   font-weight: 600;
 }
 
 
-/* =========================
-   SECTION
-========================= */
+/* TSX มี detail-line อยู่แล้ว
+   ซ่อนเพื่อไม่ให้เกิดเส้นซ้อน */
 
-.detail-section {
-  margin-bottom: 18px;
-
-  padding: 20px;
-
-  border: 1px solid #bbb;
-  border-radius: 8px;
+.staff-detail-page .detail-line {
+  display: none;
 }
 
-.detail-section h4 {
-  margin: 0;
 
-  font-size: 12px;
-  font-weight: 600;
-}
+/* =========================================================
+   TEXT STANDARD
+========================================================= */
 
-.detail-line {
-  width: 100%;
-  height: 1px;
+/*
+   มาตรฐานทั้งหน้า
 
-  margin: 12px 0 20px;
+   หัวข้อกล่อง          14px / 600
+   ชื่อข้อมูล            13px / 500
+   ค่าข้อมูล             13px / 400
+   Badge                 11px / 500
+*/
 
-  background: #bbb;
-}
+.staff-detail-page .detail-section p {
+  margin: 8px 0;
 
-.detail-section p {
-  margin: 10px 0;
+  color: #222;
 
-  font-size: 11px;
-}
-
-.detail-section p span {
+  font-size: 13px;
   font-weight: 400;
+
+  line-height: 1.7;
 }
 
 
-/* =========================
+/* Label เช่น
+   เลขที่เอกสาร :
+   วันที่อนุมัติ :
+   ประเภทโครงงาน :
+*/
+
+.staff-detail-page .detail-section p > span {
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
    MEMBERS
-========================= */
+========================================================= */
 
-.member-title {
-  margin-top: 28px;
-  margin-bottom: 5px;
+.staff-detail-page .member-title {
+  margin-top: 22px;
+  margin-bottom: 4px;
 
-  font-size: 11px;
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.member-list {
+.staff-detail-page .member-list {
   padding-left: 30px;
 }
 
-.member-list p {
-  margin: 10px 0;
+.staff-detail-page .member-list p {
+  margin: 6px 0;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.6;
 }
 
 
-/* =========================
-   SIGNATURE
-========================= */
+/* =========================================================
+   SIGNATURE / DOWNLOAD STATUS ROW
+========================================================= */
 
-.signature-status-row {
+.staff-detail-page .signature-status-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 
   gap: 10px;
 
-  margin-top: 10px;
+  margin: 8px 0;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.7;
+}
+
+
+/* ชื่อสถานะ เช่น
+   สถานะการลงนาม :
+   สถานะการดาวน์โหลด :
+*/
+
+.staff-detail-page
+  .signature-status-row
+  > span:first-child {
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+.staff-detail-page .signature-complete,
+.staff-detail-page .signature-missing {
+  min-height: 25px;
+
+  padding: 3px 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
 
   font-size: 11px;
+  font-weight: 500;
+
+  line-height: 1;
+
+  white-space: nowrap;
 }
 
-.signature-complete {
-  padding: 4px 12px;
 
-  border-radius: 20px;
+/* ---------- COMPLETE ---------- */
 
-  background: #1ca46a;
-  color: white;
+.staff-detail-page .signature-complete {
+  background: #20a36a;
+
+  color: #ffffff;
 }
 
-.signature-missing {
-  padding: 4px 12px;
 
-  border-radius: 20px;
+/* ---------- MISSING ---------- */
 
+.staff-detail-page .signature-missing {
   background: #999;
-  color: white;
+
+  color: #ffffff;
 }
 
 
-/* =========================
-   DOWNLOAD
-========================= */
+/* =========================================================
+   DOWNLOAD AREA
+========================================================= */
 
-.download-area {
+.staff-detail-page .download-area {
   display: flex;
+  align-items: center;
   justify-content: center;
+
+  margin-top: 30px;
 
   padding-top: 15px;
 }
 
-.download-document-btn {
-  padding: 8px 18px;
 
-  border: 1px solid #ccc;
+/* =========================================================
+   DOWNLOAD BUTTON
+========================================================= */
+
+.staff-detail-page .download-document-btn {
+  min-width: 180px;
+  height: 36px;
+
+  padding: 0 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #222;
+
+  border: 1px solid #bbb;
   border-radius: 5px;
 
-  background: white;
-
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
 
   cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
-.download-document-btn:hover {
-  background: #f5f5f5;
+.staff-detail-page .download-document-btn:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .staff-detail-page .staff-detail-card {
+    width: 88%;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .staff-detail-page .staff-detail-sidebar {
+    width: 250px;
+  }
+
+  .staff-detail-page .staff-detail-main {
+    width: calc(100% - 250px);
+
+    margin-left: 250px;
+  }
+
+  .staff-detail-page .staff-detail-card {
+    width: calc(100% - 50px);
+
+    padding: 30px;
+  }
+
+  .staff-detail-page .staff-detail-header h2 {
+    white-space: nowrap;
+  }
 }

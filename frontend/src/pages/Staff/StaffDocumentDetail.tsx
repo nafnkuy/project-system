@@ -229,7 +229,7 @@ function StaffDocumentDetail() {
         {/* HEADER */}
 
         <header className="staff-detail-header">
-          <h2>เอกสารขออนุมัติหัวข้อโครงงาน &gt; รายละเอียด</h2>
+          <h2>เอกสารขออนุมัติหัวข้อโครงงาน &gt; รายละเอียดเอกสารขออนุมัติ</h2>
 
           <div className="staff-detail-header-right">
             <button className="staff-detail-bell">
@@ -267,20 +267,16 @@ function StaffDocumentDetail() {
               </p>
 
               <p>
+                <span>ประเภทเอกสาร :</span> {document.document_type}
+              </p>
+
+              <p>
                 <span>วันที่อนุมัติ :</span>{" "}
                 {formatThaiDate(document.approved_at)}
               </p>
 
               <p>
                 <span>เวลา :</span> {formatThaiTime(document.approved_at)} น.
-              </p>
-
-              <p>
-                <span>ประเภทเอกสาร :</span> {document.document_type}
-              </p>
-
-              <p>
-                <span>ปีการศึกษา :</span> {document.academic_year || "-"}
               </p>
             </section>
 
@@ -339,7 +335,7 @@ function StaffDocumentDetail() {
               </p>
 
               <p>
-                <span>เวลาที่ลงนาม :</span>{" "}
+                <span>เวลา :</span>{" "}
                 {formatThaiTime(document.approved_at)} น.
               </p>
 
