@@ -348,8 +348,8 @@
 
   color: #222;
 
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .student-submit-project-page .form-group > label:not(:first-child) {
@@ -397,6 +397,20 @@
 .student-submit-project-page .form-group input:disabled {
   background: #f3f3f3;
   color: #555;
+}
+
+.student-submit-project-page
+.member-card
+.form-group
+> label.member-field-label {
+  display: block;
+
+  margin: 0 0 8px;
+
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 400;
 }
 
 /* ================= RADIO ================= */
@@ -702,4 +716,57 @@
   .student-submit-project-page .proposal-card {
     width: 88%;
   }
+}
+
+/* =========================================================
+   CONTACT SELECT
+========================================================= */
+
+.student-submit-project-page .contact-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.student-submit-project-page .contact-select-wrapper select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 42px 0 12px;
+
+  background: #ffffff;
+  color: #222222;
+
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+
+  outline: none;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.student-submit-project-page .contact-select-wrapper select:focus {
+  border-color: #aaaaaa;
+}
+
+.student-submit-project-page .contact-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 15px;
+
+  transform: translateY(-50%);
+
+  color: #777777;
+
+  font-size: 10px;
+  line-height: 1;
+
+  pointer-events: none;
 }

@@ -180,7 +180,7 @@ function ProjectDetail() {
 
             <span> &gt; </span>
 
-            <span>รายละเอียด</span>
+            <span>รายละเอียดโครงงาน</span>
           </div>
 
           <div className="header-right">

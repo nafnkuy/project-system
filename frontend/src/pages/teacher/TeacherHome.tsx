@@ -165,7 +165,7 @@ function TeacherHome() {
     sessionStorage.getItem("name");*/
 
   return (
-    <div className="layout">
+    <div className="teacher-home-page">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">

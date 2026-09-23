@@ -1,16 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
 
-* {
+.teacher-home-page, .teacher-home-page * {
   font-family: "Prompt", sans-serif;
 }
 
-* {
+.teacher-home-page, .teacher-home-page * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-.layout {
+.teacher-home-page {
   display: flex;
   height: 100vh;
   background: #f5f5f5;
@@ -20,7 +20,7 @@
    SIDEBAR
 ========================= */
 
-.sidebar {
+.teacher-home-page .sidebar {
   position: fixed;
   top: 0;
   left: 0;
@@ -43,7 +43,7 @@
    LOGO
 ========================= */
 
-.logo {
+.teacher-home-page .logo {
   display: flex;
   align-items: center;
 
@@ -54,20 +54,20 @@
   margin-bottom: 0;
 }
 
-.logo img {
+.teacher-home-page .logo img {
   width: 55px;
   height: 55px;
   object-fit: contain;
 }
 
-.logo h2 {
+.teacher-home-page .logo h2 {
   margin: 0;
 
   font-size: 23px;
   font-weight: 700;
 }
 
-.logo p {
+.teacher-home-page .logo p {
   margin: 0;
 
   font-size: 9.5px;
@@ -81,19 +81,19 @@
    MENU
 ========================= */
 
-nav {
+.teacher-home-page nav {
   margin: 0;
   width: 100%;
 }
 
-nav ul {
+.teacher-home-page nav ul {
   list-style: none;
 
   padding: 0;
   margin: 0;
 }
 
-nav li {
+.teacher-home-page nav li {
   width: 100%;
 
   padding: 18px 0;
@@ -113,7 +113,7 @@ nav li {
   cursor: pointer;
 }
 
-nav li:hover {
+.teacher-home-page nav li:hover {
   background: #f0f0f0;
 }
 
@@ -122,7 +122,7 @@ nav li:hover {
    ACTIVE MENU
 ========================= */
 
-nav li.active {
+.teacher-home-page nav li.active {
   background: #2f5d7c;
 
   color: #ffffff;
@@ -135,7 +135,7 @@ nav li.active {
    LOGOUT
 ========================= */
 
-.logout-btn {
+.teacher-home-page .logout-btn {
   width: 190px;
 
   margin: 0 auto 20px;
@@ -151,7 +151,7 @@ nav li.active {
   cursor: pointer;
 }
 
-.logout-btn:hover {
+.teacher-home-page .logout-btn:hover {
   background: #2f6db5;
 }
 
@@ -159,7 +159,7 @@ nav li.active {
    Main
 ========================= */
 
-.main {
+.teacher-home-page .main {
   flex: 1;
   min-width: 0;
   background: #f5f5f5;
@@ -169,7 +169,7 @@ nav li.active {
    HEADER
 ========================= */
 
-.header {
+.teacher-home-page .header {
   width: 100%;
   height: 70px;
 
@@ -184,7 +184,7 @@ nav li.active {
   border: none;
 }
 
-.header h2 {
+.teacher-home-page .header h2 {
   margin: 0;
 
   font-size: 20px !important;
@@ -198,7 +198,7 @@ nav li.active {
    HEADER RIGHT
 ========================= */
 
-.header-right {
+.teacher-home-page .header-right {
   display: flex;
 
   align-items: center;
@@ -211,7 +211,7 @@ nav li.active {
    NOTIFICATION
 ========================= */
 
-.notification-btn {
+.teacher-home-page .notification-btn {
   width: 50px;
   height: 50px;
 
@@ -237,7 +237,7 @@ nav li.active {
    NOTIFICATION WRAPPER
 ========================= */
 
-.notification-wrapper {
+.teacher-home-page .notification-wrapper {
   position: relative;
 }
 
@@ -246,7 +246,7 @@ nav li.active {
    NOTIFICATION COUNT
 ========================= */
 
-.notification-count {
+.teacher-home-page .notification-count {
   position: absolute;
 
   top: -7px;
@@ -272,7 +272,7 @@ nav li.active {
    NOTIFICATION DROPDOWN
 ========================= */
 
-.notification-dropdown {
+.teacher-home-page .notification-dropdown {
   position: absolute;
 
   top: 58px;
@@ -289,28 +289,28 @@ nav li.active {
   z-index: 1000;
 }
 
-.notification-dropdown h4 {
+.teacher-home-page .notification-dropdown h4 {
   padding: 12px;
   margin: 0;
 
   border-bottom: 1px solid #eee;
 }
 
-.notification-item {
+.teacher-home-page .notification-item {
   padding: 12px;
 
   border-bottom: 1px solid #eee;
 }
 
-.notification-item p {
+.teacher-home-page .notification-item p {
   margin: 0;
 }
 
-.notification-item small {
+.teacher-home-page .notification-item small {
   color: gray;
 }
 
-.notification-item:hover {
+.teacher-home-page .notification-item:hover {
   background: #f5f5f5;
 }
 
@@ -319,7 +319,7 @@ nav li.active {
    USER
 ========================= */
 
-.user-info {
+.teacher-home-page .user-info {
   height: 50px;
 
   padding: 0 14px;
@@ -343,7 +343,7 @@ nav li.active {
    PROFILE IMAGE
 ========================= */
 
-.profile-image {
+.teacher-home-page .profile-image {
   width: 30px;
   height: 30px;
 
@@ -356,7 +356,7 @@ nav li.active {
    Dashboard
 ========================= */
 
-.dashboard-content {
+.teacher-home-page .dashboard-content {
   padding: 32px 38px 40px;
 }
 
@@ -364,7 +364,7 @@ nav li.active {
    SEARCH + FILTER
 ========================= */
 
-.search-section {
+.teacher-home-page .search-section {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -374,7 +374,7 @@ nav li.active {
   margin-bottom: 28px;
 }
 
-.search-box {
+.teacher-home-page .search-box {
   width: 450px;
   height: 36px;
 
@@ -390,7 +390,7 @@ nav li.active {
   box-sizing: border-box;
 }
 
-.search-box input {
+.teacher-home-page .search-box input {
   flex: 1;
   min-width: 0;
 
@@ -405,12 +405,12 @@ nav li.active {
   font-weight: 400;
 }
 
-.search-box input::placeholder {
+.teacher-home-page .search-box input::placeholder {
   color: #999;
   font-size: 12px;
 }
 
-.search-icon {
+.teacher-home-page .search-icon {
   font-size: 15px;
   color: #999;
 
@@ -423,17 +423,17 @@ nav li.active {
    FILTER
 ========================= */
 
-.select-wrapper {
+.teacher-home-page .select-wrapper {
   position: relative;
   width: 135px;
   height: 36px;
 }
 
-.select-wrapper.type-select {
+.teacher-home-page .select-wrapper.type-select {
   width: 150px;
 }
 
-.status-filter {
+.teacher-home-page .status-filter {
   position: absolute;
   inset: 0;
 
@@ -446,7 +446,7 @@ nav li.active {
   z-index: 3;
 }
 
-.select-label {
+.teacher-home-page .select-label {
   position: absolute;
 
   left: 18px;
@@ -462,7 +462,7 @@ nav li.active {
   z-index: 1;
 }
 
-.select-wrapper::before {
+.teacher-home-page .select-wrapper::before {
   content: "";
 
   position: absolute;
@@ -475,7 +475,7 @@ nav li.active {
   box-sizing: border-box;
 }
 
-.select-arrow {
+.teacher-home-page .select-arrow {
   position: absolute;
 
   right: 14px;
@@ -490,7 +490,7 @@ nav li.active {
   z-index: 2;
 }
 
-.status-filter option {
+.teacher-home-page .status-filter option {
   font-size: 11px;
 }
 
@@ -498,7 +498,7 @@ nav li.active {
    Dashboard Cards
 ========================= */
 
-.dashboard-cards {
+.teacher-home-page .dashboard-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
 
@@ -508,7 +508,7 @@ nav li.active {
   margin-bottom: 20px;
 }
 
-.dashboard-card {
+.teacher-home-page .dashboard-card {
   height: 120px;
 
   background: #ffffff;
@@ -523,45 +523,45 @@ nav li.active {
   justify-content: center;
 }
 
-.dashboard-card .card-title {
+.teacher-home-page .dashboard-card .card-title {
   color: #222;
   font-size: 14px;
   margin-bottom: 8px;
 }
 
-.dashboard-card .card-number {
+.teacher-home-page .dashboard-card .card-number {
   font-size: 35px;
   font-weight: 600;
 }
 
-.dashboard-card .card-status {
+.teacher-home-page .dashboard-card .card-status {
   font-size: 35px;
   font-weight: 600;
 }
 
-.card-number.blue {
+.teacher-home-page .card-number.blue {
   color: #3678c5;
 }
 
-.card-number.orange {
+.teacher-home-page .card-number.orange {
   color: #f07800;
 }
 
-.card-number.green {
+.teacher-home-page .card-number.green {
   color: #159c68;
 }
 
-.card-status {
+.teacher-home-page .card-status {
   font-size: 34px;
 
   font-weight: 700;
 }
 
-.status-open {
+.teacher-home-page .status-open {
   color: #159c68;
 }
 
-.status-full {
+.teacher-home-page .status-full {
   color: #d9534f;
 }
 
@@ -570,7 +570,7 @@ nav li.active {
    REQUEST TABLE
 ========================= */
 
-.table-container {
+.teacher-home-page .table-container {
   width: 100%;
   margin: 0;
 
@@ -585,21 +585,21 @@ nav li.active {
   overflow-x: auto;
 }
 
-.table-container h3 {
+.teacher-home-page .table-container h3 {
   margin: 0 0 14px;
 
   font-size: 16px;
   font-weight: 600;
 }
 
-.table-container table {
+.teacher-home-page .table-container table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
-.table-container th,
-.table-container td {
+.teacher-home-page .table-container th,
+.teacher-home-page .table-container td {
   border: none;
   border-bottom: 1px solid #ddd;
 
@@ -612,7 +612,7 @@ nav li.active {
   white-space: nowrap;
 }
 
-.table-container th {
+.teacher-home-page .table-container th {
   font-size: 13px;
   font-weight: 500;
 
@@ -624,20 +624,20 @@ nav li.active {
 
 
 /* ประเภท */
-.table-container th:nth-child(1),
-.table-container td:nth-child(1) {
+.teacher-home-page .table-container th:nth-child(1),
+.teacher-home-page .table-container td:nth-child(1) {
   width: 11%;
 }
 
 /* รหัสประจำตัว */
-.table-container th:nth-child(2),
-.table-container td:nth-child(2) {
+.teacher-home-page .table-container th:nth-child(2),
+.teacher-home-page .table-container td:nth-child(2) {
   width: 11%;
 }
 
 /* ชื่อนิสิต */
-.table-container th:nth-child(3),
-.table-container td:nth-child(3) {
+.teacher-home-page .table-container th:nth-child(3),
+.teacher-home-page .table-container td:nth-child(3) {
   width: 14%;
   text-align: center;
 
@@ -647,8 +647,8 @@ nav li.active {
 }
 
 /* ชื่อหัวข้อโครงงาน */
-.table-container th:nth-child(4),
-.table-container td:nth-child(4) {
+.teacher-home-page .table-container th:nth-child(4),
+.teacher-home-page .table-container td:nth-child(4) {
   width: 22%;
   max-width: 220px;
 
@@ -660,26 +660,26 @@ nav li.active {
 }
 
 /* วันที่ */
-.table-container th:nth-child(5),
-.table-container td:nth-child(5) {
+.teacher-home-page .table-container th:nth-child(5),
+.teacher-home-page .table-container td:nth-child(5) {
   width: 10%;
 }
 
 /* เวลา */
-.table-container th:nth-child(6),
-.table-container td:nth-child(6) {
+.teacher-home-page .table-container th:nth-child(6),
+.teacher-home-page .table-container td:nth-child(6) {
   width: 9%;
 }
 
 /* สถานะ */
-.table-container th:nth-child(7),
-.table-container td:nth-child(7) {
+.teacher-home-page .table-container th:nth-child(7),
+.teacher-home-page .table-container td:nth-child(7) {
   width: 10%;
 }
 
 /* จัดการ */
-.table-container th:nth-child(8),
-.table-container td:nth-child(8) {
+.teacher-home-page .table-container th:nth-child(8),
+.teacher-home-page .table-container td:nth-child(8) {
   width: 9%;
 }
 
@@ -687,7 +687,7 @@ nav li.active {
    Request Status
 ========================= */
 
-.request-status {
+.teacher-home-page .request-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -703,17 +703,17 @@ nav li.active {
   white-space: nowrap;
 }
 
-.request-status.pending {
+.teacher-home-page .request-status.pending {
   background: #ffc400;
   color: white;
 }
 
-.request-status.approved {
+.teacher-home-page .request-status.approved {
   background: #159c68;
   color: white;
 }
 
-.request-status.rejected {
+.teacher-home-page .request-status.rejected {
   background: #d9534f;
   color: white;
 }
@@ -723,7 +723,7 @@ nav li.active {
    Detail Button
 ========================= */
 
-.detail-btn {
+.teacher-home-page .detail-btn {
   min-width: 74px;
   height: 28px;
 
@@ -740,7 +740,7 @@ nav li.active {
   cursor: pointer;
 }
 
-.detail-btn:hover {
+.teacher-home-page .detail-btn:hover {
   background: #f2f2f2;
 }
 
@@ -749,13 +749,13 @@ nav li.active {
    View All
 ========================= */
 
-.view-all {
+.teacher-home-page .view-all {
   text-align: center;
   padding-top: 18px;
   padding-bottom: 2px;
 }
 
-.view-all button {
+.teacher-home-page .view-all button {
   border: none;
   background: transparent;
 
@@ -770,7 +770,7 @@ nav li.active {
    Pagination
 ========================= */
 
-.pagination {
+.teacher-home-page .pagination {
   display: flex;
 
   justify-content: flex-end;
@@ -782,7 +782,7 @@ nav li.active {
   margin-top: 15px;
 }
 
-.pagination button {
+.teacher-home-page .pagination button {
   width: 30px;
   height: 30px;
 
@@ -797,17 +797,17 @@ nav li.active {
   transition: 0.2s;
 }
 
-.pagination button:hover:not(:disabled) {
+.teacher-home-page .pagination button:hover:not(:disabled) {
   background: #f2f2f2;
 }
 
-.pagination button:disabled {
+.teacher-home-page .pagination button:disabled {
   opacity: 0.4;
 
   cursor: not-allowed;
 }
 
-.pagination span {
+.teacher-home-page .pagination span {
   font-size: 14px;
 
   font-weight: 500;
@@ -820,7 +820,7 @@ nav li.active {
 
 @media (max-width: 1100px) {
 
-  .dashboard-cards {
+  .teacher-home-page .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -828,29 +828,29 @@ nav li.active {
 
 @media (max-width: 700px) {
 
-  .dashboard-content {
+  .teacher-home-page .dashboard-content {
     padding: 25px 38px;
   }
 
-  .dashboard-cards {
+  .teacher-home-page .dashboard-cards {
     grid-template-columns: 1fr;
   }
 
-  .search-section {
+  .teacher-home-page .search-section {
     justify-content: flex-start;
   }
 
-  .search-box {
+  .teacher-home-page .search-box {
     width: 100%;
   }
 
-  .table-container {
+  .teacher-home-page .table-container {
     overflow-x: auto;
   }
 
 }
 
-.empty-request-cell {
+.teacher-home-page .empty-request-cell {
   text-align: center;
   padding: 30px !important;
 
@@ -859,4 +859,59 @@ nav li.active {
   color: #888;
   font-size: 13px;
   font-weight: 400;
+}
+
+/* =========================================================
+   TEACHER HOME - FINAL SAFE LAYOUT FIX
+========================================================= */
+
+.teacher-home-page {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  background: #f5f5f5;
+}
+
+.teacher-home-page .main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  flex: none;
+  min-width: 0;
+
+  background: #f5f5f5;
+}
+
+.teacher-home-page .notification-box {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.teacher-home-page .notification-box .notification-btn {
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+}
+
+@media (max-width: 700px) {
+  .teacher-home-page .main {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+  }
 }
