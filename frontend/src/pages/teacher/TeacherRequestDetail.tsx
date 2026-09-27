@@ -470,7 +470,7 @@ function TeacherRequestDetail() {
                   {request.contact_type} : {request.contact_value}
                 </div>
 
-                <label>แนะนำตัว</label>
+                <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
 
                 <textarea value={request.introduction || ""} readOnly />
               </div>

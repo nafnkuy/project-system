@@ -3,9 +3,12 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
+const wordcut = require("wordcut");
 
 const { PDFDocument } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
+
+wordcut.init();
 
 const db = require("./db");
 
@@ -1512,19 +1515,19 @@ WHERE pr.id = ?
                     : "สมัครเข้าร่วมโครงงาน";
 
                 const insertDocumentSql = `
-  INSERT INTO approval_documents
-  (
-    request_id,
-    project_id,
-    student_id,
-    advisor_id,
-    document_type,
-    document_code,
-    approved_at,
-    signature_image
-  )
-  VALUES (?, ?, ?, ?, ?, 'RE01', NOW(), ?)
-`;
+                  INSERT INTO approval_documents
+                  (
+                    request_id,
+                    project_id,
+                    student_id,
+                    advisor_id,
+                    document_type,
+                    document_code,
+                    approved_at,
+                    signature_image
+                  )
+                  VALUES (?, ?, ?, ?, ?, 'RE01', NOW(), ?)
+                `;
 
                 db.query(
                   insertDocumentSql,
@@ -1536,7 +1539,7 @@ WHERE pr.id = ?
                     documentType,
                     request.advisor_signature,
                   ],
-                  (documentErr) => {
+                  async (documentErr, documentResult) => {
                     if (documentErr) {
                       console.log(
                         "Create approval document error:",
@@ -1546,6 +1549,28 @@ WHERE pr.id = ?
                       return res.status(500).json({
                         message: "สร้างเอกสารสำหรับเจ้าหน้าที่ไม่สำเร็จ",
                       });
+                    }
+
+                    // ==========================================
+                    // 8.1 สร้าง PDF อัตโนมัติ
+                    // ==========================================
+
+                    const approvalDocumentId = documentResult.insertId;
+
+                    try {
+                      const pdfResponse = await fetch(
+                        `http://localhost:5000/staff/documents/${approvalDocumentId}/generate-pdf`,
+                      );
+
+                      const pdfResult = await pdfResponse.json();
+
+                      if (!pdfResponse.ok) {
+                        console.log("Auto generate PDF failed:", pdfResult);
+                      } else {
+                        console.log("Auto PDF created:", pdfResult.pdf_path);
+                      }
+                    } catch (pdfError) {
+                      console.log("Auto generate PDF request error:", pdfError);
                     }
 
                     // ==========================================
@@ -2011,7 +2036,7 @@ app.get("/staff/documents/:documentId", (req, res) => {
     -- ข้อมูลโครงงาน
     p.title AS project_title,
     p.project_type,
-    p.major AS project_major,
+    p.major AS major,
     p.academic_year,
 
     -- ข้อมูลนิสิตผู้ยื่นคำขอ
@@ -2101,7 +2126,7 @@ app.get("/staff/documents/:documentId", (req, res) => {
 });
 
 // ==========================================
-// ทดสอบใส่ข้อมูลจริงลง PDF
+// ใส่ข้อมูลจริงลง PDF
 // ==========================================
 
 app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
@@ -2181,34 +2206,64 @@ app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
 
       const fontBytes = fs.readFileSync(fontPath);
 
+      // อ่านชื่อ family จริงจากไฟล์ font
+      const thaiFontInfo = fontkit.create(fontBytes);
+      const thaiFontFamily = thaiFontInfo.familyName || "sans";
+
       const thaiFont = await pdfDoc.embedFont(fontBytes);
 
       const page = pdfDoc.getPages()[0];
 
-      const wrapText = (text, font, size, maxWidth) => {
-        const lines = [];
-        let currentLine = "";
+      const drawSignatureAboveLine = async (signatureUrl, box) => {
+        const signaturePath = getAssetFilePath(signatureUrl);
 
-        const segmenter = new Intl.Segmenter("th", { granularity: "word" });
-        const words = [...segmenter.segment(text)].map((item) => item.segment);
-
-        for (const word of words) {
-          const testLine = currentLine + word;
-          const width = font.widthOfTextAtSize(testLine, size);
-
-          if (width > maxWidth && currentLine) {
-            lines.push(currentLine.trim());
-            currentLine = word;
-          } else {
-            currentLine = testLine;
-          }
+        if (!signaturePath || !fs.existsSync(signaturePath)) {
+          return;
         }
 
-        if (currentLine.trim()) {
-          lines.push(currentLine.trim());
-        }
+        const signatureBytes = fs.readFileSync(signaturePath);
 
-        return lines;
+        const trimmedBytes = await sharp(signatureBytes)
+          .trim({ threshold: 35 })
+          .png()
+          .toBuffer();
+
+        const signatureImage = await pdfDoc.embedPng(trimmedBytes);
+
+        const imageAspect = signatureImage.width / signatureImage.height;
+
+        const boxAspect = box.width / box.height;
+
+        /*
+    ถ้าลายเซ็นกว้างและเตี้ยมาก
+    ตัวจำกัดจะเป็น width
+
+    อนุญาตให้กว้างเกินเส้นเล็กน้อย
+    แต่ยังจัดกลางเส้นเดิม
+  */
+        const extraWidth = imageAspect > boxAspect ? box.extraWidth || 0 : 0;
+
+        const allowedWidth = box.width + extraWidth;
+
+        const fittedSize = signatureImage.scaleToFit(allowedWidth, box.height);
+
+        /*
+    ใช้ center ของเส้นจริง
+    ต่อให้อนุญาต extraWidth
+    ลายเซ็นก็ยังอยู่กลางตำแหน่งเดิม
+  */
+        const lineCenterX = box.x + box.width / 2;
+
+        const drawX = lineCenterX - fittedSize.width / 2;
+
+        const drawY = box.lineY + (box.gap || 0);
+
+        page.drawImage(signatureImage, {
+          x: drawX,
+          y: drawY,
+          width: fittedSize.width,
+          height: fittedSize.height,
+        });
       };
 
       /* =========================
@@ -2330,94 +2385,193 @@ app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
       // เหตุผลประกอบคำร้อง
       // ==========================================
 
+      // ==========================================
+      // เหตุผลประกอบคำร้อง
+      // ตัดคำเอง + สร้างทีละบรรทัด
+      // ==========================================
+
       const reasonText = (document.introduction || "-")
-        // ลบช่องว่างแฝงที่อาจติดมากับข้อความ
+        .normalize("NFC")
         .replace(/[\u200B-\u200D\uFEFF]/g, "")
-        // ช่องว่างหลายตัวให้เหลือแค่ตัวเดียว
-        .replace(/\s+/g, " ")
+        .replace(/\u00A0/g, " ")
+        .replace(/\r?\n+/g, " ")
+        .replace(/[ \t]+/g, " ")
         .trim();
 
-      const wrapThaiText = (text, font, size, maxWidth) => {
-        const segmenter = new Intl.Segmenter("th", {
-          granularity: "word",
-        });
+      const reasonLeftX = 55;
+      const reasonRightX = 542;
 
-        const words = Array.from(
-          segmenter.segment(text),
+      const reasonFirstLineY = 532;
+      const reasonLineHeight = 18;
+      const maxReasonLines = 6;
+
+      let reasonFontSize = 10.5;
+      const minimumReasonFontSize = 8.5;
+
+      const renderDpi = 288;
+      const pixelToPdf = 72 / renderDpi;
+
+      const reasonWidthPdf = reasonRightX - reasonLeftX;
+      const reasonWidthPx = Math.round(reasonWidthPdf / pixelToPdf);
+
+      // เยื้องบรรทัดแรก
+      const firstLineIndentPdf = 10;
+      const firstLineIndentPx = Math.round(firstLineIndentPdf / pixelToPdf);
+
+      const escapePango = (text) =>
+        text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // ใช้ตัวตัดคำภาษาไทยของ JS
+      const segmenter = new Intl.Segmenter("th", { granularity: "word" });
+
+      // วัดความกว้างข้อความจริง
+      const measureTextWidthPx = async (text, fontSize) => {
+        if (!text || !text.trim()) return 0;
+
+        const { info } = await sharp({
+          text: {
+            text: escapePango(text),
+            font: `${thaiFontFamily} ${fontSize}`,
+            fontfile: fontPath,
+            dpi: renderDpi,
+            rgba: true,
+            align: "left",
+            justify: false,
+            wrap: "none",
+            spacing: 0,
+          },
+        })
+          .trim()
+          .png()
+          .toBuffer({ resolveWithObject: true });
+
+        return info.width;
+      };
+
+      // สร้างบรรทัดเอง
+      const buildReasonLines = async (fontSize) => {
+        const tokens = [...segmenter.segment(reasonText)].map(
           (item) => item.segment,
         );
 
         const lines = [];
         let currentLine = "";
 
-        for (const word of words) {
-          const testLine = currentLine + word;
+        for (const rawToken of tokens) {
+          const token = currentLine === "" ? rawToken.trimStart() : rawToken;
 
-          const textWidth = font.widthOfTextAtSize(testLine, size);
+          const candidate = currentLine + token;
 
-          if (textWidth <= maxWidth) {
-            currentLine = testLine;
+          const maxWidthThisLinePx =
+            lines.length === 0
+              ? reasonWidthPx - firstLineIndentPx
+              : reasonWidthPx;
+
+          const candidateWidth = await measureTextWidthPx(candidate, fontSize);
+
+          if (candidateWidth <= maxWidthThisLinePx || currentLine === "") {
+            currentLine = candidate;
           } else {
-            if (currentLine.trim()) {
-              lines.push(currentLine.trim());
-            }
-
-            currentLine = word.trimStart();
+            lines.push(currentLine.trimEnd());
+            currentLine = rawToken.trimStart();
           }
         }
 
         if (currentLine.trim()) {
-          lines.push(currentLine.trim());
+          lines.push(currentLine.trimEnd());
         }
 
         return lines;
       };
 
-      const reasonFontSize = 10.5;
+      // ถ้าเกิน 6 บรรทัด ค่อยลดฟอนต์
+      let reasonLines = await buildReasonLines(reasonFontSize);
 
-      const reasonLines = wrapThaiText(
-        reasonText,
-        thaiFont,
-        reasonFontSize,
-        390,
-      );
+      while (
+        reasonLines.length > maxReasonLines &&
+        reasonFontSize > minimumReasonFontSize
+      ) {
+        reasonFontSize -= 0.25;
+        reasonLines = await buildReasonLines(reasonFontSize);
+      }
 
-      reasonLines.slice(0, 6).forEach((line, index) => {
-        page.drawText(line, {
-          x: index === 0 ? 65 : 55,
-          y: 535 - index * 20,
-          size: reasonFontSize,
-          font: thaiFont,
+      reasonLines = reasonLines.slice(0, maxReasonLines);
+
+      // render ทีละบรรทัด
+      const renderReasonLineImage = async (text, fontSize) => {
+        return await sharp({
+          text: {
+            text: escapePango(text),
+            font: `${thaiFontFamily} ${fontSize}`,
+            fontfile: fontPath,
+            dpi: renderDpi,
+            rgba: true,
+            align: "left",
+            justify: false,
+            wrap: "none",
+            spacing: 0,
+          },
+        })
+          .trim()
+          .png()
+          .toBuffer();
+      };
+
+      // วางทีละบรรทัดลง PDF
+      for (let index = 0; index < reasonLines.length; index++) {
+        const lineText = reasonLines[index];
+
+        const lineX =
+          index === 0 ? reasonLeftX + firstLineIndentPdf : reasonLeftX;
+
+        const lineBuffer = await renderReasonLineImage(
+          lineText,
+          reasonFontSize,
+        );
+
+        const lineImage = await pdfDoc.embedPng(lineBuffer);
+
+        const meta = await sharp(lineBuffer).metadata();
+
+        const drawWidth = (meta.width || 0) * pixelToPdf;
+
+        const drawHeight = (meta.height || 0) * pixelToPdf;
+
+        const dottedLineY = reasonFirstLineY - index * reasonLineHeight;
+
+        page.drawImage(lineImage, {
+          x: lineX,
+          y: dottedLineY,
+
+          // ใช้ความกว้างจริงของตัวหนังสือ
+          // ห้ามยืดให้เต็มบรรทัด
+          width: drawWidth,
+
+          height: drawHeight,
         });
-      });
-
+      }
       // ==========================================
       // ลายเซ็นนิสิต
       // ==========================================
 
-      const studentSignaturePath = getAssetFilePath(document.student_signature);
+      await drawSignatureAboveLine(document.student_signature, {
+        x: 392,
 
-      if (studentSignaturePath && fs.existsSync(studentSignaturePath)) {
-        const signatureBytes = fs.readFileSync(studentSignaturePath);
+        // ความกว้างจริงของเส้นลายเซ็น
+        width: 158,
 
-        // ตัดพื้นที่ว่างรอบลายเซ็นอัตโนมัติ
-        const trimmedSignatureBytes = await sharp(signatureBytes)
-          .trim()
-          .png()
-          .toBuffer();
+        // เพิ่มจาก 24 เพื่อให้ลายเซ็นเล็กโตขึ้น
+        height: 28,
 
-        const signatureImage = await pdfDoc.embedPng(trimmedSignatureBytes);
+        // เส้นจริงของ template อยู่ประมาณ y = 409.5
+        lineY: 410,
 
-        // ตอนนี้ขยายได้โดยไม่บีบรูป
-        const signatureSize = signatureImage.scaleToFit(125, 38);
+        // ให้ก้นรูปอยู่เหนือเส้น
+        gap: 0,
 
-        page.drawImage(signatureImage, {
-          x: 400,
-          y: 410,
-          width: signatureSize.width,
-          height: signatureSize.height,
-        });
-      }
+        // ใช้เฉพาะลายเซ็นที่กว้างและเตี้ย
+        extraWidth: 12,
+      });
 
       // ==========================================
       // ความเห็นอาจารย์ที่ปรึกษา
@@ -2469,41 +2623,35 @@ app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
       // ลายเซ็นอาจารย์
       // ==========================================
 
-      const advisorSignaturePath = getAssetFilePath(document.advisor_signature);
+      await drawSignatureAboveLine(document.advisor_signature, {
+        x: 195,
+        width: 88,
+        height: 18,
+        lineY: 287,
+        gap: 1,
+      });
 
-      if (advisorSignaturePath && fs.existsSync(advisorSignaturePath)) {
-        const advisorSignatureBytes = fs.readFileSync(advisorSignaturePath);
+      const advisorDateFontSize = 10.5;
 
-        // ตัดขอบว่างรอบลายเซ็น
-        const trimmedAdvisorSignature = await sharp(advisorSignatureBytes)
-          .trim()
-          .png()
-          .toBuffer();
+      const advisorDateBoxX = 195;
+      const advisorDateBoxWidth = 88;
 
-        const advisorSignatureImage = await pdfDoc.embedPng(
-          trimmedAdvisorSignature,
-        );
+      const advisorDateWidth = thaiFont.widthOfTextAtSize(
+        thaiDate,
+        advisorDateFontSize,
+      );
 
-        const advisorSignatureSize = advisorSignatureImage.scaleToFit(82, 22);
+      page.drawText(thaiDate, {
+        x: advisorDateBoxX + (advisorDateBoxWidth - advisorDateWidth) / 2,
 
-        page.drawImage(advisorSignatureImage, {
-          x: 198,
-          y: 289,
-          width: advisorSignatureSize.width,
-          height: advisorSignatureSize.height,
-        });
-
-        page.drawText(thaiDate, {
-          x: 200, // ขยับขวาจากเดิมนิดเดียว
-          y: 268, // ยกขึ้นอีกนิด
-          size: 10.5,
-          font: thaiFont,
-        });
-      }
+        y: 268,
+        size: advisorDateFontSize,
+        font: thaiFont,
+      });
 
       /* ==========================================
-   บันทึก PDF
-========================================== */
+         บันทึก PDF
+       ========================================== */
 
       const pdfBytes = await pdfDoc.save();
 
@@ -2608,11 +2756,7 @@ app.get("/staff/documents/:documentId/download", (req, res) => {
     // เอาเฉพาะชื่อไฟล์
     const fileName = path.basename(document.pdf_path);
 
-    const filePath = path.join(
-      __dirname,
-      "generated",
-      fileName,
-    );
+    const filePath = path.join(__dirname, "generated", fileName);
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({
@@ -2638,16 +2782,11 @@ app.get("/staff/documents/:documentId/download", (req, res) => {
 
       db.query(updateSql, [documentId], (updateErr) => {
         if (updateErr) {
-          console.log(
-            "Update download status error:",
-            updateErr,
-          );
+          console.log("Update download status error:", updateErr);
           return;
         }
 
-        console.log(
-          `Document ${documentId} downloaded successfully`,
-        );
+        console.log(`Document ${documentId} downloaded successfully`);
       });
     });
   });
