@@ -629,7 +629,7 @@ function SubmitNewProject() {
           <ul>
             <li onClick={() => navigate("/StudentHome")}>หน้าหลัก</li>
 
-            <li>รายชื่ออาจารย์</li>
+            <li onClick={() => navigate("/teachers")}>รายชื่ออาจารย์</li>
 
             <li
               className="active"

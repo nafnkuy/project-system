@@ -5,6 +5,8 @@ import StudentHome from "./pages/student/StudentHome";
 import ProjectDetail from "./pages/student/ProjectDetail";
 import ApplyProject from "./pages/student/ApplyProject";
 import SubmitNewProject from "./pages/student/SubmitNewProject";
+import TeacherList from "./pages/student/TeacherList";
+import TeacherDetail from "./pages/student/TeacherDetail";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -25,6 +27,8 @@ function App() {
         <Route path="/apply-project/:id" element={<ApplyProject />} />
         <Route path="/project-details/:id" element={<ProjectDetail />} />
         <Route path="/submit-new-project" element={<SubmitNewProject />} />
+        <Route path="/teachers" element={<TeacherList />} />
+        <Route path="/teacher-detail/:teacherId" element={<TeacherDetail />} />
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
         <Route path="/create-teacher-project"  element={<CreateTeacherProject />}/>

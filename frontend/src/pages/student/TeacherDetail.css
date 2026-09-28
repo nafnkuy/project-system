@@ -1,0 +1,683 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.teacher-detail-page,
+.teacher-detail-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.teacher-detail-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.teacher-detail-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 230px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
+  z-index: 100;
+}
+
+
+/* LOGO */
+
+.teacher-detail-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 22px 18px;
+}
+
+.teacher-detail-logo img {
+  width: 48px;
+  height: 48px;
+
+  object-fit: contain;
+}
+
+.teacher-detail-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 21px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+.teacher-detail-logo p {
+  margin: 2px 0 0;
+
+  color: #666666;
+
+  font-size: 8px;
+
+  line-height: 1.3;
+
+  white-space: nowrap;
+}
+
+
+/* NAV */
+
+.teacher-detail-sidebar ul {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.teacher-detail-sidebar li {
+  width: 100%;
+
+  padding: 16px 10px;
+
+  color: #222222;
+
+  font-size: 13px;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.teacher-detail-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.teacher-detail-sidebar li.active {
+  background: #2f5d7c;
+  color: #ffffff;
+}
+
+
+/* LOGOUT */
+
+.teacher-detail-logout {
+  width: 185px;
+
+  margin: 0 auto 20px;
+  padding: 11px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #3977c6;
+  color: #ffffff;
+
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+.teacher-detail-logout:hover {
+  background: #2d69b4;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.teacher-detail-main {
+  width: calc(100% - 230px);
+  min-height: 100vh;
+
+  margin-left: 230px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.teacher-detail-header {
+  width: 100%;
+  height: 69px;
+
+  padding: 0 16px 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f2e4a0;
+}
+
+.teacher-detail-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 400;
+
+  color: #111111;
+}
+
+.teacher-detail-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+/* BELL */
+
+.teacher-detail-bell {
+  width: 43px;
+  height: 43px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  background: #ffffff;
+  color: #999999;
+
+  font-size: 17px;
+
+  cursor: pointer;
+}
+
+
+/* USER */
+
+.teacher-detail-user {
+  height: 43px;
+
+  padding: 0 12px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  font-size: 13px;
+}
+
+.teacher-detail-user img {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.teacher-detail-content {
+  width: 100%;
+
+  padding: 30px 38px 35px;
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.teacher-profile-card {
+  width: 100%;
+
+  min-height: 250px;
+
+  padding: 28px 30px;
+
+  display: grid;
+  grid-template-columns: 220px 1fr;
+
+  gap: 34px;
+
+  background: #ffffff;
+
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+}
+
+
+/* IMAGE */
+
+.teacher-profile-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacher-profile-image img {
+  width: 190px;
+  height: 190px;
+
+  border-radius: 12px;
+
+  object-fit: cover;
+}
+
+
+/* INFORMATION */
+
+.teacher-profile-info {
+  min-width: 0;
+}
+
+.teacher-profile-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.teacher-profile-title h3 {
+  margin: 0;
+
+  color: #2f5d7c;
+
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.teacher-profile-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 14px 0 15px;
+
+  background: #dddddd;
+}
+
+.teacher-information p {
+  margin: 6px 0;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.teacher-information p span,
+.teacher-expertise > span {
+  font-weight: 500;
+}
+
+
+/* EXPERTISE */
+
+.teacher-expertise {
+  margin-top: 5px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 5px;
+
+  color: #222222;
+
+  font-size: 13px;
+}
+
+.teacher-expertise > span {
+  flex-shrink: 0;
+}
+
+.teacher-expertise div p {
+  margin: 0 0 4px;
+}
+
+
+/* STATUS */
+
+.teacher-detail-status {
+  flex-shrink: 0;
+
+  padding: 7px 11px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.teacher-detail-status strong {
+  font-weight: 500;
+}
+
+.teacher-detail-status.open strong {
+  color: #16a467;
+}
+
+.teacher-detail-status.almost strong {
+  color: #e88600;
+}
+
+.teacher-detail-status.full strong {
+  color: #d84a4a;
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.teacher-summary {
+  width: 100%;
+
+  margin-top: 15px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 15px;
+}
+
+.teacher-summary-card {
+  height: 88px;
+
+  padding: 17px 22px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  background: #ffffff;
+
+  border: 1px solid #bdbdbd;
+  border-radius: 7px;
+}
+
+.teacher-summary-card span {
+  margin-bottom: 4px;
+
+  color: #222222;
+
+  font-size: 12px;
+}
+
+.teacher-summary-card strong {
+  font-size: 29px;
+  font-weight: 600;
+
+  line-height: 1;
+}
+
+.teacher-summary-card .current {
+  color: #f07a00;
+}
+
+.teacher-summary-card .maximum {
+  color: #0876db;
+}
+
+.teacher-summary-card .remaining {
+  color: #10a628;
+}
+
+
+/* =========================================================
+   PROJECT CARD
+========================================================= */
+
+.teacher-project-card {
+  width: 100%;
+
+  margin-top: 15px;
+
+  padding: 19px 18px 0;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+}
+
+.teacher-project-heading {
+  min-height: 37px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.teacher-project-heading h3 {
+  margin: 3px 0 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* PROPOSE BUTTON */
+
+.teacher-propose-btn {
+  min-width: 150px;
+  height: 30px;
+
+  padding: 0 13px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #21a776;
+  color: #ffffff;
+
+  font-size: 10px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.teacher-propose-btn:hover:not(:disabled) {
+  background: #198b62;
+}
+
+.teacher-propose-btn:disabled {
+  background: #bbbbbb;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   PROJECT TABLE
+========================================================= */
+
+.teacher-project-table {
+  width: 100%;
+
+  margin-top: 8px;
+
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.teacher-project-table th,
+.teacher-project-table td {
+  padding: 10px 7px;
+
+  border-bottom: 1px solid #d0d0d0;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+.teacher-project-table th {
+  height: 37px;
+
+  font-weight: 500;
+}
+
+.teacher-project-table td {
+  height: 49px;
+}
+
+.teacher-project-table th:nth-child(1),
+.teacher-project-table td:nth-child(1) {
+  width: 40%;
+}
+
+.teacher-project-table th:nth-child(2),
+.teacher-project-table td:nth-child(2) {
+  width: 20%;
+}
+
+.teacher-project-table th:nth-child(3),
+.teacher-project-table td:nth-child(3) {
+  width: 20%;
+}
+
+.teacher-project-table th:nth-child(4),
+.teacher-project-table td:nth-child(4) {
+  width: 20%;
+}
+
+.teacher-project-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* PROJECT DETAIL BUTTON */
+
+.teacher-project-detail-btn {
+  border: none;
+
+  background: transparent;
+  color: #222222;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+.teacher-project-detail-btn:hover {
+  text-decoration: underline;
+}
+
+
+/* EMPTY */
+
+.teacher-project-empty {
+  height: 90px !important;
+
+  color: #888888 !important;
+
+  text-align: center !important;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.teacher-detail-loading {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Prompt", sans-serif;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+  .teacher-detail-content {
+    padding: 25px 20px;
+  }
+
+  .teacher-profile-card {
+    grid-template-columns: 190px 1fr;
+  }
+
+  .teacher-profile-image img {
+    width: 165px;
+    height: 165px;
+  }
+}
+
+/* =========================================================
+   CLOSED PROJECT
+========================================================= */
+
+.teacher-project-table
+  tbody
+  tr.project-row-closed
+  td {
+  color: #b5b5b5;
+}
+
+.teacher-project-table
+  tbody
+  tr.project-row-closed
+  .teacher-project-detail-btn {
+  color: #b5b5b5;
+}

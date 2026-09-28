@@ -156,7 +156,7 @@ function ProjectDetail() {
             <li className="active" onClick={() => navigate("/StudentHome")}>
               หน้าหลัก
             </li>
-            <li>รายชื่ออาจารย์</li>
+            <li onClick={() => navigate("/teachers")}>รายชื่ออาจารย์</li>
             <li onClick={() => navigate("/submit-new-project")}>
               ส่งคำเสนอโครงงานใหม่
             </li>

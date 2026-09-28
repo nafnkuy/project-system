@@ -361,7 +361,7 @@ app.post("/projects", (req, res) => {
 });
 
 app.get("/teachers/search", (req, res) => {
-  const { name } = req.query;
+  const { name = "" } = req.query;
 
   const sql = `
     SELECT
@@ -369,28 +369,38 @@ app.get("/teachers/search", (req, res) => {
       u.name,
       u.major,
 
-      COUNT(DISTINCT pm.user_id) AS accepted_students,
+      -- จำนวนหัวข้อโครงงานปัจจุบันของอาจารย์
+      COUNT(DISTINCT p.id) AS accepted_students,
 
-      14 AS total_capacity,
+      -- จำนวนสูงสุดจาก teacher_profiles
+      COALESCE(tp.max_capacity, 0) AS total_capacity,
 
+      -- จำนวนที่เหลือ
       GREATEST(
-        14 - COUNT(DISTINCT pm.user_id),
+        COALESCE(tp.max_capacity, 0) - COUNT(DISTINCT p.id),
         0
       ) AS remaining_capacity,
 
+      -- สถานะอาจารย์
       CASE
-        WHEN COUNT(DISTINCT pm.user_id) >= 14
-        THEN 'เต็ม'
+        WHEN COUNT(DISTINCT p.id) >= COALESCE(tp.max_capacity, 0)
+          THEN 'เต็ม'
+
+        WHEN COALESCE(tp.max_capacity, 0) - COUNT(DISTINCT p.id) <= 2
+          THEN 'ใกล้เต็ม'
+
         ELSE 'เปิดรับ'
       END AS advisor_status
 
     FROM users u
 
+    LEFT JOIN teacher_profiles tp
+      ON tp.user_id = u.id
+
     LEFT JOIN projects p
       ON p.advisor_id = u.id
-
-    LEFT JOIN project_members pm
-      ON pm.project_id = p.id
+      AND p.source = 'teacher'
+      AND p.visibility = 'แสดง'
 
     WHERE u.role = 'teacher'
       AND u.name LIKE ?
@@ -398,7 +408,10 @@ app.get("/teachers/search", (req, res) => {
     GROUP BY
       u.id,
       u.name,
-      u.major
+      u.major,
+      tp.max_capacity
+
+    ORDER BY u.id ASC
   `;
 
   db.query(sql, [`%${name}%`], (err, results) => {
@@ -411,6 +424,166 @@ app.get("/teachers/search", (req, res) => {
     }
 
     res.json(results);
+  });
+});
+
+// ==========================================
+// รายละเอียดอาจารย์
+// ==========================================
+
+app.get("/teachers/:teacherId", (req, res) => {
+  const { teacherId } = req.params;
+
+  // ==========================================
+  // 1. ดึงข้อมูลอาจารย์
+  // ==========================================
+
+  const teacherSql = `
+    SELECT
+      u.id,
+      u.username,
+      u.name,
+      u.major,
+      u.phone,
+      u.email,
+      u.profile_image,
+
+      tp.english_name,
+      tp.position,
+      tp.office,
+      tp.office_phone,
+      tp.expertise,
+      tp.max_capacity
+
+    FROM users u
+
+    LEFT JOIN teacher_profiles tp
+      ON u.id = tp.user_id
+
+    WHERE u.id = ?
+      AND u.role = 'teacher'
+  `;
+
+  db.query(teacherSql, [teacherId], (teacherErr, teacherResult) => {
+    if (teacherErr) {
+      console.log("Get teacher detail error:", teacherErr);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (teacherResult.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลอาจารย์",
+      });
+    }
+
+    const teacher = teacherResult[0];
+
+    // ==========================================
+    // 2. ดึงหัวข้อโครงงานของอาจารย์
+    // ==========================================
+
+    const projectSql = `
+  SELECT
+    id,
+    title,
+    status,
+    project_type,
+    max_members,
+    current_members,
+    academic_year,
+    source,
+    visibility
+
+  FROM projects
+
+  WHERE advisor_id = ?
+    AND source = 'teacher'
+    AND visibility = 'แสดง'
+
+  ORDER BY id DESC
+`;
+
+    db.query(projectSql, [teacherId], (projectErr, projects) => {
+      if (projectErr) {
+        console.log("Get teacher projects error:", projectErr);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      // ==========================================
+      // 3. คำนวณจำนวนโครงงาน
+      // ==========================================
+
+      const currentProjects = projects.length;
+
+      const maxCapacity = Number(teacher.max_capacity) || 0;
+
+      const remainingCapacity = Math.max(maxCapacity - currentProjects, 0);
+
+      // ==========================================
+      // 4. คำนวณสถานะ
+      // ==========================================
+
+      let advisorStatus = "เปิดรับ";
+
+      if (remainingCapacity <= 0) {
+        advisorStatus = "เต็ม";
+      } else if (remainingCapacity <= 2) {
+        advisorStatus = "ใกล้เต็ม";
+      }
+
+      // ==========================================
+      // 5. แปลง expertise
+      // Database Technology|Web Technology
+      // เป็น Array
+      // ==========================================
+
+      const expertise = teacher.expertise
+        ? teacher.expertise
+            .split("|")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
+
+      // ==========================================
+      // RESPONSE
+      // ==========================================
+
+      res.json({
+        id: teacher.id,
+        username: teacher.username,
+
+        name: teacher.name,
+        english_name: teacher.english_name,
+
+        position: teacher.position,
+
+        major: teacher.major,
+
+        phone: teacher.phone,
+        email: teacher.email,
+
+        office: teacher.office,
+        office_phone: teacher.office_phone,
+
+        profile_image: teacher.profile_image,
+
+        expertise,
+
+        current_projects: currentProjects,
+        max_capacity: maxCapacity,
+        remaining_capacity: remainingCapacity,
+
+        advisor_status: advisorStatus,
+
+        projects,
+      });
+    });
   });
 });
 
@@ -1486,16 +1659,31 @@ WHERE pr.id = ?
               UPDATE projects
               SET
                 current_members = current_members + ?,
+
                 status = CASE
-                  WHEN source = 'student' THEN 'อนุมัติ'
-                  ELSE status
+                  WHEN source = 'student'
+                    THEN 'อนุมัติ'
+
+                  WHEN current_members + ? >= max_members
+                    THEN 'ปิดรับ'
+
+                  WHEN max_members - (current_members + ?) = 1
+                    THEN 'ใกล้เต็ม'
+
+                  ELSE 'เปิดรับ'
                 END
+
               WHERE id = ?
             `;
 
             db.query(
               updateProjectSql,
-              [memberIds.length, request.project_id],
+              [
+                memberIds.length,
+                memberIds.length,
+                memberIds.length,
+                request.project_id,
+              ],
               (err) => {
                 if (err) {
                   console.log("Update project member count error:", err);

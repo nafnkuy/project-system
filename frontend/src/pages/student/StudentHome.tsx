@@ -429,7 +429,7 @@ function StudentHome() {
               หน้าหลัก
             </li>
 
-            <li>
+            <li onClick={() => navigate("/teachers")}>
               รายชื่ออาจารย์
             </li>
 
