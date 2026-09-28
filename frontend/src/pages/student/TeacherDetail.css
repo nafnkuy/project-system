@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
 
-
 /* =========================================================
    RESET
 ========================================================= */
@@ -13,193 +12,199 @@
 
 .teacher-detail-page {
   display: flex;
-
   width: 100%;
   min-height: 100vh;
-
   margin: 0;
-
   background: #f5f5f5;
 }
 
-
 /* =========================================================
    SIDEBAR
+   ใช้สเกลเดียวกับ StudentHome
 ========================================================= */
 
-.teacher-detail-sidebar {
+.teacher-detail-page .teacher-detail-sidebar {
   position: fixed;
-
   top: 0;
   left: 0;
   bottom: 0;
 
-  width: 230px;
+  width: 250px;
   height: 100vh;
 
   display: grid;
   grid-template-rows: auto 1fr auto;
 
   background: #ffffff;
-
-  border-right: 1px solid #dddddd;
+  border-right: 1px solid #ddd;
 
   z-index: 100;
 }
 
+/* ---------- LOGO ---------- */
 
-/* LOGO */
-
-.teacher-detail-logo {
+.teacher-detail-page .teacher-detail-logo {
   display: flex;
   align-items: center;
-
   gap: 10px;
 
-  padding: 22px 18px;
+  padding: 24px 20px;
+  margin: 0;
 }
 
-.teacher-detail-logo img {
-  width: 48px;
-  height: 48px;
+.teacher-detail-page .teacher-detail-logo img {
+  width: 55px;
+  height: 55px;
 
+  flex-shrink: 0;
   object-fit: contain;
 }
 
-.teacher-detail-logo h2 {
+.teacher-detail-page .teacher-detail-logo > div {
+  min-width: 0;
+}
+
+.teacher-detail-page .teacher-detail-logo h2 {
   margin: 0;
 
-  color: #111111;
+  color: #111;
 
-  font-size: 21px;
-  font-weight: 600;
-
-  white-space: nowrap;
-}
-
-.teacher-detail-logo p {
-  margin: 2px 0 0;
-
-  color: #666666;
-
-  font-size: 8px;
-
-  line-height: 1.3;
+  font-size: 23px;
+  font-weight: 700;
 
   white-space: nowrap;
 }
 
+.teacher-detail-page .teacher-detail-logo p {
+  margin: 0;
 
-/* NAV */
+  color: #666;
 
-.teacher-detail-sidebar ul {
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+/* ---------- NAV ---------- */
+
+.teacher-detail-page .teacher-detail-sidebar nav {
+  width: 100%;
+  margin: 0;
+}
+
+.teacher-detail-page .teacher-detail-sidebar ul {
+  width: 100%;
+
   margin: 0;
   padding: 0;
 
   list-style: none;
 }
 
-.teacher-detail-sidebar li {
+.teacher-detail-page .teacher-detail-sidebar li {
   width: 100%;
 
-  padding: 16px 10px;
+  margin: 0;
+  padding: 18px 0;
 
-  color: #222222;
+  color: #222;
 
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 400;
 
   text-align: center;
 
   cursor: pointer;
 }
 
-.teacher-detail-sidebar li:hover {
+.teacher-detail-page .teacher-detail-sidebar li:hover {
   background: #f0f0f0;
 }
 
-.teacher-detail-sidebar li.active {
+.teacher-detail-page .teacher-detail-sidebar li.active {
   background: #2f5d7c;
-  color: #ffffff;
+  color: #fff;
 }
 
+/* ---------- LOGOUT ---------- */
 
-/* LOGOUT */
-
-.teacher-detail-logout {
-  width: 185px;
+.teacher-detail-page .teacher-detail-logout {
+  width: 190px;
 
   margin: 0 auto 20px;
-  padding: 11px;
+  padding: 12px;
 
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
 
-  background: #3977c6;
-  color: #ffffff;
+  background: #3b75c4;
+  color: #fff;
 
   font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-.teacher-detail-logout:hover {
-  background: #2d69b4;
+.teacher-detail-page .teacher-detail-logout:hover {
+  background: #2f6db5;
 }
-
 
 /* =========================================================
    MAIN
 ========================================================= */
 
-.teacher-detail-main {
-  width: calc(100% - 230px);
+.teacher-detail-page .teacher-detail-main {
+  width: calc(100% - 250px);
   min-height: 100vh;
 
-  margin-left: 230px;
+  margin-left: 250px;
 
   background: #f5f5f5;
 }
 
-
 /* =========================================================
    HEADER
+   ใช้สเกลเดียวกับ StudentHome
 ========================================================= */
 
-.teacher-detail-header {
+.teacher-detail-page .teacher-detail-header {
   width: 100%;
-  height: 69px;
+  height: 70px;
 
-  padding: 0 16px 0 24px;
+  padding: 0 20px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: #f2e4a0;
+  background: #f0e3a1;
+
+  border: none;
 }
 
-.teacher-detail-header h2 {
+.teacher-detail-page .teacher-detail-header h2 {
   margin: 0;
+
+  color: #111;
 
   font-size: 20px;
   font-weight: 400;
-
-  color: #111111;
 }
 
-.teacher-detail-header-right {
+.teacher-detail-page .teacher-detail-header-right {
   display: flex;
   align-items: center;
-
-  gap: 8px;
+  gap: 10px;
 }
 
+/* ---------- BELL ---------- */
 
-/* BELL */
-
-.teacher-detail-bell {
-  width: 43px;
-  height: 43px;
+.teacher-detail-page .teacher-detail-bell {
+  width: 50px;
+  height: 50px;
 
   padding: 0;
 
@@ -207,91 +212,90 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 4px;
 
-  background: #ffffff;
-  color: #999999;
+  background: #fff;
+  color: #999;
 
-  font-size: 17px;
+  font-size: 20px;
 
   cursor: pointer;
 }
 
+.teacher-detail-page .teacher-detail-bell:hover {
+  background: #f7f7f7;
+}
 
-/* USER */
+/* ---------- USER ---------- */
 
-.teacher-detail-user {
-  height: 43px;
+.teacher-detail-page .teacher-detail-user {
+  height: 50px;
 
-  padding: 0 12px;
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
+  gap: 10px;
 
-  gap: 9px;
-
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 4px;
 
-  background: #ffffff;
+  background: #fff;
+  color: #222;
 
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.teacher-detail-user img {
-  width: 28px;
-  height: 28px;
+.teacher-detail-page .teacher-detail-user img {
+  width: 30px;
+  height: 30px;
 
   border-radius: 50%;
 
   object-fit: cover;
 }
 
-
 /* =========================================================
    CONTENT
 ========================================================= */
 
-.teacher-detail-content {
+.teacher-detail-page .teacher-detail-content {
   width: 100%;
 
   padding: 30px 38px 35px;
 }
 
-
 /* =========================================================
    PROFILE
 ========================================================= */
 
-.teacher-profile-card {
+.teacher-detail-page .teacher-profile-card {
   width: 100%;
-
   min-height: 250px;
 
   padding: 28px 30px;
 
   display: grid;
   grid-template-columns: 220px 1fr;
-
   gap: 34px;
 
-  background: #ffffff;
+  background: #fff;
 
-  border: 1px solid #bdbdbd;
-  border-radius: 8px;
+  border: 1px solid #bbb;
+  border-radius: 9px;
+
+  box-shadow: none;
 }
 
-
-/* IMAGE */
-
-.teacher-profile-image {
+.teacher-detail-page .teacher-profile-image {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.teacher-profile-image img {
+.teacher-detail-page .teacher-profile-image img {
   width: 190px;
   height: 190px;
 
@@ -300,14 +304,11 @@
   object-fit: cover;
 }
 
-
-/* INFORMATION */
-
-.teacher-profile-info {
+.teacher-detail-page .teacher-profile-info {
   min-width: 0;
 }
 
-.teacher-profile-title {
+.teacher-detail-page .teacher-profile-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -315,7 +316,7 @@
   gap: 20px;
 }
 
-.teacher-profile-title h3 {
+.teacher-detail-page .teacher-profile-title h3 {
   margin: 0;
 
   color: #2f5d7c;
@@ -324,33 +325,32 @@
   font-weight: 600;
 }
 
-.teacher-profile-divider {
+.teacher-detail-page .teacher-profile-divider {
   width: 100%;
   height: 1px;
 
   margin: 14px 0 15px;
 
-  background: #dddddd;
+  background: #ddd;
 }
 
-.teacher-information p {
+.teacher-detail-page .teacher-information p {
   margin: 6px 0;
 
-  color: #222222;
+  color: #222;
 
   font-size: 13px;
   font-weight: 400;
 }
 
-.teacher-information p span,
-.teacher-expertise > span {
+.teacher-detail-page .teacher-information p span,
+.teacher-detail-page .teacher-expertise > span {
   font-weight: 500;
 }
 
+/* ---------- EXPERTISE ---------- */
 
-/* EXPERTISE */
-
-.teacher-expertise {
+.teacher-detail-page .teacher-expertise {
   margin-top: 5px;
 
   display: flex;
@@ -358,275 +358,340 @@
 
   gap: 5px;
 
-  color: #222222;
+  color: #222;
 
   font-size: 13px;
 }
 
-.teacher-expertise > span {
+.teacher-detail-page .teacher-expertise > span {
   flex-shrink: 0;
 }
 
-.teacher-expertise div p {
+.teacher-detail-page .teacher-expertise div p {
   margin: 0 0 4px;
 }
 
+/* ---------- STATUS ---------- */
 
-/* STATUS */
-
-.teacher-detail-status {
+.teacher-detail-page .teacher-detail-status {
   flex-shrink: 0;
 
   padding: 7px 11px;
 
-  background: #ffffff;
+  background: #fff;
 
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 5px;
 
-  color: #222222;
+  color: #222;
 
   font-size: 11px;
   font-weight: 400;
 }
 
-.teacher-detail-status strong {
+.teacher-detail-page .teacher-detail-status strong {
   font-weight: 500;
 }
 
-.teacher-detail-status.open strong {
+.teacher-detail-page .teacher-detail-status.open strong {
   color: #16a467;
 }
 
-.teacher-detail-status.almost strong {
+.teacher-detail-page .teacher-detail-status.almost strong {
   color: #e88600;
 }
 
-.teacher-detail-status.full strong {
+.teacher-detail-page .teacher-detail-status.full strong {
   color: #d84a4a;
 }
-
 
 /* =========================================================
    SUMMARY
 ========================================================= */
 
-.teacher-summary {
+.teacher-detail-page .teacher-summary {
   width: 100%;
 
-  margin-top: 15px;
+  margin-top: 20px;
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 
-  gap: 15px;
+  gap: 20px;
 }
 
-.teacher-summary-card {
-  height: 88px;
+.teacher-detail-page .teacher-summary-card {
+  height: 120px;
 
-  padding: 17px 22px;
+  padding: 22px 22px 18px;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
+  justify-content: center;
 
   background: #ffffff;
 
-  border: 1px solid #bdbdbd;
-  border-radius: 7px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
-.teacher-summary-card span {
-  margin-bottom: 4px;
+.teacher-detail-page .teacher-summary-card span {
+  margin-bottom: 8px;
 
-  color: #222222;
+  color: #222;
 
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.teacher-summary-card strong {
-  font-size: 29px;
+.teacher-detail-page .teacher-summary-card strong {
+  font-size: 35px;
   font-weight: 600;
 
   line-height: 1;
 }
 
-.teacher-summary-card .current {
-  color: #f07a00;
+/* สีตัวเลข */
+
+.teacher-detail-page .teacher-summary-card .current {
+  color: #f07800;
 }
 
-.teacher-summary-card .maximum {
-  color: #0876db;
+.teacher-detail-page .teacher-summary-card .maximum {
+  color: #3678c5;
 }
 
-.teacher-summary-card .remaining {
-  color: #10a628;
+.teacher-detail-page .teacher-summary-card .remaining {
+  color: #159c68;
 }
-
 
 /* =========================================================
    PROJECT CARD
 ========================================================= */
 
-.teacher-project-card {
+.teacher-detail-page .teacher-project-card {
   width: 100%;
 
-  margin-top: 15px;
-
-  padding: 19px 18px 0;
+  margin-top: 20px;
+  padding: 22px 26px 12px;
 
   overflow: hidden;
 
   background: #ffffff;
 
-  border: 1px solid #bdbdbd;
-  border-radius: 8px;
+  border: 1px solid #bbb;
+  border-radius: 9px;
+
+  box-shadow: none;
 }
 
-.teacher-project-heading {
-  min-height: 37px;
+.teacher-detail-page .teacher-project-heading {
+  min-height: 36px;
 
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 
   gap: 20px;
+
+  margin: 0 0 14px;
+  padding: 0;
 }
 
-.teacher-project-heading h3 {
-  margin: 3px 0 0;
+.teacher-detail-page .teacher-project-heading h3 {
+  margin: 0;
+  padding: 0;
 
-  color: #222222;
+  color: #222;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 
+/* ================= PROPOSE BUTTON ================= */
 
-/* PROPOSE BUTTON */
+.teacher-detail-page .teacher-propose-btn {
+  min-width: 180px;
+  height: 36px;
 
-.teacher-propose-btn {
-  min-width: 150px;
-  height: 30px;
+  margin: 0;
+  padding: 0 15px;
 
-  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
 
   border: none;
-  border-radius: 6px;
+  border-radius: 7px;
 
-  background: #21a776;
+  background: #20a36a;
   color: #ffffff;
 
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 
   cursor: pointer;
+
+  white-space: nowrap;
 }
 
-.teacher-propose-btn:hover:not(:disabled) {
-  background: #198b62;
+.teacher-detail-page .teacher-propose-btn:hover:not(:disabled) {
+  background: #188c59;
 }
 
-.teacher-propose-btn:disabled {
+.teacher-detail-page .teacher-propose-btn:disabled {
   background: #bbbbbb;
+  color: #ffffff;
 
   cursor: not-allowed;
 }
 
+.teacher-detail-page .teacher-propose-btn svg {
+  font-size: 11px;
+}
 
 /* =========================================================
    PROJECT TABLE
 ========================================================= */
 
-.teacher-project-table {
+.teacher-detail-page .teacher-project-table {
   width: 100%;
 
-  margin-top: 8px;
-
   border-collapse: collapse;
+  border-spacing: 0;
+
   table-layout: fixed;
+
+  color: #222;
 }
 
-.teacher-project-table th,
-.teacher-project-table td {
-  padding: 10px 7px;
+.teacher-detail-page .teacher-project-table th,
+.teacher-detail-page .teacher-project-table td {
+  padding: 9px 5px;
 
-  border-bottom: 1px solid #d0d0d0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid #ddd;
 
-  color: #222222;
+  background: #fff;
+  color: #222;
 
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
 
   text-align: center;
   vertical-align: middle;
 }
 
-.teacher-project-table th {
-  height: 37px;
+.teacher-detail-page .teacher-project-table th {
+  padding-top: 8px;
+  padding-bottom: 10px;
 
+  font-size: 13px;
   font-weight: 500;
 }
 
-.teacher-project-table td {
-  height: 49px;
+.teacher-detail-page .teacher-project-table td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+
+  font-size: 13px;
+  font-weight: 400;
 }
 
-.teacher-project-table th:nth-child(1),
-.teacher-project-table td:nth-child(1) {
+.teacher-detail-page .teacher-project-table th:nth-child(1),
+.teacher-detail-page .teacher-project-table td:nth-child(1) {
   width: 40%;
 }
 
-.teacher-project-table th:nth-child(2),
-.teacher-project-table td:nth-child(2) {
+.teacher-detail-page .teacher-project-table th:nth-child(2),
+.teacher-detail-page .teacher-project-table td:nth-child(2) {
   width: 20%;
 }
 
-.teacher-project-table th:nth-child(3),
-.teacher-project-table td:nth-child(3) {
+.teacher-detail-page .teacher-project-table th:nth-child(3),
+.teacher-detail-page .teacher-project-table td:nth-child(3) {
   width: 20%;
 }
 
-.teacher-project-table th:nth-child(4),
-.teacher-project-table td:nth-child(4) {
+.teacher-detail-page .teacher-project-table th:nth-child(4),
+.teacher-detail-page .teacher-project-table td:nth-child(4) {
   width: 20%;
 }
 
-.teacher-project-table tbody tr:last-child td {
+.teacher-detail-page .teacher-project-table tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* ---------- PROJECT DETAIL BUTTON ---------- */
 
-/* PROJECT DETAIL BUTTON */
+.teacher-detail-page .teacher-project-detail-btn {
+  min-width: 74px;
+  height: 28px;
 
-.teacher-project-detail-btn {
-  border: none;
+  padding: 0 10px;
 
-  background: transparent;
-  color: #222222;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  font-size: 10px;
+  background: #fff;
+  color: #222;
+
+  border: 1px solid #bbb;
+  border-radius: 3px;
+
+  font-size: 11px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-.teacher-project-detail-btn:hover {
-  text-decoration: underline;
+.teacher-detail-page .teacher-project-detail-btn:hover {
+  background: #f2f2f2;
+  text-decoration: none;
 }
 
+/* ---------- EMPTY ---------- */
 
-/* EMPTY */
+.teacher-detail-page .teacher-project-empty {
+  height: 80px !important;
 
-.teacher-project-empty {
-  height: 90px !important;
+  color: #888 !important;
 
-  color: #888888 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
 
   text-align: center !important;
+  vertical-align: middle !important;
+
+  border-bottom: none !important;
 }
 
+/* =========================================================
+   CLOSED PROJECT
+========================================================= */
+
+.teacher-detail-page
+  .teacher-project-table
+  tbody
+  tr.project-row-closed
+  td {
+  color: #b5b5b5;
+}
+
+.teacher-detail-page
+  .teacher-project-table
+  tbody
+  tr.project-row-closed
+  .teacher-project-detail-btn {
+  color: #b5b5b5;
+  border-color: #ddd;
+}
 
 /* =========================================================
    LOADING
@@ -644,40 +709,31 @@
   background: #f5f5f5;
 }
 
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
 @media (max-width: 1000px) {
-  .teacher-detail-content {
+  .teacher-detail-page .teacher-detail-content {
     padding: 25px 20px;
   }
 
-  .teacher-profile-card {
+  .teacher-detail-page .teacher-profile-card {
     grid-template-columns: 190px 1fr;
   }
 
-  .teacher-profile-image img {
+  .teacher-detail-page .teacher-profile-image img {
     width: 165px;
     height: 165px;
   }
 }
 
-/* =========================================================
-   CLOSED PROJECT
-========================================================= */
+@media (max-width: 800px) {
+  .teacher-detail-page .teacher-detail-main {
+    overflow-x: auto;
+  }
 
-.teacher-project-table
-  tbody
-  tr.project-row-closed
-  td {
-  color: #b5b5b5;
-}
-
-.teacher-project-table
-  tbody
-  tr.project-row-closed
-  .teacher-project-detail-btn {
-  color: #b5b5b5;
+  .teacher-detail-page .teacher-detail-content {
+    min-width: 850px;
+  }
 }

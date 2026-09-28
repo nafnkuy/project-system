@@ -2,7 +2,7 @@ import "./TeacherDetail.css";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaPlus } from "react-icons/fa";
 import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
@@ -107,11 +107,7 @@ function TeacherDetail() {
 
           <div>
             <h2>SPTC System</h2>
-            <p>
-              ระบบติดตามและสื่อสาร
-              <br />
-              โครงงานนิสิต
-            </p>
+            <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
           </div>
         </div>
 
@@ -127,11 +123,11 @@ function TeacherDetail() {
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li>ข้อมูลส่วนตัว</li>
-
             <li>โครงงานของฉัน</li>
 
             <li>การแจ้งเตือน</li>
+
+            <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 
@@ -204,11 +200,11 @@ function TeacherDetail() {
 
               <div className="teacher-information">
                 <p>
-                  <span>ชื่อ :</span> {teacher.english_name || "-"}
+                  <span>ตำแหน่ง :</span> {teacher.position || "-"}
                 </p>
 
                 <p>
-                  <span>ตำแหน่ง :</span> {teacher.position || "-"}
+                  <span>สาขาวิชา :</span> {teacher.major || "-"}
                 </p>
 
                 <p>
@@ -220,12 +216,11 @@ function TeacherDetail() {
                 </p>
 
                 <p>
-                  <span>เบอร์โทร :</span>{" "}
-                  {teacher.office_phone || teacher.phone || "-"}
+                  <span>เบอร์โทร :</span> {teacher.office_phone || "-"}
                 </p>
 
                 <div className="teacher-expertise">
-                  <span>สาขาที่สนใจ :</span>
+                  <span>ความเชี่ยวชาญ :</span>
 
                   <div>
                     {teacher.expertise.length > 0 ? (
@@ -279,7 +274,8 @@ function TeacherDetail() {
                   navigate(`/submit-new-project?advisorId=${teacher.id}`)
                 }
               >
-                ส่งคำเสนอโครงงานใหม่&nbsp; ⊕
+                ส่งคำเสนอโครงงานใหม่
+                <FaPlus />
               </button>
             </div>
 
@@ -320,9 +316,12 @@ function TeacherDetail() {
                         <button
                           type="button"
                           className="teacher-project-detail-btn"
-                          onClick={() =>
-                            navigate(`/project-details/${project.id}`)
-                          }
+                          disabled={project.status === "ปิดรับ"}
+                          onClick={() => {
+                            if (project.status === "ปิดรับ") return;
+
+                            navigate(`/project-details/${project.id}`);
+                          }}
                         >
                           ดูรายละเอียด
                         </button>
