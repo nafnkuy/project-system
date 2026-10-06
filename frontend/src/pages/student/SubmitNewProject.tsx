@@ -176,16 +176,19 @@ function SubmitNewProject() {
   }, [teacherKeyword, advisorName]);
 
   /* =========================================================
-     LOAD RESUBMIT DATA
-  ========================================================= */
+   LOAD RESUBMIT DATA
+========================================================= */
 
   useEffect(() => {
-    if (!isResubmit || !resubmitProjectId || !userId) {
+    if (!isResubmit || !resubmitProjectId || !resubmitRequestId || !userId) {
       return;
     }
 
     const loadResubmitData = async () => {
       try {
+        // ==========================================
+        // 1. โหลดข้อมูลโครงงาน + คำขอเดิม
+        // ==========================================
         const [projectRes, requestRes] = await Promise.all([
           axios.get(`http://localhost:5000/projects/${resubmitProjectId}`),
 
@@ -195,11 +198,18 @@ function SubmitNewProject() {
         ]);
 
         const projectData = projectRes.data;
-
         const requestData = requestRes.data;
+        if (requestData.status !== "ต้องแก้ไข") {
+          alert("คำขอนี้ถูกส่งให้อาจารย์พิจารณาใหม่แล้ว");
 
-        /* ---------- PROJECT ---------- */
+          navigate("/StudentHome");
 
+          return;
+        }
+
+        // ==========================================
+        // PROJECT
+        // ==========================================
         setProjectId(Number(resubmitProjectId));
 
         setProjectTitle(projectData.title || "");
@@ -226,13 +236,53 @@ function SubmitNewProject() {
 
         setSkills(projectData.skills || "");
 
-        /* ---------- REQUEST ---------- */
-
+        // ==========================================
+        // REQUEST
+        // ==========================================
         setContactType(requestData.contact_type || "");
 
         setContactValue(requestData.contact_value || "");
 
         setIntroduction(requestData.introduction || "");
+
+        // ==========================================
+        // 2. ถ้าเป็นโครงงานคู่
+        // โหลดสมาชิกคนที่ 2 กลับมาด้วย
+        // ==========================================
+        if (projectData.project_type === "โครงงานคู่") {
+          try {
+            const invitationRes = await axios.get(
+              `http://localhost:5000/project-invitations/status/${resubmitProjectId}/${userId}`,
+            );
+
+            const invitationData = invitationRes.data;
+
+            console.log("Resubmit invitation data =", invitationData);
+
+            if (invitationData.status === "ตอบรับ") {
+              setMemberId(invitationData.receiver_username || "");
+
+              setMemberUserId(
+                invitationData.receiver_id
+                  ? Number(invitationData.receiver_id)
+                  : null,
+              );
+
+              setMemberName(invitationData.receiver_name || "");
+            }
+          } catch (invitationError: any) {
+            console.log("Load second member error =", invitationError);
+
+            setMemberId("");
+            setMemberUserId(null);
+            setMemberName("");
+          }
+        } else {
+          // ถ้าเป็นโครงงานเดี่ยว
+          setMemberId("");
+          setMemberUserId(null);
+          setMemberName("");
+        }
       } catch (err: any) {
         console.log("Load resubmit data error =", err);
 
@@ -815,62 +865,88 @@ function SubmitNewProject() {
             <div className="member-card">
               <h5>สมาชิกคนที่ 2</h5>
 
-              <div className="form-group">
-                <label className="member-field-label">รหัสประจำตัว</label>
+              {/* =========================================
+        กรณีแก้ไขและส่งใหม่
+        ห้ามเปลี่ยนสมาชิก
+    ========================================= */}
+              {isResubmit ? (
+                <>
+                  <div className="form-group">
+                    <label className="member-field-label">รหัสประจำตัว</label>
 
-                <div className="search-box">
-                  <input
-                    type="text"
-                    value={memberId}
-                    onChange={(e) => setMemberId(e.target.value)}
-                  />
-
-                  <button type="button" onClick={searchStudent}>
-                    <FaSearch />
-                  </button>
-                </div>
-              </div>
-
-              {memberName && (
-                <div className="member-result">
-                  <h4 className="success-text">พบข้อมูล</h4>
-
-                  <div className="result-item">
-                    <label>รหัสประจำตัว</label>
-                    <p>{memberId}</p>
+                    <input type="text" value={memberId} disabled />
                   </div>
 
-                  <div className="result-item">
-                    <label>ชื่อ</label>
-                    <p>{memberName}</p>
+                  <div className="form-group">
+                    <label className="member-field-label">ชื่อ</label>
+
+                    <input type="text" value={memberName} disabled />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* =========================================
+            กรณีเสนอหัวข้อใหม่
+            สามารถค้นหา / เปลี่ยน / เชิญสมาชิกได้
+        ========================================= */}
+
+                  <div className="form-group">
+                    <label className="member-field-label">รหัสประจำตัว</label>
+
+                    <div className="search-box">
+                      <input
+                        type="text"
+                        value={memberId}
+                        onChange={(e) => setMemberId(e.target.value)}
+                      />
+
+                      <button type="button" onClick={searchStudent}>
+                        <FaSearch />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="member-action">
-                    <button
-                      type="button"
-                      className="change-btn"
-                      onClick={() => {
-                        setMemberId("");
-                        setMemberUserId(null);
-                        setMemberName("");
-                      }}
-                    >
-                      เปลี่ยนสมาชิก
-                    </button>
+                  {memberName && (
+                    <div className="member-result">
+                      <h4 className="success-text">พบข้อมูล</h4>
 
-                    <button
-                      type="button"
-                      className="invite-btn"
-                      onClick={sendInvitation}
-                    >
-                      เชิญเข้าร่วมโครงงาน
-                    </button>
-                  </div>
-                </div>
+                      <div className="result-item">
+                        <label>รหัสประจำตัว</label>
+                        <p>{memberId}</p>
+                      </div>
+
+                      <div className="result-item">
+                        <label>ชื่อ</label>
+                        <p>{memberName}</p>
+                      </div>
+
+                      <div className="member-action">
+                        <button
+                          type="button"
+                          className="change-btn"
+                          onClick={() => {
+                            setMemberId("");
+                            setMemberUserId(null);
+                            setMemberName("");
+                          }}
+                        >
+                          เปลี่ยนสมาชิก
+                        </button>
+
+                        <button
+                          type="button"
+                          className="invite-btn"
+                          onClick={sendInvitation}
+                        >
+                          เชิญเข้าร่วมโครงงาน
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
-
           {/* =================================================
               CONTACT TYPE
           ================================================= */}
@@ -969,77 +1045,75 @@ function SubmitNewProject() {
               <div className="advisor-selected-row">
                 <span className="advisor-name">{advisorName}</span>
 
-                <button
-                  type="button"
-                  className="change-advisor-btn"
-                  onClick={() => {
-                    setAdvisorId(null);
-
-                    setAdvisorName("");
-
-                    setTeacherKeyword("");
-
-                    setTeacherList([]);
-                  }}
-                >
-                  เปลี่ยนอาจารย์
-                </button>
+                {/* ตอนแก้ไขตามข้อเสนอแนะ ห้ามเปลี่ยนอาจารย์ */}
+                {!isResubmit && (
+                  <button
+                    type="button"
+                    className="change-advisor-btn"
+                    onClick={() => {
+                      setAdvisorId(null);
+                      setAdvisorName("");
+                      setTeacherKeyword("");
+                      setTeacherList([]);
+                    }}
+                  >
+                    เปลี่ยนอาจารย์
+                  </button>
+                )}
               </div>
             ) : (
-              <div className="teacher-search">
-                <div className="search-box">
-                  <input
-                    value={teacherKeyword}
-                    onChange={(e) => setTeacherKeyword(e.target.value)}
-                    placeholder="พิมพ์ชื่ออาจารย์"
-                  />
+              !isResubmit && (
+                <div className="teacher-search">
+                  <div className="search-box">
+                    <input
+                      value={teacherKeyword}
+                      onChange={(e) => setTeacherKeyword(e.target.value)}
+                      placeholder="พิมพ์ชื่ออาจารย์"
+                    />
+                  </div>
+
+                  {teacherList.map((teacher) => {
+                    const requiredSlots = projectType === "โครงงานคู่" ? 2 : 1;
+
+                    const canAccept =
+                      Number(teacher.remaining_capacity) >= requiredSlots;
+
+                    return (
+                      <div
+                        key={teacher.id}
+                        className={`teacher-item ${
+                          !canAccept ? "teacher-full" : ""
+                        }`}
+                        onClick={() => {
+                          if (!canAccept) {
+                            alert(
+                              projectType === "โครงงานคู่"
+                                ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
+                                : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
+                            );
+
+                            return;
+                          }
+
+                          setAdvisorId(teacher.id);
+                          setAdvisorName(teacher.name);
+                          setMajor(teacher.major);
+                          setTeacherKeyword(teacher.name);
+                          setTeacherList([]);
+                        }}
+                      >
+                        <span>{teacher.name}</span>
+
+                        <span>
+                          {canAccept
+                            ? `เปิดรับ (${teacher.accepted_students}/${teacher.total_capacity})`
+                            : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/${teacher.total_capacity})`}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                {teacherList.map((teacher) => {
-                  const requiredSlots = projectType === "โครงงานคู่" ? 2 : 1;
-
-                  const canAccept =
-                    Number(teacher.remaining_capacity) >= requiredSlots;
-
-                  return (
-                    <div
-                      key={teacher.id}
-                      className={`teacher-item ${
-                        !canAccept ? "teacher-full" : ""
-                      }`}
-                      onClick={() => {
-                        if (!canAccept) {
-                          alert(
-                            projectType === "โครงงานคู่"
-                              ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
-                              : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
-                          );
-
-                          return;
-                        }
-
-                        setAdvisorId(teacher.id);
-
-                        setAdvisorName(teacher.name);
-
-                        setMajor(teacher.major);
-
-                        setTeacherKeyword(teacher.name);
-
-                        setTeacherList([]);
-                      }}
-                    >
-                      <span>{teacher.name}</span>
-
-                      <span>
-                        {canAccept
-                          ? `เปิดรับ (${teacher.accepted_students}/14)`
-                          : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/14)`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              )
             )}
           </div>
 

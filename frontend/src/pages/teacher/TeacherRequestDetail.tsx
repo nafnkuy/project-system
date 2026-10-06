@@ -10,6 +10,9 @@ interface Member {
   id: number;
   username: string;
   name: string;
+  major: string;
+  email: string | null;
+  phone: string | null;
 }
 
 interface RequestDetail {
@@ -22,11 +25,16 @@ interface RequestDetail {
   contact_value: string;
   introduction: string;
 
+  suggestion: string | null;
+  rejection_reason: string | null;
+  decision_date: string | null;
+
   // ข้อมูลนิสิต
   student_id: number;
   student_username: string;
   student_name: string;
   student_major: string;
+  source: "teacher" | "student";
 
   // ข้อมูลโครงงาน
   project_id: number;
@@ -54,9 +62,11 @@ function TeacherRequestDetail() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
 
-  const [decision, setDecision] = useState<"อนุมัติ" | "ปฏิเสธ" | "">("");
+  const [decision, setDecision] = useState<
+    "อนุมัติ" | "ต้องแก้ไข" | "ปฏิเสธ" | ""
+  >("");
 
-  const [teacherComment, setTeacherComment] = useState("");
+  //const [teacherComment, setTeacherComment] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
 
@@ -156,11 +166,18 @@ function TeacherRequestDetail() {
         setRequest(res.data);
 
         // โหลดผลการพิจารณาเดิมกลับมา
-        if (res.data.status === "อนุมัติ" || res.data.status === "ปฏิเสธ") {
+        if (
+          res.data.status === "อนุมัติ" ||
+          res.data.status === "ต้องแก้ไข" ||
+          res.data.status === "ปฏิเสธ"
+        ) {
           setDecision(res.data.status);
         } else {
           setDecision("");
         }
+
+        setSuggestion(res.data.suggestion || "");
+        setRejectionReason(res.data.rejection_reason || "");
       })
       .catch((err) => {
         console.log("Get request detail error =", err);
@@ -227,8 +244,6 @@ function TeacherRequestDetail() {
         `http://localhost:5000/teacher/request/${request.id}/reject`,
         {
           advisor_id: userId,
-          teacher_comment: teacherComment,
-          suggestion: suggestion,
           rejection_reason: rejectionReason,
         },
       );
@@ -246,6 +261,49 @@ function TeacherRequestDetail() {
   };
 
   // =========================
+  // ต้องแก้ไข
+  // =========================
+  const handleNeedRevision = async () => {
+    if (!request) return;
+
+    // สถานะ "ต้องแก้ไข" ต้องมีข้อเสนอแนะ
+    if (!suggestion.trim()) {
+      alert("กรุณาระบุสิ่งที่นิสิตต้องแก้ไข");
+      return;
+    }
+
+    const confirmRevision = window.confirm(
+      `ต้องการส่งคำขอของ ${request.student_name} กลับให้นิสิตแก้ไขหรือไม่?`,
+    );
+
+    if (!confirmRevision) return;
+
+    try {
+      setProcessing(true);
+
+      const res = await axios.post(
+        `http://localhost:5000/teacher/request/${request.id}/revision`,
+        {
+          advisor_id: userId,
+          suggestion: suggestion.trim(),
+        },
+      );
+
+      alert(res.data.message);
+
+      navigate("/teacher-home");
+    } catch (err: any) {
+      console.log("Revision error =", err);
+
+      alert(
+        err.response?.data?.message || "ไม่สามารถส่งคำขอกลับให้นิสิตแก้ไขได้",
+      );
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // =========================
   // บันทึกผลการพิจารณา
   // =========================
   const handleSaveDecision = () => {
@@ -254,14 +312,18 @@ function TeacherRequestDetail() {
       return;
     }
 
-    // ถ้าปฏิเสธ ต้องกรอกเหตุผล
-    if (decision === "ปฏิเสธ" && !rejectionReason.trim()) {
-      alert("กรุณากรอกเหตุผลการปฏิเสธ");
+    if (decision === "อนุมัติ") {
+      handleApprove();
       return;
     }
 
-    if (decision === "อนุมัติ") {
-      handleApprove();
+    if (decision === "ต้องแก้ไข") {
+      if (!suggestion.trim()) {
+        alert("กรุณาระบุสิ่งที่นิสิตต้องแก้ไข");
+        return;
+      }
+
+      handleNeedRevision();
       return;
     }
 
@@ -269,7 +331,6 @@ function TeacherRequestDetail() {
       handleReject();
     }
   };
-
   // =========================
   // Loading
   // =========================
@@ -451,31 +512,82 @@ function TeacherRequestDetail() {
           ========================= */}
 
             <section className="detail-card">
-              <h3>ข้อมูลผู้สมัคร</h3>
+              <h3>
+                {request.source === "student"
+                  ? "ข้อมูลผู้เสนอโครงงาน"
+                  : "ข้อมูลผู้สมัคร"}
+              </h3>
 
               <div className="detail-divider" />
 
               <div className="applicant-info">
-                <label>รหัสประจำตัว</label>
+                {request.source === "student" &&
+                request.project_type === "โครงงานคู่" ? (
+                  <>
+                    {request.members.map((member, index) => (
+                      <div key={member.id} className="applicant-member-block">
+                        <h4>
+                          {index === 0
+                            ? "ผู้เสนอโครงงานคนที่ 1"
+                            : "ผู้เสนอโครงงานคนที่ 2"}
+                        </h4>
 
-                <div className="readonly-box">{request.student_username}</div>
+                        <label>รหัสประจำตัว</label>
+                        <div className="readonly-box">{member.username}</div>
 
-                <label>ชื่อ</label>
+                        <label>ชื่อ</label>
+                        <div className="readonly-box">{member.name}</div>
 
-                <div className="readonly-box">{request.student_name}</div>
+                        <label>สาขาวิชา</label>
+                        <div className="readonly-box">
+                          {member.major || "-"}
+                        </div>
 
-                <label>ช่องทางการติดต่อ</label>
+                        <label>อีเมล</label>
+                        <div className="readonly-box">
+                          {member.email || "-"}
+                        </div>
+                      </div>
+                    ))}
 
-                <div className="readonly-box">
-                  {request.contact_type} : {request.contact_value}
-                </div>
+                    <label>ช่องทางการติดต่อหลัก</label>
+                    <div className="readonly-box">
+                      {request.contact_type} : {request.contact_value}
+                    </div>
 
-                <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
+                    <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
 
-                <textarea value={request.introduction || ""} readOnly />
+                    <textarea value={request.introduction || ""} readOnly />
+                  </>
+                ) : (
+                  <>
+                    <label>รหัสประจำตัว</label>
+
+                    <div className="readonly-box">
+                      {request.student_username}
+                    </div>
+
+                    <label>ชื่อ</label>
+
+                    <div className="readonly-box">{request.student_name}</div>
+
+                    <label>ช่องทางการติดต่อ</label>
+
+                    <div className="readonly-box">
+                      {request.contact_type} : {request.contact_value}
+                    </div>
+
+                    <label>
+                      {request.source === "teacher"
+                        ? "เหตุผลในการสมัครเข้าร่วมโครงงาน"
+                        : "เหตุผลในการเสนอหัวข้อโครงงาน"}
+                    </label>
+
+                    <textarea value={request.introduction || ""} readOnly />
+                  </>
+                )}
               </div>
             </section>
-
             {/* =========================
               รายละเอียดโครงงาน
           ========================= */}
@@ -526,19 +638,28 @@ function TeacherRequestDetail() {
                 })}
               </div>
 
-              <h4>คุณสมบัติผู้สมัคร</h4>
+              {/* =========================
+    คุณสมบัติผู้สมัคร
+    แสดงเฉพาะหัวข้อที่อาจารย์สร้าง
+========================= */}
 
-              <div className="text-section">
-                {requirements.length > 0 ? (
-                  <ul className="detail-list">
-                    {requirements.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>-</p>
-                )}
-              </div>
+              {request.source === "teacher" && (
+                <>
+                  <h4>คุณสมบัติผู้สมัคร</h4>
+
+                  <div className="text-section">
+                    {requirements.length > 0 ? (
+                      <ul className="detail-list">
+                        {requirements.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>-</p>
+                    )}
+                  </div>
+                </>
+              )}
             </section>
 
             {/* =========================
@@ -562,6 +683,7 @@ function TeacherRequestDetail() {
                       disabled={request.status !== "รอพิจารณา"}
                       onChange={() => {
                         setDecision("อนุมัติ");
+                        setSuggestion("");
                         setRejectionReason("");
                       }}
                     />
@@ -572,51 +694,65 @@ function TeacherRequestDetail() {
                     <input
                       type="radio"
                       name="decision"
+                      checked={decision === "ต้องแก้ไข"}
+                      disabled={request.status !== "รอพิจารณา"}
+                      onChange={() => {
+                        setDecision("ต้องแก้ไข");
+                        setRejectionReason("");
+                      }}
+                    />
+                    ต้องแก้ไข
+                  </label>
+
+                  <label>
+                    <input
+                      type="radio"
+                      name="decision"
                       checked={decision === "ปฏิเสธ"}
                       disabled={request.status !== "รอพิจารณา"}
-                      onChange={() => setDecision("ปฏิเสธ")}
+                      onChange={() => {
+                        setDecision("ปฏิเสธ");
+                        setSuggestion("");
+                      }}
                     />
                     ปฏิเสธ
                   </label>
                 </div>
 
-                {/* ความคิดเห็น */}
-                <label>ความคิดเห็น</label>
-
-                <textarea
-                  className="comment-box"
-                  placeholder="กรอกความคิดเห็น"
-                  value={teacherComment}
-                  onChange={(e) => setTeacherComment(e.target.value)}
-                />
-
-                {/* ข้อเสนอแนะ */}
-                <label>ข้อเสนอแนะ</label>
-
-                <textarea
-                  className="comment-box"
-                  placeholder="กรอกข้อเสนอแนะ"
-                  value={suggestion}
-                  onChange={(e) => setSuggestion(e.target.value)}
-                />
-
-                {/* แสดงเฉพาะตอนเลือกปฏิเสธ */}
-                {decision === "ปฏิเสธ" && (
+                {/* แสดงเฉพาะตอนเลือก "ต้องแก้ไข" */}
+                {decision === "ต้องแก้ไข" && (
                   <>
                     <label>
-                      เหตุผลการปฏิเสธ <span style={{ color: "red" }}>*</span>
+                      ข้อเสนอแนะ / สิ่งที่ต้องแก้ไข
+                      <span style={{ color: "red" }}> *</span>
                     </label>
 
                     <textarea
                       className="comment-box"
-                      placeholder="กรุณาระบุเหตุผลการปฏิเสธ"
-                      value={rejectionReason}
-                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="ระบุสิ่งที่นิสิตต้องแก้ไข เช่น ปรับรายละเอียดโครงงาน เพิ่มวัตถุประสงค์..."
+                      value={suggestion}
+                      onChange={(e) => setSuggestion(e.target.value)}
+                      disabled={request.status !== "รอพิจารณา"}
                     />
                   </>
                 )}
               </div>
             </section>
+
+            {/* แสดงเฉพาะตอนเลือก "ปฏิเสธ" */}
+            {decision === "ปฏิเสธ" && (
+              <>
+                <label>เหตุผลการปฏิเสธ (ไม่บังคับ)</label>
+
+                <textarea
+                  className="comment-box"
+                  placeholder="ระบุเหตุผลการปฏิเสธ (ถ้ามี)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  disabled={request.status !== "รอพิจารณา"}
+                />
+              </>
+            )}
 
             {/* ================= BUTTONS ================= */}
 

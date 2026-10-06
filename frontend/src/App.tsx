@@ -7,6 +7,7 @@ import ApplyProject from "./pages/student/ApplyProject";
 import SubmitNewProject from "./pages/student/SubmitNewProject";
 import TeacherList from "./pages/student/TeacherList";
 import TeacherDetail from "./pages/student/TeacherDetail";
+import StudentProject from "./pages/student/StudentProject";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -14,6 +15,7 @@ import CreateTeacherProject from "./pages/teacher/CreateTeacherProject";
 import TeacherProjectDetail from "./pages/teacher/TeacherProjectDetail";
 import TeacherProjectEdit from "./pages/teacher/TeacherProjectEdit";
 import TeacherRequestDetail from "./pages/teacher/TeacherRequestDetail";
+import StudentProjectRequestDetail from "./pages/student/StudentProjectRequestDetail";
 
 import StaffHome from "./pages/Staff/StaffHome";
 import StaffDocumentDetail from "./pages/Staff/StaffDocumentDetail";
@@ -29,12 +31,17 @@ function App() {
         <Route path="/submit-new-project" element={<SubmitNewProject />} />
         <Route path="/teachers" element={<TeacherList />} />
         <Route path="/teacher-detail/:teacherId" element={<TeacherDetail />} />
+        <Route path="/student-project" element={<StudentProject />} />
+        <Route path="/student-project-request-detail/:requestId/:studentId" element={<StudentProjectRequestDetail />} />
+
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
         <Route path="/create-teacher-project"  element={<CreateTeacherProject />}/>
         <Route path="/teacher-project-details/:id"  element={<TeacherProjectDetail />}/>
         <Route  path="/teacher-project-edit/:id"  element={<TeacherProjectEdit />}/>
         <Route  path="/teacher-request-details/:id"  element={<TeacherRequestDetail />}/>
+
+
         <Route path="/staff-home" element={<StaffHome />} />
         <Route path="/staff-document/:id" element={<StaffDocumentDetail />} />
       </Routes>

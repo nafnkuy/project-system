@@ -174,9 +174,10 @@ app.post("/project-requests", (req, res) => {
         student_id,
         contact_type,
         contact_value,
-        introduction
+        introduction,
+        status
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, 'รอพิจารณา')
     `;
 
     db.query(
@@ -276,6 +277,224 @@ app.get("/project-requests/student/:studentId", (req, res) => {
       hasPending: result.length > 0,
     });
   });
+});
+
+// ==========================================
+// โครงงานของฉัน - คำขอล่าสุดของนิสิต
+// ==========================================
+
+app.get("/student/my-project/:studentId", (req, res) => {
+  const { studentId } = req.params;
+
+  const sql = `
+    SELECT
+      pr.id AS request_id,
+      pr.project_id,
+      pr.student_id,
+
+      pr.status AS request_status,
+      pr.request_date,
+      pr.decision_date,
+      pr.suggestion,
+      pr.rejection_reason,
+
+      p.title,
+      p.project_type,
+      p.academic_year,
+      p.source,
+
+      COALESCE(advisor.name, p.advisor) AS advisor_name
+
+    FROM project_requests pr
+
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    LEFT JOIN users advisor
+      ON p.advisor_id = advisor.id
+
+    WHERE pr.status != 'ถูกยกเลิก'
+
+      AND (
+        pr.student_id = ?
+
+        OR
+
+        EXISTS (
+          SELECT 1
+          FROM project_invitations pi
+
+          WHERE pi.project_id = pr.project_id
+            AND pi.sender_id = pr.student_id
+            AND pi.receiver_id = ?
+            AND pi.status = 'ตอบรับ'
+        )
+      )
+
+    ORDER BY pr.request_date DESC, pr.id DESC
+
+    LIMIT 1
+  `;
+
+  db.query(
+    sql,
+    [studentId, studentId],
+    (err, results) => {
+      if (err) {
+        console.log(
+          "Get student my project error:",
+          err,
+        );
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.json({
+          request: null,
+        });
+      }
+
+      res.json({
+        request: results[0],
+      });
+    },
+  );
+});
+
+// ==========================================
+// รายละเอียดคำขอของนิสิต
+// ==========================================
+
+app.get("/student/request-detail/:requestId/:studentId", (req, res) => {
+  const { requestId, studentId } = req.params;
+
+  const sql = `
+    SELECT
+      pr.id AS request_id,
+      pr.project_id,
+      pr.student_id,
+
+      pr.status AS request_status,
+      pr.request_date,
+      pr.decision_date,
+      pr.suggestion,
+      pr.rejection_reason,
+      pr.introduction,
+
+      p.title,
+      p.project_type,
+      p.major,
+      p.academic_year,
+      p.description,
+      p.objectives,
+      p.skills,
+      p.requirements,
+      p.source,
+      p.max_members,
+
+      advisor.id AS advisor_id,
+      advisor.name AS advisor_name
+
+    FROM project_requests pr
+
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    LEFT JOIN users advisor
+      ON p.advisor_id = advisor.id
+
+    WHERE pr.id = ?
+
+      AND (
+        pr.student_id = ?
+
+        OR EXISTS (
+          SELECT 1
+          FROM project_invitations pi
+          WHERE pi.project_id = pr.project_id
+            AND pi.receiver_id = ?
+            AND pi.status = 'ตอบรับ'
+        )
+      )
+
+    LIMIT 1
+  `;
+
+  db.query(
+    sql,
+    [requestId, studentId, studentId],
+    (err, results) => {
+      if (err) {
+        console.log("Get student request detail error:", err);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          message: "ไม่พบคำขอ",
+        });
+      }
+
+      const request = results[0];
+
+      // ==========================================
+      // สมาชิกของคำขอ
+      // ==========================================
+
+      const membersSql = `
+        SELECT DISTINCT
+          u.id,
+          u.username,
+          u.name
+
+        FROM users u
+
+        WHERE u.id = ?
+
+        OR u.id IN (
+          SELECT pi.receiver_id
+          FROM project_invitations pi
+
+          WHERE pi.project_id = ?
+            AND pi.sender_id = ?
+            AND pi.status = 'ตอบรับ'
+        )
+
+        ORDER BY u.id ASC
+      `;
+
+      db.query(
+        membersSql,
+        [
+          request.student_id,
+          request.project_id,
+          request.student_id,
+        ],
+        (memberErr, members) => {
+          if (memberErr) {
+            console.log(
+              "Get request members error:",
+              memberErr,
+            );
+
+            return res.status(500).json({
+              message: "Database Error",
+            });
+          }
+
+          request.members = members;
+
+          res.json(request);
+        },
+      );
+    },
+  );
 });
 
 app.post("/projects", (req, res) => {
@@ -896,15 +1115,26 @@ app.get("/project-invitations/status/:projectId/:senderId", (req, res) => {
 
   const sql = `
     SELECT
-      id,
-      project_id,
-      sender_id,
-      receiver_id,
-      status
-    FROM project_invitations
-    WHERE project_id = ?
-      AND sender_id = ?
-    ORDER BY created_at DESC
+      pi.id,
+      pi.project_id,
+      pi.sender_id,
+      pi.receiver_id,
+      pi.status,
+
+      receiver.username AS receiver_username,
+      receiver.name AS receiver_name,
+      receiver.major AS receiver_major
+
+    FROM project_invitations pi
+
+    INNER JOIN users receiver
+      ON pi.receiver_id = receiver.id
+
+    WHERE pi.project_id = ?
+      AND pi.sender_id = ?
+      AND pi.status = 'ตอบรับ'
+
+    ORDER BY pi.created_at DESC
     LIMIT 1
   `;
 
@@ -919,7 +1149,7 @@ app.get("/project-invitations/status/:projectId/:senderId", (req, res) => {
 
     if (result.length === 0) {
       return res.status(404).json({
-        message: "ไม่พบคำเชิญสมาชิก",
+        message: "ไม่พบสมาชิกคนที่ 2",
       });
     }
 
@@ -1388,6 +1618,10 @@ app.get("/teacher/request/:requestId/:advisorId", (req, res) => {
         pr.request_date,
         pr.status,
 
+        pr.suggestion,
+        pr.rejection_reason,
+        pr.decision_date,
+
         -- ข้อมูลนิสิต
         student.username AS student_username,
         student.name AS student_name,
@@ -1396,6 +1630,7 @@ app.get("/teacher/request/:requestId/:advisorId", (req, res) => {
         -- ข้อมูลโครงงาน
         p.title,
         p.advisor_id,
+        p.source,
         p.major,
         p.project_type,
         p.max_members,
@@ -1449,7 +1684,9 @@ app.get("/teacher/request/:requestId/:advisorId", (req, res) => {
     u.id,
     u.username,
     u.name,
-    u.major
+    u.major,
+    u.email,
+    u.phone
   FROM users u
   WHERE u.id = ?
 
@@ -1459,7 +1696,9 @@ app.get("/teacher/request/:requestId/:advisorId", (req, res) => {
     u.id,
     u.username,
     u.name,
-    u.major
+    u.major,
+    u.email,
+    u.phone
   FROM project_invitations pi
   INNER JOIN users u
     ON pi.receiver_id = u.id
@@ -1684,7 +1923,7 @@ WHERE pr.id = ?
                 memberIds.length,
                 request.project_id,
               ],
-              (err) => {
+              async (err) => {
                 if (err) {
                   console.log("Update project member count error:", err);
 
@@ -1695,6 +1934,7 @@ WHERE pr.id = ?
 
                 // ==========================================
                 // 8. สร้างเอกสารให้เจ้าหน้าที่
+                //    สมาชิก 1 คน = เอกสาร 1 ใบ
                 // ==========================================
 
                 const documentType =
@@ -1717,33 +1957,47 @@ WHERE pr.id = ?
                   VALUES (?, ?, ?, ?, ?, 'RE01', NOW(), ?)
                 `;
 
-                db.query(
-                  insertDocumentSql,
-                  [
-                    request.id,
-                    request.project_id,
-                    request.student_id,
-                    request.advisor_id,
-                    documentType,
-                    request.advisor_signature,
-                  ],
-                  async (documentErr, documentResult) => {
-                    if (documentErr) {
-                      console.log(
-                        "Create approval document error:",
-                        documentErr,
-                      );
+                try {
+                  // สร้างเอกสารให้สมาชิกทุกคน
+                  for (const studentId of memberIds) {
+                    const approvalDocumentId = await new Promise(
+                      (resolve, reject) => {
+                        db.query(
+                          insertDocumentSql,
+                          [
+                            request.id,
+                            request.project_id,
 
-                      return res.status(500).json({
-                        message: "สร้างเอกสารสำหรับเจ้าหน้าที่ไม่สำเร็จ",
-                      });
-                    }
+                            // ตรงนี้สำคัญ
+                            // ใช้นิสิตทีละคนจาก memberIds
+                            studentId,
+
+                            request.advisor_id,
+                            documentType,
+                            request.advisor_signature,
+                          ],
+                          (documentErr, documentResult) => {
+                            if (documentErr) {
+                              reject(documentErr);
+                              return;
+                            }
+
+                            resolve(documentResult.insertId);
+                          },
+                        );
+                      },
+                    );
+
+                    console.log(
+                      "สร้างเอกสารให้นิสิต:",
+                      studentId,
+                      "documentId:",
+                      approvalDocumentId,
+                    );
 
                     // ==========================================
-                    // 8.1 สร้าง PDF อัตโนมัติ
+                    // 8.1 สร้าง PDF ของนิสิตคนนี้
                     // ==========================================
-
-                    const approvalDocumentId = documentResult.insertId;
 
                     try {
                       const pdfResponse = await fetch(
@@ -1760,45 +2014,51 @@ WHERE pr.id = ?
                     } catch (pdfError) {
                       console.log("Auto generate PDF request error:", pdfError);
                     }
+                  }
 
-                    // ==========================================
-                    // 9. แจ้งเตือนนิสิต
-                    // ==========================================
+                  // ==========================================
+                  // 9. แจ้งเตือนนิสิตทุกคน
+                  // ==========================================
 
-                    const notificationValues = memberIds
-                      .map(() => "(?, ?)")
-                      .join(", ");
+                  const notificationValues = memberIds
+                    .map(() => "(?, ?)")
+                    .join(", ");
 
-                    const notificationParams = memberIds.flatMap((userId) => [
-                      userId,
-                      `อาจารย์อนุมัติคำขอเข้าร่วมโครงงาน "${request.title}" ของคุณแล้ว`,
-                    ]);
+                  const notificationParams = memberIds.flatMap((userId) => [
+                    userId,
+                    `อาจารย์อนุมัติคำขอเข้าร่วมโครงงาน "${request.title}" ของคุณแล้ว`,
+                  ]);
 
-                    const notificationSql = `
-                        INSERT INTO notifications
-                              (
-                                user_id,
-                                message
-                              )
-                              VALUES ${notificationValues}
-                            `;
+                  const notificationSql = `
+                    INSERT INTO notifications
+                    (
+                      user_id,
+                      message
+                    )
+                    VALUES ${notificationValues}
+                  `;
 
-                    db.query(
-                      notificationSql,
-                      notificationParams,
-                      (notificationErr) => {
-                        if (notificationErr) {
-                          console.log("Notification error:", notificationErr);
-                        }
+                  db.query(
+                    notificationSql,
+                    notificationParams,
+                    (notificationErr) => {
+                      if (notificationErr) {
+                        console.log("Notification error:", notificationErr);
+                      }
 
-                        res.json({
-                          success: true,
-                          message: "อนุมัติคำขอเรียบร้อยแล้ว",
-                        });
-                      },
-                    );
-                  },
-                );
+                      res.json({
+                        success: true,
+                        message: "อนุมัติคำขอเรียบร้อยแล้ว",
+                      });
+                    },
+                  );
+                } catch (documentErr) {
+                  console.log("Create approval documents error:", documentErr);
+
+                  return res.status(500).json({
+                    message: "สร้างเอกสารสำหรับเจ้าหน้าที่ไม่สำเร็จ",
+                  });
+                }
               },
             );
           });
@@ -1809,36 +2069,139 @@ WHERE pr.id = ?
 });
 
 // ==========================================
-// ปฏิเสธคำขอเข้าร่วมโครงงาน
+// ส่งคำขอกลับให้นิสิตแก้ไข
 // ==========================================
-app.post("/teacher/request/:requestId/reject", (req, res) => {
+app.post("/teacher/request/:requestId/revision", (req, res) => {
   const { requestId } = req.params;
+  const { advisor_id, suggestion } = req.body;
 
-  const { advisor_id, teacher_comment, suggestion, rejection_reason } =
-    req.body;
-
-  if (!rejection_reason || !rejection_reason.trim()) {
+  if (!suggestion || !suggestion.trim()) {
     return res.status(400).json({
-      message: "กรุณาระบุเหตุผลการปฏิเสธ",
+      message: "กรุณาระบุสิ่งที่นิสิตต้องแก้ไข",
     });
   }
 
   const getRequestSql = `
-  SELECT
-    pr.id,
-    pr.project_id,
-    pr.student_id,
-    pr.status,
-    p.title
-  FROM project_requests pr
+    SELECT
+      pr.id,
+      pr.project_id,
+      pr.student_id,
+      pr.status,
+      p.title,
+      p.source
 
-  INNER JOIN projects p
-    ON pr.project_id = p.id
+    FROM project_requests pr
 
-  WHERE pr.id = ?
-    AND p.advisor_id = ?
-    AND p.source IN ('teacher', 'student')
-`;
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    WHERE pr.id = ?
+      AND p.advisor_id = ?
+      AND p.source IN ('teacher', 'student')
+  `;
+
+  db.query(getRequestSql, [requestId, advisor_id], (err, results) => {
+    if (err) {
+      console.log("Get revision request error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบคำขอ หรือคำขอนี้ไม่ใช่ของคุณ",
+      });
+    }
+
+    const request = results[0];
+
+    if (request.status !== "รอพิจารณา") {
+      return res.status(400).json({
+        message: "คำขอนี้ได้รับการพิจารณาแล้ว",
+      });
+    }
+
+    const updateSql = `
+        UPDATE project_requests
+        SET
+          status = 'ต้องแก้ไข',
+          suggestion = ?,
+          rejection_reason = NULL,
+          teacher_comment = NULL,
+          decision_date = NOW()
+        WHERE id = ?
+      `;
+
+    db.query(updateSql, [suggestion.trim(), requestId], (err) => {
+      if (err) {
+        console.log("Update revision request error:", err);
+
+        return res.status(500).json({
+          message: "อัปเดตสถานะคำขอไม่สำเร็จ",
+        });
+      }
+
+      const notificationSql = `
+            INSERT INTO notifications
+            (
+              user_id,
+              message,
+              request_id,
+              project_id
+            )
+            VALUES (?, ?, ?, ?)
+          `;
+
+      const message =
+        `อาจารย์ส่งคำขอโครงงาน "${request.title}" ` +
+        `กลับมาให้แก้ไข\n\n` +
+        `สิ่งที่ต้องแก้ไข: ${suggestion.trim()}`;
+
+      db.query(
+        notificationSql,
+        [request.student_id, message, request.id, request.project_id],
+        (notificationErr) => {
+          if (notificationErr) {
+            console.log("Revision notification error:", notificationErr);
+          }
+
+          res.json({
+            success: true,
+            message: "ส่งคำขอกลับให้นิสิตแก้ไขเรียบร้อยแล้ว",
+          });
+        },
+      );
+    });
+  });
+});
+
+// ==========================================
+// ปฏิเสธคำขอ
+// ==========================================
+app.post("/teacher/request/:requestId/reject", (req, res) => {
+  const { requestId } = req.params;
+
+  const { advisor_id, rejection_reason } = req.body;
+
+  const getRequestSql = `
+    SELECT
+      pr.id,
+      pr.project_id,
+      pr.student_id,
+      pr.status,
+      p.title
+
+    FROM project_requests pr
+
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    WHERE pr.id = ?
+      AND p.advisor_id = ?
+      AND p.source IN ('teacher', 'student')
+  `;
 
   db.query(getRequestSql, [requestId, advisor_id], (err, results) => {
     if (err) {
@@ -1863,74 +2226,58 @@ app.post("/teacher/request/:requestId/reject", (req, res) => {
       });
     }
 
+    const reason = rejection_reason?.trim() || null;
+
     const updateSql = `
-  UPDATE project_requests
-  SET
-    status = 'ปฏิเสธ',
-    teacher_comment = ?,
-    suggestion = ?,
-    rejection_reason = ?
-  WHERE id = ?
-        `;
+        UPDATE project_requests
+        SET
+          status = 'ปฏิเสธ',
+          teacher_comment = NULL,
+          suggestion = NULL,
+          rejection_reason = ?,
+          decision_date = NOW()
+        WHERE id = ?
+      `;
 
-    db.query(
-      updateSql,
-      [
-        teacher_comment || null,
-        suggestion || null,
-        rejection_reason,
-        requestId,
-      ],
-      (err) => {
-        if (err) {
-          console.log("Reject request error:", err);
+    db.query(updateSql, [reason, requestId], (err) => {
+      if (err) {
+        console.log("Reject request error:", err);
 
-          return res.status(500).json({
-            message: "อัปเดตสถานะคำขอไม่สำเร็จ",
+        return res.status(500).json({
+          message: "อัปเดตสถานะคำขอไม่สำเร็จ",
+        });
+      }
+
+      const notificationSql = `
+            INSERT INTO notifications
+            (
+              user_id,
+              message,
+              request_id,
+              project_id
+            )
+            VALUES (?, ?, ?, ?)
+          `;
+
+      const message = reason
+        ? `อาจารย์ปฏิเสธคำขอโครงงาน "${request.title}" ของคุณ\n\nเหตุผลการปฏิเสธ: ${reason}`
+        : `อาจารย์ปฏิเสธคำขอโครงงาน "${request.title}" ของคุณ`;
+
+      db.query(
+        notificationSql,
+        [request.student_id, message, request.id, request.project_id],
+        (notificationErr) => {
+          if (notificationErr) {
+            console.log("Reject notification error:", notificationErr);
+          }
+
+          res.json({
+            success: true,
+            message: "ปฏิเสธคำขอเรียบร้อยแล้ว",
           });
-        }
-
-        // แจ้งเตือนนิสิต
-        const notificationSql = `
-              INSERT INTO notifications
-              (
-                user_id,
-                message,
-                request_id,
-                project_id
-              )
-              VALUES (?, ?, ?, ?)
-            `;
-
-        db.query(
-          notificationSql,
-          [
-            request.student_id,
-
-            `อาจารย์ปฏิเสธคำขอโครงงาน "${request.title}" ของคุณ
-
-            เหตุผลการปฏิเสธ: ${rejection_reason}
-
-            ความคิดเห็น: ${teacher_comment || "-"}
-
-            ข้อเสนอแนะ: ${suggestion || "-"}`,
-
-            request.id,
-            request.project_id,
-          ],
-          (notificationErr) => {
-            if (notificationErr) {
-              console.log("Reject notification error:", notificationErr);
-            }
-
-            res.json({
-              success: true,
-              message: "ปฏิเสธคำขอเรียบร้อยแล้ว",
-            });
-          },
-        );
-      },
-    );
+        },
+      );
+    });
   });
 });
 
@@ -1962,7 +2309,7 @@ app.put("/student/project-resubmit/:projectId/:requestId", (req, res) => {
   } = req.body;
 
   // ตรวจสอบก่อนว่าคำขอนี้เป็นของนิสิตจริง
-  // และต้องถูกปฏิเสธมาก่อน
+  // และต้องเป็นคำขอที่อาจารย์ส่งกลับมาให้แก้ไข
   const checkSql = `
       SELECT
         pr.id,
@@ -1999,9 +2346,9 @@ app.put("/student/project-resubmit/:projectId/:requestId", (req, res) => {
 
     const oldRequest = results[0];
 
-    if (oldRequest.status !== "ปฏิเสธ") {
+    if (oldRequest.status !== "ต้องแก้ไข") {
       return res.status(400).json({
-        message: "สามารถส่งใหม่ได้เฉพาะคำขอที่ถูกปฏิเสธ",
+        message: "สามารถส่งใหม่ได้เฉพาะคำขอที่อาจารย์ส่งกลับให้แก้ไข",
       });
     }
 
@@ -2568,10 +2915,6 @@ app.get("/staff/documents/:documentId/generate-pdf", (req, res) => {
         size: 10.5,
         font: thaiFont,
       });
-
-      // ==========================================
-      // เหตุผลประกอบคำร้อง
-      // ==========================================
 
       // ==========================================
       // เหตุผลประกอบคำร้อง
