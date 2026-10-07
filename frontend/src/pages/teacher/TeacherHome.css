@@ -543,8 +543,8 @@
   color: #3678c5;
 }
 
-.teacher-home-page .card-number.orange {
-  color: #f07800;
+.teacher-home-page .card-number.yellow {
+  color: #ffc400;
 }
 
 .teacher-home-page .card-number.green {
@@ -703,21 +703,29 @@
   white-space: nowrap;
 }
 
+/* รอพิจารณา = เหลือง */
 .teacher-home-page .request-status.pending {
   background: #ffc400;
-  color: white;
+  color: #ffffff;
 }
 
+/* ต้องแก้ไข = ส้ม */
+.teacher-home-page .request-status.revision {
+  background: #f07800;
+  color: #ffffff;
+}
+
+/* อนุมัติ = เขียว */
 .teacher-home-page .request-status.approved {
   background: #159c68;
-  color: white;
+  color: #ffffff;
 }
 
+/* ปฏิเสธ = แดง */
 .teacher-home-page .request-status.rejected {
-  background: #d9534f;
-  color: white;
+  background: #ff0000;
+  color: #ffffff;
 }
-
 
 /* =========================
    Detail Button

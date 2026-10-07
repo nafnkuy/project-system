@@ -279,13 +279,12 @@
    CONTENT
 ========================================================= */
 
-.student-request-content {
+.student-request-page .student-request-content {
   width: 100%;
 
-  padding: 45px 55px 65px;
+  padding: 0;
 
-  display: flex;
-  justify-content: center;
+  display: block;
 }
 
 
@@ -293,49 +292,58 @@
    MAIN CARD
 ========================================================= */
 
-.student-request-card {
-  width: 100%;
-  max-width: 1250px;
+.student-request-page .student-request-card {
+  width: 80%;
 
-  padding: 30px 32px 35px;
+  margin: 40px auto 25px;
+
+  padding: 40px;
 
   background: #ffffff;
 
-  border-radius: 9px;
-}
+  border-radius: 8px;
 
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+}
 
 /* =========================================================
    TITLE
 ========================================================= */
 
-.student-request-title-row {
-  position: relative;
-
-  width: 100%;
-
-  min-height: 40px;
-
-  margin-bottom: 18px;
-
+.student-request-page .student-request-title-row {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
+  align-items: flex-start;
 
-  gap: 20px;
+  gap: 30px;
+
+  margin-bottom: 30px;
+
+  padding: 0;
+
+  background: transparent;
+
+  border: none;
 }
 
-.student-request-title-row h3 {
+.student-request-page .student-request-title-row h3 {
+  flex: 1;
+  min-width: 0;
+
   margin: 0;
 
-  padding-right: 150px;
+  padding: 0;
 
-  color: #222;
+  color: #111111;
 
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-}
 
+  line-height: 1.5;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* =========================================================
    STATUS
@@ -347,13 +355,17 @@
   padding: 7px 13px;
 
   display: inline-flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  background: #ffffff;
 
   border: 1px solid #ddd;
   border-radius: 5px;
 
-  background: #ffffff;
+  color: #222222;
 
   font-size: 11px;
   font-weight: 400;
@@ -361,66 +373,127 @@
   white-space: nowrap;
 }
 
-.student-request-status.pending {
+/* รอพิจารณา */
+.student-request-status-value.pending {
   color: #e9a800;
+  font-weight: 500;
 }
 
-.student-request-status.revision {
+/* ต้องแก้ไข */
+.student-request-status-value.revision {
   color: #ef6c00;
+  font-weight: 500;
 }
 
-.student-request-status.rejected {
-  color: #e00000;
+/* ไม่อนุมัติ */
+.student-request-status-value.rejected {
+  color: #ff0000;
+  font-weight: 500;
 }
 
-.student-request-status.approved {
+/* อนุมัติ */
+.student-request-status-value.approved {
   color: #15985a;
+  font-weight: 500;
 }
-
 
 /* =========================================================
-   SECTION
+   DETAIL CARD
 ========================================================= */
 
-.student-request-section {
-  width: 100%;
+.student-request-page .student-request-section {
+  width: 95%;
 
-  margin-top: 34px;
+  margin: 14px auto 0;
+  padding: 18px 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #cccccc;
+  border-radius: 7px;
 }
 
-.student-request-section:first-of-type {
-  margin-top: 10px;
+.student-request-page .student-request-section:first-of-type {
+  margin-top: 14px;
 }
 
-.student-request-section h4 {
-  margin: 0 0 10px;
+.student-request-page .student-request-section h4 {
+  margin: 0;
 
-  color: #222;
+  color: #222222;
 
   font-size: 14px;
   font-weight: 600;
 }
 
-.student-request-line {
+.student-request-page .student-request-line {
   width: 100%;
-  height: 1px;
 
-  margin-bottom: 18px;
+  border-top: 1px solid #dddddd;
 
-  background: #d8d8d8;
+  margin: 10px 0 15px;
 }
 
-.student-request-section p {
-  margin: 0 0 9px;
+.student-request-page .student-request-section p {
+  margin: 7px 0;
 
-  color: #222;
+  color: #222222;
 
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+.student-request-page .student-request-section {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 8px;
+}
+
+.student-request-page .student-request-section:first-of-type {
+  margin-top: 14px;
+}
+
+.student-request-page .student-request-section h4 {
+  margin: 0 0 10px;
+
+  padding-bottom: 8px;
+
+  border-bottom: 1px solid #dddddd;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* เพราะใน TSX หนูมี div student-request-line อยู่แล้ว */
+.student-request-page .student-request-line {
+  display: none;
+}
+
+.student-request-page .student-request-section p {
+  margin: 8px 0;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.7;
+}
 
 /* =========================================================
    MEMBERS
@@ -550,7 +623,7 @@
 
   color: #222;
 
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -566,14 +639,13 @@
 
   color: #222;
 
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 
   line-height: 1.7;
 
   white-space: pre-line;
 }
-
 
 /* =========================================================
    ACTIONS
@@ -582,8 +654,8 @@
 .student-request-actions {
   width: 100%;
 
-  margin-top: 45px;
-  padding-top: 30px;
+  margin-top: 35px;
+  padding-top: 0;
 
   display: flex;
   align-items: center;
@@ -591,7 +663,7 @@
 
   gap: 18px;
 
-  border-top: 1px solid #d8d8d8;
+  border-top: none;
 }
 
 .student-request-actions button {
@@ -659,6 +731,78 @@
   font-size: 16px;
 }
 
+/* =========================================================
+   FONT SCALE
+   ให้เหมือนหน้า ProjectDetail
+========================================================= */
+
+/* ชื่อโครงงานด้านบน */
+.student-request-page .student-request-title-row h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* หัวข้อแต่ละกรอบ */
+.student-request-page .student-request-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ข้อความรายละเอียดทั่วไป */
+.student-request-page .student-request-section p {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* สมาชิกในโครงงาน */
+.student-request-page .student-request-member-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-request-page .student-request-members p {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* วัตถุประสงค์ */
+.student-request-page .student-request-objectives li {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+/* สถานะด้านบน */
+.student-request-page .student-request-status {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.student-request-page .student-request-status-value {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* หัวข้อ เหตุผล / ข้อเสนอแนะ */
+.student-request-page .student-request-feedback strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ข้อความในกล่องเหตุผล */
+.student-request-page .student-request-feedback-box {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* Technology tag */
+.student-request-page .student-request-skill {
+  font-size: 11px;
+  font-weight: 500;
+}
 
 /* =========================================================
    RESPONSIVE

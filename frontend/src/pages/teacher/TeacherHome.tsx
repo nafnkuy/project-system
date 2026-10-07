@@ -276,6 +276,7 @@ function TeacherHome() {
                 <option value="ทั้งหมด">สถานะทั้งหมด</option>
                 <option value="รอพิจารณา">รอพิจารณา</option>
                 <option value="อนุมัติ">อนุมัติ</option>
+                <option value="ต้องแก้ไข">ต้องแก้ไข</option>
                 <option value="ปฏิเสธ">ปฏิเสธ</option>
               </select>
 
@@ -313,7 +314,7 @@ function TeacherHome() {
             <div className="dashboard-card">
               <div className="card-title">คำขอรอพิจารณา</div>
 
-              <div className="card-number orange">
+              <div className="card-number yellow">
                 {dashboard.pendingRequests}
               </div>
             </div>
@@ -404,7 +405,9 @@ function TeacherHome() {
                               ? "approved"
                               : item.status === "ปฏิเสธ"
                                 ? "rejected"
-                                : "pending"
+                                : item.status === "ต้องแก้ไข"
+                                  ? "revision"
+                                  : "pending"
                           }`}
                         >
                           {item.status}

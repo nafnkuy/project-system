@@ -425,9 +425,14 @@
 
 .student-project-request-info
   .student-project-request-title {
-  margin-bottom: 9px;
+  margin-bottom: 12px;
 
-  font-weight: 500;
+  color: #111111;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.5;
 }
 
 

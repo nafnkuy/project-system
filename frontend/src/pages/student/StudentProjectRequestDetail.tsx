@@ -382,12 +382,16 @@ function StudentProjectRequestDetail() {
             <div className="student-request-title-row">
               <h3>{request.title}</h3>
 
-              <span
-                className={`student-request-status ${getStatusClass(
-                  request.request_status,
-                )}`}
-              >
-                สถานะ : {getStatusLabel(request.request_status)}
+              <span className="student-request-status">
+                <span>สถานะ :</span>
+
+                <strong
+                  className={`student-request-status-value ${getStatusClass(
+                    request.request_status,
+                  )}`}
+                >
+                  {getStatusLabel(request.request_status)}
+                </strong>
               </span>
             </div>
 

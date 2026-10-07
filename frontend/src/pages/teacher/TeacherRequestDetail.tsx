@@ -528,8 +528,8 @@ function TeacherRequestDetail() {
                       <div key={member.id} className="applicant-member-block">
                         <h4>
                           {index === 0
-                            ? "ผู้เสนอโครงงานคนที่ 1"
-                            : "ผู้เสนอโครงงานคนที่ 2"}
+                            ? "สมาชิกคนที่ 1"
+                            : "สมาชิกคนที่ 2"}
                         </h4>
 
                         <label>รหัสประจำตัว</label>
@@ -663,8 +663,8 @@ function TeacherRequestDetail() {
             </section>
 
             {/* =========================
-              ผลการพิจารณา
-          ========================= */}
+    ผลการพิจารณา
+========================= */}
 
             <section className="detail-card result-card">
               <h3>ผลการพิจารณา</h3>
@@ -719,7 +719,8 @@ function TeacherRequestDetail() {
                   </label>
                 </div>
 
-                {/* แสดงเฉพาะตอนเลือก "ต้องแก้ไข" */}
+                {/* ================= ต้องแก้ไข ================= */}
+
                 {decision === "ต้องแก้ไข" && (
                   <>
                     <label>
@@ -729,30 +730,31 @@ function TeacherRequestDetail() {
 
                     <textarea
                       className="comment-box"
-                      placeholder="ระบุสิ่งที่นิสิตต้องแก้ไข เช่น ปรับรายละเอียดโครงงาน เพิ่มวัตถุประสงค์..."
+                      placeholder="ระบุสิ่งที่นิสิตต้องแก้ไข เช่น ปรับรายละเอียดโครงงาน เพิ่มวัตถุประสงค์"
                       value={suggestion}
                       onChange={(e) => setSuggestion(e.target.value)}
                       disabled={request.status !== "รอพิจารณา"}
                     />
                   </>
                 )}
+
+                {/* ================= ปฏิเสธ ================= */}
+
+                {decision === "ปฏิเสธ" && (
+                  <>
+                    <label>เหตุผลการปฏิเสธ (ไม่บังคับ)</label>
+
+                    <textarea
+                      className="comment-box"
+                      placeholder="ระบุเหตุผลการปฏิเสธ (ถ้ามี)"
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      disabled={request.status !== "รอพิจารณา"}
+                    />
+                  </>
+                )}
               </div>
             </section>
-
-            {/* แสดงเฉพาะตอนเลือก "ปฏิเสธ" */}
-            {decision === "ปฏิเสธ" && (
-              <>
-                <label>เหตุผลการปฏิเสธ (ไม่บังคับ)</label>
-
-                <textarea
-                  className="comment-box"
-                  placeholder="ระบุเหตุผลการปฏิเสธ (ถ้ามี)"
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  disabled={request.status !== "รอพิจารณา"}
-                />
-              </>
-            )}
 
             {/* ================= BUTTONS ================= */}
 
