@@ -227,17 +227,19 @@ app.get("/project-requests/:projectId/:studentId", (req, res) => {
   const { projectId, studentId } = req.params;
 
   const sql = `
-    SELECT
-      contact_type,
-      contact_value,
-      introduction,
-      status
-    FROM project_requests
-    WHERE project_id = ?
-      AND student_id = ?
-      AND status != 'ถูกยกเลิก'
-    LIMIT 1
-  `;
+  SELECT
+    contact_type,
+    contact_value,
+    introduction,
+    status,
+    suggestion
+  FROM project_requests
+  WHERE project_id = ?
+    AND student_id = ?
+    AND status != 'ถูกยกเลิก'
+  ORDER BY id DESC
+  LIMIT 1
+`;
 
   db.query(sql, [projectId, studentId], (err, result) => {
     if (err) {
@@ -336,32 +338,25 @@ app.get("/student/my-project/:studentId", (req, res) => {
     LIMIT 1
   `;
 
-  db.query(
-    sql,
-    [studentId, studentId],
-    (err, results) => {
-      if (err) {
-        console.log(
-          "Get student my project error:",
-          err,
-        );
+  db.query(sql, [studentId, studentId], (err, results) => {
+    if (err) {
+      console.log("Get student my project error:", err);
 
-        return res.status(500).json({
-          message: "Database Error",
-        });
-      }
-
-      if (results.length === 0) {
-        return res.json({
-          request: null,
-        });
-      }
-
-      res.json({
-        request: results[0],
+      return res.status(500).json({
+        message: "Database Error",
       });
-    },
-  );
+    }
+
+    if (results.length === 0) {
+      return res.json({
+        request: null,
+      });
+    }
+
+    res.json({
+      request: results[0],
+    });
+  });
 });
 
 // ==========================================
@@ -423,31 +418,28 @@ app.get("/student/request-detail/:requestId/:studentId", (req, res) => {
     LIMIT 1
   `;
 
-  db.query(
-    sql,
-    [requestId, studentId, studentId],
-    (err, results) => {
-      if (err) {
-        console.log("Get student request detail error:", err);
+  db.query(sql, [requestId, studentId, studentId], (err, results) => {
+    if (err) {
+      console.log("Get student request detail error:", err);
 
-        return res.status(500).json({
-          message: "Database Error",
-        });
-      }
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
 
-      if (results.length === 0) {
-        return res.status(404).json({
-          message: "ไม่พบคำขอ",
-        });
-      }
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบคำขอ",
+      });
+    }
 
-      const request = results[0];
+    const request = results[0];
 
-      // ==========================================
-      // สมาชิกของคำขอ
-      // ==========================================
+    // ==========================================
+    // สมาชิกของคำขอ
+    // ==========================================
 
-      const membersSql = `
+    const membersSql = `
         SELECT DISTINCT
           u.id,
           u.username,
@@ -469,32 +461,24 @@ app.get("/student/request-detail/:requestId/:studentId", (req, res) => {
         ORDER BY u.id ASC
       `;
 
-      db.query(
-        membersSql,
-        [
-          request.student_id,
-          request.project_id,
-          request.student_id,
-        ],
-        (memberErr, members) => {
-          if (memberErr) {
-            console.log(
-              "Get request members error:",
-              memberErr,
-            );
+    db.query(
+      membersSql,
+      [request.student_id, request.project_id, request.student_id],
+      (memberErr, members) => {
+        if (memberErr) {
+          console.log("Get request members error:", memberErr);
 
-            return res.status(500).json({
-              message: "Database Error",
-            });
-          }
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
 
-          request.members = members;
+        request.members = members;
 
-          res.json(request);
-        },
-      );
-    },
-  );
+        res.json(request);
+      },
+    );
+  });
 });
 
 app.post("/projects", (req, res) => {

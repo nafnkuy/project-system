@@ -770,3 +770,40 @@
 
   pointer-events: none;
 }
+
+/* =========================================================
+   ข้อเสนอแนะจากอาจารย์ตอนแก้ไขและส่งใหม่
+========================================================= */
+
+.revision-suggestion-box {
+  width: 100%;
+
+  margin: 20px 0 28px;
+  padding: 16px 18px;
+
+  background: #fff7ed;
+
+  border: 1px solid #fdba74;
+  border-left: 4px solid #f97316;
+  border-radius: 6px;
+}
+
+.revision-suggestion-title {
+  margin-bottom: 8px;
+
+  color: #c2410c;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.revision-suggestion-text {
+  color: #333;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.7;
+
+  white-space: pre-line;
+}

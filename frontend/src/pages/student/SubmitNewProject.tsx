@@ -136,6 +136,8 @@ function SubmitNewProject() {
 
   const [introduction, setIntroduction] = useState("");
 
+  const [revisionSuggestion, setRevisionSuggestion] = useState("");
+
   /* =========================================================
      CHECK LOGIN
   ========================================================= */
@@ -244,6 +246,8 @@ function SubmitNewProject() {
         setContactValue(requestData.contact_value || "");
 
         setIntroduction(requestData.introduction || "");
+
+        setRevisionSuggestion(requestData.suggestion || "");
 
         // ==========================================
         // 2. ถ้าเป็นโครงงานคู่
@@ -1166,6 +1170,20 @@ function SubmitNewProject() {
               placeholder="กรอกเทคโนโลยีหรือทักษะที่จำเป็นสำหรับโครงงาน"
             />
           </div>
+
+          {/* =========================================
+              สิ่งที่อาจารย์ให้แก้ไข
+          ========================================= */}
+
+          {isResubmit && (
+            <div className="revision-suggestion-box">
+              <div className="revision-suggestion-title">สิ่งที่ต้องแก้ไข</div>
+
+              <div className="revision-suggestion-text">
+                {revisionSuggestion || "-"}
+              </div>
+            </div>
+          )}
 
           {/* =================================================
               BUTTON
