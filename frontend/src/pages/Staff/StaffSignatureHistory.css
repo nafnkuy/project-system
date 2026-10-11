@@ -1,0 +1,653 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.staff-history-page,
+.staff-history-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.staff-history-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.staff-history-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.staff-history-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+}
+
+.staff-history-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+}
+
+.staff-history-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.staff-history-logo p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.staff-history-sidebar nav {
+  width: 100%;
+}
+
+.staff-history-sidebar ul {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+}
+
+.staff-history-sidebar li {
+  width: 100%;
+
+  padding: 18px 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.staff-history-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.staff-history-sidebar li.active {
+  background: #2f5d7c;
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.staff-history-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.staff-history-logout:hover {
+  background: #2f6db5;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.staff-history-main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.staff-history-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+}
+
+.staff-history-header h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.staff-history-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+.staff-history-notification {
+  width: 50px;
+  height: 50px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #999999;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.staff-history-notification svg {
+  color: #999999;
+}
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+.staff-history-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.staff-history-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.staff-history-content {
+  width: 100%;
+
+  padding: 42px 38px 40px;
+}
+
+
+/* =========================================================
+   SEARCH + FILTER
+========================================================= */
+
+.staff-history-toolbar {
+  width: 100%;
+
+  margin-bottom: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.staff-history-search {
+  width: 450px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+
+  padding: 0 14px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+}
+
+.staff-history-search input {
+  flex: 1;
+
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.staff-history-search input::placeholder {
+  color: #999999;
+
+  font-size: 12px;
+}
+
+.staff-history-search svg {
+  flex-shrink: 0;
+
+  color: #999999;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.staff-history-select-wrapper {
+  position: relative;
+
+  width: 150px;
+  height: 36px;
+}
+
+.staff-history-filter {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 34px 0 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+
+  color: #777777;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.staff-history-filter:focus {
+  outline: none;
+  box-shadow: none;
+
+  border-color: #b7b7b7;
+}
+
+.staff-history-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  color: #999999;
+
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.staff-history-card {
+  width: 100%;
+
+  padding: 22px 26px 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+}
+
+.staff-history-card h3 {
+  margin: 0 0 14px;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.staff-history-table {
+  width: 100%;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  color: #222222;
+}
+
+.staff-history-table th,
+.staff-history-table td {
+  padding: 9px 5px;
+
+  background: #ffffff;
+
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid #dddddd;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+.staff-history-table th {
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.staff-history-table td {
+  height: 52px;
+
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
+
+/* อาจารย์ผู้อนุมัติ */
+
+.staff-history-table th:nth-child(1),
+.staff-history-table td:nth-child(1) {
+  width: 22%;
+}
+
+
+/* ชื่อหัวข้อโครงงาน */
+
+.staff-history-table th:nth-child(2),
+.staff-history-table td:nth-child(2) {
+  width: 29%;
+}
+
+
+/* เลขที่เอกสาร */
+
+.staff-history-table th:nth-child(3),
+.staff-history-table td:nth-child(3) {
+  width: 19%;
+}
+
+
+/* วันที่อนุมัติ */
+
+.staff-history-table th:nth-child(4),
+.staff-history-table td:nth-child(4) {
+  width: 18%;
+}
+
+
+/* จัดการ */
+
+.staff-history-table th:nth-child(5),
+.staff-history-table td:nth-child(5) {
+  width: 12%;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.staff-history-detail-btn {
+  min-width: 74px;
+  height: 28px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #222222;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 3px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.staff-history-detail-btn:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.staff-history-message {
+  height: 80px !important;
+
+  color: #888888 !important;
+
+  font-size: 13px !important;
+  font-weight: 400 !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  border-bottom: none !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.staff-history-pagination {
+  width: 100%;
+
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 8px;
+}
+
+.staff-history-pagination button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  color: #222222;
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.staff-history-pagination button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+.staff-history-pagination button:disabled {
+  color: #cccccc;
+
+  cursor: default;
+}
+
+.staff-history-pagination span {
+  min-width: 20px;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .staff-history-content {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .staff-history-search {
+    width: 380px;
+  }
+}

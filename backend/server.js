@@ -1236,12 +1236,14 @@ app.get("/notifications/:userId", (req, res) => {
 
   const sql = `
   SELECT
-    id,
-    message,
-    request_id,
-    project_id,
-    created_at
-  FROM notifications
+  id,
+  message,
+  is_read,
+  request_id,
+  project_id,
+  document_id,
+  created_at
+FROM notifications
   WHERE user_id = ?
     AND message NOT LIKE '%ได้เชิญคุณเข้าร่วมโครงงาน%'
   ORDER BY created_at DESC
@@ -1352,6 +1354,34 @@ app.get("/teacher/projects/:projectId/:advisorId", (req, res) => {
       project.members = members;
 
       res.json(project);
+    });
+  });
+});
+
+// ==========================================
+// อ่านการแจ้งเตือน
+// ==========================================
+
+app.put("/notifications/:notificationId/read", (req, res) => {
+  const { notificationId } = req.params;
+
+  const sql = `
+    UPDATE notifications
+    SET is_read = 1
+    WHERE id = ?
+  `;
+
+  db.query(sql, [notificationId], (err) => {
+    if (err) {
+      console.log("Mark notification read error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json({
+      success: true,
     });
   });
 });
@@ -1998,6 +2028,71 @@ WHERE pr.id = ?
                     } catch (pdfError) {
                       console.log("Auto generate PDF request error:", pdfError);
                     }
+                  
+
+                  // ==========================================
+                  // แจ้งเตือนเจ้าหน้าที่สำหรับเอกสารใบนี้
+                  // ==========================================
+
+                  const getStaffSql = `
+  SELECT id
+  FROM users
+  WHERE role = 'staff'
+`;
+
+                  const staffResults = await new Promise((resolve, reject) => {
+                    db.query(getStaffSql, (staffErr, results) => {
+                      if (staffErr) {
+                        reject(staffErr);
+                        return;
+                      }
+
+                      resolve(results);
+                    });
+                  });
+
+                  if (staffResults.length > 0) {
+                    const staffValues = staffResults
+                      .map(() => "(?, ?, ?, ?, ?)")
+                      .join(", ");
+
+                    const staffParams = staffResults.flatMap((staff) => [
+                      staff.id,
+
+                      `${request.advisor_name || "อาจารย์"} อนุมัติและลงนามเอกสาร "${request.title}"`,
+
+                      request.id,
+                      request.project_id,
+                      approvalDocumentId,
+                    ]);
+
+                    const staffNotificationSql = `
+    INSERT INTO notifications
+    (
+      user_id,
+      message,
+      request_id,
+      project_id,
+      document_id
+    )
+    VALUES ${staffValues}
+  `;
+
+                    await new Promise((resolve, reject) => {
+                      db.query(
+                        staffNotificationSql,
+                        staffParams,
+                        (staffNotificationErr) => {
+                          if (staffNotificationErr) {
+                            reject(staffNotificationErr);
+                            return;
+                          }
+
+                          resolve();
+                        },
+                      );
+                    });
+                  }
                   }
 
                   // ==========================================
@@ -2496,7 +2591,7 @@ app.get("/staff/dashboard", (req, res) => {
 
     ORDER BY ad.approved_at DESC
 
-    LIMIT 5
+    LIMIT 10
   `;
 
   db.query(summarySql, (summaryErr, summaryResult) => {
@@ -2527,6 +2622,108 @@ app.get("/staff/dashboard", (req, res) => {
         latestDocuments: latestResult,
       });
     });
+  });
+});
+
+// ==========================================
+// เอกสารขออนุมัติหัวข้อโครงงานทั้งหมด
+// ==========================================
+
+app.get("/staff/documents", (req, res) => {
+  const sql = `
+    SELECT
+      ad.id,
+      ad.document_type,
+      ad.document_code,
+      ad.approved_at,
+      ad.download_status,
+      ad.pdf_path,
+
+      p.title AS project_title,
+      p.academic_year,
+
+      advisor.name AS advisor_name,
+
+      student.name AS student_name,
+      student.username AS student_username
+
+    FROM approval_documents ad
+
+    INNER JOIN projects p
+      ON ad.project_id = p.id
+
+    INNER JOIN users advisor
+      ON ad.advisor_id = advisor.id
+
+    INNER JOIN users student
+      ON ad.student_id = student.id
+
+    ORDER BY ad.approved_at DESC, ad.id DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.log("Get staff documents error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json(results);
+  });
+});
+
+// ==========================================
+// ประวัติการลงนาม
+// ==========================================
+
+app.get("/staff/signature-history", (req, res) => {
+  const sql = `
+    SELECT
+      ad.id,
+      ad.document_type,
+      ad.document_code,
+      ad.approved_at,
+      ad.signature_image,
+      ad.pdf_path,
+
+      p.title AS project_title,
+      p.academic_year,
+
+      advisor.name AS advisor_name,
+
+      CONCAT(
+        ad.document_code,
+        '-',
+        SUBSTRING_INDEX(p.academic_year, '/', 1),
+        '-',
+        LPAD(ad.id, 3, '0')
+      ) AS document_number
+
+    FROM approval_documents ad
+
+    INNER JOIN projects p
+      ON ad.project_id = p.id
+
+    INNER JOIN users advisor
+      ON ad.advisor_id = advisor.id
+
+    WHERE ad.signature_image IS NOT NULL
+
+    ORDER BY ad.approved_at DESC, ad.id DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.log("Get signature history error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    res.json(results);
   });
 });
 

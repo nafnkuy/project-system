@@ -1,7 +1,7 @@
 import "./StaffDocumentDetail.css";
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FaBell } from "react-icons/fa";
 import axios from "axios";
 
@@ -46,6 +46,10 @@ interface DocumentDetail {
 
 function StaffDocumentDetail() {
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const from = searchParams.get("from");
 
   const { id } = useParams();
 
@@ -206,13 +210,33 @@ function StaffDocumentDetail() {
 
         <nav>
           <ul>
-            <li onClick={() => navigate("/staff-home")}>หน้าหลัก</li>
+            <li
+              className={from === "home" ? "active" : ""}
+              onClick={() => navigate("/staff-home")}
+            >
+              หน้าหลัก
+            </li>
 
-            <li className="active">เอกสารขออนุมัติหัวข้อโครงงาน</li>
+            <li
+              className={from === "documents" ? "active" : ""}
+              onClick={() => navigate("/staff-documents")}
+            >
+              เอกสารขออนุมัติหัวข้อโครงงาน
+            </li>
 
-            <li>ประวัติการลงนาม</li>
+            <li
+              className={from === "history" ? "active" : ""}
+              onClick={() => navigate("/staff-signature-history")}
+            >
+              ประวัติการลงนาม
+            </li>
 
-            <li>การแจ้งเตือน</li>
+            <li
+              className={from === "notifications" ? "active" : ""}
+              onClick={() => navigate("/staff-notifications")}
+            >
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -229,7 +253,32 @@ function StaffDocumentDetail() {
         {/* HEADER */}
 
         <header className="staff-detail-header">
-          <h2>เอกสารขออนุมัติหัวข้อโครงงาน &gt; รายละเอียดเอกสารขออนุมัติ</h2>
+          <h2 className="staff-detail-breadcrumb">
+            <span
+              className="staff-detail-breadcrumb-link"
+              onClick={() => {
+                if (from === "home") {
+                  navigate("/staff-home");
+                } else if (from === "history") {
+                  navigate("/staff-signature-history");
+                } else if (from === "notifications") {
+                  navigate("/staff-notifications");
+                } else {
+                  navigate("/staff-documents");
+                }
+              }}
+            >
+              {from === "home"
+                ? "หน้าหลัก"
+                : from === "history"
+                  ? "ประวัติการลงนาม"
+                  : from === "notifications"
+                    ? "การแจ้งเตือน"
+                    : "เอกสารขออนุมัติหัวข้อโครงงาน"}
+            </span>
+
+            <span>{" > "}รายละเอียดเอกสารขออนุมัติ</span>
+          </h2>
 
           <div className="staff-detail-header-right">
             <button className="staff-detail-bell">
@@ -335,8 +384,7 @@ function StaffDocumentDetail() {
               </p>
 
               <p>
-                <span>เวลา :</span>{" "}
-                {formatThaiTime(document.approved_at)} น.
+                <span>เวลา :</span> {formatThaiTime(document.approved_at)} น.
               </p>
 
               <div className="signature-status-row">

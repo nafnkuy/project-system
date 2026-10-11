@@ -194,11 +194,17 @@ function StaffHome() {
           <ul>
             <li className="active">หน้าหลัก</li>
 
-            <li>เอกสารขออนุมัติหัวข้อโครงงาน</li>
+            <li onClick={() => navigate("/staff-documents")}>
+              เอกสารขออนุมัติหัวข้อโครงงาน
+            </li>
 
-            <li>ประวัติการลงนาม</li>
+            <li onClick={() => navigate("/staff-signature-history")}>
+              ประวัติการลงนาม
+            </li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/staff-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -225,9 +231,7 @@ function StaffHome() {
             <div className="staff-user-info">
               <img
                 src={
-                  profileImage
-                    ? `http://localhost:5000${profileImage}`
-                    : logo
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
                 }
                 alt="Profile"
               />
@@ -266,13 +270,9 @@ function StaffHome() {
               >
                 <option value="ทั้งหมด">การดาวน์โหลดทั้งหมด</option>
 
-                <option value="ดาวน์โหลดแล้ว">
-                  ดาวน์โหลดแล้ว
-                </option>
+                <option value="ดาวน์โหลดแล้ว">ดาวน์โหลดแล้ว</option>
 
-                <option value="ยังไม่ดาวน์โหลด">
-                  ยังไม่ดาวน์โหลด
-                </option>
+                <option value="ยังไม่ดาวน์โหลด">ยังไม่ดาวน์โหลด</option>
               </select>
 
               <span className="staff-select-arrow">▼</span>
@@ -293,17 +293,13 @@ function StaffHome() {
             <div className="staff-summary-card">
               <span>เอกสารที่ได้รับเดือนนี้</span>
 
-              <strong className="staff-month">
-                {dashboard.thisMonth}
-              </strong>
+              <strong className="staff-month">{dashboard.thisMonth}</strong>
             </div>
 
             <div className="staff-summary-card">
               <span>เอกสารที่ได้รับวันนี้</span>
 
-              <strong className="staff-today">
-                {dashboard.today}
-              </strong>
+              <strong className="staff-today">{dashboard.today}</strong>
             </div>
           </div>
 
@@ -366,7 +362,7 @@ function StaffHome() {
                         <button
                           className="staff-detail-btn"
                           onClick={() =>
-                            navigate(`/staff-document/${document.id}`)
+                            navigate(`/staff-document/${document.id}?from=home`)
                           }
                         >
                           รายละเอียด
@@ -380,7 +376,10 @@ function StaffHome() {
             {/* แสดงเฉพาะตอนมีข้อมูล */}
 
             {filteredDocuments.length > 0 && (
-              <button className="staff-view-all-btn">
+              <button
+                className="staff-view-all-btn"
+                onClick={() => navigate("/staff-documents")}
+              >
                 ดูทั้งหมด →
               </button>
             )}

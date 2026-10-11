@@ -19,6 +19,9 @@ import StudentProjectRequestDetail from "./pages/student/StudentProjectRequestDe
 
 import StaffHome from "./pages/Staff/StaffHome";
 import StaffDocumentDetail from "./pages/Staff/StaffDocumentDetail";
+import StaffDocuments from "./pages/Staff/StaffDocuments";
+import StaffSignatureHistory from "./pages/Staff/StaffSignatureHistory";
+import StaffNotifications from "./pages/Staff/StaffNotifications";
 
 function App() {
   return (
@@ -44,6 +47,9 @@ function App() {
 
         <Route path="/staff-home" element={<StaffHome />} />
         <Route path="/staff-document/:id" element={<StaffDocumentDetail />} />
+        <Route path="/staff-documents" element={<StaffDocuments />} />
+        <Route path="/staff-signature-history" element={<StaffSignatureHistory />} />
+        <Route path="/staff-notifications" element={<StaffNotifications />} />
       </Routes>
     </BrowserRouter>
   );

@@ -586,3 +586,16 @@
     white-space: nowrap;
   }
 }
+
+.staff-detail-breadcrumb {
+  display: flex;
+  align-items: center;
+}
+
+.staff-detail-breadcrumb-link {
+  cursor: pointer;
+}
+
+.staff-detail-breadcrumb-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,722 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.staff-documents-page,
+.staff-documents-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.staff-documents-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.staff-documents-page .staff-documents-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #ddd;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.staff-documents-page .staff-documents-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+
+  margin: 0;
+}
+
+.staff-documents-page .staff-documents-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+}
+
+.staff-documents-page .staff-documents-logo h2 {
+  margin: 0;
+
+  color: #111;
+
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.staff-documents-page .staff-documents-logo p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.staff-documents-page .staff-documents-sidebar nav {
+  width: 100%;
+
+  margin: 0;
+}
+
+.staff-documents-page .staff-documents-sidebar ul {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+}
+
+.staff-documents-page .staff-documents-sidebar li {
+  width: 100%;
+
+  margin: 0;
+  padding: 18px 0;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.staff-documents-page .staff-documents-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.staff-documents-page .staff-documents-sidebar li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.staff-documents-page .staff-documents-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.staff-documents-page .staff-documents-logout:hover {
+  background: #2f6db5;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.staff-documents-page .staff-documents-main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.staff-documents-page .staff-documents-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+
+  border: none;
+}
+
+.staff-documents-page .staff-documents-header h2 {
+  margin: 0;
+  padding: 0;
+
+  color: #111;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.staff-documents-page .staff-documents-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+.staff-documents-page .staff-documents-notification {
+  width: 50px;
+  height: 50px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #999;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.staff-documents-page .staff-documents-notification svg {
+  color: #999;
+}
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+.staff-documents-page .staff-documents-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  color: #222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.staff-documents-page .staff-documents-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.staff-documents-page .staff-documents-content {
+  width: 100%;
+
+  padding: 62px 38px 40px;
+}
+
+
+/* =========================================================
+   SEARCH + FILTER
+========================================================= */
+
+.staff-documents-page .staff-documents-toolbar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 0;
+  margin-bottom: 60px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.staff-documents-page .staff-documents-search {
+  width: 450px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+
+  flex-direction: row-reverse;
+
+  padding: 0 14px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+}
+
+.staff-documents-page .staff-documents-search input {
+  flex: 1;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.staff-documents-page
+  .staff-documents-search
+  input::placeholder {
+  color: #999;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.staff-documents-page .staff-documents-search svg {
+  flex-shrink: 0;
+
+  color: #999;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   YEAR FILTER
+========================================================= */
+
+.staff-documents-page .staff-documents-select-wrapper {
+  position: relative;
+
+  width: 150px;
+  height: 36px;
+}
+
+.staff-documents-page .staff-documents-filter {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 34px 0 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+
+  color: #777;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  outline: none;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.staff-documents-page .staff-documents-filter:hover,
+.staff-documents-page .staff-documents-filter:focus {
+  border-color: #b7b7b7;
+
+  outline: none;
+  box-shadow: none;
+}
+
+.staff-documents-page .staff-documents-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  color: #999;
+
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+.staff-documents-page .staff-documents-filter option {
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.staff-documents-page .staff-documents-card {
+  width: 100%;
+
+  margin: 0;
+
+  padding: 22px 26px 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #bbb;
+  border-radius: 9px;
+
+  box-shadow: none;
+}
+
+.staff-documents-page .staff-documents-card h3 {
+  margin: 0 0 14px;
+  padding: 0;
+
+  color: #222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.staff-documents-page .staff-documents-table {
+  width: 100%;
+
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  table-layout: fixed;
+
+  color: #222;
+}
+
+.staff-documents-page .staff-documents-table th,
+.staff-documents-page .staff-documents-table td {
+  border-left: none;
+  border-right: none;
+  border-top: none;
+
+  border-bottom: 1px solid #ddd;
+
+  padding: 9px 5px;
+
+  background: #ffffff;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+.staff-documents-page .staff-documents-table th {
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.staff-documents-page .staff-documents-table td {
+  height: 52px;
+
+  padding-top: 9px;
+  padding-bottom: 9px;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
+
+/* อาจารย์ผู้อนุมัติ */
+
+.staff-documents-page
+  .staff-documents-table
+  th:nth-child(1),
+.staff-documents-page
+  .staff-documents-table
+  td:nth-child(1) {
+  width: 22%;
+}
+
+
+/* ชื่อหัวข้อโครงงาน */
+
+.staff-documents-page
+  .staff-documents-table
+  th:nth-child(2),
+.staff-documents-page
+  .staff-documents-table
+  td:nth-child(2) {
+  width: 31%;
+}
+
+
+/* การดาวน์โหลด */
+
+.staff-documents-page
+  .staff-documents-table
+  th:nth-child(3),
+.staff-documents-page
+  .staff-documents-table
+  td:nth-child(3) {
+  width: 17%;
+}
+
+
+/* วันที่อนุมัติ */
+
+.staff-documents-page
+  .staff-documents-table
+  th:nth-child(4),
+.staff-documents-page
+  .staff-documents-table
+  td:nth-child(4) {
+  width: 18%;
+}
+
+
+/* จัดการ */
+
+.staff-documents-page
+  .staff-documents-table
+  th:nth-child(5),
+.staff-documents-page
+  .staff-documents-table
+  td:nth-child(5) {
+  width: 12%;
+}
+
+
+/* =========================================================
+   PROJECT TITLE
+========================================================= */
+
+.staff-documents-page .staff-documents-project-title {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.staff-documents-page .staff-documents-detail-btn {
+  min-width: 74px;
+  height: 28px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #222;
+
+  border: 1px solid #bbb;
+  border-radius: 3px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.staff-documents-page .staff-documents-detail-btn:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.staff-documents-page .staff-documents-message {
+  height: 80px !important;
+
+  color: #888 !important;
+
+  font-size: 13px !important;
+  font-weight: 400 !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  border-bottom: none !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.staff-documents-page .staff-documents-pagination {
+  width: 100%;
+
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 8px;
+}
+
+.staff-documents-page
+  .staff-documents-pagination
+  button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  color: #222;
+
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.staff-documents-page
+  .staff-documents-pagination
+  button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+.staff-documents-page
+  .staff-documents-pagination
+  button:disabled {
+  color: #ccc;
+
+  cursor: default;
+}
+
+.staff-documents-page
+  .staff-documents-pagination
+  span {
+  min-width: 20px;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .staff-documents-page .staff-documents-content {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .staff-documents-page .staff-documents-search {
+    width: 380px;
+  }
+}
