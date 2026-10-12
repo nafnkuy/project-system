@@ -1,8 +1,8 @@
 import "./TeacherRequestDetail.css";
+import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBell } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -406,9 +406,7 @@ function TeacherRequestDetail() {
 
           <div className="header-right">
             {/* Notification */}
-            <button className="notification-btn">
-              <FaBell />
-            </button>
+            <TeacherNotificationBell />
 
             {/* User */}
             <div className="user-info">

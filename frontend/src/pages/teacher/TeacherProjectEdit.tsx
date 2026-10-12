@@ -1,8 +1,9 @@
 import "./TeacherProjectEdit.css";
+import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { FaBell, FaPaperclip } from "react-icons/fa";
+
 
 import logo from "../../assets/Logo.svg";
 
@@ -209,9 +210,7 @@ function TeacherProjectEdit() {
           </div>
 
           <div className="header-right">
-            <button className="notification-btn">
-              <FaBell />
-            </button>
+            <TeacherNotificationBell />
 
             <div className="user-info">
               <img

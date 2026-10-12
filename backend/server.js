@@ -185,59 +185,154 @@ app.get("/projects/:id", (req, res) => {
 });
 
 app.post("/project-requests", (req, res) => {
-  const { project_id, student_id, contact_type, contact_value, introduction } =
-    req.body;
+  const {
+    project_id,
+    student_id,
+    contact_type,
+    contact_value,
+    introduction,
+  } = req.body;
 
   const checkSql = `
     SELECT id
     FROM project_requests
     WHERE student_id = ?
       AND status IN ('รอพิจารณา','อนุมัติ')
-`;
+  `;
 
-  db.query(checkSql, [student_id], (err, rows) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Database Error",
-      });
-    }
+  db.query(
+    checkSql,
+    [student_id],
+    (err, rows) => {
 
-    if (rows.length > 0) {
-      return res.status(400).json({
-        message: "คุณมีใบสมัครที่กำลังรอพิจารณาหรือได้รับการอนุมัติแล้ว",
-      });
-    }
-
-    const insertSql = `
-      INSERT INTO project_requests
-      (
-        project_id,
-        student_id,
-        contact_type,
-        contact_value,
-        introduction,
-        status
-      )
-      VALUES (?, ?, ?, ?, ?, 'รอพิจารณา')
-    `;
-
-    db.query(
-      insertSql,
-      [project_id, student_id, contact_type, contact_value, introduction],
-      (err, result) => {
-        if (err) {
-          return res.status(500).json({
-            message: "Database Error",
-          });
-        }
-
-        res.json({
-          success: true,
-          id: result.insertId,
+      if (err) {
+        return res.status(500).json({
+          message: "Database Error",
         });
-      },
-    );
-  });
+      }
+
+      if (rows.length > 0) {
+        return res.status(400).json({
+          message:
+            "คุณมีใบสมัครที่กำลังรอพิจารณาหรือได้รับการอนุมัติแล้ว",
+        });
+      }
+
+
+      /* ==========================================
+         1. สร้างคำขอ
+      ========================================== */
+
+      const insertSql = `
+        INSERT INTO project_requests
+        (
+          project_id,
+          student_id,
+          contact_type,
+          contact_value,
+          introduction,
+          status
+        )
+        VALUES (?, ?, ?, ?, ?, 'รอพิจารณา')
+      `;
+
+      db.query(
+        insertSql,
+        [
+          project_id,
+          student_id,
+          contact_type,
+          contact_value,
+          introduction,
+        ],
+        (err, result) => {
+
+          if (err) {
+            return res.status(500).json({
+              message: "Database Error",
+            });
+          }
+
+          const requestId =
+            result.insertId;
+
+
+          /* ==========================================
+             2. แจ้งเตือนอาจารย์ที่ปรึกษา
+          ========================================== */
+
+          const notificationSql = `
+            INSERT INTO notifications
+            (
+              user_id,
+              message,
+              request_id,
+              project_id
+            )
+
+            SELECT
+              p.advisor_id,
+
+              CASE
+                WHEN p.source = 'student'
+                THEN CONCAT(
+                  s.name,
+                  ' ส่งคำเสนอหัวข้อโครงงาน "',
+                  p.title,
+                  '" มาให้คุณพิจารณา'
+                )
+
+                ELSE CONCAT(
+                  s.name,
+                  ' ส่งคำขอสมัครเข้าร่วมโครงงาน "',
+                  p.title,
+                  '" มาให้คุณพิจารณา'
+                )
+              END,
+
+              ?,
+              p.id
+
+            FROM projects p
+
+            INNER JOIN users s
+              ON s.id = ?
+
+            WHERE p.id = ?
+              AND p.advisor_id IS NOT NULL
+          `;
+
+
+          db.query(
+            notificationSql,
+            [
+              requestId,
+              student_id,
+              project_id,
+            ],
+            (notificationErr) => {
+
+              if (notificationErr) {
+                console.log(
+                  "Teacher notification error:",
+                  notificationErr,
+                );
+              }
+
+
+              res.json({
+                success: true,
+                id: requestId,
+              });
+
+            },
+          );
+
+        },
+      );
+
+    },
+  );
 });
 
 app.get("/project-requests/check/:projectId/:studentId", (req, res) => {

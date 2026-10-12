@@ -1,8 +1,9 @@
 import "./TeacherProjects.css";
+import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBell, FaPlus, FaSearch, FaEllipsisV } from "react-icons/fa";
+import {FaPlus, FaSearch, FaEllipsisV } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -367,9 +368,7 @@ function TeacherProjects() {
           <h2>จัดการหัวข้อโครงงาน</h2>
 
           <div className="header-right">
-            <button className="notification-btn">
-              <FaBell />
-            </button>
+            <TeacherNotificationBell />
 
             <div className="user-info">
               <img

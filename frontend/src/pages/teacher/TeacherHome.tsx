@@ -1,8 +1,9 @@
 import "./TeacherHome.css";
+import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react"; //ใช้ตรวจสอบการเข้าสู่ระบบ
 import axios from "axios";
-import { FaBell, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -31,8 +32,6 @@ function TeacherHome() {
   const userId = sessionStorage.getItem("userId"); //ดึงค่ารหัสประจำตัวจาก sessionStorage
   const username = sessionStorage.getItem("username");
   const profileImage = sessionStorage.getItem("profileImage");
-
-  const [showNotifications, setShowNotifications] = useState(false);
 
   const [requests, setRequests] = useState<Request[]>([]);
   const [dashboard, setDashboard] = useState<Dashboard>({
@@ -100,19 +99,6 @@ function TeacherHome() {
 
     return "ไม่พบคำขอ";
   };
-
-  const notifications = [
-    {
-      id: 1,
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-      time: "2 ชั่วโมงที่แล้ว",
-    },
-    {
-      id: 2,
-      message: "ส่งคำขอเลือกหัวข้อสำเร็จ",
-      time: "1 วันที่แล้ว",
-    },
-  ];
 
   useEffect(() => {
     //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
@@ -208,33 +194,7 @@ function TeacherHome() {
           <h2>หน้าหลัก</h2>
 
           <div className="header-right">
-            <div className="notification-box">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <FaBell />
-
-                  <span className="notification-count">
-                    {notifications.length}
-                  </span>
-                </button>
-
-                {showNotifications && (
-                  <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
-
-                    {notifications.map((item) => (
-                      <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-                        <small>{item.time}</small>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <TeacherNotificationBell />
 
             <div className="user-info">
               <img
