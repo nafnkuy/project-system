@@ -1,0 +1,249 @@
+/* =========================================================
+   NOTIFICATION WRAPPER
+========================================================= */
+
+.student-notification-wrapper {
+  position: relative;
+}
+
+
+/* =========================================================
+   BELL
+========================================================= */
+
+.student-notification-btn {
+  position: relative;
+
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  background: #ffffff;
+  color: #999999;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  font-size: 18px;
+
+  cursor: pointer;
+}
+
+.student-notification-btn svg {
+  color: #999999;
+}
+
+
+/* =========================================================
+   BADGE
+========================================================= */
+
+.student-notification-count {
+  position: absolute;
+
+  top: -7px;
+  right: -5px;
+
+  min-width: 19px;
+  height: 19px;
+
+  padding: 0 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: red;
+  color: #ffffff;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   DROPDOWN
+========================================================= */
+
+.student-notification-dropdown {
+  position: absolute;
+
+  top: 58px;
+  right: 0;
+
+  width: 310px;
+
+  max-height: 420px;
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+
+  box-shadow:
+    0 4px 12px
+    rgba(0, 0, 0, 0.15);
+
+  z-index: 1000;
+}
+
+
+.student-notification-dropdown h4 {
+  margin: 0;
+
+  padding: 16px;
+
+  border-bottom: 1px solid #eeeeee;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   ITEM
+========================================================= */
+
+.student-notification-item {
+  padding: 14px 16px;
+
+  border-bottom: 1px solid #eeeeee;
+
+  cursor: pointer;
+}
+
+.student-notification-item:hover {
+  background: #f7f7f7;
+}
+
+.student-notification-item p {
+  margin: 0 0 5px;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.student-notification-item small {
+  color: #999999;
+
+  font-size: 9px;
+}
+
+
+.student-notification-empty {
+  padding: 20px;
+
+  text-align: center;
+
+  color: #999999;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   POPUP
+========================================================= */
+
+.student-notification-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(0, 0, 0, 0.45);
+
+  z-index: 9999;
+}
+
+
+.student-notification-popup {
+  width: 430px;
+
+  padding: 30px 38px;
+
+  background: #ffffff;
+
+  border: 1px solid #666666;
+  border-radius: 8px;
+}
+
+
+.student-notification-popup h3 {
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 16px;
+}
+
+
+.student-notification-divider {
+  height: 1px;
+
+  margin: 20px 0;
+
+  background: #dddddd;
+}
+
+
+.student-notification-message {
+  white-space: pre-line;
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+
+.student-notification-question {
+  text-align: center;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.student-notification-actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 15px;
+
+  margin-top: 20px;
+}
+
+
+.student-notification-actions button {
+  min-width: 100px;
+
+  padding: 10px 15px;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+
+.student-notification-reject {
+  background: #ff0000;
+}
+
+
+.student-notification-accept {
+  background: #20a36a;
+}

@@ -1,4 +1,5 @@
 import "./TeacherList.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -114,9 +115,9 @@ function TeacherList() {
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li>โครงงานของฉัน</li>
+            <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -136,9 +137,7 @@ function TeacherList() {
           <h2>รายชื่ออาจารย์</h2>
 
           <div className="teacher-list-header-right">
-            <button className="teacher-list-bell" type="button">
-              <FaBell />
-            </button>
+            <StudentNotificationBell />
 
             <div className="teacher-list-user">
               <img

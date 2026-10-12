@@ -34,6 +34,8 @@ interface SystemNotification {
 
   message: string;
 
+  is_read: number;
+
   request_id: number | null;
 
   project_id: number | null;
@@ -119,6 +121,10 @@ function StudentHome() {
   const [systemNotifications, setSystemNotifications] = useState<
     SystemNotification[]
   >([]);
+
+  const unreadSystemCount = systemNotifications.filter(
+    (item) => item.is_read === 0,
+  ).length;
 
   /* ---------- SELECTED POPUP ---------- */
 
@@ -224,12 +230,46 @@ function StudentHome() {
       .then((res) => {
         console.log("System Notifications =", res.data);
 
+        // เอามาแสดงในกระดิ่งเฉพาะที่ยังไม่ได้อ่าน
+        const unreadNotifications = res.data.filter(
+          (item: SystemNotification) => item.is_read === 0,
+        );
+
         setSystemNotifications(res.data);
       })
       .catch((err) => {
         console.log("Get notifications error:", err);
       });
   }, [userId]);
+
+  /* =========================================================
+   OPEN SYSTEM NOTIFICATION
+========================================================= */
+
+  const handleSystemNotificationClick = async (item: SystemNotification) => {
+    try {
+      // บันทึกว่าอ่านแล้วในฐานข้อมูล
+      if (item.is_read === 0) {
+        await axios.put(`http://localhost:5000/notifications/${item.id}/read`);
+      }
+
+      // เปิด popup รายละเอียด
+      setSelectedSystemNotification({
+        ...item,
+        is_read: 1,
+      });
+
+      // เอาแจ้งเตือนที่กดแล้วออกจากกล่อง
+      setSystemNotifications((prev) =>
+        prev.filter((notification) => notification.id !== item.id),
+      );
+
+      // ปิด dropdown
+      setShowNotifications(false);
+    } catch (err) {
+      console.log("Mark notification read error:", err);
+    }
+  };
 
   /* =========================================================
      ACCEPT INVITATION
@@ -354,7 +394,9 @@ function StudentHome() {
 
             <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -392,9 +434,9 @@ function StudentHome() {
 
                   {/* จำนวนแจ้งเตือน */}
 
-                  {notifications.length + systemNotifications.length > 0 && (
+                  {notifications.length + unreadSystemCount > 0 && (
                     <span className="notification-count">
-                      {notifications.length + systemNotifications.length}
+                      {notifications.length + unreadSystemCount}
                     </span>
                   )}
                 </button>
@@ -431,11 +473,7 @@ function StudentHome() {
                       <div
                         key={`notification-${item.id}`}
                         className="notification-item"
-                        onClick={() => {
-                          setSelectedSystemNotification(item);
-
-                          setShowNotifications(false);
-                        }}
+                        onClick={() => handleSystemNotificationClick(item)}
                       >
                         <p>{item.message.split("\n")[0]}</p>
 

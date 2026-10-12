@@ -1,4 +1,5 @@
 import "./ProjectDetail.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -160,8 +161,8 @@ function ProjectDetail() {
             <li onClick={() => navigate("/submit-new-project")}>
               ส่งคำเสนอโครงงานใหม่
             </li>
-            <li>โครงงานของฉัน</li>
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
+            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
             <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
@@ -184,33 +185,7 @@ function ProjectDetail() {
           </div>
 
           <div className="header-right">
-            <div className="notification-box">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <FaBell />
-
-                  <span className="notification-count">
-                    {notifications.length}
-                  </span>
-                </button>
-
-                {showNotifications && (
-                  <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
-
-                    {notifications.map((item) => (
-                      <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-                        <small>{item.time}</small>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <StudentNotificationBell />
 
             <div className="user-info">
               <img

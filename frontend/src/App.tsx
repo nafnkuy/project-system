@@ -8,6 +8,7 @@ import SubmitNewProject from "./pages/student/SubmitNewProject";
 import TeacherList from "./pages/student/TeacherList";
 import TeacherDetail from "./pages/student/TeacherDetail";
 import StudentProject from "./pages/student/StudentProject";
+import StudentNotifications from "./pages/student/StudentNotifications";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -37,6 +38,7 @@ function App() {
         <Route path="/teacher-detail/:teacherId" element={<TeacherDetail />} />
         <Route path="/student-project" element={<StudentProject />} />
         <Route path="/student-project-request-detail/:requestId/:studentId" element={<StudentProjectRequestDetail />} />
+        <Route path="/student-notifications" element={<StudentNotifications />} />
 
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />

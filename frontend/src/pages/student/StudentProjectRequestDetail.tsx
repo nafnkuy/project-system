@@ -1,8 +1,9 @@
 import "./StudentProjectRequestDetail.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBell } from "react-icons/fa";
+
 import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
@@ -336,7 +337,7 @@ function StudentProjectRequestDetail() {
               โครงงานของฉัน
             </li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -356,9 +357,7 @@ function StudentProjectRequestDetail() {
           <h2>โครงงานของฉัน &gt; รายละเอียดคำขอ</h2>
 
           <div className="student-request-header-right">
-            <button className="student-request-bell">
-              <FaBell />
-            </button>
+            <StudentNotificationBell />
 
             <div className="student-request-user">
               <img

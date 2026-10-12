@@ -1,8 +1,9 @@
 import "./ApplyProject.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { FaBell } from "react-icons/fa";
+
 import logo from "../../assets/Logo.svg";
 
 interface Project {
@@ -25,8 +26,6 @@ function ApplyProject() {
   const { id } = useParams();
 
   const [project, setProject] = useState<Project | null>(null);
-
-  const [showNotifications, setShowNotifications] = useState(false);
 
   const [contactType, setContactType] = useState("");
 
@@ -53,24 +52,6 @@ function ApplyProject() {
   const name = sessionStorage.getItem("name");
 
   const profileImage = sessionStorage.getItem("profileImage");
-
-  const notifications = [
-    {
-      id: 1,
-
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-
-      time: "2 ชั่วโมงที่แล้ว",
-    },
-
-    {
-      id: 2,
-
-      message: "ส่งคำขอเลือกหัวข้อสำเร็จ",
-
-      time: "1 วันที่แล้ว",
-    },
-  ];
 
   const handleLogout = () => {
     sessionStorage.removeItem("userId");
@@ -230,7 +211,9 @@ function ApplyProject() {
 
             <li>โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -278,38 +261,7 @@ function ApplyProject() {
           <div className="header-right">
             {/* NOTIFICATION */}
 
-            <div className="notification-box">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <FaBell />
-
-                  {notifications.length > 0 && (
-                    <span className="notification-count">
-                      {notifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {/* DROPDOWN */}
-
-                {showNotifications && (
-                  <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
-
-                    {notifications.map((item) => (
-                      <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-
-                        <small>{item.time}</small>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <StudentNotificationBell />
 
             {/* USER */}
 

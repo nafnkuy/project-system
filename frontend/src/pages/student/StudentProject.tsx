@@ -1,8 +1,9 @@
 import "./StudentProject.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBell } from "react-icons/fa";
+
 import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
@@ -240,7 +241,7 @@ function StudentProject() {
 
             <li className="active">โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -264,9 +265,7 @@ function StudentProject() {
           <h2>โครงงานของฉัน</h2>
 
           <div className="student-project-header-right">
-            <button className="student-project-notification">
-              <FaBell />
-            </button>
+            <StudentNotificationBell />
 
             <div className="student-project-user">
               <img

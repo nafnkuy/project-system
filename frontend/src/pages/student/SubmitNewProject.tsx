@@ -1,9 +1,10 @@
 import "./SubmitNewProject.css";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBell, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -692,9 +693,9 @@ function SubmitNewProject() {
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li>โครงงานของฉัน</li>
+            <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -718,34 +719,7 @@ function SubmitNewProject() {
           <h2>{isResubmit ? "แก้ไขคำเสนอโครงงาน" : "ส่งคำเสนอโครงงานใหม่"}</h2>
 
           <div className="header-right">
-            <div className="notification-box">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <FaBell />
-
-                  <span className="notification-count">
-                    {notifications.length}
-                  </span>
-                </button>
-
-                {showNotifications && (
-                  <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
-
-                    {notifications.map((item) => (
-                      <div key={item.id} className="notification-item">
-                        <p>{item.message}</p>
-
-                        <small>{item.time}</small>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <StudentNotificationBell />
 
             <div className="user-info">
               <img
