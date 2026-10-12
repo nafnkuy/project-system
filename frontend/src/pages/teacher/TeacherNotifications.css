@@ -1,0 +1,617 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+.teacher-notifications-page,
+.teacher-notifications-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.teacher-notifications-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background: #f5f5f5;
+}
+
+
+/* ================= SIDEBAR ================= */
+
+.teacher-notifications-page
+.teacher-notifications-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows:
+    auto 1fr auto;
+
+  background: #ffffff;
+
+  border-right:
+    1px solid #dddddd;
+
+  z-index: 100;
+}
+
+
+/* ================= LOGO ================= */
+
+.teacher-notifications-page
+.teacher-notifications-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+}
+
+.teacher-notifications-page
+.teacher-notifications-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+.teacher-notifications-page
+.teacher-notifications-logo > div {
+  min-width: 0;
+}
+
+.teacher-notifications-page
+.teacher-notifications-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.teacher-notifications-page
+.teacher-notifications-logo p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* ================= NAV ================= */
+
+.teacher-notifications-page
+.teacher-notifications-sidebar nav {
+  width: 100%;
+
+  margin: 0;
+}
+
+.teacher-notifications-page
+.teacher-notifications-sidebar ul {
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.teacher-notifications-page
+.teacher-notifications-sidebar li {
+  width: 100%;
+
+  margin: 0;
+
+  padding: 18px 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.teacher-notifications-page
+.teacher-notifications-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.teacher-notifications-page
+.teacher-notifications-sidebar li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* ================= LOGOUT ================= */
+
+.teacher-notifications-page
+.teacher-notifications-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.teacher-notifications-page
+.teacher-notifications-logout:hover {
+  background: #2f6db5;
+}
+
+
+/* ================= MAIN ================= */
+
+.teacher-notifications-page
+.teacher-notifications-main {
+  width: calc(100% - 250px);
+
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* ================= HEADER ================= */
+
+.teacher-notifications-page
+.teacher-notifications-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+}
+
+.teacher-notifications-page
+.teacher-notifications-header h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.teacher-notifications-page
+.teacher-notifications-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+/* ================= USER ================= */
+
+.teacher-notifications-page
+.teacher-notifications-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  border:
+    1px solid #dddddd;
+
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.teacher-notifications-page
+.teacher-notifications-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* ================= CONTENT ================= */
+
+.teacher-notifications-page
+.teacher-notifications-content {
+  width: 100%;
+
+  padding: 0 38px 35px;
+}
+
+
+/* ================= TOOLBAR ================= */
+
+.teacher-notifications-page
+.teacher-notifications-toolbar {
+  width: 100%;
+
+  margin: 62px 0 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+
+/* ================= SEARCH ================= */
+
+.teacher-notifications-page
+.teacher-notifications-search {
+  width: 450px;
+  height: 36px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  background: #ffffff;
+
+  border:
+    1px solid #b7b7b7;
+
+  border-radius: 20px;
+}
+
+.teacher-notifications-page
+.teacher-notifications-search input {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.teacher-notifications-page
+.teacher-notifications-search input::placeholder {
+  color: #999999;
+
+  font-size: 12px;
+}
+
+.teacher-notifications-page
+.teacher-notifications-search svg {
+  flex-shrink: 0;
+
+  color: #999999;
+
+  font-size: 15px;
+}
+
+
+/* ================= FILTER ================= */
+
+.teacher-notifications-page
+.teacher-notifications-select-wrapper {
+  position: relative;
+
+  width: 120px;
+  height: 36px;
+}
+
+.teacher-notifications-page
+.teacher-notifications-filter {
+  width: 100%;
+  height: 36px;
+
+  padding: 0 30px 0 14px;
+
+  appearance: none;
+
+  border:
+    1px solid #b7b7b7;
+
+  border-radius: 20px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #666666;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.teacher-notifications-page
+.teacher-notifications-select-arrow {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  transform:
+    translateY(-50%);
+
+  color: #999999;
+
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+
+/* ================= CARD ================= */
+
+.teacher-notifications-page
+.teacher-notifications-card {
+  width: 100%;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border:
+    1px solid #bbbbbb;
+
+  border-radius: 9px;
+
+  box-shadow: none;
+}
+
+
+/* ================= ROW ================= */
+
+.teacher-notifications-page
+.teacher-notifications-row {
+  width: 100%;
+
+  min-height: 58px;
+
+  padding: 9px 26px;
+
+  display: grid;
+
+  grid-template-columns:
+    32px
+    minmax(0, 1fr)
+    190px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border-bottom:
+    1px solid #dddddd;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  cursor: pointer;
+}
+
+.teacher-notifications-page
+.teacher-notifications-row:hover {
+  background: #f5f5f5;
+}
+
+.teacher-notifications-page
+.teacher-notifications-row.unread {
+  color: #222222;
+
+  font-weight: 500;
+}
+
+.teacher-notifications-page
+.teacher-notifications-row.read {
+  color: #777777;
+
+  font-weight: 400;
+}
+
+
+/* ================= DOT ================= */
+
+.teacher-notifications-page
+.teacher-notifications-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+}
+
+
+/* ================= MESSAGE ================= */
+
+.teacher-notifications-page
+.teacher-notifications-message {
+  min-width: 0;
+
+  color: inherit;
+
+  font-size: 13px;
+  font-weight: inherit;
+
+  line-height: 1.5;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* ================= DATE ================= */
+
+.teacher-notifications-page
+.teacher-notifications-date {
+  color: inherit;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  text-align: right;
+
+  white-space: nowrap;
+}
+
+
+/* ================= EMPTY ================= */
+
+.teacher-notifications-page
+.teacher-notifications-empty {
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #888888;
+
+  font-size: 13px;
+}
+
+
+/* ================= PAGINATION ================= */
+
+.teacher-notifications-page
+.teacher-notifications-pagination {
+  width: 100%;
+
+  padding: 12px 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.teacher-notifications-page
+.teacher-notifications-pagination button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  border:
+    1px solid #cccccc;
+
+  border-radius: 5px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.teacher-notifications-page
+.teacher-notifications-pagination button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+.teacher-notifications-page
+.teacher-notifications-pagination button:disabled {
+  color: #aaaaaa;
+
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.teacher-notifications-page
+.teacher-notifications-pagination span {
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 800px) {
+
+  .teacher-notifications-page
+  .teacher-notifications-main {
+    overflow-x: auto;
+  }
+
+  .teacher-notifications-page
+  .teacher-notifications-content {
+    min-width: 850px;
+  }
+
+}
