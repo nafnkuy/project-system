@@ -69,6 +69,47 @@ app.post("/login", (req, res) => {
   });
 });
 
+// ==========================================
+// ข้อมูลส่วนตัวเจ้าหน้าที่
+// ==========================================
+
+app.get("/staff/profile/:staffId", (req, res) => {
+  const { staffId } = req.params;
+
+  const sql = `
+    SELECT
+      id,
+      username,
+      prefix,
+      name,
+      role,
+      profile_image,
+      phone,
+      email
+    FROM users
+    WHERE id = ?
+      AND role = 'staff'
+  `;
+
+  db.query(sql, [staffId], (err, results) => {
+    if (err) {
+      console.log("Get staff profile error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลเจ้าหน้าที่",
+      });
+    }
+
+    res.json(results[0]);
+  });
+});
+
 app.get("/projects", (req, res) => {
   const sql = `
     SELECT

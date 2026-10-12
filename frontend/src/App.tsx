@@ -22,6 +22,7 @@ import StaffDocumentDetail from "./pages/Staff/StaffDocumentDetail";
 import StaffDocuments from "./pages/Staff/StaffDocuments";
 import StaffSignatureHistory from "./pages/Staff/StaffSignatureHistory";
 import StaffNotifications from "./pages/Staff/StaffNotifications";
+import StaffProfile from "./pages/Staff/StaffProfile";
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
         <Route path="/staff-documents" element={<StaffDocuments />} />
         <Route path="/staff-signature-history" element={<StaffSignatureHistory />} />
         <Route path="/staff-notifications" element={<StaffNotifications />} />
+        <Route path="/staff-profile" element={<StaffProfile />} />
       </Routes>
     </BrowserRouter>
   );
