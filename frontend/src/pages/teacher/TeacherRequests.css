@@ -1,0 +1,977 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
+
+
+/* =========================================================
+   RESET
+   เหมือน TeacherHome / TeacherDecisionHistory
+========================================================= */
+
+.teacher-requests-page,
+.teacher-requests-page * {
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+
+  font-family: "Prompt", sans-serif;
+}
+
+
+.teacher-requests-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.teacher-requests-page .teacher-requests-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
+  display: grid;
+
+  grid-template-rows:
+    auto
+    1fr
+    auto;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.teacher-requests-page .teacher-requests-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+
+  margin-bottom: 0;
+}
+
+
+.teacher-requests-page .teacher-requests-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+
+.teacher-requests-page .teacher-requests-logo > div {
+  min-width: 0;
+}
+
+
+.teacher-requests-page .teacher-requests-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.teacher-requests-page .teacher-requests-logo p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.teacher-requests-page .teacher-requests-sidebar nav {
+  width: 100%;
+
+  margin: 0;
+}
+
+
+.teacher-requests-page .teacher-requests-sidebar nav ul {
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+
+.teacher-requests-page .teacher-requests-sidebar nav li {
+  width: 100%;
+
+  margin: 0;
+
+  padding: 18px 0;
+
+  border-radius: 0;
+
+  color: #222222;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 14px !important;
+  font-weight: 400;
+
+  line-height: 1.5;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+
+.teacher-requests-page .teacher-requests-sidebar nav li:hover {
+  background: #f0f0f0;
+}
+
+
+/* =========================================================
+   ACTIVE MENU
+========================================================= */
+
+.teacher-requests-page .teacher-requests-sidebar nav li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.teacher-requests-page .teacher-requests-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.teacher-requests-page .teacher-requests-logout:hover {
+  background: #2f6db5;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.teacher-requests-page .teacher-requests-main {
+  width: calc(100% - 250px);
+
+  min-width: 0;
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.teacher-requests-page .teacher-requests-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+
+  border: none;
+}
+
+
+.teacher-requests-page .teacher-requests-header h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 20px !important;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
+.teacher-requests-page .teacher-requests-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   TEACHER NOTIFICATION BELL
+========================================================= */
+
+.teacher-requests-page .teacher-notification-wrapper {
+  position: relative;
+
+  width: 50px;
+  height: 50px;
+}
+
+
+.teacher-requests-page .teacher-notification-btn {
+  position: relative;
+
+  width: 50px;
+  height: 50px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  color: #999999;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+
+.teacher-requests-page .teacher-notification-btn:hover {
+  background: #f7f7f7;
+}
+
+
+.teacher-requests-page .teacher-notification-btn svg {
+  color: #999999;
+}
+
+
+/* =========================================================
+   NOTIFICATION COUNT
+========================================================= */
+
+.teacher-requests-page .teacher-notification-count {
+  position: absolute;
+
+  top: -7px;
+  right: -8px;
+
+  min-width: 17px;
+  height: 17px;
+
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: red;
+
+  color: #ffffff;
+
+  border-radius: 50%;
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+.teacher-requests-page .teacher-requests-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+
+.teacher-requests-page .teacher-requests-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.teacher-requests-page .teacher-requests-content {
+  width: 100%;
+
+  padding: 32px 38px 40px;
+}
+
+
+/* =========================================================
+   SEARCH + FILTER
+========================================================= */
+
+.teacher-requests-page .teacher-requests-toolbar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 0;
+  margin-bottom: 28px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.teacher-requests-page .teacher-requests-search {
+  width: 450px;
+  height: 36px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  background: #ffffff;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+}
+
+
+.teacher-requests-page .teacher-requests-search svg {
+  flex-shrink: 0;
+
+  color: #999999;
+
+  font-size: 15px;
+
+  pointer-events: none;
+}
+
+
+.teacher-requests-page .teacher-requests-search input {
+  flex: 1;
+
+  min-width: 0;
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+.teacher-requests-page
+.teacher-requests-search
+input::placeholder {
+  color: #999999;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.teacher-requests-page .teacher-requests-select-wrapper {
+  position: relative;
+
+  width: 135px;
+  height: 36px;
+}
+
+
+.teacher-requests-page .teacher-requests-filter {
+  width: 100%;
+  height: 100%;
+
+  padding: 0 32px 0 18px;
+
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #777777;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+
+.teacher-requests-page .teacher-requests-filter:focus {
+  border-color: #b7b7b7;
+
+  outline: none;
+
+  box-shadow: none;
+}
+
+
+.teacher-requests-page .teacher-requests-filter option {
+  font-size: 11px;
+}
+
+
+.teacher-requests-page .teacher-requests-select-arrow {
+  position: absolute;
+
+  right: 14px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #999999;
+
+  font-size: 8px;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.teacher-requests-page .teacher-requests-card {
+  width: 100%;
+
+  margin: 0;
+
+  padding: 22px 26px 12px;
+
+  overflow-x: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   CARD TITLE
+========================================================= */
+
+.teacher-requests-page .teacher-requests-card h3 {
+  margin: 0 0 14px;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.teacher-requests-page .teacher-requests-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  table-layout: fixed;
+
+  color: #222222;
+}
+
+
+/* =========================================================
+   TABLE CELL
+========================================================= */
+
+.teacher-requests-page .teacher-requests-table th,
+.teacher-requests-page .teacher-requests-table td {
+  padding: 9px 5px;
+
+  border: none;
+  border-bottom: 1px solid #dddddd;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+
+  vertical-align: middle;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.teacher-requests-page .teacher-requests-table th {
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  background: #ffffff;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+/* แถวสุดท้ายไม่มีเส้น */
+
+.teacher-requests-page
+.teacher-requests-table
+tbody
+tr:last-child
+td {
+  border-bottom: none;
+}
+
+
+/* =========================================================
+   COLUMN WIDTH
+========================================================= */
+
+
+/* 1. ประเภท */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(1),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(1) {
+  width: 15%;
+}
+
+
+/* 2. รหัสประจำตัว */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(2),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(2) {
+  width: 11%;
+}
+
+
+/* 3. ชื่อนิสิต */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(3),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(3) {
+  width: 15%;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* 4. ชื่อหัวข้อโครงงาน */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(4),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(4) {
+  width: 25%;
+
+  max-width: 260px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* 5. วันเวลาที่ส่งคำขอ */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(5),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(5) {
+  width: 17%;
+}
+
+
+/* 6. สถานะ */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(6),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(6) {
+  width: 9%;
+}
+
+
+/* 7. จัดการ */
+
+.teacher-requests-page
+.teacher-requests-table
+th:nth-child(7),
+
+.teacher-requests-page
+.teacher-requests-table
+td:nth-child(7) {
+  width: 8%;
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.teacher-requests-page .teacher-requests-message {
+  height: 80px !important;
+
+  padding: 30px !important;
+
+  border-bottom: none !important;
+
+  color: #888888 !important;
+
+  font-size: 13px !important;
+  font-weight: 400 !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.teacher-requests-page .teacher-requests-status {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 78px;
+  height: 25px;
+
+  padding: 0 12px;
+
+  border-radius: 14px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+
+/* รอพิจารณา */
+
+.teacher-requests-page
+.teacher-requests-status.pending {
+  background: #ffbd00;
+
+  color: #ffffff;
+}
+
+
+/* แก้ไขแล้ว */
+
+.teacher-requests-page
+.teacher-requests-status.resubmitted {
+  background: #3b75c4;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.teacher-requests-page .teacher-requests-detail-btn {
+  min-width: 74px;
+  height: 28px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 3px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.teacher-requests-page
+.teacher-requests-detail-btn:hover {
+  background: #f2f2f2;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.teacher-requests-page .teacher-requests-pagination {
+  width: 100%;
+
+  margin-top: 15px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+}
+
+
+.teacher-requests-page
+.teacher-requests-pagination
+button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.teacher-requests-page
+.teacher-requests-pagination
+button:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+
+.teacher-requests-page
+.teacher-requests-pagination
+button:disabled {
+  color: #aaaaaa;
+
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+
+.teacher-requests-page
+.teacher-requests-pagination
+span {
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .teacher-requests-page
+  .teacher-requests-table {
+    min-width: 1050px;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .teacher-requests-page
+  .teacher-requests-main {
+    width: calc(100% - 250px);
+
+    margin-left: 250px;
+
+    overflow-x: auto;
+  }
+
+
+  .teacher-requests-page
+  .teacher-requests-content {
+    min-width: 900px;
+
+    padding: 25px 38px;
+  }
+
+
+  .teacher-requests-page
+  .teacher-requests-toolbar {
+    justify-content: flex-start;
+  }
+
+
+  .teacher-requests-page
+  .teacher-requests-card {
+    overflow-x: auto;
+  }
+
+}

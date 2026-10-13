@@ -177,7 +177,7 @@ function TeacherProjectEdit() {
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li>คำขอเข้าร่วมโครงงาน</li>
+            <li onClick={() => navigate("/teacher-requests")}>คำขอเข้าร่วมโครงงาน</li>
             <li>ภาระงานที่ปรึกษา</li>
             <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
             <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>

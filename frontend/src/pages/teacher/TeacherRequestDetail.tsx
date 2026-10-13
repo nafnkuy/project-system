@@ -1,6 +1,6 @@
 import "./TeacherRequestDetail.css";
 import TeacherNotificationBell from "./TeacherNotificationBell";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -56,7 +56,20 @@ interface RequestDetail {
 
 function TeacherRequestDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
+
+  const locationState = location.state as {
+    from?: "home" | "requests";
+  } | null;
+
+  const fromPage = locationState?.from || "requests";
+
+  const previousPage =
+    fromPage === "home" ? "/teacher-home" : "/teacher-requests";
+
+  const previousPageName =
+    fromPage === "home" ? "หน้าหลัก" : "คำขอเข้าร่วมโครงงาน";
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,7 +197,7 @@ function TeacherRequestDetail() {
 
         alert(err.response?.data?.message || "ไม่สามารถโหลดรายละเอียดคำขอได้");
 
-        navigate("/teacher-home");
+        navigate(previousPage);
       })
       .finally(() => {
         setLoading(false);
@@ -215,7 +228,7 @@ function TeacherRequestDetail() {
 
       alert(res.data.message);
 
-      navigate("/teacher-home");
+      navigate(previousPage);
     } catch (err: any) {
       console.log("Approve error =", err);
 
@@ -250,7 +263,7 @@ function TeacherRequestDetail() {
 
       alert(res.data.message);
 
-      navigate("/teacher-home");
+      navigate(previousPage);
     } catch (err: any) {
       console.log("Reject error =", err);
 
@@ -291,7 +304,7 @@ function TeacherRequestDetail() {
 
       alert(res.data.message);
 
-      navigate("/teacher-home");
+      navigate(previousPage);
     } catch (err: any) {
       console.log("Revision error =", err);
 
@@ -381,11 +394,17 @@ function TeacherRequestDetail() {
 
             <li className="active">คำขอเข้าร่วมโครงงาน</li>
 
-            <li>ภาระงานที่ปรึกษา</li>
+            <li onClick={() => navigate("/teacher-requests")}>
+              ภาระงานที่ปรึกษา
+            </li>
 
-            <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>
+              ประวัติการพิจารณา
+            </li>
 
-            <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/teacher-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -402,7 +421,18 @@ function TeacherRequestDetail() {
         {/* ================= HEADER ================= */}
 
         <header className="header">
-          <h2>คำขอเข้าร่วมโครงงาน &gt; รายละเอียดคำขอเข้าร่วมโครงงาน</h2>
+          <h2>
+            <span
+              className="request-breadcrumb-link"
+              onClick={() => navigate(previousPage)}
+            >
+              {previousPageName}
+            </span>
+
+            <span className="request-breadcrumb-separator">{" > "}</span>
+
+            <span>รายละเอียดคำขอเข้าร่วมโครงงาน</span>
+          </h2>
 
           <div className="header-right">
             {/* Notification */}
@@ -525,9 +555,7 @@ function TeacherRequestDetail() {
                     {request.members.map((member, index) => (
                       <div key={member.id} className="applicant-member-block">
                         <h4>
-                          {index === 0
-                            ? "สมาชิกคนที่ 1"
-                            : "สมาชิกคนที่ 2"}
+                          {index === 0 ? "สมาชิกคนที่ 1" : "สมาชิกคนที่ 2"}
                         </h4>
 
                         <label>รหัสประจำตัว</label>
@@ -759,7 +787,7 @@ function TeacherRequestDetail() {
             <div className="request-actions">
               <button
                 className="cancel-btn"
-                onClick={() => navigate("/teacher-home")}
+                onClick={() => navigate(previousPage)}
                 disabled={processing}
               >
                 ยกเลิก

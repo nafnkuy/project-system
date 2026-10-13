@@ -674,62 +674,118 @@ app.get("/teachers/search", (req, res) => {
       u.name,
       u.major,
 
-      -- จำนวนหัวข้อโครงงานปัจจุบันของอาจารย์
-      COUNT(DISTINCT p.id) AS accepted_students,
+      /* ==========================================
+         จำนวนนิสิตที่อาจารย์รับแล้วจริง ๆ
+      ========================================== */
 
-      -- จำนวนสูงสุดจาก teacher_profiles
-      COALESCE(tp.max_capacity, 0) AS total_capacity,
+      (
+        SELECT COUNT(DISTINCT pm.user_id)
 
-      -- จำนวนที่เหลือ
+        FROM project_members pm
+
+        INNER JOIN projects p
+          ON pm.project_id = p.id
+
+        WHERE p.advisor_id = u.id
+
+      ) AS accepted_students,
+
+
+      /* ==========================================
+         จำนวนสูงสุดที่อาจารย์รับได้
+         ให้ตรงกับ TeacherHome
+      ========================================== */
+
+      14 AS total_capacity,
+
+
+      /* ==========================================
+         จำนวนที่ยังรับได้
+      ========================================== */
+
       GREATEST(
-        COALESCE(tp.max_capacity, 0) - COUNT(DISTINCT p.id),
+        14 - (
+          SELECT COUNT(DISTINCT pm.user_id)
+
+          FROM project_members pm
+
+          INNER JOIN projects p
+            ON pm.project_id = p.id
+
+          WHERE p.advisor_id = u.id
+        ),
         0
       ) AS remaining_capacity,
 
-      -- สถานะอาจารย์
+
+      /* ==========================================
+         สถานะการรับนิสิต
+      ========================================== */
+
       CASE
-        WHEN COUNT(DISTINCT p.id) >= COALESCE(tp.max_capacity, 0)
+
+        WHEN (
+          SELECT COUNT(DISTINCT pm.user_id)
+
+          FROM project_members pm
+
+          INNER JOIN projects p
+            ON pm.project_id = p.id
+
+          WHERE p.advisor_id = u.id
+        ) >= 14
+
           THEN 'เต็ม'
 
-        WHEN COALESCE(tp.max_capacity, 0) - COUNT(DISTINCT p.id) <= 2
+
+        WHEN 14 - (
+          SELECT COUNT(DISTINCT pm.user_id)
+
+          FROM project_members pm
+
+          INNER JOIN projects p
+            ON pm.project_id = p.id
+
+          WHERE p.advisor_id = u.id
+        ) <= 2
+
           THEN 'ใกล้เต็ม'
 
+
         ELSE 'เปิดรับ'
+
       END AS advisor_status
 
+
     FROM users u
-
-    LEFT JOIN teacher_profiles tp
-      ON tp.user_id = u.id
-
-    LEFT JOIN projects p
-      ON p.advisor_id = u.id
-      AND p.source = 'teacher'
-      AND p.visibility = 'แสดง'
 
     WHERE u.role = 'teacher'
       AND u.name LIKE ?
 
-    GROUP BY
-      u.id,
-      u.name,
-      u.major,
-      tp.max_capacity
-
     ORDER BY u.id ASC
   `;
 
-  db.query(sql, [`%${name}%`], (err, results) => {
-    if (err) {
-      console.log("Teacher search error:", err);
 
-      return res.status(500).json({
-        message: "Database Error",
-      });
-    }
+  db.query(
+    sql,
+    [`%${name}%`],
+    (err, results) => {
 
-    res.json(results);
-  });
+      if (err) {
+        console.log(
+          "Teacher search error:",
+          err,
+        );
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+
+      res.json(results);
+    },
+  );
 });
 
 // ==========================================

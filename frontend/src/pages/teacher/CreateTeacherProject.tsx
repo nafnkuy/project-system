@@ -130,7 +130,7 @@ function CreateTeacherProject() {
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li>คำขอเข้าร่วมโครงงาน</li>
+            <li onClick={() => navigate("/teacher-requests")}>คำขอเข้าร่วมโครงงาน</li>
 
             <li>ภาระงานที่ปรึกษา</li>
 

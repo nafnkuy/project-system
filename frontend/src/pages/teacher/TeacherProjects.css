@@ -244,7 +244,8 @@ body,
 
 .teacher-projects-page .project-content {
   width: 100%;
-  padding: 62px 38px 40px;
+
+  padding: 32px 38px 40px;
 }
 
 /* =========================
@@ -261,7 +262,7 @@ body,
   gap: 10px;
 
   margin-top: 0;
-  margin-bottom: 60px;
+  margin-bottom: 28px;
 }
 
 .teacher-projects-page .project-search {
@@ -370,6 +371,7 @@ body,
 
 /* =========================
    SUMMARY CARDS
+   เหมือน TeacherHome
 ========================= */
 
 .teacher-projects-page .project-summary {
@@ -384,12 +386,13 @@ body,
   margin-bottom: 20px;
 }
 
+
 .teacher-projects-page .summary-card {
   height: 120px;
 
   background: #ffffff;
 
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   border-radius: 8px;
 
   padding: 22px 22px 18px;
@@ -401,70 +404,71 @@ body,
 }
 
 
-/* หัวข้อในการ์ด */
-
 .teacher-projects-page .summary-card span {
-  color: #222;
+  margin-bottom: 8px;
+
+  color: #222222;
 
   font-size: 14px;
   font-weight: 400;
-
-  margin-bottom: 8px;
 }
 
-
-/* ตัวเลข */
 
 .teacher-projects-page .summary-card strong {
   font-size: 35px;
   font-weight: 600;
+
   line-height: normal;
 }
 
 
-/* ทั้งหมด */
-
-.teacher-projects-page .summary-card:nth-child(1) strong {
+.teacher-projects-page
+.summary-card:nth-child(1)
+strong {
   color: #3678c5;
 }
 
 
-/* เปิดรับ */
-
-.teacher-projects-page .summary-card:nth-child(2) strong {
+.teacher-projects-page
+.summary-card:nth-child(2)
+strong {
   color: #159c68;
 }
 
 
-/* ปิดรับ */
-
-.teacher-projects-page .summary-card:nth-child(3) strong {
+.teacher-projects-page
+.summary-card:nth-child(3)
+strong {
   color: #ff0a0a;
 }
 
 
-/* ซ่อน */
-
-.teacher-projects-page .summary-card:nth-child(4) strong {
+.teacher-projects-page
+.summary-card:nth-child(4)
+strong {
   color: #999999;
 }
 
 /* =========================
    PROJECT TABLE CONTAINER
+   เหมือน TeacherHome
 ========================= */
 
 .teacher-projects-page .project-list-container {
   width: 100%;
 
   margin: 0;
+
   padding: 22px 26px 12px;
 
   background: #ffffff;
 
-  border: 1px solid #bbb;
+  border: 1px solid #bbbbbb;
   border-radius: 9px;
 
   box-shadow: none;
+
+  overflow-x: auto;
 }
 
 .teacher-projects-page .project-list-header {

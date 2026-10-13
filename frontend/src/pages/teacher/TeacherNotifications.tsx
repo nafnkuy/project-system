@@ -207,7 +207,7 @@ function TeacherNotifications() {
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li onClick={() => navigate("/teacher/requests")}>
+            <li onClick={() => navigate("/teacher-requests")}>
               คำขอเข้าร่วมโครงงาน
             </li>
 

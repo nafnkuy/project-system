@@ -189,7 +189,9 @@ function TeacherHome() {
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li>คำขอเข้าร่วมโครงงาน</li>
+            <li onClick={() => navigate("/teacher-requests")}>
+              คำขอเข้าร่วมโครงงาน
+            </li>
 
             <li>ภาระงานที่ปรึกษา</li>
 
@@ -401,7 +403,11 @@ function TeacherHome() {
                         <button
                           className="detail-btn"
                           onClick={() =>
-                            navigate(`/teacher-request-details/${item.id}`)
+                            navigate(`/teacher-request-details/${item.id}`, {
+                              state: {
+                                from: "home",
+                              },
+                            })
                           }
                         >
                           รายละเอียด
@@ -415,7 +421,7 @@ function TeacherHome() {
 
             {filteredRequests.length > 0 && (
               <div className="view-all">
-                <button onClick={() => navigate("/teacher/requests")}>
+                <button onClick={() => navigate("/teacher-requests")}>
                   ดูทั้งหมด →
                 </button>
               </div>

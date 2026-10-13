@@ -840,3 +840,30 @@
     flex-wrap: wrap;
   }
 }
+
+/* =========================================================
+   BREADCRUMB
+========================================================= */
+
+.teacher-request-detail-page
+.request-breadcrumb-link {
+  color: #111111;
+
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.teacher-request-detail-page
+.request-breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+
+.teacher-request-detail-page
+.request-breadcrumb-separator {
+  color: #111111;
+
+  margin: 0 4px;
+}
