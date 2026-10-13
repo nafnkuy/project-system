@@ -207,7 +207,7 @@ function TeacherProjectDetail() {
 
             <li>คำขอเข้าร่วมโครงงาน</li>
             <li>ภาระงานที่ปรึกษา</li>
-            <li>ประวัติการพิจารณา</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
             <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>
             <li>ข้อมูลส่วนตัว</li>
           </ul>

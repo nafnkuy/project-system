@@ -185,13 +185,8 @@ app.get("/projects/:id", (req, res) => {
 });
 
 app.post("/project-requests", (req, res) => {
-  const {
-    project_id,
-    student_id,
-    contact_type,
-    contact_value,
-    introduction,
-  } = req.body;
+  const { project_id, student_id, contact_type, contact_value, introduction } =
+    req.body;
 
   const checkSql = `
     SELECT id
@@ -200,30 +195,24 @@ app.post("/project-requests", (req, res) => {
       AND status IN ('รอพิจารณา','อนุมัติ')
   `;
 
-  db.query(
-    checkSql,
-    [student_id],
-    (err, rows) => {
+  db.query(checkSql, [student_id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
 
-      if (err) {
-        return res.status(500).json({
-          message: "Database Error",
-        });
-      }
+    if (rows.length > 0) {
+      return res.status(400).json({
+        message: "คุณมีใบสมัครที่กำลังรอพิจารณาหรือได้รับการอนุมัติแล้ว",
+      });
+    }
 
-      if (rows.length > 0) {
-        return res.status(400).json({
-          message:
-            "คุณมีใบสมัครที่กำลังรอพิจารณาหรือได้รับการอนุมัติแล้ว",
-        });
-      }
-
-
-      /* ==========================================
+    /* ==========================================
          1. สร้างคำขอ
       ========================================== */
 
-      const insertSql = `
+    const insertSql = `
         INSERT INTO project_requests
         (
           project_id,
@@ -236,32 +225,23 @@ app.post("/project-requests", (req, res) => {
         VALUES (?, ?, ?, ?, ?, 'รอพิจารณา')
       `;
 
-      db.query(
-        insertSql,
-        [
-          project_id,
-          student_id,
-          contact_type,
-          contact_value,
-          introduction,
-        ],
-        (err, result) => {
+    db.query(
+      insertSql,
+      [project_id, student_id, contact_type, contact_value, introduction],
+      (err, result) => {
+        if (err) {
+          return res.status(500).json({
+            message: "Database Error",
+          });
+        }
 
-          if (err) {
-            return res.status(500).json({
-              message: "Database Error",
-            });
-          }
+        const requestId = result.insertId;
 
-          const requestId =
-            result.insertId;
-
-
-          /* ==========================================
+        /* ==========================================
              2. แจ้งเตือนอาจารย์ที่ปรึกษา
           ========================================== */
 
-          const notificationSql = `
+        const notificationSql = `
             INSERT INTO notifications
             (
               user_id,
@@ -302,37 +282,23 @@ app.post("/project-requests", (req, res) => {
               AND p.advisor_id IS NOT NULL
           `;
 
+        db.query(
+          notificationSql,
+          [requestId, student_id, project_id],
+          (notificationErr) => {
+            if (notificationErr) {
+              console.log("Teacher notification error:", notificationErr);
+            }
 
-          db.query(
-            notificationSql,
-            [
-              requestId,
-              student_id,
-              project_id,
-            ],
-            (notificationErr) => {
-
-              if (notificationErr) {
-                console.log(
-                  "Teacher notification error:",
-                  notificationErr,
-                );
-              }
-
-
-              res.json({
-                success: true,
-                id: requestId,
-              });
-
-            },
-          );
-
-        },
-      );
-
-    },
-  );
+            res.json({
+              success: true,
+              id: requestId,
+            });
+          },
+        );
+      },
+    );
+  });
 });
 
 app.get("/project-requests/check/:projectId/:studentId", (req, res) => {
@@ -968,7 +934,8 @@ SELECT
   u.username AS student_username,
   u.name AS student_name,
   pr.request_date,
-  pr.status
+  pr.status,
+  pr.resubmitted_at
 
     FROM project_requests pr
 
@@ -993,6 +960,61 @@ SELECT
     }
 
     console.log("Teacher requests:", results);
+
+    res.json(results);
+  });
+});
+
+// ==========================================
+// ประวัติการพิจารณาของอาจารย์
+// ==========================================
+
+app.get("/teacher/decision-history/:advisorId", (req, res) => {
+  const { advisorId } = req.params;
+
+  const sql = `
+    SELECT
+      pr.id,
+      pr.project_id,
+      pr.student_id,
+      pr.status,
+      pr.decision_date,
+
+      p.title,
+      p.source,
+
+      student.username AS student_username,
+      student.name AS student_name
+
+    FROM project_requests pr
+
+    INNER JOIN projects p
+      ON pr.project_id = p.id
+
+    INNER JOIN users student
+      ON pr.student_id = student.id
+
+    WHERE p.advisor_id = ?
+      AND pr.status IN (
+        'อนุมัติ',
+        'ต้องแก้ไข',
+        'ปฏิเสธ'
+      )
+      AND pr.decision_date IS NOT NULL
+
+    ORDER BY
+      pr.decision_date DESC,
+      pr.id DESC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.log("Get teacher decision history error:", err);
+
+      return res.status(500).json({
+        message: "Database Error",
+      });
+    }
 
     res.json(results);
   });
@@ -1767,6 +1789,7 @@ app.get("/teacher/request/:requestId/:advisorId", (req, res) => {
         pr.introduction,
         pr.request_date,
         pr.status,
+        pr.resubmitted_at,
 
         pr.suggestion,
         pr.rejection_reason,
@@ -2029,10 +2052,12 @@ WHERE pr.id = ?
 
           // 6. เปลี่ยนสถานะ request
           const updateRequestSql = `
-                  UPDATE project_requests
-                  SET status = 'อนุมัติ'
-                  WHERE id = ?
-                `;
+            UPDATE project_requests
+            SET
+              status = 'อนุมัติ',
+              decision_date = NOW()
+            WHERE id = ?
+          `;
 
           db.query(updateRequestSql, [requestId], (err) => {
             if (err) {
@@ -2164,45 +2189,46 @@ WHERE pr.id = ?
                     } catch (pdfError) {
                       console.log("Auto generate PDF request error:", pdfError);
                     }
-                  
 
-                  // ==========================================
-                  // แจ้งเตือนเจ้าหน้าที่สำหรับเอกสารใบนี้
-                  // ==========================================
+                    // ==========================================
+                    // แจ้งเตือนเจ้าหน้าที่สำหรับเอกสารใบนี้
+                    // ==========================================
 
-                  const getStaffSql = `
+                    const getStaffSql = `
   SELECT id
   FROM users
   WHERE role = 'staff'
 `;
 
-                  const staffResults = await new Promise((resolve, reject) => {
-                    db.query(getStaffSql, (staffErr, results) => {
-                      if (staffErr) {
-                        reject(staffErr);
-                        return;
-                      }
+                    const staffResults = await new Promise(
+                      (resolve, reject) => {
+                        db.query(getStaffSql, (staffErr, results) => {
+                          if (staffErr) {
+                            reject(staffErr);
+                            return;
+                          }
 
-                      resolve(results);
-                    });
-                  });
+                          resolve(results);
+                        });
+                      },
+                    );
 
-                  if (staffResults.length > 0) {
-                    const staffValues = staffResults
-                      .map(() => "(?, ?, ?, ?, ?)")
-                      .join(", ");
+                    if (staffResults.length > 0) {
+                      const staffValues = staffResults
+                        .map(() => "(?, ?, ?, ?, ?)")
+                        .join(", ");
 
-                    const staffParams = staffResults.flatMap((staff) => [
-                      staff.id,
+                      const staffParams = staffResults.flatMap((staff) => [
+                        staff.id,
 
-                      `${request.advisor_name || "อาจารย์"} อนุมัติและลงนามเอกสาร "${request.title}"`,
+                        `${request.advisor_name || "อาจารย์"} อนุมัติและลงนามเอกสาร "${request.title}"`,
 
-                      request.id,
-                      request.project_id,
-                      approvalDocumentId,
-                    ]);
+                        request.id,
+                        request.project_id,
+                        approvalDocumentId,
+                      ]);
 
-                    const staffNotificationSql = `
+                      const staffNotificationSql = `
     INSERT INTO notifications
     (
       user_id,
@@ -2214,21 +2240,21 @@ WHERE pr.id = ?
     VALUES ${staffValues}
   `;
 
-                    await new Promise((resolve, reject) => {
-                      db.query(
-                        staffNotificationSql,
-                        staffParams,
-                        (staffNotificationErr) => {
-                          if (staffNotificationErr) {
-                            reject(staffNotificationErr);
-                            return;
-                          }
+                      await new Promise((resolve, reject) => {
+                        db.query(
+                          staffNotificationSql,
+                          staffParams,
+                          (staffNotificationErr) => {
+                            if (staffNotificationErr) {
+                              reject(staffNotificationErr);
+                              return;
+                            }
 
-                          resolve();
-                        },
-                      );
-                    });
-                  }
+                            resolve();
+                          },
+                        );
+                      });
+                    }
                   }
 
                   // ==========================================
@@ -2345,7 +2371,8 @@ app.post("/teacher/request/:requestId/revision", (req, res) => {
           suggestion = ?,
           rejection_reason = NULL,
           teacher_comment = NULL,
-          decision_date = NOW()
+          decision_date = NOW(),
+          resubmitted_at = NULL
         WHERE id = ?
       `;
 
@@ -2526,24 +2553,33 @@ app.put("/student/project-resubmit/:projectId/:requestId", (req, res) => {
   // ตรวจสอบก่อนว่าคำขอนี้เป็นของนิสิตจริง
   // และต้องเป็นคำขอที่อาจารย์ส่งกลับมาให้แก้ไข
   const checkSql = `
-      SELECT
-        pr.id,
-        pr.status,
-        pr.student_id,
-        p.id AS project_id,
-        p.source
-      FROM project_requests pr
+  SELECT
+    pr.id,
+    pr.status,
+    pr.student_id,
 
-      INNER JOIN projects p
-        ON pr.project_id = p.id
+    p.id AS project_id,
+    p.source,
+    p.advisor_id,
+    p.title,
 
-      WHERE pr.id = ?
-        AND p.id = ?
-        AND pr.student_id = ?
-        AND p.source = 'student'
-      LIMIT 1
-    `;
+    student.name AS student_name
 
+  FROM project_requests pr
+
+  INNER JOIN projects p
+    ON pr.project_id = p.id
+
+  INNER JOIN users student
+    ON pr.student_id = student.id
+
+  WHERE pr.id = ?
+    AND p.id = ?
+    AND pr.student_id = ?
+    AND p.source = 'student'
+
+  LIMIT 1
+`;
   db.query(checkSql, [requestId, projectId, student_id], (err, results) => {
     if (err) {
       console.log("Check resubmit error:", err);
@@ -2631,7 +2667,8 @@ app.put("/student/project-resubmit/:projectId/:requestId", (req, res) => {
                 rejection_reason = NULL,
 
                 request_date = CURRENT_TIMESTAMP,
-                decision_date = NULL
+                decision_date = NULL,
+                resubmitted_at = CURRENT_TIMESTAMP
               WHERE id = ?
                 AND student_id = ?
                 AND project_id = ?
@@ -2657,10 +2694,43 @@ app.put("/student/project-resubmit/:projectId/:requestId", (req, res) => {
               });
             }
 
-            res.json({
-              success: true,
-              message: "แก้ไขและส่งให้อาจารย์พิจารณาใหม่เรียบร้อยแล้ว",
-            });
+            const notificationSql = `
+  INSERT INTO notifications
+  (
+    user_id,
+    message,
+    request_id,
+    project_id
+  )
+  VALUES (?, ?, ?, ?)
+`;
+
+            const notificationMessage =
+              `${oldRequest.student_name} แก้ไขคำเสนอโครงงาน "` +
+              `${title}" และส่งกลับมาให้คุณพิจารณาอีกครั้ง`;
+
+            db.query(
+              notificationSql,
+              [
+                oldRequest.advisor_id,
+                notificationMessage,
+                requestId,
+                projectId,
+              ],
+              (notificationErr) => {
+                if (notificationErr) {
+                  console.log(
+                    "Resubmit teacher notification error:",
+                    notificationErr,
+                  );
+                }
+
+                res.json({
+                  success: true,
+                  message: "แก้ไขและส่งให้อาจารย์พิจารณาใหม่เรียบร้อยแล้ว",
+                });
+              },
+            );
           },
         );
       },

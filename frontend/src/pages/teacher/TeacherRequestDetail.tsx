@@ -383,7 +383,7 @@ function TeacherRequestDetail() {
 
             <li>ภาระงานที่ปรึกษา</li>
 
-            <li>ประวัติการพิจารณา</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
 
             <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>
 

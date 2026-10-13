@@ -16,6 +16,7 @@ interface Request {
   student_name: string;
   request_date: string;
   status: string;
+  resubmitted_at: string | null;
 }
 
 interface Dashboard {
@@ -48,13 +49,31 @@ function TeacherHome() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const getDisplayStatus = (item: Request) => {
+    if (item.status === "รอพิจารณา" && item.resubmitted_at) {
+      return "แก้ไขแล้ว";
+    }
+
+    return item.status;
+  };
+
   const filteredRequests = requests.filter((item) => {
+    const displayStatus = getDisplayStatus(item);
+
+    // หน้าหลักแสดงเฉพาะงานที่อาจารย์ต้องดำเนินการ
+    const isActiveRequest =
+      displayStatus === "รอพิจารณา" || displayStatus === "แก้ไขแล้ว";
+
+    if (!isActiveRequest) {
+      return false;
+    }
+
     const matchesSearch =
       item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
-      statusFilter === "ทั้งหมด" || item.status === statusFilter;
+      statusFilter === "ทั้งหมด" || displayStatus === statusFilter;
 
     const requestType =
       item.source === "student" ? "เสนอหัวข้อโครงงาน" : "สมัครเข้าร่วม";
@@ -174,7 +193,9 @@ function TeacherHome() {
 
             <li>ภาระงานที่ปรึกษา</li>
 
-            <li>ประวัติการพิจารณา</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>
+              ประวัติการพิจารณา
+            </li>
 
             <li onClick={() => navigate("/teacher-notifications")}>
               การแจ้งเตือน
@@ -237,9 +258,7 @@ function TeacherHome() {
               >
                 <option value="ทั้งหมด">สถานะทั้งหมด</option>
                 <option value="รอพิจารณา">รอพิจารณา</option>
-                <option value="อนุมัติ">อนุมัติ</option>
-                <option value="ต้องแก้ไข">ต้องแก้ไข</option>
-                <option value="ปฏิเสธ">ปฏิเสธ</option>
+                <option value="แก้ไขแล้ว">แก้ไขแล้ว</option>
               </select>
 
               <span className="select-arrow">▼</span>
@@ -363,16 +382,18 @@ function TeacherHome() {
                       <td>
                         <span
                           className={`request-status ${
-                            item.status === "อนุมัติ"
+                            getDisplayStatus(item) === "อนุมัติ"
                               ? "approved"
-                              : item.status === "ปฏิเสธ"
+                              : getDisplayStatus(item) === "ปฏิเสธ"
                                 ? "rejected"
-                                : item.status === "ต้องแก้ไข"
+                                : getDisplayStatus(item) === "ต้องแก้ไข"
                                   ? "revision"
-                                  : "pending"
+                                  : getDisplayStatus(item) === "แก้ไขแล้ว"
+                                    ? "resubmitted"
+                                    : "pending"
                           }`}
                         >
-                          {item.status}
+                          {getDisplayStatus(item)}
                         </span>
                       </td>
 

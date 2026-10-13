@@ -727,6 +727,12 @@
   color: #ffffff;
 }
 
+.teacher-home-page
+.request-status.resubmitted {
+  background: #3b75c4;
+  color: #ffffff;
+}
+
 /* =========================
    Detail Button
 ========================= */
