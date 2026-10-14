@@ -356,10 +356,15 @@ function TeacherRequestDetail() {
   }
 
   // แยกข้อมูลที่คั่นด้วย | เพื่อแสดงเป็นรายการแบบ bullet
-  const objectives = request.objectives
+const objectives =
+  request?.objectives
     ? request.objectives
-        .split("|")
-        .map((item) => item.trim())
+        .split(/\r?\n|\|/)
+        .map((item) =>
+          item
+            .trim()
+            .replace(/^[-•]\s*/, "")
+        )
         .filter(Boolean)
     : [];
 

@@ -701,3 +701,282 @@
     min-width: 800px;
   }
 }
+/* =========================================================
+   CURRENT PROJECT
+========================================================= */
+
+.student-project-page
+.student-current-project-area {
+  width: 100%;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.student-project-page
+.student-current-project-card {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 430px;
+
+  padding: 24px 24px 26px;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  border: none;
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.student-project-page
+.student-current-project-title {
+  margin: 0 0 25px;
+
+  padding-right: 150px;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.student-project-page
+.student-current-status {
+  position: absolute;
+
+  top: 20px;
+  right: 20px;
+
+  min-width: 112px;
+  height: 28px;
+
+  padding: 0 15px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #20a36a;
+
+  color: #ffffff;
+
+  border-radius: 14px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   BASIC INFO
+========================================================= */
+
+.student-project-page
+.student-current-project-info {
+  margin-bottom: 28px;
+}
+
+
+.student-project-page
+.student-current-project-info p {
+  margin: 0 0 12px;
+
+  color: #333333;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+.student-project-page
+.student-current-members {
+  margin-bottom: 28px;
+}
+
+
+.student-project-page
+.student-current-members h4 {
+  margin: 0 0 12px;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+.student-project-page
+.student-current-member-row {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 0 0 8px;
+
+  padding-left: 28px;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+
+.student-project-page
+.student-current-no-member {
+  margin: 0;
+
+  padding-left: 28px;
+
+  color: #888888;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.student-project-page
+.student-current-progress {
+  margin-top: 5px;
+
+  margin-bottom: 22px;
+}
+
+
+.student-project-page
+.student-current-progress h4 {
+  margin: 0 0 10px;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+.student-project-page
+.student-current-progress-row {
+  width: 320px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.student-project-page
+.student-current-progress-track {
+  width: 280px;
+  height: 15px;
+
+  overflow: hidden;
+
+  background: #dddddd;
+
+  border-radius: 0;
+}
+
+
+.student-project-page
+.student-current-progress-fill {
+  height: 100%;
+
+  background: #111111;
+}
+
+
+.student-project-page
+.student-current-progress-percent {
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+.student-project-page
+.student-current-progress-text {
+  margin: 8px 0 0;
+
+  color: #333333;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   UPDATED
+========================================================= */
+
+.student-project-page
+.student-current-updated {
+  margin: 0 0 22px;
+
+  color: #333333;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   DETAIL BUTTON
+========================================================= */
+
+.student-project-page
+.student-current-detail-btn {
+  min-width: 125px;
+  height: 30px;
+
+  padding: 0 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+
+  color: #3b75c4;
+
+  border: 1px solid #3b75c4;
+  border-radius: 4px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.student-project-page
+.student-current-detail-btn:hover {
+  background: #f5f8fd;
+}

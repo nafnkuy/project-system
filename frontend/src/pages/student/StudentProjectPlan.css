@@ -1,0 +1,1728 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.student-project-plan-page,
+.student-project-plan-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+
+.student-project-plan-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.student-project-plan-page
+.student-plan-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.student-project-plan-page
+.student-plan-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+}
+
+
+.student-project-plan-page
+.student-plan-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+
+.student-project-plan-page
+.student-plan-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.student-project-plan-page
+.student-plan-logo p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIDEBAR MENU
+========================================================= */
+
+.student-project-plan-page
+.student-plan-sidebar nav {
+  width: 100%;
+}
+
+
+.student-project-plan-page
+.student-plan-sidebar ul {
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+
+.student-project-plan-page
+.student-plan-sidebar li {
+  width: 100%;
+
+  padding: 18px 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-plan-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+
+.student-project-plan-page
+.student-plan-sidebar li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.student-project-plan-page
+.student-plan-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.student-project-plan-page
+.student-plan-main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.student-project-plan-page
+.student-plan-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+}
+
+
+.student-project-plan-page
+.student-plan-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+
+.student-project-plan-page
+.student-plan-breadcrumb-link {
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-plan-breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
+.student-project-plan-page
+.student-plan-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.student-project-plan-page
+.student-plan-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  font-size: 14px;
+}
+
+
+.student-project-plan-page
+.student-plan-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.student-project-plan-page
+.student-plan-content {
+  width: 100%;
+
+  padding: 32px 38px 45px;
+}
+
+
+/* =========================================================
+   PROJECT HEADER
+========================================================= */
+
+.student-project-plan-page
+.student-plan-project-heading {
+  margin-bottom: 20px;
+}
+
+
+.student-project-plan-page
+.student-plan-project-heading h3 {
+  margin: 0 0 5px;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+.student-project-plan-page
+.student-plan-project-heading p {
+  margin: 0;
+
+  color: #555555;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.student-project-plan-page
+.student-plan-tabs {
+  width: 100%;
+
+  margin-bottom: 15px;
+
+  display: flex;
+}
+
+
+.student-project-plan-page
+.student-plan-tabs button {
+  min-width: 120px;
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-right: 1px solid #cccccc;
+
+  background: transparent;
+
+  color: #333333;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-plan-tabs button.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   MAIN PLAN CARD
+========================================================= */
+
+.student-project-plan-page
+.student-plan-container {
+  width: 100%;
+
+  padding: 22px 24px 35px;
+
+  background: #ffffff;
+
+  border-radius: 9px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.student-project-plan-page
+.student-plan-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 28px;
+}
+
+
+.student-project-plan-page
+.student-plan-title-row h3 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   CREATE PHASE
+========================================================= */
+
+.student-project-plan-page
+.student-plan-create-phase-btn {
+  height: 36px;
+
+  padding: 0 15px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #20a36a;
+  color: #ffffff;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.student-project-plan-page
+.student-plan-toolbar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-bottom: 28px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.student-project-plan-page
+.student-plan-search {
+  width: 360px;
+  height: 38px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  background: #ffffff;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 20px;
+}
+
+
+.student-project-plan-page
+.student-plan-search input {
+  flex: 1;
+
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 12px;
+}
+
+
+.student-project-plan-page
+.student-plan-search svg {
+  color: #aaaaaa;
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.student-project-plan-page
+.student-plan-toolbar select {
+  height: 38px;
+
+  padding: 0 28px 0 14px;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 20px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #777777;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   VIEW SWITCH
+========================================================= */
+
+.student-project-plan-page
+.student-plan-view-switch {
+  margin-bottom: 14px;
+
+  display: flex;
+}
+
+
+.student-project-plan-page
+.student-plan-view-switch button {
+  width: 62px;
+  height: 34px;
+
+  border: 1px solid #bbbbbb;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-plan-view-switch button:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+
+.student-project-plan-page
+.student-plan-view-switch button:last-child {
+  border-radius: 0 7px 7px 0;
+}
+
+
+.student-project-plan-page
+.student-plan-view-switch button.active {
+  background: #f0f0f0;
+}
+
+
+/* =========================================================
+   PHASE CARD
+========================================================= */
+
+.student-project-plan-page
+.student-phase-card {
+  width: 100%;
+
+  margin-bottom: 22px;
+
+  border: 1px solid #aaaaaa;
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   PHASE HEADER
+========================================================= */
+
+.student-project-plan-page
+.student-phase-header {
+  height: 48px;
+
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #cccccc;
+}
+
+
+.student-project-plan-page
+.student-phase-name {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-phase-edit-btn {
+  padding: 0;
+
+  display: flex;
+
+  border: none;
+
+  background: transparent;
+
+  color: #333333;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   PHASE STATUS
+========================================================= */
+
+.student-project-plan-page
+.student-phase-status {
+  min-width: 90px;
+  height: 24px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 14px;
+
+  font-size: 10px;
+}
+
+
+.student-project-plan-page
+.student-phase-status.completed {
+  color: #20a36a;
+}
+
+
+.student-project-plan-page
+.student-phase-status.working {
+  border-color: #20a36a;
+
+  background: #20a36a;
+  color: #ffffff;
+}
+
+
+.student-project-plan-page
+.student-phase-status.not-started {
+  color: #777777;
+}
+
+
+/* =========================================================
+   PHASE BODY
+========================================================= */
+
+.student-project-plan-page
+.student-phase-body {
+  padding: 17px 16px 20px;
+}
+
+
+.student-project-plan-page
+.student-phase-body > p {
+  margin: 0 0 7px;
+
+  color: #333333;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   ADD TASK
+========================================================= */
+
+.student-project-plan-page
+.student-phase-add-task-btn {
+  height: 35px;
+
+  margin: 15px 0 5px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #3678c5;
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   BOARD
+========================================================= */
+
+.student-project-plan-page
+.student-phase-board {
+  width: 100%;
+
+  min-height: 230px;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  border: 1px solid #bbbbbb;
+}
+
+
+.student-project-plan-page
+.student-phase-column {
+  min-width: 0;
+
+  border-right: 1px solid #bbbbbb;
+}
+
+
+.student-project-plan-page
+.student-phase-column:last-child {
+  border-right: none;
+}
+
+
+.student-project-plan-page
+.student-phase-column-title {
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-bottom: 1px solid #bbbbbb;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-phase-task-list {
+  min-height: 190px;
+
+  padding: 8px;
+}
+
+
+/* =========================================================
+   TASK CARD
+========================================================= */
+
+.student-project-plan-page
+.student-task-card {
+  width: 100%;
+
+  margin-bottom: 8px;
+
+  padding: 12px;
+
+  background: #fff9e6;
+
+  border: 1px solid #f0d982;
+  border-radius: 8px;
+}
+
+
+.student-project-plan-page
+.student-task-title {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 12px;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-task-title svg {
+  font-size: 10px;
+}
+
+
+.student-project-plan-page
+.student-task-card p {
+  margin: 0 0 7px;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   REVIEW STATUS
+========================================================= */
+
+.student-project-plan-page
+.student-task-review {
+  min-width: 54px;
+  height: 25px;
+
+  margin-top: 5px;
+
+  padding: 0 11px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 9px;
+}
+
+
+.student-project-plan-page
+.student-task-review.passed {
+  background: #20a36a;
+}
+
+
+.student-project-plan-page
+.student-task-review.waiting {
+  background: #ffbd00;
+}
+
+
+.student-project-plan-page
+.student-task-review.revision {
+  background: #ef6666;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.student-project-plan-page
+.student-plan-empty {
+  min-height: 250px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed #cccccc;
+  border-radius: 8px;
+
+  color: #777777;
+
+  text-align: center;
+}
+
+
+.student-project-plan-page
+.student-plan-empty h4 {
+  margin: 0 0 8px;
+
+  font-size: 14px;
+}
+
+
+.student-project-plan-page
+.student-plan-empty p {
+  margin: 0;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   LIST VIEW
+========================================================= */
+
+.student-project-plan-page
+.student-plan-list-phase {
+  margin-bottom: 20px;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 8px;
+
+  overflow: hidden;
+}
+
+
+.student-project-plan-page
+.student-plan-list-phase-header {
+  height: 45px;
+
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.student-project-plan-page
+.student-plan-list-phase-header strong,
+.student-project-plan-page
+.student-plan-list-phase-header span {
+  font-size: 11px;
+}
+
+
+.student-project-plan-page
+.student-plan-list table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+
+.student-project-plan-page
+.student-plan-list th,
+.student-project-plan-page
+.student-plan-list td {
+  padding: 11px 8px;
+
+  border-bottom: 1px solid #dddddd;
+
+  font-size: 10px;
+
+  text-align: center;
+}
+
+
+.student-project-plan-page
+.student-plan-list th {
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-plan-list-empty {
+  padding: 25px;
+
+  color: #888888;
+
+  font-size: 11px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   MODAL OVERLAY
+========================================================= */
+
+.student-project-plan-page
+.student-phase-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  z-index: 999;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.student-project-plan-page
+.student-phase-modal {
+  width: 430px;
+
+  padding: 25px;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+.student-project-plan-page
+.student-phase-modal h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 600;
+}
+
+
+.student-project-plan-page
+.student-phase-modal-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 16px 0 20px;
+
+  background: #dddddd;
+}
+
+
+.student-project-plan-page
+.student-phase-modal label {
+  display: block;
+
+  margin: 0 0 7px;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-phase-modal label span {
+  color: red;
+}
+
+
+.student-project-plan-page
+.student-phase-modal input {
+  width: 100%;
+  height: 40px;
+
+  margin-bottom: 17px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+
+  outline: none;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   MODAL BUTTON
+========================================================= */
+
+.student-project-plan-page
+.student-phase-modal-actions {
+  margin-top: 8px;
+
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+
+.student-project-plan-page
+.student-phase-modal-actions button {
+  min-width: 95px;
+  height: 36px;
+
+  border-radius: 6px;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-phase-modal-cancel {
+  border: 1px solid #bbbbbb;
+
+  background: #ffffff;
+
+  color: #333333;
+}
+
+
+.student-project-plan-page
+.student-phase-modal-save {
+  border: none;
+
+  background: #20a36a;
+
+  color: #ffffff;
+}
+
+
+.student-project-plan-page
+.student-phase-modal-actions button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.student-plan-loading {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f5f5;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 14px;
+
+  color: #555555;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .student-project-plan-page
+  .student-plan-content {
+    min-width: 1050px;
+  }
+
+}
+/* =========================================================
+   EDIT PHASE MODAL
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-modal {
+  width: 500px;
+
+  padding: 28px 28px 30px;
+
+  background: #ffffff;
+
+  border: 1px solid #999999;
+  border-radius: 9px;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-modal h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 16px 0 24px;
+
+  background: #bfbfbf;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-modal label {
+  display: block;
+
+  margin: 0 0 7px;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-edit-phase-modal label span {
+  margin-left: 3px;
+
+  color: #ff0000;
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-modal input {
+  width: 100%;
+  height: 40px;
+
+  margin: 0 0 20px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+.student-project-plan-page
+.student-edit-phase-modal input:focus {
+  border-color: #888888;
+}
+
+
+/* =========================================================
+   DATE ERROR
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-error {
+  margin: -10px 0 16px;
+
+  color: #e53935;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   DELETE PHASE
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-delete {
+  min-width: 95px;
+  height: 36px;
+
+  margin-top: 2px;
+
+  padding: 0 14px;
+
+  border: 1px solid #ff0000;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #ff0000;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-edit-phase-delete:hover:not(:disabled) {
+  background: #fff3f3;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-actions {
+  width: 100%;
+
+  margin-top: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-cancel {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #ff0d0d;
+
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-edit-phase-cancel:hover:not(:disabled) {
+  background: #e60000;
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-save {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 400;
+}
+
+
+/* ยังกรอกข้อมูลไม่ครบ */
+
+.student-project-plan-page
+.student-edit-phase-save.disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+
+/* กรอกข้อมูลครบแล้ว */
+
+.student-project-plan-page
+.student-edit-phase-save.enabled {
+  background: #20a36a;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-edit-phase-save.enabled:hover {
+  background: #188858;
+}
+
+
+/* =========================================================
+   DISABLED
+========================================================= */
+
+.student-project-plan-page
+.student-edit-phase-modal
+button:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   ADD TASK MODAL
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal {
+  width: 500px;
+
+  max-height: 90vh;
+
+  padding: 28px 28px 30px;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #999999;
+  border-radius: 9px;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 16px 0 24px;
+
+  background: #bfbfbf;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal label {
+  display: block;
+
+  margin: 0 0 7px;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-task-modal label span {
+  margin-left: 3px;
+
+  color: #ff0000;
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal input {
+  width: 100%;
+  height: 40px;
+
+  margin: 0 0 18px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 12px;
+}
+
+
+.student-project-plan-page
+.student-task-modal input:focus,
+.student-project-plan-page
+.student-task-modal textarea:focus {
+  border-color: #888888;
+}
+
+
+/* =========================================================
+   PHASE READONLY
+========================================================= */
+
+.student-project-plan-page
+.student-task-phase-readonly {
+  width: 100%;
+  height: 40px;
+
+  margin-bottom: 18px;
+
+  padding: 0 12px;
+
+  display: flex;
+  align-items: center;
+
+  border-radius: 5px;
+
+  background: #dddddd;
+
+  color: #333333;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  resize: vertical;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 12px;
+}
+
+
+/* รายละเอียด */
+
+.student-project-plan-page
+.student-task-description-input {
+  height: 90px;
+
+  margin-bottom: 18px;
+}
+
+
+/* Subtask */
+
+.student-project-plan-page
+.student-task-subtask-input {
+  min-height: 90px;
+
+  margin-bottom: 5px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal-error {
+  margin: -8px 0 15px;
+
+  color: #e53935;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   BUTTON AREA
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal-actions {
+  width: 100%;
+
+  margin-top: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal-cancel {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #ff0d0d;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-task-modal-cancel:hover:not(:disabled) {
+  background: #e60000;
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal-save {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+
+/* ยังไม่ครบ */
+
+.student-project-plan-page
+.student-task-modal-save.disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+
+/* กรอกครบ */
+
+.student-project-plan-page
+.student-task-modal-save.enabled {
+  background: #20a36a;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-task-modal-save.enabled:hover {
+  background: #188858;
+}
+
+
+/* =========================================================
+   DISABLED
+========================================================= */
+
+.student-project-plan-page
+.student-task-modal button:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
+}

@@ -8,29 +8,46 @@ import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
 
-/* =========================================================
-   TYPE
-========================================================= */
+interface ProjectMember {
+  id: number;
+  username: string;
+  name: string;
+}
 
 interface MyProjectRequest {
   request_id: number;
+
   project_id: number;
+
   student_id: number;
 
   request_status: string;
 
   request_date: string;
+
   decision_date: string | null;
 
   suggestion: string | null;
+
   rejection_reason: string | null;
 
   title: string;
+
   project_type: string;
+
   academic_year: string | null;
+
   source: "teacher" | "student";
 
   advisor_name: string;
+
+  current_members: number;
+
+  max_members: number;
+
+  project_status: string;
+
+  members: ProjectMember[];
 }
 
 /* =========================================================
@@ -175,6 +192,16 @@ function StudentProject() {
   const handleDetail = () => {
     if (!request || !userId) return;
 
+    // อนุมัติแล้ว
+    // ไปหน้ารายละเอียดโครงงานจริง
+    if (request.request_status === "อนุมัติ") {
+      navigate(`/student-project-detail/${request.project_id}`);
+
+      return;
+    }
+
+    // รอพิจารณา / ต้องแก้ไข / ปฏิเสธ
+    // ไปหน้ารายละเอียดคำขอ
     navigate(`/student-project-request-detail/${request.request_id}/${userId}`);
   };
 
@@ -241,7 +268,9 @@ function StudentProject() {
 
             <li className="active">โครงงานของฉัน</li>
 
-            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -325,7 +354,7 @@ function StudentProject() {
 
           {/* ================= REQUEST ================= */}
 
-          {!loading && request && (
+          {!loading && request && request.request_status !== "อนุมัติ" && (
             <div className="student-project-request-area">
               <h3 className="student-project-section-title">
                 {getSectionTitle()}
@@ -366,6 +395,99 @@ function StudentProject() {
                       : "ดูรายละเอียดคำขอ"}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+          {/* ===================================================
+    CURRENT PROJECT
+=================================================== */}
+
+          {!loading && request && request.request_status === "อนุมัติ" && (
+            <div className="student-current-project-area">
+              <h3 className="student-project-section-title">โครงงานปัจจุบัน</h3>
+
+              <div className="student-current-project-card">
+                {/* ================= STATUS ================= */}
+
+                <span className="student-current-status">กำลังดำเนินการ</span>
+
+                {/* ================= TITLE ================= */}
+
+                <h3 className="student-current-project-title">
+                  {request.title}
+                </h3>
+
+                {/* ================= BASIC INFO ================= */}
+
+                <div className="student-current-project-info">
+                  <p>อาจารย์ที่ปรึกษา : {request.advisor_name || "-"}</p>
+
+                  <p>ประเภทโครงงาน : {request.project_type || "-"}</p>
+
+                  <p>ปีการศึกษา : {request.academic_year || "-"}</p>
+                </div>
+
+                {/* ================= MEMBERS ================= */}
+
+                <div className="student-current-members">
+                  <h4>
+                    สมาชิกในโครงงาน ({request.members?.length || 0}/
+                    {request.max_members || 0})
+                  </h4>
+
+                  {request.members && request.members.length > 0 ? (
+                    request.members.map((member) => (
+                      <div
+                        key={member.id}
+                        className="student-current-member-row"
+                      >
+                        <span>{member.username}</span>
+
+                        <span>{member.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="student-current-no-member">
+                      ยังไม่มีข้อมูลสมาชิก
+                    </p>
+                  )}
+                </div>
+
+                {/* ================= PROGRESS ================= */}
+
+                <div className="student-current-progress">
+                  <h4>ความคืบหน้า</h4>
+
+                  <div className="student-current-progress-row">
+                    <div className="student-current-progress-track">
+                      <div
+                        className="student-current-progress-fill"
+                        style={{
+                          width: "0%",
+                        }}
+                      />
+                    </div>
+
+                    <span className="student-current-progress-percent">0%</span>
+                  </div>
+
+                  <p className="student-current-progress-text">
+                    ยังไม่มีข้อมูลความคืบหน้า
+                  </p>
+                </div>
+
+                {/* ================= UPDATE ================= */}
+
+                <p className="student-current-updated">อัปเดตล่าสุด : -</p>
+
+                {/* ================= BUTTON ================= */}
+
+                <button
+                  className="student-current-detail-btn"
+                  onClick={handleDetail}
+                >
+                  ดูรายละเอียดโครงงาน
+                </button>
               </div>
             </div>
           )}

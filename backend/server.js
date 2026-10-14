@@ -384,7 +384,7 @@ app.get("/project-requests/student/:studentId", (req, res) => {
 });
 
 // ==========================================
-// โครงงานของฉัน - คำขอล่าสุดของนิสิต
+// โครงงานของฉัน
 // ==========================================
 
 app.get("/student/my-project/:studentId", (req, res) => {
@@ -407,7 +407,14 @@ app.get("/student/my-project/:studentId", (req, res) => {
       p.academic_year,
       p.source,
 
-      COALESCE(advisor.name, p.advisor) AS advisor_name
+      p.current_members,
+      p.max_members,
+      p.status AS project_status,
+
+      COALESCE(
+        advisor.name,
+        p.advisor
+      ) AS advisor_name
 
     FROM project_requests pr
 
@@ -426,6 +433,7 @@ app.get("/student/my-project/:studentId", (req, res) => {
 
         EXISTS (
           SELECT 1
+
           FROM project_invitations pi
 
           WHERE pi.project_id = pr.project_id
@@ -435,30 +443,97 @@ app.get("/student/my-project/:studentId", (req, res) => {
         )
       )
 
-    ORDER BY pr.request_date DESC, pr.id DESC
+    ORDER BY
+      pr.request_date DESC,
+      pr.id DESC
 
     LIMIT 1
   `;
 
-  db.query(sql, [studentId, studentId], (err, results) => {
-    if (err) {
-      console.log("Get student my project error:", err);
 
-      return res.status(500).json({
-        message: "Database Error",
-      });
-    }
+  db.query(
+    sql,
+    [studentId, studentId],
+    (err, results) => {
 
-    if (results.length === 0) {
-      return res.json({
-        request: null,
-      });
-    }
+      if (err) {
 
-    res.json({
-      request: results[0],
-    });
-  });
+        console.log(
+          "Get student my project error:",
+          err,
+        );
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+
+      if (results.length === 0) {
+
+        return res.json({
+          request: null,
+        });
+      }
+
+
+      const request =
+        results[0];
+
+
+      // ==========================================
+      // ดึงสมาชิกในโครงงาน
+      // หลังอาจารย์อนุมัติแล้ว
+      // ==========================================
+
+      const memberSql = `
+        SELECT
+          u.id,
+          u.username,
+          u.name
+
+        FROM project_members pm
+
+        INNER JOIN users u
+          ON pm.user_id = u.id
+
+        WHERE pm.project_id = ?
+
+        ORDER BY pm.id ASC
+      `;
+
+
+      db.query(
+        memberSql,
+        [request.project_id],
+        (memberErr, members) => {
+
+          if (memberErr) {
+
+            console.log(
+              "Get project members error:",
+              memberErr,
+            );
+
+            return res.status(500).json({
+              message: "Database Error",
+            });
+          }
+
+
+          request.members =
+            members;
+
+
+          res.json({
+            request,
+          });
+
+        },
+      );
+
+    },
+  );
 });
 
 // ==========================================
@@ -3765,6 +3840,1335 @@ app.get("/staff/documents/:documentId/download", (req, res) => {
     });
   });
 });
+
+// =========================================================
+// STUDENT PROJECT PLAN
+// =========================================================
+
+
+// =========================================================
+// 1. ดูแผนงานทั้งหมดของโครงงาน
+// =========================================================
+
+app.get(
+  "/student/projects/:projectId/plan",
+  (req, res) => {
+
+    const { projectId } =
+      req.params;
+
+
+    // -----------------------------------------
+    // ข้อมูลโครงงาน
+    // -----------------------------------------
+
+    const projectSql = `
+      SELECT
+        p.id,
+        p.title
+
+      FROM projects p
+
+      WHERE p.id = ?
+    `;
+
+
+    db.query(
+      projectSql,
+      [projectId],
+      (projectErr, projectRows) => {
+
+        if (projectErr) {
+
+          console.log(
+            "Get plan project error:",
+            projectErr,
+          );
+
+          return res.status(500).json({
+            message: "Database Error",
+          });
+
+        }
+
+
+        if (projectRows.length === 0) {
+
+          return res.status(404).json({
+            message: "ไม่พบโครงงาน",
+          });
+
+        }
+
+
+        const project =
+          projectRows[0];
+
+
+        // -----------------------------------------
+        // สมาชิกในโครงงาน
+        // -----------------------------------------
+
+        const memberSql = `
+          SELECT
+            u.id,
+            u.username,
+            u.name
+
+          FROM project_members pm
+
+          INNER JOIN users u
+            ON pm.user_id = u.id
+
+          WHERE pm.project_id = ?
+
+          ORDER BY pm.id ASC
+        `;
+
+
+        db.query(
+          memberSql,
+          [projectId],
+          (memberErr, members) => {
+
+            if (memberErr) {
+
+              console.log(
+                "Get plan members error:",
+                memberErr,
+              );
+
+              return res.status(500).json({
+                message: "Database Error",
+              });
+
+            }
+
+
+            // -----------------------------------------
+            // Phase
+            // -----------------------------------------
+
+            const phaseSql = `
+              SELECT
+                id,
+                project_id,
+                phase_name,
+                start_date,
+                due_date,
+                phase_order,
+                created_at,
+                updated_at
+
+              FROM project_phases
+
+              WHERE project_id = ?
+
+              ORDER BY
+                phase_order ASC,
+                id ASC
+            `;
+
+
+            db.query(
+              phaseSql,
+              [projectId],
+              (phaseErr, phases) => {
+
+                if (phaseErr) {
+
+                  console.log(
+                    "Get phases error:",
+                    phaseErr,
+                  );
+
+                  return res.status(500).json({
+                    message: "Database Error",
+                  });
+
+                }
+
+
+                // -----------------------------------------
+                // Task
+                // -----------------------------------------
+
+                const taskSql = `
+                  SELECT
+                    t.id,
+                    t.project_id,
+                    t.phase_id,
+
+                    t.task_name,
+                    t.description,
+
+                    t.assignee_id,
+
+                    u.username
+                      AS assignee_username,
+
+                    u.name
+                      AS assignee_name,
+
+                    t.start_date,
+                    t.due_date,
+
+                    t.status,
+                    t.review_status,
+
+                    t.task_order,
+
+                    t.created_at,
+                    t.updated_at
+
+                  FROM project_tasks t
+
+                  LEFT JOIN users u
+                    ON t.assignee_id = u.id
+
+                  WHERE t.project_id = ?
+
+                  ORDER BY
+                    t.task_order ASC,
+                    t.id ASC
+                `;
+
+
+                db.query(
+                  taskSql,
+                  [projectId],
+                  (taskErr, tasks) => {
+
+                    if (taskErr) {
+
+                      console.log(
+                        "Get tasks error:",
+                        taskErr,
+                      );
+
+                      return res.status(500).json({
+                        message:
+                          "Database Error",
+                      });
+
+                    }
+
+
+                    // -----------------------------------------
+                    // Subtask
+                    // -----------------------------------------
+
+                    const subtaskSql = `
+                      SELECT
+                        st.id,
+                        st.task_id,
+                        st.subtask_name,
+                        st.status,
+                        st.subtask_order,
+                        st.created_at,
+                        st.updated_at
+
+                      FROM project_subtasks st
+
+                      INNER JOIN project_tasks t
+                        ON st.task_id = t.id
+
+                      WHERE t.project_id = ?
+
+                      ORDER BY
+                        st.subtask_order ASC,
+                        st.id ASC
+                    `;
+
+
+                    db.query(
+                      subtaskSql,
+                      [projectId],
+                      (
+                        subtaskErr,
+                        subtasks,
+                      ) => {
+
+                        if (subtaskErr) {
+
+                          console.log(
+                            "Get subtasks error:",
+                            subtaskErr,
+                          );
+
+                          return res
+                            .status(500)
+                            .json({
+                              message:
+                                "Database Error",
+                            });
+
+                        }
+
+
+                        // =====================================
+                        // จัด Subtask เข้า Task
+                        // =====================================
+
+                        const tasksWithSubtasks =
+                          tasks.map(
+                            (task) => {
+
+                              const taskSubtasks =
+                                subtasks.filter(
+                                  (subtask) =>
+                                    Number(
+                                      subtask.task_id,
+                                    ) ===
+                                    Number(
+                                      task.id,
+                                    ),
+                                );
+
+
+                              const completedSubtasks =
+                                taskSubtasks.filter(
+                                  (subtask) =>
+                                    subtask.status ===
+                                    "เสร็จสิ้น",
+                                ).length;
+
+
+                              return {
+                                ...task,
+
+                                subtasks:
+                                  taskSubtasks,
+
+                                completed_subtasks:
+                                  completedSubtasks,
+
+                                total_subtasks:
+                                  taskSubtasks.length,
+                              };
+
+                            },
+                          );
+
+
+                        // =====================================
+                        // จัด Task เข้า Phase
+                        // =====================================
+
+                        const phasesWithTasks =
+                          phases.map(
+                            (phase) => {
+
+                              const phaseTasks =
+                                tasksWithSubtasks.filter(
+                                  (task) =>
+                                    Number(
+                                      task.phase_id,
+                                    ) ===
+                                    Number(
+                                      phase.id,
+                                    ),
+                                );
+
+
+                              const completedTasks =
+                                phaseTasks.filter(
+                                  (task) =>
+                                    task.status ===
+                                    "เสร็จสิ้น",
+                                ).length;
+
+
+                              const totalTasks =
+                                phaseTasks.length;
+
+
+                              let phaseStatus =
+                                "ยังไม่เริ่ม";
+
+
+                              if (
+                                totalTasks > 0 &&
+                                completedTasks ===
+                                  totalTasks
+                              ) {
+
+                                phaseStatus =
+                                  "เสร็จสิ้น";
+
+                              } else if (
+                                phaseTasks.some(
+                                  (task) =>
+                                    task.status ===
+                                      "กำลังดำเนินการ" ||
+                                    task.status ===
+                                      "เสร็จสิ้น",
+                                )
+                              ) {
+
+                                phaseStatus =
+                                  "กำลังดำเนินการ";
+
+                              }
+
+
+                              return {
+                                ...phase,
+
+                                status:
+                                  phaseStatus,
+
+                                completed_tasks:
+                                  completedTasks,
+
+                                total_tasks:
+                                  totalTasks,
+
+                                tasks:
+                                  phaseTasks,
+                              };
+
+                            },
+                          );
+
+
+                        // =====================================
+                        // RESPONSE
+                        // =====================================
+
+                        res.json({
+                          project,
+
+                          members,
+
+                          phases:
+                            phasesWithTasks,
+                        });
+
+                      },
+                    );
+
+                  },
+                );
+
+              },
+            );
+
+          },
+        );
+
+      },
+    );
+
+  },
+);
+
+
+// =========================================================
+// 2. สร้าง Phase
+// =========================================================
+
+app.post(
+  "/student/projects/:projectId/phases",
+  (req, res) => {
+
+    const { projectId } =
+      req.params;
+
+
+    const {
+      student_id,
+      phase_name,
+      start_date,
+      due_date,
+    } = req.body;
+
+
+    // -----------------------------------------
+    // ตรวจข้อมูล
+    // -----------------------------------------
+
+    if (
+      !student_id ||
+      !phase_name?.trim()
+    ) {
+
+      return res.status(400).json({
+        message:
+          "กรุณาระบุชื่อ Phase",
+      });
+
+    }
+
+
+    if (
+      start_date &&
+      due_date &&
+      new Date(start_date) >
+        new Date(due_date)
+    ) {
+
+      return res.status(400).json({
+        message:
+          "วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด",
+      });
+
+    }
+
+
+    // -----------------------------------------
+    // ตรวจว่านิสิตเป็นสมาชิกโครงงานจริง
+    // -----------------------------------------
+
+    const memberCheckSql = `
+      SELECT id
+
+      FROM project_members
+
+      WHERE project_id = ?
+        AND user_id = ?
+
+      LIMIT 1
+    `;
+
+
+    db.query(
+      memberCheckSql,
+      [
+        projectId,
+        student_id,
+      ],
+      (memberErr, memberRows) => {
+
+        if (memberErr) {
+
+          console.log(
+            "Check project member error:",
+            memberErr,
+          );
+
+          return res.status(500).json({
+            message:
+              "Database Error",
+          });
+
+        }
+
+
+        if (
+          memberRows.length === 0
+        ) {
+
+          return res.status(403).json({
+            message:
+              "คุณไม่ใช่สมาชิกของโครงงานนี้",
+          });
+
+        }
+
+
+        // -----------------------------------------
+        // หา order ถัดไป
+        // -----------------------------------------
+
+        const orderSql = `
+          SELECT
+            COALESCE(
+              MAX(phase_order),
+              0
+            ) + 1 AS next_order
+
+          FROM project_phases
+
+          WHERE project_id = ?
+        `;
+
+
+        db.query(
+          orderSql,
+          [projectId],
+          (orderErr, orderRows) => {
+
+            if (orderErr) {
+
+              console.log(
+                "Get phase order error:",
+                orderErr,
+              );
+
+              return res
+                .status(500)
+                .json({
+                  message:
+                    "Database Error",
+                });
+
+            }
+
+
+            const nextOrder =
+              Number(
+                orderRows[0]
+                  ?.next_order,
+              ) || 1;
+
+
+            // -----------------------------------------
+            // Insert Phase
+            // -----------------------------------------
+
+            const insertSql = `
+              INSERT INTO project_phases
+              (
+                project_id,
+                phase_name,
+                start_date,
+                due_date,
+                phase_order
+              )
+
+              VALUES (?, ?, ?, ?, ?)
+            `;
+
+
+            db.query(
+              insertSql,
+              [
+                projectId,
+
+                phase_name.trim(),
+
+                start_date ||
+                  null,
+
+                due_date ||
+                  null,
+
+                nextOrder,
+              ],
+              (
+                insertErr,
+                result,
+              ) => {
+
+                if (insertErr) {
+
+                  console.log(
+                    "Create phase error:",
+                    insertErr,
+                  );
+
+                  return res
+                    .status(500)
+                    .json({
+                      message:
+                        "สร้าง Phase ไม่สำเร็จ",
+                    });
+
+                }
+
+
+                res.json({
+                  success: true,
+
+                  message:
+                    "สร้าง Phase เรียบร้อยแล้ว",
+
+                  phase_id:
+                    result.insertId,
+                });
+
+              },
+            );
+
+          },
+        );
+
+      },
+    );
+
+  },
+);
+// =========================================================
+// 3. แก้ไข Phase
+// =========================================================
+
+app.put(
+  "/student/phases/:phaseId",
+  (req, res) => {
+
+    const { phaseId } =
+      req.params;
+
+    const {
+      student_id,
+      phase_name,
+      start_date,
+      due_date,
+    } = req.body;
+
+
+    // ==========================================
+    // ตรวจข้อมูล
+    // ==========================================
+
+    if (
+      !student_id ||
+      !phase_name?.trim() ||
+      !start_date ||
+      !due_date
+    ) {
+
+      return res.status(400).json({
+        message:
+          "กรุณากรอกข้อมูลให้ครบ",
+      });
+
+    }
+
+
+    if (
+      new Date(start_date) >
+      new Date(due_date)
+    ) {
+
+      return res.status(400).json({
+        message:
+          "วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด",
+      });
+
+    }
+
+
+    // ==========================================
+    // หา Phase + ตรวจว่านิสิตเป็นสมาชิกโครงงาน
+    // ==========================================
+
+    const checkSql = `
+      SELECT
+        ph.id,
+        ph.project_id
+
+      FROM project_phases ph
+
+      INNER JOIN project_members pm
+        ON pm.project_id = ph.project_id
+
+      WHERE ph.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+
+    db.query(
+      checkSql,
+      [
+        phaseId,
+        student_id,
+      ],
+      (checkErr, rows) => {
+
+        if (checkErr) {
+
+          console.log(
+            "Check edit phase error:",
+            checkErr,
+          );
+
+          return res.status(500).json({
+            message:
+              "Database Error",
+          });
+
+        }
+
+
+        if (rows.length === 0) {
+
+          return res.status(403).json({
+            message:
+              "คุณไม่มีสิทธิ์แก้ไข Phase นี้",
+          });
+
+        }
+
+
+        // ==========================================
+        // UPDATE
+        // ==========================================
+
+        const updateSql = `
+          UPDATE project_phases
+
+          SET
+            phase_name = ?,
+            start_date = ?,
+            due_date = ?
+
+          WHERE id = ?
+        `;
+
+
+        db.query(
+          updateSql,
+          [
+            phase_name.trim(),
+            start_date,
+            due_date,
+            phaseId,
+          ],
+          (updateErr) => {
+
+            if (updateErr) {
+
+              console.log(
+                "Update phase error:",
+                updateErr,
+              );
+
+              return res
+                .status(500)
+                .json({
+                  message:
+                    "แก้ไข Phase ไม่สำเร็จ",
+                });
+
+            }
+
+
+            res.json({
+              success: true,
+
+              message:
+                "แก้ไข Phase เรียบร้อยแล้ว",
+            });
+
+          },
+        );
+
+      },
+    );
+
+  },
+);
+// =========================================================
+// 4. ลบ Phase
+// =========================================================
+
+app.delete(
+  "/student/phases/:phaseId",
+  (req, res) => {
+
+    const { phaseId } =
+      req.params;
+
+    const {
+      student_id,
+    } = req.body;
+
+
+    if (!student_id) {
+
+      return res.status(400).json({
+        message:
+          "ไม่พบข้อมูลผู้ใช้งาน",
+      });
+
+    }
+
+
+    // ==========================================
+    // ตรวจสิทธิ์ก่อน
+    // ==========================================
+
+    const checkSql = `
+      SELECT
+        ph.id,
+        ph.project_id,
+        ph.phase_name
+
+      FROM project_phases ph
+
+      INNER JOIN project_members pm
+        ON pm.project_id = ph.project_id
+
+      WHERE ph.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+
+    db.query(
+      checkSql,
+      [
+        phaseId,
+        student_id,
+      ],
+      (checkErr, rows) => {
+
+        if (checkErr) {
+
+          console.log(
+            "Check delete phase error:",
+            checkErr,
+          );
+
+          return res.status(500).json({
+            message:
+              "Database Error",
+          });
+
+        }
+
+
+        if (rows.length === 0) {
+
+          return res.status(403).json({
+            message:
+              "คุณไม่มีสิทธิ์ลบ Phase นี้",
+          });
+
+        }
+
+
+        // ==========================================
+        // DELETE
+        // ==========================================
+
+        const deleteSql = `
+          DELETE FROM project_phases
+
+          WHERE id = ?
+        `;
+
+
+        db.query(
+          deleteSql,
+          [phaseId],
+          (deleteErr) => {
+
+            if (deleteErr) {
+
+              console.log(
+                "Delete phase error:",
+                deleteErr,
+              );
+
+              return res
+                .status(500)
+                .json({
+                  message:
+                    "ลบ Phase ไม่สำเร็จ",
+                });
+
+            }
+
+
+            res.json({
+              success: true,
+
+              message:
+                "ลบ Phase เรียบร้อยแล้ว",
+            });
+
+          },
+        );
+
+      },
+    );
+
+  },
+);
+// =========================================================
+// 5. สร้างงานใน Phase
+// =========================================================
+
+app.post(
+  "/student/phases/:phaseId/tasks",
+  (req, res) => {
+
+    const { phaseId } =
+      req.params;
+
+    const {
+      student_id,
+      task_name,
+      description,
+      start_date,
+      due_date,
+      subtasks = [],
+    } = req.body;
+
+
+    // ==========================================
+    // ตรวจข้อมูล
+    // ==========================================
+
+    if (
+      !student_id ||
+      !task_name?.trim() ||
+      !start_date ||
+      !due_date
+    ) {
+      return res.status(400).json({
+        message:
+          "กรุณากรอกข้อมูลที่จำเป็นให้ครบ",
+      });
+    }
+
+
+    if (
+      new Date(start_date) >
+      new Date(due_date)
+    ) {
+      return res.status(400).json({
+        message:
+          "วันที่เริ่มต้นต้องไม่เกินกำหนดส่ง",
+      });
+    }
+
+
+    // ==========================================
+    // ตรวจ Phase + ตรวจว่านิสิตเป็นสมาชิก
+    // ==========================================
+
+    const checkSql = `
+      SELECT
+        ph.id,
+        ph.project_id,
+        ph.start_date AS phase_start_date,
+        ph.due_date AS phase_due_date
+
+      FROM project_phases ph
+
+      INNER JOIN project_members pm
+        ON pm.project_id = ph.project_id
+
+      WHERE ph.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+
+    db.query(
+      checkSql,
+      [
+        phaseId,
+        student_id,
+      ],
+      (checkErr, rows) => {
+
+        if (checkErr) {
+
+          console.log(
+            "Check task phase error:",
+            checkErr,
+          );
+
+          return res.status(500).json({
+            message:
+              "Database Error",
+          });
+        }
+
+
+        if (rows.length === 0) {
+
+          return res.status(403).json({
+            message:
+              "คุณไม่มีสิทธิ์เพิ่มงานใน Phase นี้",
+          });
+        }
+
+
+        const phase =
+          rows[0];
+
+
+        // ==========================================
+        // ตรวจวันที่ของงานกับ Phase
+        // ==========================================
+
+        if (
+          phase.phase_start_date &&
+          new Date(start_date) <
+            new Date(
+              phase.phase_start_date,
+            )
+        ) {
+          return res.status(400).json({
+            message:
+              "วันที่เริ่มงานต้องไม่ก่อนวันที่เริ่มต้นของ Phase",
+          });
+        }
+
+
+        if (
+          phase.phase_due_date &&
+          new Date(due_date) >
+            new Date(
+              phase.phase_due_date,
+            )
+        ) {
+          return res.status(400).json({
+            message:
+              "กำหนดส่งต้องไม่เกินวันที่สิ้นสุดของ Phase",
+          });
+        }
+
+
+        // ==========================================
+        // หา task_order ถัดไป
+        // ==========================================
+
+        const orderSql = `
+          SELECT
+            COALESCE(
+              MAX(task_order),
+              0
+            ) + 1 AS next_order
+
+          FROM project_tasks
+
+          WHERE phase_id = ?
+        `;
+
+
+        db.query(
+          orderSql,
+          [phaseId],
+          (orderErr, orderRows) => {
+
+            if (orderErr) {
+
+              console.log(
+                "Get task order error:",
+                orderErr,
+              );
+
+              return res.status(500).json({
+                message:
+                  "Database Error",
+              });
+            }
+
+
+            const nextOrder =
+              Number(
+                orderRows[0]
+                  ?.next_order,
+              ) || 1;
+
+
+            // ==========================================
+            // INSERT TASK
+            // ==========================================
+
+            const insertTaskSql = `
+              INSERT INTO project_tasks
+              (
+                project_id,
+                phase_id,
+                task_name,
+                description,
+                assignee_id,
+                start_date,
+                due_date,
+                status,
+                review_status,
+                task_order
+              )
+
+              VALUES (
+                ?, ?, ?, ?, ?, ?, ?,
+                'ยังไม่เริ่ม',
+                'ยังไม่ส่ง',
+                ?
+              )
+            `;
+
+
+            db.query(
+              insertTaskSql,
+              [
+                phase.project_id,
+                phaseId,
+
+                task_name.trim(),
+
+                description?.trim() ||
+                  null,
+
+                student_id,
+
+                start_date,
+                due_date,
+
+                nextOrder,
+              ],
+              (
+                taskErr,
+                taskResult,
+              ) => {
+
+                if (taskErr) {
+
+                  console.log(
+                    "Create task error:",
+                    taskErr,
+                  );
+
+                  return res
+                    .status(500)
+                    .json({
+                      message:
+                        "เพิ่มงานไม่สำเร็จ",
+                    });
+                }
+
+
+                const taskId =
+                  taskResult.insertId;
+
+
+                // ==========================================
+                // ไม่มี Subtask
+                // ==========================================
+
+                if (
+                  !Array.isArray(
+                    subtasks,
+                  ) ||
+                  subtasks.length === 0
+                ) {
+
+                  return res.json({
+                    success: true,
+
+                    message:
+                      "เพิ่มงานเรียบร้อยแล้ว",
+
+                    task_id:
+                      taskId,
+                  });
+                }
+
+
+                // ==========================================
+                // INSERT SUBTASK
+                // ==========================================
+
+                const subtaskValues =
+                  subtasks
+                    .map(
+                      (
+                        item,
+                        index,
+                      ) => [
+                        taskId,
+                        String(
+                          item,
+                        ).trim(),
+                        "ยังไม่เริ่ม",
+                        index + 1,
+                      ],
+                    )
+                    .filter(
+                      (item) =>
+                        item[1] !== "",
+                    );
+
+
+                if (
+                  subtaskValues.length ===
+                  0
+                ) {
+
+                  return res.json({
+                    success: true,
+
+                    message:
+                      "เพิ่มงานเรียบร้อยแล้ว",
+
+                    task_id:
+                      taskId,
+                  });
+                }
+
+
+                const insertSubtaskSql = `
+                  INSERT INTO project_subtasks
+                  (
+                    task_id,
+                    subtask_name,
+                    status,
+                    subtask_order
+                  )
+
+                  VALUES ?
+                `;
+
+
+                db.query(
+                  insertSubtaskSql,
+                  [subtaskValues],
+                  (subtaskErr) => {
+
+                    if (subtaskErr) {
+
+                      console.log(
+                        "Create subtasks error:",
+                        subtaskErr,
+                      );
+
+                      // ถ้า Subtask ผิด
+                      // ลบ Task ที่เพิ่งสร้างออก
+                      db.query(
+                        `
+                          DELETE
+                          FROM project_tasks
+                          WHERE id = ?
+                        `,
+                        [taskId],
+                      );
+
+
+                      return res
+                        .status(500)
+                        .json({
+                          message:
+                            "เพิ่ม Subtask ไม่สำเร็จ",
+                        });
+                    }
+
+
+                    res.json({
+                      success: true,
+
+                      message:
+                        "เพิ่มงานเรียบร้อยแล้ว",
+
+                      task_id:
+                        taskId,
+                    });
+
+                  },
+                );
+
+              },
+            );
+
+          },
+        );
+
+      },
+    );
+
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
