@@ -1,0 +1,1156 @@
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.student-task-page,
+.student-task-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+
+.student-task-page {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.student-task-page
+.student-task-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows:
+    auto
+    1fr
+    auto;
+
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.student-task-page
+.student-task-logo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 24px 20px;
+}
+
+
+.student-task-page
+.student-task-logo img {
+  width: 55px;
+  height: 55px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+
+.student-task-page
+.student-task-logo h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.student-task-page
+.student-task-logo p {
+  margin: 0;
+
+  color: #666666;
+
+  font-size: 9.5px;
+  font-weight: 400;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.student-task-page
+.student-task-sidebar ul {
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+
+.student-task-page
+.student-task-sidebar li {
+  width: 100%;
+
+  padding: 18px 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+
+.student-task-page
+.student-task-sidebar li.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.student-task-page
+.student-task-logout {
+  width: 190px;
+
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.student-task-page
+.student-task-main {
+  width: calc(100% - 250px);
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  background: #f5f5f5;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.student-task-page
+.student-task-header {
+  width: 100%;
+  height: 70px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f0e3a1;
+}
+
+
+.student-task-page
+.student-task-header h2 {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 20px;
+  font-weight: 400;
+}
+
+
+.student-task-page
+.student-task-breadcrumb {
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-breadcrumb:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
+.student-task-page
+.student-task-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.student-task-page
+.student-task-user {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 14px;
+}
+
+
+.student-task-page
+.student-task-user img {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.student-task-page
+.student-task-content {
+  width: 100%;
+
+  padding: 32px 38px 45px;
+}
+
+
+/* =========================================================
+   PROJECT TITLE
+========================================================= */
+
+.student-task-page
+.student-task-project-heading {
+  margin-bottom: 18px;
+}
+
+
+.student-task-page
+.student-task-project-heading h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.student-task-page
+.student-task-tabs {
+  width: 100%;
+
+  margin-bottom: 15px;
+
+  display: flex;
+}
+
+
+.student-task-page
+.student-task-tabs button {
+  min-width: 120px;
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-right: 1px solid #cccccc;
+
+  background: transparent;
+
+  color: #333333;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-tabs button.active {
+  background: #2f5d7c;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.student-task-page
+.student-task-container {
+  width: 100%;
+
+  padding: 24px 25px 30px;
+
+  background: #ffffff;
+
+  border-radius: 9px;
+}
+
+
+.student-task-page
+.student-task-container > h3 {
+  margin:
+    0
+    0
+    20px;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   DETAIL CARD
+========================================================= */
+
+.student-task-page
+.student-task-detail-card {
+  width: 100%;
+
+  padding: 20px;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 8px;
+
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.student-task-page
+.student-task-title-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.student-task-page
+.student-task-title strong {
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.student-task-page
+.student-task-status {
+  min-width: 90px;
+  height: 25px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+
+.student-task-page
+.student-task-status.not-started {
+  background: #dddddd;
+
+  color: #777777;
+}
+
+
+.student-task-page
+.student-task-status.working {
+  background: #20a36a;
+
+  color: #ffffff;
+}
+
+
+.student-task-page
+.student-task-status.completed {
+  background: #20a36a;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.student-task-page
+.student-task-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 15px 0 18px;
+
+  background: #cccccc;
+}
+
+
+/* =========================================================
+   INFO
+========================================================= */
+
+.student-task-page
+.student-task-info p {
+  margin: 0 0 8px;
+
+  color: #222222;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.student-task-page
+.student-task-section {
+  margin-top: 28px;
+}
+
+
+.student-task-page
+.student-task-section h4 {
+  margin:
+    0
+    0
+    12px;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+.student-task-page
+.student-task-section > p {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   SUBTASK
+========================================================= */
+
+.student-task-page
+.student-task-subtasks {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.student-task-page
+.student-task-subtask {
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #222222;
+
+  font-size: 10px;
+}
+
+
+.student-task-page
+.student-task-subtask input {
+  width: 14px;
+  height: 14px;
+
+  margin: 0;
+
+  accent-color: #20a36a;
+}
+
+
+.student-task-page
+.student-task-empty {
+  color: #888888 !important;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.student-task-page
+.student-task-progress-row {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.student-task-page
+.student-task-progress-bar {
+  width: 250px;
+  height: 13px;
+
+  overflow: hidden;
+
+  background: #dddddd;
+}
+
+
+.student-task-page
+.student-task-progress-fill {
+  height: 100%;
+
+  background: #111111;
+
+  transition: width 0.25s ease;
+}
+
+
+.student-task-page
+.student-task-progress-percent {
+  color: #222222;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   FILE
+========================================================= */
+
+.student-task-page
+.student-task-file-area {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.student-task-page
+.student-task-file-area span {
+  color: #888888;
+
+  font-size: 10px;
+}
+
+
+.student-task-page
+.student-task-file-btn {
+  min-width: 90px;
+  height: 30px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: #cccccc;
+  color: #ffffff;
+
+  font-size: 10px;
+}
+
+
+.student-task-page
+.student-task-file-btn:disabled {
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+.student-task-page
+.student-task-actions {
+  width: 100%;
+
+  margin-top: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+.student-task-page
+.student-task-back-btn,
+.student-task-page
+.student-task-save-btn {
+  min-width: 150px;
+  height: 40px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-back-btn {
+  background: #3b75c4;
+}
+
+
+.student-task-page
+.student-task-save-btn {
+  background: #20a36a;
+}
+
+
+.student-task-page
+.student-task-save-btn:disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.student-task-page-loading {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f5f5;
+
+  font-family: "Prompt", sans-serif;
+
+  font-size: 14px;
+
+  color: #555555;
+}
+
+/* =========================================================
+   SUBTASK INTERACTION
+========================================================= */
+
+.student-task-page
+.student-task-subtask {
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-subtask input:not(:disabled) {
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-subtask input:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+
+.student-task-page
+.student-task-subtask.completed span {
+  color: #777777;
+
+  text-decoration: line-through;
+}
+
+
+/* =========================================================
+   SAVE BUTTON
+========================================================= */
+
+.student-task-page
+.student-task-save-btn:not(:disabled) {
+  background: #20a36a;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-save-btn:not(:disabled):hover {
+  background: #188858;
+}
+
+
+.student-task-page
+.student-task-save-btn:disabled {
+  background: #aaaaaa;
+
+  color: #ffffff;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   SUBTASK HEADER
+========================================================= */
+
+.student-task-page
+.student-subtask-header {
+  width: 100%;
+
+  margin-bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.student-task-page
+.student-subtask-header h4 {
+  margin: 0;
+}
+
+
+/* =========================================================
+   ADD SUBTASK
+========================================================= */
+
+.student-task-page
+.student-add-subtask-btn {
+  height: 30px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-add-subtask-btn:hover:not(:disabled) {
+  background: #2f6db5;
+}
+
+
+.student-task-page
+.student-add-subtask-btn:disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUBTASK ROW
+========================================================= */
+
+.student-task-page
+.student-task-subtask-row {
+  width: 100%;
+  min-height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+
+.student-task-page
+.student-task-subtask-check {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #222222;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-subtask-check input {
+  width: 14px;
+  height: 14px;
+
+  margin: 0;
+
+  accent-color: #20a36a;
+}
+
+
+.student-task-page
+.student-task-subtask-row.completed
+.student-task-subtask-check span {
+  color: #777777;
+
+  text-decoration: line-through;
+}
+
+
+/* =========================================================
+   EDIT / DELETE
+========================================================= */
+
+.student-task-page
+.student-subtask-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+
+.student-task-page
+.student-subtask-edit-btn,
+.student-task-page
+.student-subtask-delete-btn {
+  width: 27px;
+  height: 27px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 4px;
+
+  background: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-subtask-edit-btn {
+  border: 1px solid #3b75c4;
+
+  color: #3b75c4;
+}
+
+
+.student-task-page
+.student-subtask-edit-btn:hover:not(:disabled) {
+  background: #edf4fd;
+}
+
+
+.student-task-page
+.student-subtask-delete-btn {
+  border: 1px solid #e74c3c;
+
+  color: #e74c3c;
+}
+
+
+.student-task-page
+.student-subtask-delete-btn:hover:not(:disabled) {
+  background: #fff0ee;
+}
+
+
+.student-task-page
+.student-subtask-edit-btn:disabled,
+.student-task-page
+.student-subtask-delete-btn:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUBTASK MODAL OVERLAY
+========================================================= */
+
+.student-task-page
+.student-subtask-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(
+    0,
+    0,
+    0,
+    0.35
+  );
+}
+
+
+/* =========================================================
+   SUBTASK MODAL
+========================================================= */
+
+.student-task-page
+.student-subtask-modal {
+  width: 420px;
+
+  padding: 28px 28px 25px;
+
+  background: #ffffff;
+
+  border: 1px solid #aaaaaa;
+  border-radius: 8px;
+}
+
+
+.student-task-page
+.student-subtask-modal h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+.student-task-page
+.student-subtask-modal-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 18px 0 22px;
+
+  background: #cccccc;
+}
+
+
+.student-task-page
+.student-subtask-modal label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+.student-task-page
+.student-subtask-modal label span {
+  color: red;
+}
+
+
+.student-task-page
+.student-subtask-modal input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  font-size: 11px;
+}
+
+
+.student-task-page
+.student-subtask-modal input:focus {
+  border-color: #3b75c4;
+}
+
+
+/* =========================================================
+   MODAL BUTTON
+========================================================= */
+
+.student-task-page
+.student-subtask-modal-actions {
+  margin-top: 30px;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+
+.student-task-page
+.student-subtask-modal-cancel,
+.student-task-page
+.student-subtask-modal-save {
+  min-width: 130px;
+  height: 38px;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-subtask-modal-cancel {
+  background: #ff1010;
+}
+
+
+.student-task-page
+.student-subtask-modal-save {
+  background: #20a36a;
+}
+
+
+.student-task-page
+.student-subtask-modal-save:disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}

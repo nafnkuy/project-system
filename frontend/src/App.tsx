@@ -11,6 +11,7 @@ import StudentProject from "./pages/student/StudentProject";
 import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentProjectDetail from "./pages/student/StudentProjectDetail";
 import StudentProjectPlan from "./pages/student/StudentProjectPlan";
+import StudentTaskDetail from "./pages/student/StudentTaskDetail";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -47,6 +48,7 @@ function App() {
         <Route path="/student-notifications" element={<StudentNotifications />} />
         <Route path="/student-project-detail/:projectId" element={<StudentProjectDetail />} />
         <Route path="/student-project-detail/:projectId/plan" element={<StudentProjectPlan />} />
+        <Route path="/student-project-detail/:projectId/plan/task/:taskId" element={<StudentTaskDetail />} />
 
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />

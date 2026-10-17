@@ -47,6 +47,7 @@ interface Task {
   phase_id: number;
 
   task_name: string;
+  description: string | null;
 
   assignee_id: number | null;
 
@@ -201,6 +202,42 @@ function StudentProjectPlan() {
   const [taskSubtasks, setTaskSubtasks] = useState("");
 
   const [creatingTask, setCreatingTask] = useState(false);
+
+  /* =========================================================
+   EDIT TASK MODAL
+========================================================= */
+
+  const [showEditTaskModal, setShowEditTaskModal] = useState(false);
+
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  const [editTaskName, setEditTaskName] = useState("");
+
+  const [editTaskPhaseId, setEditTaskPhaseId] = useState("");
+
+  const [editTaskDescription, setEditTaskDescription] = useState("");
+
+  const [editTaskStartDate, setEditTaskStartDate] = useState("");
+
+  const [editTaskDueDate, setEditTaskDueDate] = useState("");
+
+  const [editTaskSubtasks, setEditTaskSubtasks] = useState("");
+
+  const [savingTask, setSavingTask] = useState(false);
+
+  const [deletingTask, setDeletingTask] = useState(false);
+
+  /* =========================================================
+   TASK DETAIL MODAL
+========================================================= */
+
+  const [showTaskDetailModal, setShowTaskDetailModal] = useState(false);
+
+  const [selectedTaskDetail, setSelectedTaskDetail] = useState<Task | null>(
+    null,
+  );
+
+  const [startingTask, setStartingTask] = useState(false);
 
   /* =========================================================
      CHECK LOGIN
@@ -520,6 +557,244 @@ function StudentProjectPlan() {
       setCreatingTask(false);
     }
   };
+
+  /* =========================================================
+   OPEN EDIT TASK
+========================================================= */
+
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+
+    setEditTaskName(task.task_name || "");
+
+    setEditTaskPhaseId(String(task.phase_id));
+
+    setEditTaskDescription(task.description || "");
+
+    setEditTaskStartDate(formatDateInput(task.start_date));
+
+    setEditTaskDueDate(formatDateInput(task.due_date));
+
+    setEditTaskSubtasks(
+      (task.subtasks || []).map((subtask) => subtask.subtask_name).join("\n"),
+    );
+
+    setShowEditTaskModal(true);
+  };
+
+  const selectedEditTaskPhase =
+    phases.find((phase) => Number(phase.id) === Number(editTaskPhaseId)) ||
+    null;
+
+  const isEditTaskValid =
+    editTaskName.trim() !== "" &&
+    editTaskPhaseId !== "" &&
+    editTaskStartDate !== "" &&
+    editTaskDueDate !== "" &&
+    editTaskStartDate <= editTaskDueDate &&
+    (!selectedEditTaskPhase?.start_date ||
+      editTaskStartDate >= formatDateInput(selectedEditTaskPhase.start_date)) &&
+    (!selectedEditTaskPhase?.due_date ||
+      editTaskDueDate <= formatDateInput(selectedEditTaskPhase.due_date));
+
+  /* =========================================================
+   SAVE EDIT TASK
+========================================================= */
+
+  const handleSaveEditTask = async () => {
+    if (!editingTask || !userId || !isEditTaskValid) {
+      return;
+    }
+
+    const lines = editTaskSubtasks
+      .split(/\r?\n/)
+      .map((item) => item.trim().replace(/^[-•]\s*/, ""))
+      .filter(Boolean);
+
+    /*
+      พยายามรักษา id ของ Subtask เดิมไว้
+      เพื่อไม่ให้ status เดิมหาย
+    */
+
+    const usedIds = new Set<number>();
+
+    const subtasks = lines.map((name, index) => {
+      // หาอันเดิมที่ชื่อเหมือนกันก่อน
+      let original = editingTask.subtasks.find(
+        (subtask) =>
+          subtask.subtask_name.trim() === name && !usedIds.has(subtask.id),
+      );
+
+      // ถ้าเป็นการแก้ชื่อ
+      // ใช้ตำแหน่งเดิม
+      if (!original) {
+        const byIndex = editingTask.subtasks[index];
+
+        if (byIndex && !usedIds.has(byIndex.id)) {
+          original = byIndex;
+        }
+      }
+
+      if (original) {
+        usedIds.add(original.id);
+      }
+
+      return {
+        id: original?.id || null,
+
+        subtask_name: name,
+      };
+    });
+
+    try {
+      setSavingTask(true);
+
+      const res = await axios.put(
+        `http://localhost:5000/student/tasks/${editingTask.id}`,
+        {
+          student_id: Number(userId),
+
+          phase_id: Number(editTaskPhaseId),
+
+          task_name: editTaskName.trim(),
+
+          description: editTaskDescription.trim(),
+
+          start_date: editTaskStartDate,
+
+          due_date: editTaskDueDate,
+
+          subtasks,
+        },
+      );
+
+      alert(res.data.message);
+
+      setShowEditTaskModal(false);
+
+      setEditingTask(null);
+
+      loadPlan();
+    } catch (err: any) {
+      console.log("Edit task error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถแก้ไขงานได้");
+    } finally {
+      setSavingTask(false);
+    }
+  };
+
+  /* =========================================================
+   DELETE TASK
+========================================================= */
+
+  const handleDeleteTask = async () => {
+    if (!editingTask || !userId) {
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `ต้องการลบงาน "${editingTask.task_name}" หรือไม่?\n\nSubtask ภายในงานนี้จะถูกลบด้วย`,
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setDeletingTask(true);
+
+      const res = await axios.delete(
+        `http://localhost:5000/student/tasks/${editingTask.id}`,
+        {
+          data: {
+            student_id: Number(userId),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      setShowEditTaskModal(false);
+      setEditingTask(null);
+
+      loadPlan();
+    } catch (err: any) {
+      console.log("Delete task error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถลบงานได้");
+    } finally {
+      setDeletingTask(false);
+    }
+  };
+
+  /* =========================================================
+   OPEN TASK DETAIL
+========================================================= */
+
+  const openTaskDetail = (task: Task) => {
+    setSelectedTaskDetail(task);
+
+    setShowTaskDetailModal(true);
+  };
+
+  /* =========================================================
+   START TASK
+========================================================= */
+
+  const handleStartTask = async () => {
+    if (!selectedTaskDetail || !userId) {
+      return;
+    }
+
+    const confirmStart = window.confirm(
+      `ต้องการเริ่มดำเนินการงาน "${selectedTaskDetail.task_name}" หรือไม่?`,
+    );
+
+    if (!confirmStart) {
+      return;
+    }
+
+    try {
+      setStartingTask(true);
+
+      const res = await axios.put(
+        `http://localhost:5000/student/tasks/${selectedTaskDetail.id}/start`,
+        {
+          student_id: Number(userId),
+        },
+      );
+
+      alert(res.data.message);
+
+      setShowTaskDetailModal(false);
+
+      setSelectedTaskDetail(null);
+
+      loadPlan();
+    } catch (err: any) {
+      console.log("Start task error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถเริ่มดำเนินการงานได้");
+    } finally {
+      setStartingTask(false);
+    }
+  };
+
+  const selectedTaskDetailPhase = selectedTaskDetail
+    ? phases.find(
+        (phase) => Number(phase.id) === Number(selectedTaskDetail.phase_id),
+      ) || null
+    : null;
+
+  /* =========================================================
+   GO TO TASK DETAIL PAGE
+========================================================= */
+
+  const goToTaskDetailPage = (task: Task) => {
+    navigate(`/student-project-detail/${projectId}/plan/task/${task.id}`);
+  };
+
   /* =========================================================
      FILTER
   ========================================================= */
@@ -575,14 +850,13 @@ function StudentProjectPlan() {
       });
   }, [phases, searchTerm, phaseFilter, taskStatusFilter, reviewStatusFilter]);
 
-  const formatDateInput = (value: string | null) => {
+  function formatDateInput(value: string | null) {
     if (!value) {
       return "";
     }
 
     return value.slice(0, 10);
-  };
-
+  }
   /* =========================================================
      DATE
   ========================================================= */
@@ -983,6 +1257,9 @@ function StudentProjectPlan() {
                                 key={task.id}
                                 task={task}
                                 formatThaiDate={formatThaiDate}
+                                onEdit={openEditTask}
+                                onView={openTaskDetail}
+                                onDetail={goToTaskDetailPage}
                               />
                             ))}
                         </div>
@@ -1005,6 +1282,9 @@ function StudentProjectPlan() {
                                 key={task.id}
                                 task={task}
                                 formatThaiDate={formatThaiDate}
+                                onEdit={openEditTask}
+                                onView={openTaskDetail}
+                                onDetail={goToTaskDetailPage}
                               />
                             ))}
                         </div>
@@ -1027,6 +1307,9 @@ function StudentProjectPlan() {
                                 key={task.id}
                                 task={task}
                                 formatThaiDate={formatThaiDate}
+                                onEdit={openEditTask}
+                                onView={openTaskDetail}
+                                onDetail={goToTaskDetailPage}
                               />
                             ))}
                         </div>
@@ -1436,6 +1719,287 @@ function StudentProjectPlan() {
           </div>
         </div>
       )}
+      {/* =====================================================
+    EDIT TASK MODAL
+===================================================== */}
+
+      {showEditTaskModal && editingTask && (
+        <div className="student-phase-modal-overlay">
+          <div className="student-edit-task-modal">
+            <h3>แก้ไขงาน</h3>
+
+            <div className="student-edit-task-divider" />
+
+            {/* ชื่องาน */}
+
+            <label>
+              ชื่องาน
+              <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              value={editTaskName}
+              onChange={(e) => setEditTaskName(e.target.value)}
+            />
+
+            {/* Phase */}
+
+            <label>
+              Phase
+              <span>*</span>
+            </label>
+
+            <select
+              value={editTaskPhaseId}
+              onChange={(e) => setEditTaskPhaseId(e.target.value)}
+            >
+              {phases.map((phase) => (
+                <option key={phase.id} value={phase.id}>
+                  Phase {phase.phase_order}
+                  {" : "}
+                  {phase.phase_name}
+                </option>
+              ))}
+            </select>
+
+            {/* รายละเอียด */}
+
+            <label>รายละเอียด</label>
+
+            <textarea
+              className="student-edit-task-description"
+              value={editTaskDescription}
+              onChange={(e) => setEditTaskDescription(e.target.value)}
+            />
+
+            {/* วันที่เริ่มต้น */}
+
+            <label>
+              วันที่เริ่มต้น
+              <span>*</span>
+            </label>
+
+            <input
+              type="date"
+              value={editTaskStartDate}
+              min={formatDateInput(selectedEditTaskPhase?.start_date || null)}
+              max={formatDateInput(selectedEditTaskPhase?.due_date || null)}
+              onChange={(e) => setEditTaskStartDate(e.target.value)}
+            />
+
+            {/* กำหนดส่ง */}
+
+            <label>
+              กำหนดส่ง
+              <span>*</span>
+            </label>
+
+            <input
+              type="date"
+              value={editTaskDueDate}
+              min={
+                editTaskStartDate ||
+                formatDateInput(selectedEditTaskPhase?.start_date || null)
+              }
+              max={formatDateInput(selectedEditTaskPhase?.due_date || null)}
+              onChange={(e) => setEditTaskDueDate(e.target.value)}
+            />
+
+            {/* Subtask */}
+
+            <label>Subtask</label>
+
+            <textarea
+              className="student-edit-task-subtasks"
+              value={editTaskSubtasks}
+              onChange={(e) => setEditTaskSubtasks(e.target.value)}
+            />
+
+            {/* ลบงาน */}
+
+            <button
+              type="button"
+              className="student-edit-task-delete"
+              onClick={handleDeleteTask}
+              disabled={savingTask || deletingTask}
+            >
+              {deletingTask ? "กำลังลบ..." : "ลบงาน"}
+            </button>
+
+            {/* ปุ่มล่าง */}
+
+            <div className="student-edit-task-actions">
+              <button
+                type="button"
+                className="student-edit-task-cancel"
+                disabled={savingTask || deletingTask}
+                onClick={() => {
+                  setShowEditTaskModal(false);
+                  setEditingTask(null);
+                }}
+              >
+                ยกเลิก
+              </button>
+
+              <button
+                type="button"
+                className={`student-edit-task-save ${
+                  isEditTaskValid ? "enabled" : "disabled"
+                }`}
+                disabled={!isEditTaskValid || savingTask || deletingTask}
+                onClick={handleSaveEditTask}
+              >
+                {savingTask ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* =====================================================
+    TASK DETAIL MODAL
+===================================================== */}
+
+      {showTaskDetailModal && selectedTaskDetail && (
+        <div className="student-phase-modal-overlay">
+          <div className="student-task-detail-modal">
+            {/* TITLE */}
+
+            <h3>รายละเอียดงาน</h3>
+
+            <div className="student-task-detail-divider" />
+
+            {/* ===============================================
+          NAME + STATUS
+      =============================================== */}
+
+            <div className="student-task-detail-heading">
+              <strong>{selectedTaskDetail.task_name}</strong>
+
+              <span
+                className={`student-task-detail-status ${
+                  selectedTaskDetail.status === "ยังไม่เริ่ม"
+                    ? "not-started"
+                    : selectedTaskDetail.status === "กำลังดำเนินการ"
+                      ? "working"
+                      : "completed"
+                }`}
+              >
+                {selectedTaskDetail.status}
+              </span>
+            </div>
+
+            {/* ===============================================
+          PHASE
+      =============================================== */}
+
+            <p>
+              <strong>
+                Phase {selectedTaskDetailPhase?.phase_order || "-"}
+                {" : "}
+              </strong>
+
+              {selectedTaskDetailPhase?.phase_name || "-"}
+            </p>
+
+            {/* ===============================================
+          ASSIGNEE
+      =============================================== */}
+
+            <p>
+              <strong>ผู้รับผิดชอบ :</strong>{" "}
+              {selectedTaskDetail.assignee_name || "-"}
+            </p>
+
+            {/* ===============================================
+          DATE
+      =============================================== */}
+
+            <p>
+              <strong>วันที่เริ่มต้น :</strong>{" "}
+              {formatThaiDate(selectedTaskDetail.start_date)}
+            </p>
+
+            <p>
+              <strong>กำหนดส่ง :</strong>{" "}
+              {formatThaiDate(selectedTaskDetail.due_date)}
+            </p>
+
+            {/* ===============================================
+          DESCRIPTION
+      =============================================== */}
+
+            <div className="student-task-detail-section">
+              <h4>รายละเอียดงาน</h4>
+
+              <p>{selectedTaskDetail.description || "-"}</p>
+            </div>
+
+            {/* ===============================================
+          SUBTASK
+      =============================================== */}
+
+            <div className="student-task-detail-section">
+              <h4>
+                Subtask : {selectedTaskDetail.completed_subtasks}
+                {" / "}
+                {selectedTaskDetail.total_subtasks}
+              </h4>
+
+              {selectedTaskDetail.subtasks.length === 0 ? (
+                <p>ไม่มี Subtask</p>
+              ) : (
+                <div className="student-task-detail-subtasks">
+                  {selectedTaskDetail.subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className={`student-task-detail-subtask ${
+                        subtask.status === "เสร็จสิ้น" ? "completed" : ""
+                      }`}
+                    >
+                      <span className="student-task-detail-circle">
+                        {subtask.status === "เสร็จสิ้น" ? "✓" : ""}
+                      </span>
+
+                      <span>{subtask.subtask_name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ===============================================
+          BUTTONS
+      =============================================== */}
+
+            <div className="student-task-detail-actions">
+              <button
+                type="button"
+                className="student-task-detail-cancel"
+                disabled={startingTask}
+                onClick={() => {
+                  setShowTaskDetailModal(false);
+
+                  setSelectedTaskDetail(null);
+                }}
+              >
+                ยกเลิก
+              </button>
+
+              {selectedTaskDetail.status === "ยังไม่เริ่ม" && (
+                <button
+                  type="button"
+                  className="student-task-detail-start"
+                  disabled={startingTask}
+                  onClick={handleStartTask}
+                >
+                  {startingTask ? "กำลังดำเนินการ..." : "เริ่มดำเนินการ"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1447,17 +2011,36 @@ function StudentProjectPlan() {
 function TaskCard({
   task,
   formatThaiDate,
+  onEdit,
+  onView,
+  onDetail,
 }: {
   task: Task;
 
   formatThaiDate: (value: string | null) => string;
+
+  onEdit: (task: Task) => void;
+
+  onView: (task: Task) => void;
+
+  onDetail: (task: Task) => void;
 }) {
   return (
-    <div className="student-task-card">
+    <div className="student-task-card" onClick={() => onView(task)}>
       <div className="student-task-title">
         <span>{task.task_name}</span>
 
-        <FaEdit />
+        <button
+          type="button"
+          className="student-task-edit-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+
+            onEdit(task);
+          }}
+        >
+          <FaEdit />
+        </button>
       </div>
 
       <p>ผู้รับผิดชอบ : {task.assignee_name || "-"}</p>
@@ -1469,6 +2052,18 @@ function TaskCard({
         {" / "}
         {task.total_subtasks}
       </p>
+
+      <button
+        type="button"
+        className="student-task-detail-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+
+          onDetail(task);
+        }}
+      >
+        ดูรายละเอียด
+      </button>
 
       {task.review_status !== "ยังไม่ส่ง" && (
         <span

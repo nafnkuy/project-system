@@ -1726,3 +1726,595 @@ button:disabled {
 
   cursor: not-allowed;
 }
+
+/* =========================================================
+   EDIT TASK MODAL
+========================================================= */
+
+.student-project-plan-page .student-edit-task-modal {
+  width: 500px;
+  max-height: 90vh;
+
+  padding: 28px 28px 30px;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #999999;
+  border-radius: 9px;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+
+/* ================= TITLE ================= */
+
+.student-project-plan-page .student-edit-task-modal h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* ================= DIVIDER ================= */
+
+.student-project-plan-page .student-edit-task-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 16px 0 24px;
+
+  background: #bfbfbf;
+}
+
+
+/* ================= LABEL ================= */
+
+.student-project-plan-page .student-edit-task-modal label {
+  display: block;
+
+  margin: 0 0 7px;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.student-project-plan-page .student-edit-task-modal label span {
+  margin-left: 3px;
+
+  color: #ff0000;
+}
+
+
+/* ================= INPUT ================= */
+
+.student-project-plan-page .student-edit-task-modal input,
+.student-project-plan-page .student-edit-task-modal select {
+  width: 100%;
+  height: 40px;
+
+  margin-bottom: 18px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 12px;
+}
+
+.student-project-plan-page .student-edit-task-modal input:focus,
+.student-project-plan-page .student-edit-task-modal select:focus,
+.student-project-plan-page .student-edit-task-modal textarea:focus {
+  border-color: #888888;
+}
+
+
+/* ================= TEXTAREA ================= */
+
+.student-project-plan-page .student-edit-task-modal textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  resize: vertical;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-family: "Prompt", sans-serif;
+  font-size: 12px;
+}
+
+.student-project-plan-page .student-edit-task-description {
+  min-height: 85px;
+
+  margin-bottom: 18px;
+}
+
+.student-project-plan-page .student-edit-task-subtasks {
+  min-height: 85px;
+
+  margin-bottom: 12px;
+}
+
+
+/* ================= DELETE ================= */
+
+.student-project-plan-page .student-edit-task-delete {
+  min-width: 90px;
+  height: 36px;
+
+  padding: 0 14px;
+
+  border: 1px solid #ff0000;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #ff0000;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.student-project-plan-page .student-edit-task-delete:hover:not(:disabled) {
+  background: #fff3f3;
+}
+
+
+/* ================= ACTIONS ================= */
+
+.student-project-plan-page .student-edit-task-actions {
+  width: 100%;
+
+  margin-top: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+/* ================= CANCEL ================= */
+
+.student-project-plan-page .student-edit-task-cancel {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #ff0d0d;
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.student-project-plan-page
+.student-edit-task-cancel:hover:not(:disabled) {
+  background: #e60000;
+}
+
+
+/* ================= SAVE ================= */
+
+.student-project-plan-page .student-edit-task-save {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+.student-project-plan-page .student-edit-task-save.disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+.student-project-plan-page .student-edit-task-save.enabled {
+  background: #20a36a;
+
+  cursor: pointer;
+}
+
+.student-project-plan-page .student-edit-task-save.enabled:hover {
+  background: #188858;
+}
+
+
+/* ================= DISABLED ================= */
+
+.student-project-plan-page .student-edit-task-modal button:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
+}
+
+
+/* ================= EDIT ICON ================= */
+
+.student-project-plan-page .student-task-edit-btn {
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  background: transparent;
+  color: #222222;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   TASK CARD CLICK
+========================================================= */
+
+.student-project-plan-page
+.student-task-card {
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   TASK DETAIL MODAL
+========================================================= */
+
+.student-project-plan-page
+.student-task-detail-modal {
+  width: 500px;
+  max-height: 90vh;
+
+  padding: 28px 28px 30px;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #999999;
+  border-radius: 9px;
+
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+/* ================= TITLE ================= */
+
+.student-project-plan-page
+.student-task-detail-modal > h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+.student-project-plan-page
+.student-task-detail-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 16px 0 20px;
+
+  background: #bfbfbf;
+}
+
+
+/* ================= HEADING ================= */
+
+.student-project-plan-page
+.student-task-detail-heading {
+  width: 100%;
+
+  margin-bottom: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+.student-project-plan-page
+.student-task-detail-heading strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* ================= STATUS ================= */
+
+.student-project-plan-page
+.student-task-detail-status {
+  min-width: 82px;
+  height: 25px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+
+.student-project-plan-page
+.student-task-detail-status.not-started {
+  background: #d3d3d3;
+  color: #ffffff;
+}
+
+
+.student-project-plan-page
+.student-task-detail-status.working {
+  background: #20a36a;
+  color: #ffffff;
+}
+
+
+.student-project-plan-page
+.student-task-detail-status.completed {
+  background: #20a36a;
+  color: #ffffff;
+}
+
+
+/* ================= INFORMATION ================= */
+
+.student-project-plan-page
+.student-task-detail-modal > p {
+  margin: 0 0 8px;
+
+  color: #222222;
+
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+
+.student-project-plan-page
+.student-task-detail-modal > p strong {
+  font-weight: 500;
+}
+
+
+/* ================= SECTION ================= */
+
+.student-project-plan-page
+.student-task-detail-section {
+  margin-top: 20px;
+}
+
+
+.student-project-plan-page
+.student-task-detail-section h4 {
+  margin: 0 0 10px;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+.student-project-plan-page
+.student-task-detail-section p {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+
+/* ================= SUBTASK ================= */
+
+.student-project-plan-page
+.student-task-detail-subtasks {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.student-project-plan-page
+.student-task-detail-subtask {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  color: #222222;
+
+  font-size: 10px;
+}
+
+
+/* วงกลมตามรูป */
+
+.student-project-plan-page
+.student-task-detail-circle {
+  width: 12px;
+  height: 12px;
+
+  margin-top: 1px;
+
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #555555;
+  border-radius: 50%;
+
+  font-size: 8px;
+}
+
+
+/* เสร็จแล้ว */
+
+.student-project-plan-page
+.student-task-detail-subtask.completed
+.student-task-detail-circle {
+  border-color: #20a36a;
+
+  background: #20a36a;
+  color: #ffffff;
+}
+
+
+.student-project-plan-page
+.student-task-detail-subtask.completed
+> span:last-child {
+  color: #777777;
+
+  text-decoration: line-through;
+}
+
+
+/* ================= BUTTONS ================= */
+
+.student-project-plan-page
+.student-task-detail-actions {
+  width: 100%;
+
+  margin-top: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+
+.student-project-plan-page
+.student-task-detail-cancel,
+.student-project-plan-page
+.student-task-detail-start {
+  width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+
+.student-project-plan-page
+.student-task-detail-cancel {
+  background: #ff0d0d;
+}
+
+
+.student-project-plan-page
+.student-task-detail-start {
+  background: #20a36a;
+}
+
+
+.student-project-plan-page
+.student-task-detail-cancel:hover:not(:disabled) {
+  background: #e60000;
+}
+
+
+.student-project-plan-page
+.student-task-detail-start:hover:not(:disabled) {
+  background: #188858;
+}
+
+
+.student-project-plan-page
+.student-task-detail-actions
+button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+/* =========================================================
+   TASK DETAIL BUTTON
+========================================================= */
+
+.student-project-plan-page
+.student-task-detail-btn {
+  min-width: 78px;
+  height: 28px;
+
+  margin-top: 8px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 4px;
+
+  background: #ffffff;
+  color: #333333;
+
+  font-size: 10px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-project-plan-page
+.student-task-detail-btn:hover {
+  background: #f2f2f2;
+}
