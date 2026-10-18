@@ -1,12 +1,18 @@
 import "./StudentTaskDetail.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
 import axios from "axios";
 
-import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import {
+  FaDownload,
+  FaEdit,
+  FaPaperclip,
+  FaPlus,
+  FaTrash,
+} from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -25,6 +31,24 @@ interface Subtask {
   status: "ยังไม่เริ่ม" | "กำลังดำเนินการ" | "เสร็จสิ้น";
 
   subtask_order: number;
+}
+
+interface TaskFile {
+  id: number;
+
+  task_id: number;
+  uploader_id: number;
+
+  original_name: string;
+  file_path: string;
+
+  mime_type: string | null;
+  file_size: number | null;
+
+  uploaded_at: string;
+
+  uploader_username: string;
+  uploader_name: string;
 }
 
 interface Task {
@@ -136,6 +160,18 @@ function StudentTaskDetail() {
   const [deletingSubtaskId, setDeletingSubtaskId] = useState<number | null>(
     null,
   );
+
+  /* =========================================================
+   TASK FILE
+========================================================= */
+
+  const [taskFiles, setTaskFiles] = useState<TaskFile[]>([]);
+
+  const [uploadingFile, setUploadingFile] = useState(false);
+
+  const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   /* =========================================================
      CHECK LOGIN
@@ -527,6 +563,167 @@ function StudentTaskDetail() {
   };
 
   /* =========================================================
+   LOAD TASK FILES
+========================================================= */
+
+  const loadTaskFiles = async () => {
+    if (!taskId) {
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/student/tasks/${taskId}/files`,
+      );
+
+      setTaskFiles(res.data || []);
+    } catch (err) {
+      console.log("Load task files error:", err);
+    }
+  };
+
+  /* =========================================================
+   LOAD FILES WHEN OPEN PAGE
+========================================================= */
+
+  useEffect(() => {
+    loadTaskFiles();
+  }, [taskId]);
+
+  /* =========================================================
+   UPLOAD TASK FILE
+========================================================= */
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file || !taskData || !userId) {
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      alert("ไฟล์ต้องมีขนาดไม่เกิน 10 MB");
+
+      e.target.value = "";
+
+      return;
+    }
+
+    const allowedExtensions = [
+      ".pdf",
+      ".doc",
+      ".docx",
+      ".ppt",
+      ".pptx",
+      ".jpg",
+      ".jpeg",
+      ".png",
+    ];
+
+    const extension = "." + (file.name.split(".").pop() || "").toLowerCase();
+
+    if (!allowedExtensions.includes(extension)) {
+      alert("รองรับเฉพาะ PDF, DOC, DOCX, PPT, PPTX, JPG และ PNG");
+
+      e.target.value = "";
+
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    formData.append("student_id", userId);
+
+    try {
+      setUploadingFile(true);
+
+      const res = await axios.post(
+        `http://localhost:5000/student/tasks/${taskData.task.id}/files`,
+        formData,
+      );
+
+      alert(res.data.message);
+
+      await loadTaskFiles();
+    } catch (err: any) {
+      console.log("Upload file error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถแนบเอกสารได้");
+    } finally {
+      setUploadingFile(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  /* =========================================================
+   DELETE TASK FILE
+========================================================= */
+
+  const handleDeleteFile = async (file: TaskFile) => {
+    if (!userId) {
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `ต้องการลบไฟล์ "${file.original_name}" หรือไม่?`,
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setDeletingFileId(file.id);
+
+      const res = await axios.delete(
+        `http://localhost:5000/student/task-files/${file.id}`,
+        {
+          data: {
+            student_id: Number(userId),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      await loadTaskFiles();
+    } catch (err: any) {
+      console.log("Delete file error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถลบเอกสารได้");
+    } finally {
+      setDeletingFileId(null);
+    }
+  };
+
+  /* =========================================================
+   FORMAT FILE SIZE
+========================================================= */
+
+  const formatFileSize = (bytes: number | null) => {
+    if (!bytes) {
+      return "-";
+    }
+
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  };
+
+  /* =========================================================
      DATE
   ========================================================= */
 
@@ -879,19 +1076,75 @@ function StudentTaskDetail() {
               {/* ATTACHMENT */}
 
               <div className="student-task-section">
-                <h4>เอกสารแนบ</h4>
+                <div className="student-task-file-header">
+                  <h4>เอกสารแนบ</h4>
 
-                <div className="student-task-file-area">
                   <button
                     type="button"
                     className="student-task-file-btn"
-                    disabled
+                    disabled={uploadingFile || !canEditSubtasks}
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    แนบเอกสาร
+                    <FaPaperclip />
+
+                    {uploadingFile ? "กำลังอัปโหลด..." : "แนบเอกสาร"}
                   </button>
 
-                  <span>ยังไม่มีเอกสารแนบ</span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="student-task-file-input"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                    onChange={handleFileChange}
+                  />
                 </div>
+
+                {taskFiles.length === 0 ? (
+                  <p className="student-task-no-file">ยังไม่มีเอกสารแนบ</p>
+                ) : (
+                  <div className="student-task-file-list">
+                    {taskFiles.map((file) => (
+                      <div key={file.id} className="student-task-file-item">
+                        <div className="student-task-file-info">
+                          <FaPaperclip />
+
+                          <div>
+                            <strong>{file.original_name}</strong>
+
+                            <span>
+                              {formatFileSize(file.file_size)}
+                              {" • "}
+                              อัปโหลดโดย {file.uploader_name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="student-task-file-actions">
+                          <a
+                            href={`http://localhost:5000${file.file_path}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="student-task-file-download"
+                          >
+                            <FaDownload />
+                            ดาวน์โหลด
+                          </a>
+
+                          {Number(file.uploader_id) === Number(userId) && (
+                            <button
+                              type="button"
+                              className="student-task-file-delete"
+                              disabled={deletingFileId === file.id}
+                              onClick={() => handleDeleteFile(file)}
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

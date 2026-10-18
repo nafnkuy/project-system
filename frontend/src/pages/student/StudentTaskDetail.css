@@ -1154,3 +1154,268 @@
 
   cursor: not-allowed;
 }
+
+/* =========================================================
+   TASK FILE HEADER
+========================================================= */
+
+.student-task-page
+.student-task-file-header {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 12px;
+}
+
+
+.student-task-page
+.student-task-file-header h4 {
+  margin: 0;
+}
+
+
+/* =========================================================
+   FILE INPUT
+========================================================= */
+
+.student-task-page
+.student-task-file-input {
+  display: none;
+}
+
+
+/* =========================================================
+   ATTACH BUTTON
+========================================================= */
+
+.student-task-page
+.student-task-file-btn {
+  min-width: 100px;
+  height: 32px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-file-btn:hover:not(:disabled) {
+  background: #2f6db5;
+}
+
+
+.student-task-page
+.student-task-file-btn:disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   NO FILE
+========================================================= */
+
+.student-task-page
+.student-task-no-file {
+  margin: 0;
+
+  color: #888888;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   FILE LIST
+========================================================= */
+
+.student-task-page
+.student-task-file-list {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+.student-task-page
+.student-task-file-item {
+  width: 100%;
+  min-height: 54px;
+
+  padding: 9px 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+
+  background: #fafafa;
+}
+
+
+/* =========================================================
+   FILE INFO
+========================================================= */
+
+.student-task-page
+.student-task-file-info {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.student-task-page
+.student-task-file-info > svg {
+  flex-shrink: 0;
+
+  color: #666666;
+
+  font-size: 15px;
+}
+
+
+.student-task-page
+.student-task-file-info div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.student-task-page
+.student-task-file-info strong {
+  overflow: hidden;
+
+  color: #222222;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.student-task-page
+.student-task-file-info span {
+  color: #888888;
+
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   FILE ACTION
+========================================================= */
+
+.student-task-page
+.student-task-file-actions {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+.student-task-page
+.student-task-file-download {
+  height: 28px;
+
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  border: 1px solid #3b75c4;
+  border-radius: 4px;
+
+  background: #ffffff;
+  color: #3b75c4;
+
+  font-size: 9px;
+
+  text-decoration: none;
+}
+
+
+.student-task-page
+.student-task-file-download:hover {
+  background: #edf4fd;
+}
+
+
+.student-task-page
+.student-task-file-delete {
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+
+  background: #ffffff;
+  color: #e74c3c;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+.student-task-page
+.student-task-file-delete:hover:not(:disabled) {
+  background: #fff0ee;
+}
+
+
+.student-task-page
+.student-task-file-delete:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}

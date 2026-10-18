@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const multer = require("multer");
 const sharp = require("sharp");
 const wordcut = require("wordcut");
 
@@ -17,6 +18,63 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/generated", express.static(path.join(__dirname, "generated")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// =========================================================
+// TASK FILE UPLOAD
+// =========================================================
+
+const taskUploadDir = path.join(__dirname, "uploads", "task-files");
+
+if (!fs.existsSync(taskUploadDir)) {
+  fs.mkdirSync(taskUploadDir, {
+    recursive: true,
+  });
+}
+
+const taskFileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, taskUploadDir);
+  },
+
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+    cb(null, uniqueName);
+  },
+});
+
+const allowedTaskFileTypes = [
+  "application/pdf",
+
+  "application/msword",
+
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
+  "application/vnd.ms-powerpoint",
+
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+  "image/jpeg",
+  "image/png",
+];
+
+const uploadTaskFile = multer({
+  storage: taskFileStorage,
+
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, cb) => {
+    if (allowedTaskFileTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("รองรับเฉพาะ PDF, DOC, DOCX, PPT, PPTX, JPG และ PNG"));
+    }
+  },
+});
 app.use(
   "/src/assets",
   express.static(path.join(__dirname, "../frontend/src/assets")),
@@ -5714,6 +5772,264 @@ app.delete("/student/subtasks/:subtaskId", async (req, res) => {
     });
   }
 });
+
+// =========================================================
+// 13. อัปโหลดเอกสารแนบของงาน
+// =========================================================
+
+app.post(
+  "/student/tasks/:taskId/files",
+
+  uploadTaskFile.single("file"),
+
+  (req, res) => {
+    const { taskId } = req.params;
+
+    const studentId = Number(req.body.student_id);
+
+    if (!studentId || !req.file) {
+      if (req.file?.path) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      return res.status(400).json({
+        message: "ข้อมูลไฟล์ไม่ครบถ้วน",
+      });
+    }
+
+    const checkSql = `
+      SELECT
+        t.id,
+        t.project_id,
+        t.review_status
+
+      FROM project_tasks t
+
+      INNER JOIN project_members pm
+        ON pm.project_id =
+           t.project_id
+
+      WHERE t.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+    db.query(checkSql, [taskId, studentId], (checkErr, rows) => {
+      if (checkErr) {
+        fs.unlinkSync(req.file.path);
+
+        console.log("Check task file error:", checkErr);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (rows.length === 0) {
+        fs.unlinkSync(req.file.path);
+
+        return res.status(403).json({
+          message: "คุณไม่มีสิทธิ์แนบไฟล์ในงานนี้",
+        });
+      }
+
+      if (
+        rows[0].review_status === "รอตรวจ" ||
+        rows[0].review_status === "ผ่าน"
+      ) {
+        fs.unlinkSync(req.file.path);
+
+        return res.status(400).json({
+          message: "ไม่สามารถแนบไฟล์ได้ เนื่องจากงานถูกส่งให้อาจารย์ตรวจแล้ว",
+        });
+      }
+
+      const filePath = `/uploads/task-files/${req.file.filename}`;
+
+      const insertSql = `
+          INSERT INTO task_files
+          (
+            task_id,
+            uploader_id,
+            original_name,
+            stored_name,
+            file_path,
+            mime_type,
+            file_size
+          )
+
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+      db.query(
+        insertSql,
+        [
+          taskId,
+
+          studentId,
+
+          req.file.originalname,
+
+          req.file.filename,
+
+          filePath,
+
+          req.file.mimetype,
+
+          req.file.size,
+        ],
+        (insertErr, result) => {
+          if (insertErr) {
+            fs.unlinkSync(req.file.path);
+
+            console.log("Insert task file error:", insertErr);
+
+            return res.status(500).json({
+              message: "ไม่สามารถบันทึกไฟล์ได้",
+            });
+          }
+
+          res.json({
+            success: true,
+
+            message: "แนบเอกสารเรียบร้อยแล้ว",
+
+            file_id: result.insertId,
+          });
+        },
+      );
+    });
+  },
+);
+
+// =========================================================
+// 14. ดูรายการเอกสารแนบ
+// =========================================================
+
+app.get(
+  "/student/tasks/:taskId/files",
+
+  (req, res) => {
+    const { taskId } = req.params;
+
+    const sql = `
+      SELECT
+        tf.id,
+        tf.task_id,
+        tf.uploader_id,
+
+        tf.original_name,
+        tf.file_path,
+        tf.mime_type,
+        tf.file_size,
+        tf.uploaded_at,
+
+        u.username
+          AS uploader_username,
+
+        u.name
+          AS uploader_name
+
+      FROM task_files tf
+
+      INNER JOIN users u
+        ON tf.uploader_id =
+           u.id
+
+      WHERE tf.task_id = ?
+
+      ORDER BY
+        tf.uploaded_at DESC,
+        tf.id DESC
+    `;
+
+    db.query(sql, [taskId], (err, rows) => {
+      if (err) {
+        console.log("Get task files error:", err);
+
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      res.json(rows);
+    });
+  },
+);
+
+// =========================================================
+// 15. ลบเอกสารแนบ
+// =========================================================
+
+app.delete(
+  "/student/task-files/:fileId",
+
+  (req, res) => {
+    const { fileId } = req.params;
+
+    const studentId = Number(req.body.student_id);
+
+    const findSql = `
+      SELECT *
+
+      FROM task_files
+
+      WHERE id = ?
+        AND uploader_id = ?
+
+      LIMIT 1
+    `;
+
+    db.query(findSql, [fileId, studentId], (findErr, rows) => {
+      if (findErr) {
+        return res.status(500).json({
+          message: "Database Error",
+        });
+      }
+
+      if (rows.length === 0) {
+        return res.status(403).json({
+          message: "คุณไม่มีสิทธิ์ลบไฟล์นี้",
+        });
+      }
+
+      const file = rows[0];
+
+      db.query(
+        `
+            DELETE
+            FROM task_files
+
+            WHERE id = ?
+          `,
+        [fileId],
+        (deleteErr) => {
+          if (deleteErr) {
+            return res.status(500).json({
+              message: "ไม่สามารถลบไฟล์ได้",
+            });
+          }
+
+          const realPath = path.join(
+            __dirname,
+            file.file_path.replace(/^\//, ""),
+          );
+
+          if (fs.existsSync(realPath)) {
+            fs.unlinkSync(realPath);
+          }
+
+          res.json({
+            success: true,
+
+            message: "ลบเอกสารเรียบร้อยแล้ว",
+          });
+        },
+      );
+    });
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
