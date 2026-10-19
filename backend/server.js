@@ -3968,44 +3968,59 @@ app.get("/student/projects/:projectId/plan", (req, res) => {
         // -----------------------------------------
 
         const taskSql = `
-                  SELECT
-                    t.id,
-                    t.project_id,
-                    t.phase_id,
+          SELECT
+            t.id,
+            t.project_id,
+            t.phase_id,
 
-                    t.task_name,
-                    t.description,
+            t.task_name,
+            t.description,
 
-                    t.assignee_id,
+            t.assignee_id,
 
-                    u.username
-                      AS assignee_username,
+            u.username
+              AS assignee_username,
 
-                    u.name
-                      AS assignee_name,
+            u.name
+              AS assignee_name,
 
-                    t.start_date,
-                    t.due_date,
+            t.start_date,
+            t.due_date,
 
-                    t.status,
-                    t.review_status,
+            t.status,
+            t.review_status,
 
-                    t.task_order,
+            t.submission_note,
+            t.submitted_at,
 
-                    t.created_at,
-                    t.updated_at
+            t.reviewed_at,
+            t.reviewed_by,
 
-                  FROM project_tasks t
+            reviewer.name
+              AS reviewed_by_name,
 
-                  LEFT JOIN users u
-                    ON t.assignee_id = u.id
+            t.teacher_comment,
+            t.teacher_file,
 
-                  WHERE t.project_id = ?
+            t.task_order,
 
-                  ORDER BY
-                    t.task_order ASC,
-                    t.id ASC
-                `;
+            t.created_at,
+            t.updated_at
+
+          FROM project_tasks t
+
+          LEFT JOIN users u
+            ON t.assignee_id = u.id
+
+          LEFT JOIN users reviewer
+            ON t.reviewed_by = reviewer.id
+
+          WHERE t.project_id = ?
+
+          ORDER BY
+            t.task_order ASC,
+            t.id ASC
+        `;
 
         db.query(taskSql, [projectId], (taskErr, tasks) => {
           if (taskErr) {
@@ -5971,12 +5986,17 @@ app.delete(
     const studentId = Number(req.body.student_id);
 
     const findSql = `
-      SELECT *
+      SELECT
+        tf.*,
+        t.review_status
 
-      FROM task_files
+      FROM task_files tf
 
-      WHERE id = ?
-        AND uploader_id = ?
+      INNER JOIN project_tasks t
+        ON tf.task_id = t.id
+
+      WHERE tf.id = ?
+        AND tf.uploader_id = ?
 
       LIMIT 1
     `;
@@ -5995,6 +6015,12 @@ app.delete(
       }
 
       const file = rows[0];
+
+      if (file.review_status === "รอตรวจ" || file.review_status === "ผ่าน") {
+        return res.status(403).json({
+          message: "ไม่สามารถลบเอกสารได้ เนื่องจากงานถูกส่งตรวจแล้ว",
+        });
+      }
 
       db.query(
         `
@@ -6030,6 +6056,187 @@ app.delete(
     });
   },
 );
+
+// =========================================================
+// 16. ส่งงานให้อาจารย์ตรวจ
+// =========================================================
+
+app.post("/student/tasks/:taskId/submit-review", async (req, res) => {
+  const { taskId } = req.params;
+
+  const { student_id, submission_note } = req.body;
+
+  if (!student_id) {
+    return res.status(400).json({
+      message: "ไม่พบข้อมูลนิสิต",
+    });
+  }
+
+  const runQuery = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+      db.query(sql, params, (err, results) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(results);
+      });
+    });
+  };
+
+  try {
+    // ==========================================
+    // ตรวจงาน + สิทธิ์นิสิต
+    // ==========================================
+
+    const taskRows = await runQuery(
+      `
+            SELECT
+              t.id,
+              t.project_id,
+              t.task_name,
+              t.status,
+              t.review_status,
+
+              p.advisor_id,
+
+              student.name
+                AS student_name
+
+            FROM project_tasks t
+
+            INNER JOIN projects p
+              ON t.project_id = p.id
+
+            INNER JOIN project_members pm
+              ON pm.project_id = t.project_id
+
+            INNER JOIN users student
+              ON student.id = ?
+
+            WHERE t.id = ?
+              AND pm.user_id = ?
+
+            LIMIT 1
+          `,
+      [student_id, taskId, student_id],
+    );
+
+    if (taskRows.length === 0) {
+      return res.status(403).json({
+        message: "คุณไม่มีสิทธิ์ส่งงานนี้",
+      });
+    }
+
+    const task = taskRows[0];
+
+    // ==========================================
+    // งานต้องเสร็จก่อน
+    // ==========================================
+
+    if (task.status !== "เสร็จสิ้น") {
+      return res.status(400).json({
+        message: "งานยังไม่เสร็จสิ้น ไม่สามารถส่งให้อาจารย์ตรวจได้",
+      });
+    }
+
+    // ==========================================
+    // ห้ามส่งซ้ำตอนรอตรวจ / ผ่านแล้ว
+    // ==========================================
+
+    if (task.review_status === "รอตรวจ") {
+      return res.status(400).json({
+        message: "งานนี้ถูกส่งให้อาจารย์ตรวจแล้ว",
+      });
+    }
+
+    if (task.review_status === "ผ่าน") {
+      return res.status(400).json({
+        message: "งานนี้ผ่านการตรวจแล้ว",
+      });
+    }
+
+    // ==========================================
+    // ตรวจเอกสารแนบ
+    // ==========================================
+
+    const fileRows = await runQuery(
+      `
+            SELECT COUNT(*) AS total_files
+
+            FROM task_files
+
+            WHERE task_id = ?
+          `,
+      [taskId],
+    );
+
+    const totalFiles = Number(fileRows[0]?.total_files || 0);
+
+    if (totalFiles === 0) {
+      return res.status(400).json({
+        message: "กรุณาแนบเอกสารอย่างน้อย 1 ไฟล์ก่อนส่งให้อาจารย์ตรวจ",
+      });
+    }
+
+    // ==========================================
+    // เปลี่ยนเป็นรอตรวจ
+    // ==========================================
+
+    await runQuery(
+      `
+          UPDATE project_tasks
+
+          SET
+            review_status = 'รอตรวจ',
+            submission_note = ?,
+            submitted_at = NOW()
+
+          WHERE id = ?
+        `,
+      [submission_note?.trim() || null, taskId],
+    );
+
+    // ==========================================
+    // แจ้งเตือนอาจารย์
+    // ==========================================
+
+    if (task.advisor_id) {
+      await runQuery(
+        `
+            INSERT INTO notifications
+            (
+              user_id,
+              message,
+              project_id
+            )
+
+            VALUES (?, ?, ?)
+          `,
+        [
+          task.advisor_id,
+
+          `${task.student_name} ส่งงาน "${task.task_name}" มาให้คุณตรวจแล้ว`,
+
+          task.project_id,
+        ],
+      );
+    }
+
+    res.json({
+      success: true,
+
+      message: "ส่งงานให้อาจารย์ตรวจเรียบร้อยแล้ว",
+    });
+  } catch (err) {
+    console.log("Submit task review error:", err);
+
+    res.status(500).json({
+      message: "ไม่สามารถส่งงานให้อาจารย์ตรวจได้",
+    });
+  }
+});
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

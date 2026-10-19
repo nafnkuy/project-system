@@ -399,9 +399,9 @@ const objectives =
 
             <li className="active">คำขอเข้าร่วมโครงงาน</li>
 
-            <li onClick={() => navigate("/teacher-requests")}>
-              ภาระงานที่ปรึกษา
-            </li>
+            <li>โครงงานที่ดูแล</li>
+
+            <li>งานที่ต้องดำเนินการ</li>
 
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา

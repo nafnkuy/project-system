@@ -72,6 +72,16 @@ interface Task {
 
   review_status: "ยังไม่ส่ง" | "รอตรวจ" | "ผ่าน" | "แก้ไข";
 
+  submission_note: string | null;
+  submitted_at: string | null;
+
+  reviewed_at: string | null;
+  reviewed_by: number | null;
+  reviewed_by_name: string | null;
+
+  teacher_comment: string | null;
+  teacher_file: string | null;
+
   completed_subtasks: number;
   total_subtasks: number;
 
@@ -172,6 +182,16 @@ function StudentTaskDetail() {
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  /* =========================================================
+   SUBMIT REVIEW
+========================================================= */
+
+  const [showSubmitReviewModal, setShowSubmitReviewModal] = useState(false);
+
+  const [submissionNote, setSubmissionNote] = useState("");
+
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   /* =========================================================
      CHECK LOGIN
@@ -724,6 +744,78 @@ function StudentTaskDetail() {
   };
 
   /* =========================================================
+   OPEN SUBMIT REVIEW MODAL
+========================================================= */
+
+  const handleOpenSubmitReview = () => {
+    if (!taskData) {
+      return;
+    }
+
+    if (taskData.task.status !== "เสร็จสิ้น") {
+      alert("กรุณาดำเนินงานให้เสร็จสิ้นก่อน");
+
+      return;
+    }
+
+    if (hasProgressChanges) {
+      alert("กรุณาบันทึกความคืบหน้าก่อนส่งงาน");
+
+      return;
+    }
+
+    setSubmissionNote("");
+
+    setShowSubmitReviewModal(true);
+  };
+
+  /* =========================================================
+   SUBMIT TO ADVISOR
+========================================================= */
+
+  const handleSubmitReview = async () => {
+    if (!taskData || !userId) {
+      return;
+    }
+
+    if (taskFiles.length === 0) {
+      alert("กรุณาแนบเอกสารอย่างน้อย 1 ไฟล์ก่อนส่งให้อาจารย์ตรวจ");
+
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      const res = await axios.post(
+        `http://localhost:5000/student/tasks/${taskData.task.id}/submit-review`,
+        {
+          student_id: Number(userId),
+
+          submission_note: submissionNote.trim(),
+        },
+      );
+
+      alert(res.data.message);
+
+      setShowSubmitReviewModal(false);
+
+      setSubmissionNote("");
+
+      // โหลด task ใหม่
+      // review_status จะกลายเป็น "รอตรวจ"
+
+      setRefreshPlan((value) => value + 1);
+    } catch (err: any) {
+      console.log("Submit review error:", err);
+
+      alert(err.response?.data?.message || "ไม่สามารถส่งงานให้อาจารย์ตรวจได้");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  /* =========================================================
      DATE
   ========================================================= */
 
@@ -739,6 +831,38 @@ function StudentTaskDetail() {
       month: "short",
       year: "numeric",
     });
+  };
+
+  /* =========================================================
+   DATE AND TIME
+========================================================= */
+
+  const formatThaiDateTime = (value: string | null) => {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    const dateText = date.toLocaleDateString("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "Asia/Bangkok",
+    });
+
+    const timeText = date.toLocaleTimeString("th-TH", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Bangkok",
+    });
+
+    return `${dateText} เวลา ${timeText} น.`;
   };
 
   /* =========================================================
@@ -766,6 +890,18 @@ function StudentTaskDetail() {
   }
 
   const { task, phase } = taskData;
+
+  /* =========================================================
+   REVIEW STATUS
+========================================================= */
+
+  const isWaitingReview = task.review_status === "รอตรวจ";
+
+  const isPassed = task.review_status === "ผ่าน";
+
+  const isRevision = task.review_status === "แก้ไข";
+
+  const canManageFiles = task.review_status === "ยังไม่ส่ง" || isRevision;
 
   /* =========================================================
      RENDER
@@ -940,6 +1076,26 @@ function StudentTaskDetail() {
 
               <div className="student-task-divider" />
 
+              {/* REVIEW STATUS */}
+
+              {(isWaitingReview || isPassed || isRevision) && (
+                <div className="student-task-review-row">
+                  <span>สถานะการตรวจ :</span>
+
+                  <span
+                    className={`student-task-review-badge ${
+                      isWaitingReview
+                        ? "waiting"
+                        : isPassed
+                          ? "passed"
+                          : "revision"
+                    }`}
+                  >
+                    {isRevision ? "ต้องแก้ไข" : task.review_status}
+                  </span>
+                </div>
+              )}
+
               {/* BASIC INFO */}
 
               <div className="student-task-info">
@@ -954,6 +1110,17 @@ function StudentTaskDetail() {
                 <p>วันที่เริ่มต้น : {formatThaiDate(task.start_date)}</p>
 
                 <p>กำหนดส่ง : {formatThaiDate(task.due_date)}</p>
+
+                {/* วันที่ส่งตรวจ */}
+
+                {(isWaitingReview || isPassed || isRevision) &&
+                  task.submitted_at && (
+                    <p>
+                      {isRevision ? "ส่งตรวจครั้งล่าสุด : " : "ส่งตรวจ : "}
+
+                      {formatThaiDateTime(task.submitted_at)}
+                    </p>
+                  )}
               </div>
 
               {/* DESCRIPTION */}
@@ -1079,24 +1246,27 @@ function StudentTaskDetail() {
                 <div className="student-task-file-header">
                   <h4>เอกสารแนบ</h4>
 
-                  <button
-                    type="button"
-                    className="student-task-file-btn"
-                    disabled={uploadingFile || !canEditSubtasks}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <FaPaperclip />
+                  {canManageFiles && (
+                    <>
+                      <button
+                        type="button"
+                        className="student-task-file-btn"
+                        disabled={uploadingFile || !canEditSubtasks}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <FaPaperclip />
+                        {uploadingFile ? "กำลังอัปโหลด..." : "แนบเอกสาร"}
+                      </button>
 
-                    {uploadingFile ? "กำลังอัปโหลด..." : "แนบเอกสาร"}
-                  </button>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="student-task-file-input"
-                    accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
-                  />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="student-task-file-input"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                        onChange={handleFileChange}
+                      />
+                    </>
+                  )}
                 </div>
 
                 {taskFiles.length === 0 ? (
@@ -1119,38 +1289,54 @@ function StudentTaskDetail() {
                           </div>
                         </div>
 
-                        <div className="student-task-file-actions">
-                          <a
-                            href={`http://localhost:5000${file.file_path}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="student-task-file-download"
-                          >
-                            <FaDownload />
-                            ดาวน์โหลด
-                          </a>
-
-                          {Number(file.uploader_id) === Number(userId) && (
-                            <button
-                              type="button"
-                              className="student-task-file-delete"
-                              disabled={deletingFileId === file.id}
-                              onClick={() => handleDeleteFile(file)}
+                        {canManageFiles && (
+                          <div className="student-task-file-actions">
+                            <a
+                              href={`http://localhost:5000${file.file_path}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="student-task-file-download"
                             >
-                              <FaTrash />
-                            </button>
-                          )}
-                        </div>
+                              <FaDownload />
+                              ดาวน์โหลด
+                            </a>
+
+                            {Number(file.uploader_id) === Number(userId) && (
+                              <button
+                                type="button"
+                                className="student-task-file-delete"
+                                disabled={deletingFileId === file.id}
+                                onClick={() => handleDeleteFile(file)}
+                              >
+                                <FaTrash />
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* SUBMISSION NOTE */}
+
+              {(isWaitingReview || isPassed || isRevision) && (
+                <div className="student-task-section">
+                  <h4>หมายเหตุถึงอาจารย์</h4>
+
+                  <div className="student-task-submission-note">
+                    {task.submission_note?.trim() || "-"}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* BUTTON */}
 
             <div className="student-task-actions">
+              {/* กลับ */}
+
               <button
                 type="button"
                 className="student-task-back-btn"
@@ -1161,16 +1347,70 @@ function StudentTaskDetail() {
                 กลับไปยังแผนงาน
               </button>
 
-              <button
-                type="button"
-                className="student-task-save-btn"
-                disabled={
-                  !canEditProgress || !hasProgressChanges || savingProgress
-                }
-                onClick={handleSaveProgress}
-              >
-                {savingProgress ? "กำลังบันทึก..." : "บันทึกความคืบหน้า"}
-              </button>
+              {/* =========================================
+                    งานยังไม่เสร็จ
+                    → บันทึกความคืบหน้า
+                ========================================= */}
+
+              {task.status !== "เสร็จสิ้น" && (
+                <button
+                  type="button"
+                  className="student-task-save-btn"
+                  disabled={
+                    !canEditProgress || !hasProgressChanges || savingProgress
+                  }
+                  onClick={handleSaveProgress}
+                >
+                  {savingProgress ? "กำลังบันทึก..." : "บันทึกความคืบหน้า"}
+                </button>
+              )}
+
+              {/* =========================================
+                    เสร็จแล้ว + ยังไม่ส่ง
+                    → ส่งให้อาจารย์
+                ========================================= */}
+
+              {task.status === "เสร็จสิ้น" &&
+                (task.review_status === "ยังไม่ส่ง" ||
+                  task.review_status === "แก้ไข") && (
+                  <button
+                    type="button"
+                    className="student-task-submit-review-btn"
+                    onClick={handleOpenSubmitReview}
+                  >
+                    {task.review_status === "แก้ไข"
+                      ? "ส่งงานแก้ไขให้อาจารย์ตรวจ"
+                      : "ส่งให้อาจารย์ตรวจ"}
+                  </button>
+                )}
+
+              {/* =========================================
+                    ส่งแล้ว
+                ========================================= */}
+
+              {task.review_status === "รอตรวจ" && (
+                <button
+                  type="button"
+                  className="student-task-waiting-review-btn"
+                  disabled
+                >
+                  รออาจารย์ตรวจ
+                </button>
+              )}
+
+              {/* =========================================
+                    ผ่านแล้ว
+                ========================================= */}
+
+              {task.review_status === "ผ่าน" && (
+                <button
+                  type="button"
+                  className="student-task-passed-btn"
+                  disabled
+                >
+                  ผ่านการตรวจแล้ว
+                </button>
+              )}
             </div>
           </section>
         </div>
@@ -1268,6 +1508,108 @@ function StudentTaskDetail() {
                 onClick={handleSaveEditSubtask}
               >
                 {savingSubtask ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+    SUBMIT REVIEW MODAL
+===================================================== */}
+
+      {showSubmitReviewModal && taskData && (
+        <div className="student-submit-review-overlay">
+          <div className="student-submit-review-modal">
+            {/* TITLE */}
+
+            <h3>ส่งงานให้อาจารย์ตรวจ</h3>
+
+            <div className="student-submit-review-divider" />
+
+            {/* TASK */}
+
+            <div className="student-submit-review-info">
+              <strong>{task.task_name}</strong>
+
+              <p>
+                Phase {phase.phase_order}
+                {" : "}
+                {phase.phase_name}
+              </p>
+
+              <p>ผู้รับผิดชอบ : {task.assignee_name || "-"}</p>
+            </div>
+
+            {/* FILE */}
+
+            <div className="student-submit-review-section">
+              <h4>เอกสารประกอบการส่งงาน</h4>
+
+              {taskFiles.length === 0 ? (
+                <p className="student-submit-no-file">ยังไม่มีเอกสารแนบ</p>
+              ) : (
+                <div className="student-submit-file-list">
+                  {taskFiles.map((file) => (
+                    <a
+                      key={file.id}
+                      href={`http://localhost:5000${file.file_path}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="student-submit-file"
+                    >
+                      <FaPaperclip />
+
+                      {file.original_name}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* NOTE */}
+
+            <div className="student-submit-review-section">
+              <label>หมายเหตุถึงอาจารย์</label>
+
+              <textarea
+                value={submissionNote}
+                onChange={(e) => setSubmissionNote(e.target.value)}
+                placeholder="ระบุข้อความถึงอาจารย์ (ถ้ามี)"
+              />
+            </div>
+
+            {/* WARNING */}
+
+            <div className="student-submit-review-warning">
+              <strong>โปรดตรวจสอบข้อมูลและเอกสารให้เรียบร้อยก่อนส่ง</strong>
+
+              <p>เมื่อส่งแล้วจะไม่สามารถแก้ไขงานได้ จนกว่าอาจารย์จะตรวจสอบ</p>
+            </div>
+
+            {/* ACTION */}
+
+            <div className="student-submit-review-actions">
+              <button
+                type="button"
+                className="student-submit-review-cancel"
+                disabled={submittingReview}
+                onClick={() => {
+                  setShowSubmitReviewModal(false);
+
+                  setSubmissionNote("");
+                }}
+              >
+                ยกเลิก
+              </button>
+
+              <button
+                type="button"
+                className="student-submit-review-confirm"
+                disabled={submittingReview || taskFiles.length === 0}
+                onClick={handleSubmitReview}
+              >
+                {submittingReview ? "กำลังส่ง..." : "ยืนยันการส่ง"}
               </button>
             </div>
           </div>

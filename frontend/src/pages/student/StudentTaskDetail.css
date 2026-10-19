@@ -1419,3 +1419,386 @@
 
   cursor: not-allowed;
 }
+
+/* =========================================================
+   SUBMIT REVIEW BUTTON
+========================================================= */
+
+.student-task-page
+.student-task-submit-review-btn {
+  min-width: 150px;
+  height: 40px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #20a36a;
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.student-task-page
+.student-task-submit-review-btn:hover {
+  background: #188858;
+}
+
+
+/* =========================================================
+   WAITING / PASSED BUTTON
+========================================================= */
+
+.student-task-page
+.student-task-waiting-review-btn,
+.student-task-page
+.student-task-passed-btn {
+  min-width: 150px;
+  height: 40px;
+
+  border: none;
+  border-radius: 7px;
+
+  font-size: 11px;
+
+  cursor: not-allowed;
+}
+
+.student-task-page
+.student-task-waiting-review-btn {
+  background: #f4b400;
+  color: #ffffff;
+}
+
+.student-task-page
+.student-task-passed-btn {
+  background: #20a36a;
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   SUBMIT REVIEW OVERLAY
+========================================================= */
+
+.student-task-page
+.student-submit-review-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1500;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   SUBMIT REVIEW MODAL
+========================================================= */
+
+.student-task-page
+.student-submit-review-modal {
+  width: 500px;
+
+  padding: 30px 28px;
+
+  background: #ffffff;
+
+  border: 1px solid #999999;
+  border-radius: 8px;
+}
+
+.student-task-page
+.student-submit-review-modal h3 {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+.student-task-page
+.student-submit-review-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 20px 0;
+
+  background: #cccccc;
+}
+
+
+/* =========================================================
+   TASK INFO
+========================================================= */
+
+.student-task-page
+.student-submit-review-info {
+  color: #222222;
+
+  font-size: 11px;
+}
+
+.student-task-page
+.student-submit-review-info strong {
+  display: block;
+
+  margin-bottom: 18px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-task-page
+.student-submit-review-info p {
+  margin: 0 0 8px;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.student-task-page
+.student-submit-review-section {
+  margin-top: 25px;
+}
+
+.student-task-page
+.student-submit-review-section h4,
+.student-task-page
+.student-submit-review-section label {
+  display: block;
+
+  margin: 0 0 10px;
+
+  color: #222222;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   FILES
+========================================================= */
+
+.student-task-page
+.student-submit-file-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.student-task-page
+.student-submit-file {
+  width: fit-content;
+
+  padding: 7px 10px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  background: #fafafa;
+
+  color: #222222;
+
+  font-size: 10px;
+
+  text-decoration: none;
+}
+
+.student-task-page
+.student-submit-file:hover {
+  background: #f2f2f2;
+}
+
+.student-task-page
+.student-submit-no-file {
+  color: #e74c3c;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   NOTE
+========================================================= */
+
+.student-task-page
+.student-submit-review-section textarea {
+  width: 100%;
+  height: 90px;
+
+  padding: 10px 12px;
+
+  resize: vertical;
+
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+
+  outline: none;
+
+  font-size: 11px;
+}
+
+.student-task-page
+.student-submit-review-section textarea:focus {
+  border-color: #3b75c4;
+}
+
+
+/* =========================================================
+   WARNING
+========================================================= */
+
+.student-task-page
+.student-submit-review-warning {
+  margin-top: 25px;
+
+  text-align: center;
+
+  color: #333333;
+
+  font-size: 10px;
+}
+
+.student-task-page
+.student-submit-review-warning strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-weight: 600;
+}
+
+.student-task-page
+.student-submit-review-warning p {
+  margin: 0;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.student-task-page
+.student-submit-review-actions {
+  margin-top: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+.student-task-page
+.student-submit-review-cancel,
+.student-task-page
+.student-submit-review-confirm {
+  min-width: 145px;
+  height: 38px;
+
+  border: none;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.student-task-page
+.student-submit-review-cancel {
+  background: #ff1010;
+}
+
+.student-task-page
+.student-submit-review-confirm {
+  background: #20a36a;
+}
+
+.student-task-page
+.student-submit-review-confirm:disabled {
+  background: #aaaaaa;
+
+  cursor: not-allowed;
+}
+
+/* =========================================
+   REVIEW STATUS
+========================================= */
+
+.student-task-review-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+.student-task-review-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 75px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+/* รอตรวจ */
+.student-task-review-badge.waiting {
+  background-color: #ffc107;
+}
+
+/* ผ่าน */
+.student-task-review-badge.passed {
+  background-color: #20a86b;
+}
+
+/* ต้องแก้ไข */
+.student-task-review-badge.revision {
+  background-color: #ff8c00;
+}
+
+/* =========================================
+   SUBMISSION NOTE
+========================================= */
+
+.student-task-submission-note {
+  width: 100%;
+  min-height: 65px;
+  padding: 14px 16px;
+
+  background-color: #d9d9d9;
+  border-radius: 4px;
+
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}

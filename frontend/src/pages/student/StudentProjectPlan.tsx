@@ -2053,31 +2053,33 @@ function TaskCard({
         {task.total_subtasks}
       </p>
 
-      <button
-        type="button"
-        className="student-task-detail-btn"
-        onClick={(e) => {
-          e.stopPropagation();
+      <div className="student-task-card-actions">
+        <button
+          type="button"
+          className="student-task-detail-btn"
+          onClick={(e) => {
+            e.stopPropagation();
 
-          onDetail(task);
-        }}
-      >
-        ดูรายละเอียด
-      </button>
-
-      {task.review_status !== "ยังไม่ส่ง" && (
-        <span
-          className={`student-task-review ${
-            task.review_status === "ผ่าน"
-              ? "passed"
-              : task.review_status === "รอตรวจ"
-                ? "waiting"
-                : "revision"
-          }`}
+            onDetail(task);
+          }}
         >
-          {task.review_status}
-        </span>
-      )}
+          ดูรายละเอียด
+        </button>
+
+        {task.review_status !== "ยังไม่ส่ง" && (
+          <span
+            className={`student-task-review ${
+              task.review_status === "ผ่าน"
+                ? "passed"
+                : task.review_status === "รอตรวจ"
+                  ? "waiting"
+                  : "revision"
+            }`}
+          >
+            {task.review_status === "แก้ไข" ? "ต้องแก้ไข" : task.review_status}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

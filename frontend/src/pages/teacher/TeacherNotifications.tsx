@@ -211,7 +211,9 @@ function TeacherNotifications() {
               คำขอเข้าร่วมโครงงาน
             </li>
 
-            <li>ภาระงานที่ปรึกษา</li>
+            <li>โครงงานที่ดูแล</li>
+
+            <li>งานที่ต้องดำเนินการ</li>
 
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา
