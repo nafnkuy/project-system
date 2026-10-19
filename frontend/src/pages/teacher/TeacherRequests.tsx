@@ -225,7 +225,7 @@ function TeacherRequests() {
 
             <li>โครงงานที่ดูแล</li>
 
-            <li>งานที่ต้องดำเนินการ</li>
+            <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
 
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา

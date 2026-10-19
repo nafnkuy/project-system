@@ -1,3 +1,13 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* ใช้ฟอนต์เดียวกับ TeacherHome */
+.teacher-project-detail-page,
+.teacher-project-detail-page * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
 .teacher-project-detail-page {
   display: flex;
   min-height: 100vh;

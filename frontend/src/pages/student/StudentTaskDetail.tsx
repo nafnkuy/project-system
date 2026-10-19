@@ -51,6 +51,24 @@ interface TaskFile {
   uploader_name: string;
 }
 
+/* =========================================================
+   TEACHER REVIEW FILE
+========================================================= */
+
+interface TeacherReviewFile {
+  id: number;
+  task_id: number;
+  reviewer_id: number;
+
+  original_name: string;
+  file_path: string;
+  mime_type: string | null;
+  file_size: number | null;
+
+  created_at: string;
+  reviewer_name: string | null;
+}
+
 interface Task {
   id: number;
 
@@ -71,6 +89,7 @@ interface Task {
   status: "ยังไม่เริ่ม" | "กำลังดำเนินการ" | "เสร็จสิ้น";
 
   review_status: "ยังไม่ส่ง" | "รอตรวจ" | "ผ่าน" | "แก้ไข";
+  revision_started_at: string | null;
 
   submission_note: string | null;
   submitted_at: string | null;
@@ -149,6 +168,8 @@ function StudentTaskDetail() {
 
   const [savingProgress, setSavingProgress] = useState(false);
 
+  const [startingRevision, setStartingRevision] = useState(false);
+
   const [refreshPlan, setRefreshPlan] = useState(0);
 
   /* =========================================================
@@ -182,6 +203,18 @@ function StudentTaskDetail() {
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  /* =========================================================
+   TEACHER REVIEW FILES
+========================================================= */
+
+  const [teacherReviewFiles, setTeacherReviewFiles] = useState<
+    TeacherReviewFile[]
+  >([]);
+
+  const [teacherFilesLoading, setTeacherFilesLoading] = useState(false);
+
+  const [teacherFilesError, setTeacherFilesError] = useState("");
 
   /* =========================================================
    SUBMIT REVIEW
@@ -326,11 +359,19 @@ function StudentTaskDetail() {
 
     const task = taskData.task;
 
+    // ยังไม่เริ่มงาน
     if (task.status === "ยังไม่เริ่ม") {
       return false;
     }
 
+    // รอตรวจหรือผ่านแล้ว ห้ามแก้
     if (task.review_status === "รอตรวจ" || task.review_status === "ผ่าน") {
+      return false;
+    }
+
+    // อาจารย์ส่งกลับมาแก้ไข
+    // แต่ยังไม่กดดำเนินการแก้ไข
+    if (task.review_status === "แก้ไข" && !task.revision_started_at) {
       return false;
     }
 
@@ -338,7 +379,7 @@ function StudentTaskDetail() {
   }, [taskData]);
 
   /* =========================================================
-   CAN EDIT SUBTASK
+   CAN EDIT SUBTASKS
 ========================================================= */
 
   const canEditSubtasks = useMemo(() => {
@@ -346,15 +387,76 @@ function StudentTaskDetail() {
       return false;
     }
 
-    if (
-      taskData.task.review_status === "รอตรวจ" ||
-      taskData.task.review_status === "ผ่าน"
-    ) {
+    const task = taskData.task;
+
+    if (task.review_status === "รอตรวจ" || task.review_status === "ผ่าน") {
+      return false;
+    }
+
+    // ถ้าต้องแก้ไข ต้องกดปุ่มเริ่มก่อน
+    if (task.review_status === "แก้ไข" && !task.revision_started_at) {
       return false;
     }
 
     return true;
   }, [taskData]);
+
+  /* =========================================================
+   START TASK REVISION
+========================================================= */
+
+  const handleStartRevision = async () => {
+    if (!taskData || !userId || startingRevision) {
+      return;
+    }
+
+    // ตรวจสอบว่าต้องแก้ไขจริงหรือไม่
+
+    if (taskData.task.review_status !== "แก้ไข") {
+      return;
+    }
+
+    // ยืนยันการเริ่มแก้ไข
+
+    const confirmStart = window.confirm(
+      "ต้องการเริ่มดำเนินการแก้ไขงานนี้หรือไม่?",
+    );
+
+    if (!confirmStart) {
+      return;
+    }
+
+    try {
+      setStartingRevision(true);
+
+      // ส่งข้อมูลไป Backend
+
+      const res = await axios.put(
+        `http://localhost:5000/student/tasks/${taskData.task.id}/start-revision`,
+        {
+          student_id: Number(userId),
+        },
+      );
+
+      alert(res.data.message);
+
+      // โหลดข้อมูลงานใหม่
+
+      setRefreshPlan((value) => value + 1);
+    } catch (err: unknown) {
+      console.log("Start revision error:", err);
+
+      let message = "ไม่สามารถเริ่มแก้ไขงานได้";
+
+      if (axios.isAxiosError(err)) {
+        message = err.response?.data?.message || message;
+      }
+
+      alert(message);
+    } finally {
+      setStartingRevision(false);
+    }
+  };
 
   /* =========================================================
    TOGGLE SUBTASK
@@ -385,7 +487,15 @@ function StudentTaskDetail() {
 ========================================================= */
 
   const handleSaveProgress = async () => {
-    if (!taskData || !userId || !hasProgressChanges) {
+    if (!taskData || !userId) {
+      return;
+    }
+
+    const isActiveRevision =
+      taskData.task.review_status === "แก้ไข" &&
+      !!taskData.task.revision_started_at;
+
+    if (!hasProgressChanges && !isActiveRevision) {
       return;
     }
 
@@ -609,6 +719,59 @@ function StudentTaskDetail() {
   useEffect(() => {
     loadTaskFiles();
   }, [taskId]);
+
+  /* =========================================================
+   LOAD TEACHER REVIEW FILES
+========================================================= */
+
+  const reviewStatus = taskData?.task.review_status;
+  const submittedAt = taskData?.task.submitted_at;
+
+  useEffect(() => {
+    if (
+      !taskId ||
+      !userId ||
+      (reviewStatus !== "ผ่าน" && reviewStatus !== "แก้ไข")
+    ) {
+      setTeacherReviewFiles([]);
+      setTeacherFilesError("");
+      return;
+    }
+
+    let cancelled = false;
+
+    setTeacherFilesLoading(true);
+    setTeacherFilesError("");
+
+    axios
+      .get(
+        `http://localhost:5000/student/tasks/${taskId}/review-files/${userId}`,
+      )
+      .then((res) => {
+        if (!cancelled) {
+          setTeacherReviewFiles(res.data.files || []);
+        }
+      })
+      .catch((err) => {
+        console.log("Load teacher review files error:", err);
+
+        if (!cancelled) {
+          setTeacherReviewFiles([]);
+          setTeacherFilesError(
+            err.response?.data?.message || "ไม่สามารถโหลดไฟล์ของอาจารย์ได้",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setTeacherFilesLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [taskId, userId, reviewStatus, submittedAt]);
 
   /* =========================================================
    UPLOAD TASK FILE
@@ -901,7 +1064,9 @@ function StudentTaskDetail() {
 
   const isRevision = task.review_status === "แก้ไข";
 
-  const canManageFiles = task.review_status === "ยังไม่ส่ง" || isRevision;
+  const canManageFiles =
+    task.review_status === "ยังไม่ส่ง" ||
+    (isRevision && !!task.revision_started_at);
 
   /* =========================================================
      RENDER
@@ -1145,15 +1310,17 @@ function StudentTaskDetail() {
                     {draftSubtasks.length}
                   </h4>
 
-                  <button
-                    type="button"
-                    className="student-add-subtask-btn"
-                    disabled={!canEditSubtasks || savingProgress}
-                    onClick={handleOpenAddSubtask}
-                  >
-                    <FaPlus />
-                    เพิ่ม Subtask
-                  </button>
+                  {canEditSubtasks && (
+                    <button
+                      type="button"
+                      className="student-add-subtask-btn"
+                      disabled={savingProgress}
+                      onClick={handleOpenAddSubtask}
+                    >
+                      <FaPlus />
+                      เพิ่ม Subtask
+                    </button>
+                  )}
                 </div>
 
                 {/* =========================================
@@ -1186,33 +1353,33 @@ function StudentTaskDetail() {
 
                         {/* EDIT / DELETE */}
 
-                        <div className="student-subtask-actions">
-                          <button
-                            type="button"
-                            className="student-subtask-edit-btn"
-                            title="แก้ไข Subtask"
-                            disabled={
-                              !canEditSubtasks ||
-                              deletingSubtaskId === subtask.id
-                            }
-                            onClick={() => handleOpenEditSubtask(subtask)}
-                          >
-                            <FaEdit />
-                          </button>
+                        {canEditSubtasks && (
+                          <div className="student-subtask-actions">
+                            {/* EDIT SUBTASK */}
 
-                          <button
-                            type="button"
-                            className="student-subtask-delete-btn"
-                            title="ลบ Subtask"
-                            disabled={
-                              !canEditSubtasks ||
-                              deletingSubtaskId === subtask.id
-                            }
-                            onClick={() => handleDeleteSubtask(subtask)}
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              className="student-subtask-edit-btn"
+                              title="แก้ไข Subtask"
+                              disabled={deletingSubtaskId === subtask.id}
+                              onClick={() => handleOpenEditSubtask(subtask)}
+                            >
+                              <FaEdit />
+                            </button>
+
+                            {/* DELETE SUBTASK */}
+
+                            <button
+                              type="button"
+                              className="student-subtask-delete-btn"
+                              title="ลบ Subtask"
+                              disabled={deletingSubtaskId === subtask.id}
+                              onClick={() => handleDeleteSubtask(subtask)}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1332,10 +1499,85 @@ function StudentTaskDetail() {
               )}
             </div>
 
+            {/* =====================================================
+    TEACHER REVIEW RESULT
+===================================================== */}
+
+            {(isPassed || isRevision) && (
+              <div className="student-task-review-result">
+                <h3>ผลการตรวจงาน</h3>
+
+                <div className="student-task-review-result-divider" />
+
+                {/* REVIEW STATUS */}
+
+                <div className="student-task-review-result-row">
+                  <span>สถานะการตรวจ :</span>
+
+                  <span
+                    className={`student-task-review-badge ${
+                      isPassed ? "passed" : "revision"
+                    }`}
+                  >
+                    {isPassed ? "ผ่าน" : "ต้องแก้ไข"}
+                  </span>
+                </div>
+
+                {/* REVIEW INFORMATION */}
+
+                <div className="student-task-review-result-info">
+                  <p>ตรวจโดย : {task.reviewed_by_name || "-"}</p>
+
+                  <p>วันที่ตรวจ : {formatThaiDateTime(task.reviewed_at)}</p>
+                </div>
+
+                {/* TEACHER COMMENT */}
+
+                <div className="student-task-review-result-section">
+                  <h4>ข้อเสนอแนะจากอาจารย์</h4>
+
+                  <div className="student-task-review-comment">
+                    {task.teacher_comment?.trim() || "-"}
+                  </div>
+                </div>
+
+                {/* TEACHER FILES */}
+
+                {(teacherFilesLoading ||
+                  teacherFilesError ||
+                  teacherReviewFiles.length > 0) && (
+                  <div className="student-task-review-result-section">
+                    <h4>ไฟล์จากอาจารย์</h4>
+
+                    {teacherFilesLoading ? (
+                      <p>กำลังโหลดไฟล์จากอาจารย์...</p>
+                    ) : teacherFilesError ? (
+                      <p>{teacherFilesError}</p>
+                    ) : (
+                      <div className="student-task-teacher-files">
+                        {teacherReviewFiles.map((file) => (
+                          <a
+                            key={file.id}
+                            href={`http://localhost:5000${file.file_path}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="student-task-teacher-file"
+                          >
+                            <FaPaperclip />
+                            <span>{file.original_name}</span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* BUTTON */}
 
             <div className="student-task-actions">
-              {/* กลับ */}
+              {/* กลับไปยังแผนงาน */}
 
               <button
                 type="button"
@@ -1348,47 +1590,64 @@ function StudentTaskDetail() {
               </button>
 
               {/* =========================================
-                    งานยังไม่เสร็จ
-                    → บันทึกความคืบหน้า
-                ========================================= */}
+      ยังไม่กดดำเนินการแก้ไข
+  ========================================= */}
 
-              {task.status !== "เสร็จสิ้น" && (
+              {isRevision && !task.revision_started_at && (
                 <button
                   type="button"
-                  className="student-task-save-btn"
-                  disabled={
-                    !canEditProgress || !hasProgressChanges || savingProgress
-                  }
-                  onClick={handleSaveProgress}
+                  className="student-task-revision-start-btn"
+                  disabled={startingRevision}
+                  onClick={handleStartRevision}
                 >
-                  {savingProgress ? "กำลังบันทึก..." : "บันทึกความคืบหน้า"}
+                  {startingRevision ? "กำลังเริ่มแก้ไข..." : "ดำเนินการแก้ไข"}
                 </button>
               )}
 
               {/* =========================================
-                    เสร็จแล้ว + ยังไม่ส่ง
-                    → ส่งให้อาจารย์
-                ========================================= */}
+      กำลังดำเนินงาน / กำลังแก้ไข
+  ========================================= */}
+
+              {task.status !== "เสร็จสิ้น" &&
+                (task.review_status === "ยังไม่ส่ง" ||
+                  (isRevision && !!task.revision_started_at)) && (
+                  <button
+                    type="button"
+                    className={`student-task-save-btn ${
+                      isRevision ? "revision-save" : ""
+                    }`}
+                    disabled={
+                      !canEditProgress ||
+                      savingProgress ||
+                      (!isRevision && !hasProgressChanges)
+                    }
+                    onClick={handleSaveProgress}
+                  >
+                    {savingProgress ? "กำลังบันทึก..." : "บันทึกความคืบหน้า"}
+                  </button>
+                )}
+
+              {/* =========================================
+      งานเสร็จแล้ว พร้อมส่งตรวจ
+  ========================================= */}
 
               {task.status === "เสร็จสิ้น" &&
                 (task.review_status === "ยังไม่ส่ง" ||
-                  task.review_status === "แก้ไข") && (
+                  (isRevision && !!task.revision_started_at)) && (
                   <button
                     type="button"
                     className="student-task-submit-review-btn"
                     onClick={handleOpenSubmitReview}
                   >
-                    {task.review_status === "แก้ไข"
+                    {isRevision
                       ? "ส่งงานแก้ไขให้อาจารย์ตรวจ"
                       : "ส่งให้อาจารย์ตรวจ"}
                   </button>
                 )}
 
-              {/* =========================================
-                    ส่งแล้ว
-                ========================================= */}
+              {/* รออาจารย์ตรวจ */}
 
-              {task.review_status === "รอตรวจ" && (
+              {isWaitingReview && (
                 <button
                   type="button"
                   className="student-task-waiting-review-btn"
@@ -1398,11 +1657,9 @@ function StudentTaskDetail() {
                 </button>
               )}
 
-              {/* =========================================
-                    ผ่านแล้ว
-                ========================================= */}
+              {/* ผ่านการตรวจแล้ว */}
 
-              {task.review_status === "ผ่าน" && (
+              {isPassed && (
                 <button
                   type="button"
                   className="student-task-passed-btn"

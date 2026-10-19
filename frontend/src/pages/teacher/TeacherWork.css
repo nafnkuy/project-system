@@ -1,0 +1,661 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.teacher-work-page,
+.teacher-work-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.teacher-work-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #f5f5f5;
+  color: #222;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.teacher-work-page .tw-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background: white;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.teacher-work-page .tw-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+}
+
+.teacher-work-page .tw-logo img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.teacher-work-page .tw-logo h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.teacher-work-page .tw-logo p {
+  margin: 0;
+  font-size: 9px;
+  color: #666;
+}
+
+.teacher-work-page .tw-nav {
+  flex: 1;
+}
+
+.teacher-work-page .tw-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.teacher-work-page .tw-nav li {
+  padding: 18px 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-nav li:hover {
+  background: #f0f0f0;
+}
+
+.teacher-work-page .tw-nav li.tw-active {
+  background: #2f5d7c;
+  color: white;
+}
+
+.teacher-work-page .tw-nav li.tw-active:hover {
+  background: #2f5d7c;
+}
+
+.teacher-work-page .tw-logout-btn {
+  width: 190px;
+  margin: 0 auto 20px;
+  padding: 12px;
+  background: #3b75c4;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.teacher-work-page .tw-main {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.teacher-work-page .tw-header {
+  min-height: 70px;
+  background: #f0e3a1;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.teacher-work-page .tw-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  color: #111;
+}
+
+.teacher-work-page .tw-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.teacher-work-page .tw-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 45px;
+  padding: 5px 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.teacher-work-page .tw-profile-image {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.teacher-work-page .tw-content {
+  padding: 38px 40px 45px;
+}
+
+/* =========================================================
+   DASHBOARD CARDS
+========================================================= */
+
+.teacher-work-page .tw-dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.teacher-work-page .tw-dashboard-card {
+  min-height: 112px;
+  padding: 18px 22px;
+  background: white;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.teacher-work-page .tw-card-title {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.teacher-work-page .tw-card-number {
+  font-size: 35px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.teacher-work-page .tw-blue {
+  color: #3678c5;
+}
+
+.teacher-work-page .tw-orange {
+  color: #ff8a1f;
+}
+
+.teacher-work-page .tw-yellow {
+  color: #ffbf00;
+}
+
+/* =========================================================
+   MAIN TABS
+========================================================= */
+
+.teacher-work-page .tw-tabs {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.teacher-work-page .tw-tab {
+  padding: 10px 14px;
+  border: none;
+  border-right: 1px solid #ccc;
+  background: transparent;
+  font-size: 13px;
+  color: #222;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-tab:last-child {
+  border-right: none;
+}
+
+.teacher-work-page .tw-tab:hover {
+  background: #eaeaea;
+}
+
+.teacher-work-page .tw-tab.tw-tab-active {
+  background: #2f5d7c;
+  color: white;
+}
+
+/* =========================================================
+   CONTENT PANEL
+========================================================= */
+
+.teacher-work-page .tw-panel {
+  min-height: 555px;
+  padding: 23px 22px 45px;
+  background: white;
+  border-radius: 9px;
+}
+
+.teacher-work-page .tw-panel h3 {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   STATUS FILTER
+========================================================= */
+
+.teacher-work-page .tw-review-filters {
+  display: inline-flex;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.teacher-work-page .tw-filter {
+  padding: 9px 13px;
+  background: white;
+  border: none;
+  border-right: 1px solid #ccc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-filter:last-child {
+  border-right: none;
+}
+
+.teacher-work-page .tw-filter.tw-filter-active {
+  background: #fff3cd;
+  font-weight: 500;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.teacher-work-page .tw-search-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0 38px;
+}
+
+.teacher-work-page .tw-search-box {
+  position: relative;
+  width: 360px;
+  max-width: 100%;
+}
+
+.teacher-work-page .tw-search-box input {
+  width: 100%;
+  height: 42px;
+  padding: 0 45px 0 15px;
+  border: 1px solid #bbb;
+  border-radius: 24px;
+  background: white;
+  font-size: 13px;
+  outline: none;
+}
+
+.teacher-work-page .tw-search-box input:focus {
+  border-color: #3678c5;
+}
+
+.teacher-work-page .tw-search-icon {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.teacher-work-page .tw-table-wrap {
+  padding: 13px 10px 3px;
+  border: 1px solid #c9c9c9;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.teacher-work-page .tw-table {
+  width: 100%;
+  min-width: 670px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.teacher-work-page .tw-table th,
+.teacher-work-page .tw-table td {
+  padding: 15px 9px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  border-bottom: 1px solid #d4d4d4;
+  vertical-align: middle;
+}
+
+.teacher-work-page .tw-table th {
+  font-weight: 500;
+}
+
+.teacher-work-page .tw-table tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-work-page .tw-table th:nth-child(1),
+.teacher-work-page .tw-table td:nth-child(1) {
+  width: 22%;
+}
+
+.teacher-work-page .tw-table th:nth-child(2),
+.teacher-work-page .tw-table td:nth-child(2) {
+  width: 25%;
+}
+
+.teacher-work-page .tw-table th:nth-child(3),
+.teacher-work-page .tw-table td:nth-child(3) {
+  width: 20%;
+}
+
+.teacher-work-page .tw-table th:nth-child(4),
+.teacher-work-page .tw-table td:nth-child(4) {
+  width: 17%;
+}
+
+.teacher-work-page .tw-table th:nth-child(5),
+.teacher-work-page .tw-table td:nth-child(5) {
+  width: 16%;
+}
+
+.teacher-work-page .tw-review-btn {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  color: #333;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.teacher-work-page .tw-review-btn:hover {
+  background: #eef3f8;
+  border-color: #3678c5;
+}
+
+.teacher-work-page .tw-empty-cell {
+  padding: 35px !important;
+  color: #777;
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.teacher-work-page .tw-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  font-size: 13px;
+}
+
+.teacher-work-page .tw-pagination button {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   OTHER TABS
+========================================================= */
+
+.teacher-work-page .tw-placeholder {
+  padding: 85px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #777;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .teacher-work-page .tw-content {
+    padding: 30px 28px;
+  }
+
+  .teacher-work-page .tw-dashboard-cards {
+    gap: 13px;
+  }
+
+  .teacher-work-page .tw-header h2 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 850px) {
+  .teacher-work-page .tw-dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-work-page .tw-panel {
+    padding: 18px 14px 30px;
+  }
+}
+
+
+/* =========================================
+   MATCH TEACHER DECISION HISTORY
+   SIDEBAR / HEADER / CONTENT
+========================================= */
+
+/* SIDEBAR */
+.teacher-work-page .tw-sidebar {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* LOGO */
+.teacher-work-page .tw-logo {
+  padding: 24px 20px;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.teacher-work-page .tw-logo img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.teacher-work-page .tw-logo > div {
+  min-width: 0;
+}
+
+.teacher-work-page .tw-logo h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+}
+
+.teacher-work-page .tw-logo p {
+  margin: 0;
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* NAVIGATION */
+.teacher-work-page .tw-nav {
+  width: 100%;
+  margin: 0;
+  flex: initial;
+}
+
+.teacher-work-page .tw-nav ul {
+  margin: 0;
+  padding: 0;
+}
+
+.teacher-work-page .tw-nav li {
+  margin: 0;
+  padding: 18px 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.teacher-work-page .tw-logout-btn {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* HEADER */
+.teacher-work-page .tw-header {
+  width: 100%;
+  height: 70px;
+  min-height: 70px;
+  padding: 0 20px;
+  background: #f0e3a1;
+  border: none;
+}
+
+.teacher-work-page .tw-header h2 {
+  margin: 0;
+  font-size: 20px !important;
+  font-weight: 400;
+  color: #111;
+}
+
+.teacher-work-page .tw-header-right {
+  gap: 10px;
+}
+
+/* NOTIFICATION BELL */
+.teacher-work-page .teacher-notification-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.teacher-work-page .teacher-notification-btn {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  color: #999;
+  font-size: 20px;
+}
+
+.teacher-work-page .teacher-notification-btn svg {
+  color: #999;
+}
+
+/* PROFILE */
+.teacher-work-page .tw-user-info {
+  height: 50px;
+  min-height: 50px;
+  padding: 0 14px;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.teacher-work-page .tw-profile-image {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* MAIN CONTENT */
+.teacher-work-page .tw-content {
+  width: 100%;
+  padding: 32px 38px 40px;
+}
+
+/* SEARCH SIZE */
+.teacher-work-page .tw-search-box {
+  width: 450px;
+  max-width: 100%;
+  height: 36px;
+}
+
+.teacher-work-page .tw-search-box input {
+  height: 36px;
+  padding: 0 14px 0 38px;
+  border: 1px solid #b7b7b7;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.teacher-work-page .tw-search-icon {
+  left: 14px;
+  right: auto;
+  font-size: 15px;
+}
+
+/* TABLE TYPOGRAPHY */
+.teacher-work-page .tw-table th,
+.teacher-work-page .tw-table td {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.teacher-work-page .tw-table th {
+  font-weight: 500;
+}

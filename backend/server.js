@@ -3989,6 +3989,7 @@ app.get("/student/projects/:projectId/plan", (req, res) => {
 
             t.status,
             t.review_status,
+            t.revision_started_at,
 
             t.submission_note,
             t.submitted_at,
@@ -6186,15 +6187,16 @@ app.post("/student/tasks/:taskId/submit-review", async (req, res) => {
 
     await runQuery(
       `
-          UPDATE project_tasks
+    UPDATE project_tasks
 
-          SET
-            review_status = 'รอตรวจ',
-            submission_note = ?,
-            submitted_at = NOW()
+    SET
+      review_status = 'รอตรวจ',
+      revision_started_at = NULL,
+      submission_note = ?,
+      submitted_at = NOW()
 
-          WHERE id = ?
-        `,
+    WHERE id = ?
+  `,
       [submission_note?.trim() || null, taskId],
     );
 
@@ -6236,6 +6238,736 @@ app.post("/student/tasks/:taskId/submit-review", async (req, res) => {
       message: "ไม่สามารถส่งงานให้อาจารย์ตรวจได้",
     });
   }
+});
+
+/* =========================================================
+   TEACHER WORK - TASK REVIEW LIST
+========================================================= */
+
+app.get("/teacher/work/reviews/:advisorId", (req, res) => {
+  const { advisorId } = req.params;
+
+  const sql = `
+    SELECT
+      t.id,
+      t.project_id,
+      t.task_name,
+      t.review_status,
+      t.submitted_at,
+      t.reviewed_at,
+
+      p.title AS project_title,
+
+      u.name AS assignee_name
+
+    FROM project_tasks t
+
+    INNER JOIN projects p
+      ON t.project_id = p.id
+
+    LEFT JOIN users u
+      ON t.assignee_id = u.id
+
+    WHERE p.advisor_id = ?
+      AND t.submitted_at IS NOT NULL
+      AND t.review_status IN ('รอตรวจ', 'ผ่าน', 'แก้ไข')
+
+    ORDER BY
+      CASE
+        WHEN t.review_status = 'รอตรวจ' THEN 0
+        ELSE 1
+      END,
+      t.submitted_at DESC,
+      t.id DESC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.log("Get teacher work reviews error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดรายการตรวจงานได้",
+      });
+    }
+
+    res.json({
+      tasks: results,
+    });
+  });
+});
+
+/* =========================================================
+   TEACHER WORK - REVIEW TASK DETAIL
+========================================================= */
+
+app.get("/teacher/work/review/:taskId/:advisorId", (req, res) => {
+  const { taskId, advisorId } = req.params;
+
+  // =========================================
+  // 1. ข้อมูลรายละเอียดงาน
+  // =========================================
+
+  const taskSql = `
+    SELECT
+      t.id,
+      t.project_id,
+      t.phase_id,
+      t.task_name,
+      t.description,
+      t.status,
+      t.review_status,
+      t.start_date,
+      t.due_date,
+      t.submission_note,
+      t.submitted_at,
+      t.reviewed_at,
+      t.reviewed_by,
+      t.teacher_comment,
+      t.teacher_file,
+
+      p.title AS project_title,
+
+      ph.phase_name,
+      ph.phase_order,
+
+      student.name AS assignee_name,
+      reviewer.name AS reviewed_by_name
+
+    FROM project_tasks t
+
+    INNER JOIN projects p
+      ON t.project_id = p.id
+
+    LEFT JOIN project_phases ph
+      ON t.phase_id = ph.id
+
+    LEFT JOIN users student
+      ON t.assignee_id = student.id
+
+    LEFT JOIN users reviewer
+      ON t.reviewed_by = reviewer.id
+
+    WHERE t.id = ?
+      AND p.advisor_id = ?
+
+    LIMIT 1
+  `;
+
+  db.query(taskSql, [taskId, advisorId], (err, tasks) => {
+    if (err) {
+      console.log("Get teacher task detail error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดรายละเอียดงานได้",
+      });
+    }
+
+    if (tasks.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบงาน หรือคุณไม่มีสิทธิ์ตรวจงานนี้",
+      });
+    }
+
+    const task = tasks[0];
+
+    // =========================================
+    // 2. ดึงรายการ Subtask
+    // =========================================
+
+    const subtaskSql = `
+      SELECT
+        id,
+        task_id,
+        subtask_name,
+        status,
+        subtask_order
+
+      FROM project_subtasks
+
+      WHERE task_id = ?
+
+      ORDER BY subtask_order ASC, id ASC
+    `;
+
+    db.query(subtaskSql, [taskId], (subtaskErr, subtasks) => {
+      if (subtaskErr) {
+        console.log("Get review subtasks error:", subtaskErr);
+
+        return res.status(500).json({
+          message: "ไม่สามารถโหลด Subtask ได้",
+        });
+      }
+
+      // =========================================
+      // 3. ดึงเอกสารแนบของนิสิต
+      // =========================================
+
+      const fileSql = `
+        SELECT
+          tf.id,
+          tf.task_id,
+          tf.original_name,
+          tf.file_path,
+          tf.file_size,
+          tf.mime_type,
+          tf.uploaded_at,
+
+          u.name AS uploader_name
+
+        FROM task_files tf
+
+        LEFT JOIN users u
+          ON tf.uploader_id = u.id
+
+        WHERE tf.task_id = ?
+
+        ORDER BY tf.uploaded_at DESC, tf.id DESC
+      `;
+
+      db.query(fileSql, [taskId], (fileErr, files) => {
+        if (fileErr) {
+          console.log("Get review files error:", fileErr);
+
+          return res.status(500).json({
+            message: "ไม่สามารถโหลดเอกสารแนบได้",
+          });
+        }
+
+        // =========================================
+        // RESPONSE
+        // =========================================
+
+        res.json({
+          task,
+          subtasks,
+          files,
+        });
+      });
+    });
+  });
+});
+
+/* =========================================================
+   TEACHER REVIEW - MULTIPLE FILE UPLOAD
+========================================================= */
+
+// โฟลเดอร์เก็บไฟล์ตรวจงานของอาจารย์
+
+const teacherReviewUploadDir = path.join(
+  __dirname,
+  "uploads",
+  "teacher-review-files",
+);
+
+if (!fs.existsSync(teacherReviewUploadDir)) {
+  fs.mkdirSync(teacherReviewUploadDir, {
+    recursive: true,
+  });
+}
+
+// ตั้งค่าการเก็บไฟล์
+
+const teacherReviewStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, teacherReviewUploadDir);
+  },
+
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+    cb(null, uniqueName);
+  },
+});
+
+// ประเภทไฟล์ที่อนุญาต
+
+const allowedTeacherReviewExtensions = [
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".ppt",
+  ".pptx",
+  ".jpg",
+  ".jpeg",
+  ".png",
+];
+
+const uploadTeacherReviewFiles = multer({
+  storage: teacherReviewStorage,
+
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 10,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (
+      allowedTeacherReviewExtensions.includes(ext) &&
+      allowedTaskFileTypes.includes(file.mimetype)
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("ประเภทไฟล์ไม่ถูกต้อง"));
+    }
+  },
+}).array("files", 10);
+
+/* =========================================================
+   SAVE TEACHER REVIEW
+========================================================= */
+
+app.post("/teacher/work/review/:taskId/submit", (req, res) => {
+  uploadTeacherReviewFiles(req, res, async (uploadErr) => {
+    const { taskId } = req.params;
+
+    const files = req.files || [];
+
+    // ลบไฟล์ที่อัปโหลดชั่วคราว เมื่อบันทึกไม่สำเร็จ
+
+    const cleanupFiles = () => {
+      for (const file of files) {
+        try {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (err) {
+          console.log("Cleanup file error:", err);
+        }
+      }
+    };
+
+    if (uploadErr) {
+      cleanupFiles();
+
+      return res.status(400).json({
+        message: uploadErr.message,
+      });
+    }
+
+    const advisorId = Number(req.body.advisor_id);
+
+    const decision = req.body.decision;
+
+    const teacherComment = String(req.body.teacher_comment || "").trim();
+
+    // =========================================
+    // VALIDATION
+    // =========================================
+
+    if (
+      !Number.isInteger(Number(taskId)) ||
+      Number(taskId) <= 0 ||
+      !Number.isInteger(advisorId) ||
+      advisorId <= 0
+    ) {
+      cleanupFiles();
+
+      return res.status(400).json({
+        message: "รหัสงานหรือรหัสอาจารย์ไม่ถูกต้อง",
+      });
+    }
+
+    if (decision !== "ผ่าน" && decision !== "แก้ไข") {
+      cleanupFiles();
+
+      return res.status(400).json({
+        message: "กรุณาเลือกผลการตรวจงาน",
+      });
+    }
+
+    if (decision === "แก้ไข" && !teacherComment) {
+      cleanupFiles();
+
+      return res.status(400).json({
+        message: "กรุณากรอกข้อเสนอแนะสำหรับงานที่ต้องแก้ไข",
+      });
+    }
+
+    // รองรับ db ที่เป็น mysql2 connection หรือ pool
+
+    const acquireConnection = () => {
+      return new Promise((resolve, reject) => {
+        if (typeof db.getConnection === "function") {
+          db.getConnection((err, connection) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve({
+                connection,
+                fromPool: true,
+              });
+            }
+          });
+        } else {
+          resolve({
+            connection: db,
+            fromPool: false,
+          });
+        }
+      });
+    };
+
+    const runQuery = (connection, sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        connection.query(sql, params, (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows);
+          }
+        });
+      });
+    };
+
+    const beginTransaction = (connection) => {
+      return new Promise((resolve, reject) => {
+        connection.beginTransaction((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
+
+    const commitTransaction = (connection) => {
+      return new Promise((resolve, reject) => {
+        connection.commit((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
+
+    const rollbackTransaction = (connection) => {
+      return new Promise((resolve) => {
+        connection.rollback(() => resolve());
+      });
+    };
+
+    let connection = null;
+    let fromPool = false;
+    let transactionStarted = false;
+
+    try {
+      const acquired = await acquireConnection();
+
+      connection = acquired.connection;
+      fromPool = acquired.fromPool;
+
+      await beginTransaction(connection);
+      transactionStarted = true;
+
+      // =========================================
+      // 1. ตรวจสอบงานและอาจารย์
+      // =========================================
+
+      const taskRows = await runQuery(
+        connection,
+        `
+          SELECT
+            t.id,
+            t.project_id,
+            t.task_name,
+            t.review_status,
+            t.submitted_at
+
+          FROM project_tasks t
+
+          INNER JOIN projects p
+            ON t.project_id = p.id
+
+          INNER JOIN users reviewer
+            ON reviewer.id = p.advisor_id
+            AND reviewer.role = 'teacher'
+
+          WHERE t.id = ?
+            AND p.advisor_id = ?
+
+          LIMIT 1
+          FOR UPDATE
+        `,
+        [taskId, advisorId],
+      );
+
+      if (taskRows.length === 0) {
+        await rollbackTransaction(connection);
+        transactionStarted = false;
+        cleanupFiles();
+
+        return res.status(403).json({
+          message: "ไม่พบงาน หรือคุณไม่มีสิทธิ์ตรวจงานนี้",
+        });
+      }
+
+      const task = taskRows[0];
+
+      // งานต้องอยู่สถานะรอตรวจเท่านั้น
+
+      if (task.review_status !== "รอตรวจ" || !task.submitted_at) {
+        await rollbackTransaction(connection);
+        transactionStarted = false;
+        cleanupFiles();
+
+        return res.status(409).json({
+          message: "งานนี้ไม่ได้อยู่ในสถานะรอตรวจ",
+        });
+      }
+
+      // =========================================
+      // 2. บันทึกผลการตรวจ
+      // =========================================
+
+      await runQuery(
+        connection,
+        `
+    UPDATE project_tasks
+
+    SET
+      review_status = ?,
+      reviewed_at = NOW(),
+      reviewed_by = ?,
+      teacher_comment = ?,
+      teacher_file = NULL,
+      revision_started_at = NULL,
+
+      status = CASE
+        WHEN ? = 'แก้ไข'
+          THEN 'กำลังดำเนินการ'
+        ELSE status
+      END
+
+    WHERE id = ?
+      AND review_status = 'รอตรวจ'
+  `,
+        [decision, advisorId, teacherComment || null, decision, taskId],
+      );
+
+      // =========================================
+      // 3. บันทึกไฟล์หลายรายการ
+      // =========================================
+
+      for (const file of files) {
+        const filePath = `/uploads/teacher-review-files/${file.filename}`;
+
+        await runQuery(
+          connection,
+          `
+            INSERT INTO task_review_files
+            (
+              task_id,
+              reviewer_id,
+              submitted_at,
+              original_name,
+              stored_name,
+              file_path,
+              mime_type,
+              file_size
+            )
+
+            SELECT
+              t.id,
+              ?,
+              t.submitted_at,
+              ?,
+              ?,
+              ?,
+              ?,
+              ?
+
+            FROM project_tasks t
+            WHERE t.id = ?
+          `,
+          [
+            advisorId,
+            file.originalname,
+            file.filename,
+            filePath,
+            file.mimetype,
+            file.size,
+            taskId,
+          ],
+        );
+      }
+
+      // =========================================
+      // 4. แจ้งเตือนนิสิตในโครงงาน
+      // =========================================
+
+      const message =
+        decision === "ผ่าน"
+          ? `อาจารย์ตรวจงาน "${task.task_name}" ผ่านแล้ว`
+          : `อาจารย์ส่งงาน "${task.task_name}" กลับให้แก้ไข`;
+
+      await runQuery(
+        connection,
+        `
+          INSERT INTO notifications
+          (
+            user_id,
+            message,
+            project_id
+          )
+
+          SELECT DISTINCT
+            pm.user_id,
+            ?,
+            ?
+
+          FROM project_members pm
+
+          WHERE pm.project_id = ?
+        `,
+        [message, task.project_id, task.project_id],
+      );
+
+      // =========================================
+      // 5. ยืนยันการบันทึกทั้งหมด
+      // =========================================
+
+      await commitTransaction(connection);
+      transactionStarted = false;
+
+      return res.json({
+        success: true,
+        message: "บันทึกผลการตรวจเรียบร้อยแล้ว",
+        review_status: decision,
+        uploaded_files: files.length,
+      });
+    } catch (err) {
+      console.log("Save teacher review error:", err);
+
+      if (transactionStarted && connection) {
+        await rollbackTransaction(connection);
+      }
+
+      cleanupFiles();
+
+      return res.status(500).json({
+        message: "ไม่สามารถบันทึกผลการตรวจได้",
+      });
+    } finally {
+      if (fromPool && connection && typeof connection.release === "function") {
+        connection.release();
+      }
+    }
+  });
+});
+
+/* =========================================================
+   STUDENT - GET TEACHER REVIEW FILES
+========================================================= */
+
+app.get("/student/tasks/:taskId/review-files/:studentId", (req, res) => {
+  const { taskId, studentId } = req.params;
+
+  const sql = `
+    SELECT
+      rf.id,
+      rf.task_id,
+      rf.reviewer_id,
+
+      rf.original_name,
+      rf.file_path,
+      rf.mime_type,
+      rf.file_size,
+      rf.created_at,
+
+      reviewer.name AS reviewer_name
+
+    FROM task_review_files rf
+
+    INNER JOIN project_tasks t
+      ON rf.task_id = t.id
+      AND rf.submitted_at = t.submitted_at
+
+    INNER JOIN project_members pm
+      ON pm.project_id = t.project_id
+      AND pm.user_id = ?
+
+    LEFT JOIN users reviewer
+      ON rf.reviewer_id = reviewer.id
+
+    WHERE rf.task_id = ?
+      AND t.review_status IN ('ผ่าน', 'แก้ไข')
+
+    ORDER BY
+      rf.created_at DESC,
+      rf.id DESC
+  `;
+
+  db.query(sql, [studentId, taskId], (err, results) => {
+    if (err) {
+      console.log("Get teacher review files error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดไฟล์ของอาจารย์ได้",
+      });
+    }
+
+    res.json({
+      files: results,
+    });
+  });
+});
+
+/* =========================================================
+   STUDENT - START TASK REVISION
+========================================================= */
+
+app.put("/student/tasks/:taskId/start-revision", (req, res) => {
+  const taskId = Number(req.params.taskId);
+  const studentId = Number(req.body.student_id);
+
+  if (
+    !Number.isInteger(taskId) ||
+    taskId <= 0 ||
+    !Number.isInteger(studentId) ||
+    studentId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลนิสิตหรืองานไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    UPDATE project_tasks t
+
+    INNER JOIN project_members pm
+      ON pm.project_id = t.project_id
+
+    SET
+      t.revision_started_at = NOW(),
+      t.status = 'กำลังดำเนินการ'
+
+    WHERE t.id = ?
+      AND pm.user_id = ?
+      AND t.review_status = 'แก้ไข'
+      AND t.revision_started_at IS NULL
+  `;
+
+  db.query(sql, [taskId, studentId], (err, result) => {
+    if (err) {
+      console.log("Start revision error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถเริ่มแก้ไขงานได้",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(409).json({
+        message: "ไม่สามารถเริ่มแก้ไขงานได้ กรุณาตรวจสอบสถานะหรือรีเฟรชหน้า",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "เริ่มดำเนินการแก้ไขงานเรียบร้อยแล้ว",
+    });
+  });
 });
 
 app.listen(5000, () => {

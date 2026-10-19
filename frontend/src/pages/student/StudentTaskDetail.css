@@ -1802,3 +1802,144 @@
   white-space: pre-wrap;
   box-sizing: border-box;
 }
+
+
+/* =========================================================
+   TEACHER REVIEW RESULT
+========================================================= */
+
+.student-task-page .student-task-review-result {
+  margin-top: 20px;
+  padding: 20px 22px;
+
+  border: 1px solid #cccccc;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.student-task-page .student-task-review-result h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-task-page .student-task-review-result-divider {
+  margin: 16px 0 20px;
+  border-top: 1px solid #d5d5d5;
+}
+
+/* STATUS */
+
+.student-task-page .student-task-review-result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  font-size: 14px;
+}
+
+/* REVIEW INFO */
+
+.student-task-page .student-task-review-result-info p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* SECTIONS */
+
+.student-task-page .student-task-review-result-section {
+  margin-top: 25px;
+}
+
+.student-task-page .student-task-review-result-section h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* TEACHER COMMENT */
+
+.student-task-page .student-task-review-comment {
+  min-height: 70px;
+  padding: 14px 16px;
+
+  background: #d9d9d9;
+  border-radius: 5px;
+
+  color: #333333;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+/* TEACHER FILES */
+
+.student-task-page .student-task-teacher-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-task-page .student-task-teacher-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+
+  color: #333333;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.student-task-page .student-task-teacher-file:hover {
+  background: #f5f5f5;
+  border-color: #aaaaaa;
+}
+
+/* =========================================================
+   START REVISION BUTTON
+========================================================= */
+
+.student-task-page .student-task-revision-start-btn {
+  min-width: 160px;
+  min-height: 42px;
+  padding: 10px 20px;
+
+  background-color: #ff8a00;
+  border: none;
+  border-radius: 7px;
+
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.student-task-page .student-task-revision-start-btn:hover {
+  background-color: #e97d00;
+}
+
+.student-task-page .student-task-revision-start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   SAVE REVISION PROGRESS
+========================================================= */
+
+.student-task-page .student-task-save-btn.revision-save {
+  background-color: #20a86b;
+  color: white;
+}
+
+.student-task-page .student-task-save-btn.revision-save:hover:not(:disabled) {
+  background-color: #188d59;
+}

@@ -23,6 +23,8 @@ import StudentProjectRequestDetail from "./pages/student/StudentProjectRequestDe
 import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 import TeacherDecisionHistory from "./pages/teacher/TeacherDecisionHistory";
 import TeacherRequests from "./pages/teacher/TeacherRequests";
+import TeacherWork from "./pages/teacher/TeacherWork";
+import TeacherReviewDetail from "./pages/teacher/TeacherReviewDetail";
 
 
 import StaffHome from "./pages/Staff/StaffHome";
@@ -59,6 +61,8 @@ function App() {
         <Route path="/teacher-notifications" element={<TeacherNotifications />} />
         <Route path="/teacher-decision-history" element={<TeacherDecisionHistory />} />
         <Route path="/teacher-requests" element={<TeacherRequests />} />
+        <Route path="/teacher-work" element={<TeacherWork />} />
+        <Route path="/teacher-work/review/:taskId" element={<TeacherReviewDetail />} />
 
 
         <Route path="/staff-home" element={<StaffHome />} />
