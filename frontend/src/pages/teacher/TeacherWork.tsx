@@ -17,10 +17,18 @@ interface ReviewTask {
   project_id: number;
   task_name: string;
   project_title: string;
+
   assignee_name: string | null;
   submitted_at: string | null;
   reviewed_at: string | null;
+
   review_status: "รอตรวจ" | "ผ่าน" | "แก้ไข";
+
+  // เลขรอบการส่งล่าสุด
+  submission_number: number | null;
+
+  // ผลการตรวจจากรอบก่อนหน้า
+  previous_review_status: "รอตรวจ" | "ผ่าน" | "แก้ไข" | null;
 }
 
 type WorkTab = "review" | "exam" | "evaluation";
@@ -425,6 +433,7 @@ function TeacherWork() {
                         <th>โครงงาน</th>
                         <th>ผู้รับผิดชอบ</th>
                         <th>วันที่ส่ง</th>
+                        <th>สถานะ</th>
                         <th>การดำเนินการ</th>
                       </tr>
                     </thead>
@@ -432,7 +441,7 @@ function TeacherWork() {
                     <tbody>
                       {loading || error || currentTasks.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="tw-empty-cell">
+                          <td colSpan={6} className="tw-empty-cell">
                             {loading
                               ? "กำลังโหลดรายการตรวจงาน..."
                               : error
@@ -447,14 +456,53 @@ function TeacherWork() {
                       ) : (
                         currentTasks.map((task) => (
                           <tr key={task.id}>
+                            {/* ชื่องาน */}
                             <td>{task.task_name}</td>
 
+                            {/* โครงงาน */}
                             <td>{task.project_title}</td>
 
+                            {/* ผู้รับผิดชอบ */}
                             <td>{task.assignee_name || "-"}</td>
 
+                            {/* วันที่ส่ง */}
                             <td>{formatThaiDate(task.submitted_at)}</td>
 
+                            {/* สถานะ */}
+                            <td>
+                              <div className="tw-review-status-cell">
+                                {task.review_status === "รอตรวจ" && (
+                                  <>
+                                    <span className="tw-review-status-badge tw-status-waiting">
+                                      รอตรวจ
+                                    </span>
+
+                                    {Number(task.submission_number) > 1 &&
+                                      task.previous_review_status ===
+                                        "แก้ไข" && (
+                                        <span className="tw-resubmission-label">
+                                          ส่งแก้ไขครั้งที่{" "}
+                                          {task.submission_number}
+                                        </span>
+                                      )}
+                                  </>
+                                )}
+
+                                {task.review_status === "ผ่าน" && (
+                                  <span className="tw-review-status-badge tw-status-passed">
+                                    ผ่าน
+                                  </span>
+                                )}
+
+                                {task.review_status === "แก้ไข" && (
+                                  <span className="tw-review-status-badge tw-status-revision">
+                                    ต้องแก้ไข
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* การดำเนินการ */}
                             <td>
                               <button
                                 type="button"

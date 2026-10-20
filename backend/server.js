@@ -6058,185 +6058,436 @@ app.delete(
   },
 );
 
-// =========================================================
-// 16. ส่งงานให้อาจารย์ตรวจ
-// =========================================================
+/* =========================================================
+   STUDENT - SUBMIT TASK WITH SUBMISSION HISTORY
+========================================================= */
+
+// โฟลเดอร์เก็บสำเนาเอกสารของแต่ละรอบการส่ง
+
+const taskSubmissionDir = path.join(__dirname, "uploads", "task-submissions");
+
+fs.mkdirSync(taskSubmissionDir, {
+  recursive: true,
+});
+
+// =========================================
+// ส่งงานให้อาจารย์ตรวจ
+// =========================================
 
 app.post("/student/tasks/:taskId/submit-review", async (req, res) => {
-  const { taskId } = req.params;
+  const taskId = Number(req.params.taskId);
+  const studentId = Number(req.body.student_id);
 
-  const { student_id, submission_note } = req.body;
+  const submissionNote = String(req.body.submission_note || "").trim();
 
-  if (!student_id) {
+  // =========================================
+  // ตรวจข้อมูลเบื้องต้น
+  // =========================================
+
+  if (
+    !Number.isInteger(taskId) ||
+    taskId <= 0 ||
+    !Number.isInteger(studentId) ||
+    studentId <= 0
+  ) {
     return res.status(400).json({
-      message: "ไม่พบข้อมูลนิสิต",
+      message: "รหัสงานหรือรหัสนิสิตไม่ถูกต้อง",
     });
   }
 
-  const runQuery = (sql, params = []) => {
+  // =========================================
+  // ฟังก์ชันช่วยจัดการ Database
+  // =========================================
+
+  const acquireConnection = () => {
     return new Promise((resolve, reject) => {
-      db.query(sql, params, (err, results) => {
+      if (typeof db.getConnection === "function") {
+        db.getConnection((err, connection) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              connection,
+              fromPool: true,
+            });
+          }
+        });
+      } else {
+        resolve({
+          connection: db,
+          fromPool: false,
+        });
+      }
+    });
+  };
+
+  const query = (connection, sql, params = []) => {
+    return new Promise((resolve, reject) => {
+      connection.query(sql, params, (err, result) => {
         if (err) {
           reject(err);
-          return;
+        } else {
+          resolve(result);
         }
-
-        resolve(results);
       });
     });
   };
 
+  const transaction = (connection, action) => {
+    return new Promise((resolve, reject) => {
+      connection[action]((err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  };
+
+  const stop = (statusCode, message) => {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    throw error;
+  };
+
+  let connection = null;
+  let fromPool = false;
+  let transactionStarted = false;
+
+  // เก็บชื่อไฟล์ที่คัดลอกแล้ว
+  // ถ้าบันทึกไม่สำเร็จจะได้ลบสำเนาออก
+
+  const copiedFiles = [];
+
   try {
-    // ==========================================
-    // ตรวจงาน + สิทธิ์นิสิต
-    // ==========================================
+    // =========================================
+    // 1. เริ่ม Transaction
+    // =========================================
 
-    const taskRows = await runQuery(
+    const acquired = await acquireConnection();
+
+    connection = acquired.connection;
+    fromPool = acquired.fromPool;
+
+    await transaction(connection, "beginTransaction");
+    transactionStarted = true;
+
+    // =========================================
+    // 2. ตรวจงานและสิทธิ์นิสิต
+    // =========================================
+
+    const taskRows = await query(
+      connection,
       `
-            SELECT
-              t.id,
-              t.project_id,
-              t.task_name,
-              t.status,
-              t.review_status,
+        SELECT
+          t.id,
+          t.project_id,
+          t.task_name,
+          t.status,
+          t.review_status,
+          t.revision_started_at,
 
-              p.advisor_id,
+          p.advisor_id,
 
-              student.name
-                AS student_name
+          student.name AS student_name
 
-            FROM project_tasks t
+        FROM project_tasks t
 
-            INNER JOIN projects p
-              ON t.project_id = p.id
+        INNER JOIN projects p
+          ON p.id = t.project_id
 
-            INNER JOIN project_members pm
-              ON pm.project_id = t.project_id
+        INNER JOIN project_members pm
+          ON pm.project_id = t.project_id
 
-            INNER JOIN users student
-              ON student.id = ?
+        INNER JOIN users student
+          ON student.id = pm.user_id
 
-            WHERE t.id = ?
-              AND pm.user_id = ?
+        WHERE t.id = ?
+          AND pm.user_id = ?
 
-            LIMIT 1
-          `,
-      [student_id, taskId, student_id],
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [taskId, studentId],
     );
 
     if (taskRows.length === 0) {
-      return res.status(403).json({
-        message: "คุณไม่มีสิทธิ์ส่งงานนี้",
-      });
+      stop(403, "คุณไม่มีสิทธิ์ส่งงานนี้");
     }
 
     const task = taskRows[0];
 
-    // ==========================================
-    // งานต้องเสร็จก่อน
-    // ==========================================
+    // =========================================
+    // 3. ตรวจสอบสถานะงาน
+    // =========================================
 
     if (task.status !== "เสร็จสิ้น") {
-      return res.status(400).json({
-        message: "งานยังไม่เสร็จสิ้น ไม่สามารถส่งให้อาจารย์ตรวจได้",
-      });
+      stop(400, "กรุณาดำเนินงานให้เสร็จสิ้นก่อนส่งให้อาจารย์ตรวจ");
     }
 
-    // ==========================================
-    // ห้ามส่งซ้ำตอนรอตรวจ / ผ่านแล้ว
-    // ==========================================
-
-    if (task.review_status === "รอตรวจ") {
-      return res.status(400).json({
-        message: "งานนี้ถูกส่งให้อาจารย์ตรวจแล้ว",
-      });
+    if (task.review_status !== "ยังไม่ส่ง" && task.review_status !== "แก้ไข") {
+      stop(409, "งานนี้อยู่ระหว่างรอตรวจหรือผ่านการตรวจแล้ว");
     }
 
-    if (task.review_status === "ผ่าน") {
-      return res.status(400).json({
-        message: "งานนี้ผ่านการตรวจแล้ว",
-      });
+    // ถ้าเป็นงานที่อาจารย์ส่งกลับมาให้แก้ไข
+    // ต้องกดดำเนินการแก้ไขก่อน
+
+    if (task.review_status === "แก้ไข" && !task.revision_started_at) {
+      stop(409, "กรุณากดดำเนินการแก้ไขก่อนส่งงานรอบใหม่");
     }
 
-    // ==========================================
-    // ตรวจเอกสารแนบ
-    // ==========================================
+    // =========================================
+    // 4. ตรวจไฟล์ของนิสิต
+    // =========================================
 
-    const fileRows = await runQuery(
+    const files = await query(
+      connection,
       `
-            SELECT COUNT(*) AS total_files
+        SELECT
+          id,
+          original_name,
+          stored_name,
+          file_path,
+          mime_type,
+          file_size
 
-            FROM task_files
+        FROM task_files
 
-            WHERE task_id = ?
-          `,
+        WHERE task_id = ?
+
+        ORDER BY id ASC
+        FOR UPDATE
+      `,
       [taskId],
     );
 
-    const totalFiles = Number(fileRows[0]?.total_files || 0);
-
-    if (totalFiles === 0) {
-      return res.status(400).json({
-        message: "กรุณาแนบเอกสารอย่างน้อย 1 ไฟล์ก่อนส่งให้อาจารย์ตรวจ",
-      });
+    if (files.length === 0) {
+      stop(400, "กรุณาแนบเอกสารอย่างน้อย 1 ไฟล์ก่อนส่งตรวจ");
     }
 
-    // ==========================================
-    // เปลี่ยนเป็นรอตรวจ
-    // ==========================================
+    // =========================================
+    // 5. หาเลขรอบการส่งครั้งต่อไป
+    // =========================================
 
-    await runQuery(
+    const roundRows = await query(
+      connection,
       `
-    UPDATE project_tasks
+        SELECT
+          COALESCE(
+            MAX(submission_number),
+            0
+          ) + 1 AS next_round
 
-    SET
-      review_status = 'รอตรวจ',
-      revision_started_at = NULL,
-      submission_note = ?,
-      submitted_at = NOW()
+        FROM task_submissions
 
-    WHERE id = ?
-  `,
-      [submission_note?.trim() || null, taskId],
+        WHERE task_id = ?
+      `,
+      [taskId],
     );
 
-    // ==========================================
-    // แจ้งเตือนอาจารย์
-    // ==========================================
+    const submissionNumber = Number(roundRows[0].next_round) || 1;
 
-    if (task.advisor_id) {
-      await runQuery(
+    // =========================================
+    // 6. เปลี่ยนสถานะงานเป็นรอตรวจ
+    // =========================================
+
+    await query(
+      connection,
+      `
+        UPDATE project_tasks
+
+        SET
+          review_status = 'รอตรวจ',
+          revision_started_at = NULL,
+
+          submission_note = ?,
+          submitted_at = NOW(),
+
+          reviewed_at = NULL,
+          reviewed_by = NULL,
+          teacher_comment = NULL,
+          teacher_file = NULL
+
+        WHERE id = ?
+      `,
+      [submissionNote || null, taskId],
+    );
+
+    // =========================================
+    // 7. สร้างประวัติการส่งรอบใหม่
+    // =========================================
+
+    const submissionResult = await query(
+      connection,
+      `
+        INSERT INTO task_submissions
+        (
+          task_id,
+          submission_number,
+          student_id,
+          submission_note,
+          submitted_at,
+          review_status
+        )
+
+        SELECT
+          t.id,
+          ?,
+          ?,
+          t.submission_note,
+          t.submitted_at,
+          'รอตรวจ'
+
+        FROM project_tasks t
+
+        WHERE t.id = ?
+      `,
+      [submissionNumber, studentId, taskId],
+    );
+
+    const submissionId = submissionResult.insertId;
+
+    // =========================================
+    // 8. คัดลอกเอกสารเก็บแยกแต่ละรอบ
+    // =========================================
+
+    for (const file of files) {
+      if (!file.stored_name) {
+        stop(409, `ไม่พบข้อมูลไฟล์ต้นฉบับ ${file.original_name}`);
+      }
+
+      // อ่านไฟล์จากโฟลเดอร์ task-files เดิม
+
+      const sourcePath = path.join(
+        taskUploadDir,
+        path.basename(file.stored_name),
+      );
+
+      // ตั้งชื่อสำเนาใหม่ ป้องกันชนกัน
+
+      const newStoredName =
+        `submission-${submissionId}-${file.id}-` +
+        path.basename(file.stored_name);
+
+      const destinationPath = path.join(taskSubmissionDir, newStoredName);
+
+      // ตรวจสอบว่ามีไฟล์จริง
+
+      if (!fs.existsSync(sourcePath)) {
+        stop(409, `ไม่พบไฟล์ ${file.original_name} ในเซิร์ฟเวอร์`);
+      }
+
+      // คัดลอกไฟล์จริง
+
+      await fs.promises.copyFile(sourcePath, destinationPath);
+
+      copiedFiles.push(destinationPath);
+
+      // Path สำหรับเปิดไฟล์จากหน้าเว็บ
+
+      const snapshotPath = `/uploads/task-submissions/${newStoredName}`;
+
+      // บันทึกประวัติไฟล์
+
+      await query(
+        connection,
         `
-            INSERT INTO notifications
-            (
-              user_id,
-              message,
-              project_id
-            )
+          INSERT INTO task_submission_files
+          (
+            submission_id,
+            original_name,
+            stored_name,
+            file_path,
+            mime_type,
+            file_size
+          )
 
-            VALUES (?, ?, ?)
-          `,
+          VALUES (?, ?, ?, ?, ?, ?)
+        `,
         [
-          task.advisor_id,
-
-          `${task.student_name} ส่งงาน "${task.task_name}" มาให้คุณตรวจแล้ว`,
-
-          task.project_id,
+          submissionId,
+          file.original_name,
+          newStoredName,
+          snapshotPath,
+          file.mime_type,
+          file.file_size,
         ],
       );
     }
 
-    res.json({
-      success: true,
+    // =========================================
+    // 9. แจ้งเตือนอาจารย์
+    // =========================================
 
-      message: "ส่งงานให้อาจารย์ตรวจเรียบร้อยแล้ว",
+    if (task.advisor_id) {
+      const message =
+        `${task.student_name} ส่งงาน "${task.task_name}" ` +
+        `(ครั้งที่ ${submissionNumber}) มาให้คุณตรวจแล้ว`;
+
+      await query(
+        connection,
+        `
+          INSERT INTO notifications
+          (
+            user_id,
+            message,
+            project_id
+          )
+
+          VALUES (?, ?, ?)
+        `,
+        [task.advisor_id, message, task.project_id],
+      );
+    }
+
+    // =========================================
+    // 10. ยืนยันการบันทึก
+    // =========================================
+
+    await transaction(connection, "commit");
+    transactionStarted = false;
+
+    return res.json({
+      success: true,
+      message: `ส่งงานครั้งที่ ${submissionNumber} เรียบร้อยแล้ว`,
+      submission_id: submissionId,
+      submission_number: submissionNumber,
+      uploaded_files: files.length,
     });
   } catch (err) {
-    console.log("Submit task review error:", err);
+    console.log("Submit task with history error:", err);
 
-    res.status(500).json({
-      message: "ไม่สามารถส่งงานให้อาจารย์ตรวจได้",
+    // ย้อนกลับข้อมูลฐานข้อมูล
+
+    if (transactionStarted && connection) {
+      try {
+        await transaction(connection, "rollback");
+      } catch (rollbackErr) {
+        console.log("Rollback error:", rollbackErr);
+      }
+    }
+
+    // ลบสำเนาไฟล์ที่สร้างระหว่างการบันทึก
+    // กรณีเกิดข้อผิดพลาด
+
+    for (const filePath of copiedFiles) {
+      try {
+        await fs.promises.unlink(filePath);
+      } catch (fileErr) {
+        console.log("Remove snapshot error:", fileErr);
+      }
+    }
+
+    const statusCode = err.statusCode || 500;
+
+    return res.status(statusCode).json({
+      message:
+        statusCode === 500 ? "ไม่สามารถส่งงานและบันทึกประวัติได้" : err.message,
     });
+  } finally {
+    // คืน Connection ให้ Pool
+
+    if (fromPool && connection && typeof connection.release === "function") {
+      connection.release();
+    }
   }
 });
 
@@ -6248,38 +6499,67 @@ app.get("/teacher/work/reviews/:advisorId", (req, res) => {
   const { advisorId } = req.params;
 
   const sql = `
+  SELECT
+    t.id,
+    t.project_id,
+    t.task_name,
+    t.review_status,
+    t.submitted_at,
+    t.reviewed_at,
+
+    p.title AS project_title,
+
+    u.name AS assignee_name,
+
+    -- เลขรอบการส่งล่าสุด
+    last_submission.latest_round AS submission_number,
+
+    -- ผลการตรวจของรอบก่อนหน้า
+    previous_submission.review_status
+      AS previous_review_status
+
+  FROM project_tasks t
+
+  INNER JOIN projects p
+    ON t.project_id = p.id
+
+  LEFT JOIN users u
+    ON t.assignee_id = u.id
+
+  -- หาเลขรอบล่าสุดของแต่ละงาน
+  LEFT JOIN (
     SELECT
-      t.id,
-      t.project_id,
-      t.task_name,
-      t.review_status,
-      t.submitted_at,
-      t.reviewed_at,
+      task_id,
+      MAX(submission_number) AS latest_round
 
-      p.title AS project_title,
+    FROM task_submissions
 
-      u.name AS assignee_name
+    GROUP BY task_id
+  ) last_submission
+    ON last_submission.task_id = t.id
 
-    FROM project_tasks t
+  -- ตรวจว่ารอบก่อนหน้าถูกสั่งแก้ไขหรือไม่
+  LEFT JOIN task_submissions previous_submission
+    ON previous_submission.task_id = t.id
+    AND previous_submission.submission_number =
+        last_submission.latest_round - 1
 
-    INNER JOIN projects p
-      ON t.project_id = p.id
+  WHERE p.advisor_id = ?
+    AND t.submitted_at IS NOT NULL
+    AND t.review_status IN (
+      'รอตรวจ',
+      'ผ่าน',
+      'แก้ไข'
+    )
 
-    LEFT JOIN users u
-      ON t.assignee_id = u.id
-
-    WHERE p.advisor_id = ?
-      AND t.submitted_at IS NOT NULL
-      AND t.review_status IN ('รอตรวจ', 'ผ่าน', 'แก้ไข')
-
-    ORDER BY
-      CASE
-        WHEN t.review_status = 'รอตรวจ' THEN 0
-        ELSE 1
-      END,
-      t.submitted_at DESC,
-      t.id DESC
-  `;
+  ORDER BY
+    CASE
+      WHEN t.review_status = 'รอตรวจ' THEN 0
+      ELSE 1
+    END,
+    t.submitted_at DESC,
+    t.id DESC
+`;
 
   db.query(sql, [advisorId], (err, results) => {
     if (err) {
@@ -6746,6 +7026,68 @@ app.post("/teacher/work/review/:taskId/submit", (req, res) => {
       );
 
       // =========================================
+      // 2.1 บันทึกผลตรวจลงประวัติการส่งงาน
+      // =========================================
+
+      // ค้นหาการส่งงานรอบปัจจุบัน
+
+      const submissionRows = await runQuery(
+        connection,
+        `
+          SELECT
+            id,
+            submission_number,
+            review_status
+
+          FROM task_submissions
+
+          WHERE task_id = ?
+            AND submitted_at = ?
+
+          ORDER BY id DESC
+
+          LIMIT 1
+          FOR UPDATE
+        `,
+        [taskId, task.submitted_at],
+      );
+
+      // งานเก่าที่ไม่มีประวัติจะยังตรวจได้ตามปกติ
+
+      if (submissionRows.length > 0) {
+        const submission = submissionRows[0];
+
+        // ตรวจสอบว่ายังรอการตรวจ
+
+        if (submission.review_status !== "รอตรวจ") {
+          throw new Error("ประวัติการส่งงานรอบนี้ได้รับการตรวจแล้ว");
+        }
+
+        // อัปเดตผลการตรวจของรอบนั้น
+
+        const historyResult = await runQuery(
+          connection,
+          `
+            UPDATE task_submissions
+
+            SET
+              review_status = ?,
+              reviewed_at = NOW(),
+              reviewed_by = ?,
+              teacher_comment = ?
+
+            WHERE id = ?
+              AND review_status = 'รอตรวจ'
+          `,
+          [decision, advisorId, teacherComment || null, submission.id],
+        );
+
+        if (historyResult.affectedRows !== 1) {
+          throw new Error("ไม่สามารถอัปเดตประวัติการตรวจงานได้");
+        }
+      }
+
+      // =========================================
       // 3. บันทึกไฟล์หลายรายการ
       // =========================================
 
@@ -6969,6 +7311,396 @@ app.put("/student/tasks/:taskId/start-revision", (req, res) => {
     });
   });
 });
+
+/* =========================================================
+   STUDENT - SUBMITTED DOCUMENTS AND TASKS
+========================================================= */
+
+app.get("/student/projects/:projectId/submissions/:studentId", (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const studentId = Number(req.params.studentId);
+
+  if (
+    !Number.isInteger(projectId) ||
+    projectId <= 0 ||
+    !Number.isInteger(studentId) ||
+    studentId <= 0
+  ) {
+    return res.status(400).json({
+      message: "รหัสโครงงานหรือรหัสนิสิตไม่ถูกต้อง",
+    });
+  }
+
+  // =========================================
+  // 1. ตรวจสอบสมาชิกโครงงาน
+  // =========================================
+
+  const projectSql = `
+      SELECT
+        p.id,
+        p.title
+
+      FROM projects p
+
+      INNER JOIN project_members pm
+        ON pm.project_id = p.id
+
+      WHERE p.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+  db.query(projectSql, [projectId, studentId], (projectErr, projectRows) => {
+    if (projectErr) {
+      console.log("Get submission project error:", projectErr);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดข้อมูลโครงงานได้",
+      });
+    }
+
+    if (projectRows.length === 0) {
+      return res.status(403).json({
+        message: "ไม่พบโครงงาน หรือคุณไม่ใช่สมาชิกโครงงานนี้",
+      });
+    }
+
+    const project = projectRows[0];
+
+    // =========================================
+    // 2. ดึงเฉพาะงานที่ส่งอาจารย์แล้ว
+    // =========================================
+
+    const taskSql = `
+          SELECT
+            t.id AS task_id,
+            t.task_name,
+            t.review_status,
+            t.submitted_at,
+            
+            (
+              SELECT COUNT(*)
+              FROM task_submissions ts
+              WHERE ts.task_id = t.id
+            ) AS submission_count,
+
+
+            ph.id AS phase_id,
+            ph.phase_name,
+            ph.phase_order
+
+          FROM project_tasks t
+
+          LEFT JOIN project_phases ph
+            ON ph.id = t.phase_id
+
+          WHERE t.project_id = ?
+            AND t.submitted_at IS NOT NULL
+
+          ORDER BY
+            t.submitted_at DESC,
+            t.id DESC
+        `;
+
+    db.query(taskSql, [projectId], (taskErr, tasks) => {
+      if (taskErr) {
+        console.log("Get submitted tasks error:", taskErr);
+
+        return res.status(500).json({
+          message: "ไม่สามารถโหลดรายการงานที่ส่งได้",
+        });
+      }
+
+      if (tasks.length === 0) {
+        return res.json({
+          project,
+          submissions: [],
+        });
+      }
+
+      // =========================================
+      // 3. ดึงไฟล์ที่อัปโหลดก่อนหรือขณะส่งงาน
+      // =========================================
+
+      const fileSql = `
+  SELECT
+    sf.id,
+    ts.task_id,
+    sf.original_name,
+    sf.file_path,
+    sf.file_size,
+
+    ts.submitted_at AS uploaded_at
+
+  FROM task_submission_files sf
+
+  INNER JOIN task_submissions ts
+    ON ts.id = sf.submission_id
+
+  INNER JOIN project_tasks t
+    ON t.id = ts.task_id
+
+  WHERE t.project_id = ?
+
+    AND ts.id = (
+      SELECT latest.id
+      FROM task_submissions latest
+
+      WHERE latest.task_id = ts.task_id
+
+      ORDER BY
+        latest.submission_number DESC,
+        latest.id DESC
+
+      LIMIT 1
+    )
+
+  ORDER BY sf.id DESC
+`;
+
+      db.query(fileSql, [projectId], (fileErr, files) => {
+        if (fileErr) {
+          console.log("Get submitted files error:", fileErr);
+
+          return res.status(500).json({
+            message: "ไม่สามารถโหลดเอกสารที่ส่งได้",
+          });
+        }
+
+        // =========================================
+        // 4. จัดไฟล์ให้ตรงกับแต่ละงาน
+        // =========================================
+
+        const submissions = tasks.map((task) => {
+          const taskFiles = files.filter(
+            (file) => Number(file.task_id) === Number(task.task_id),
+          );
+
+          return {
+            ...task,
+            files: taskFiles,
+          };
+        });
+
+        // =========================================
+        // RESPONSE
+        // =========================================
+
+        res.json({
+          project,
+          submissions,
+        });
+      });
+    });
+  });
+});
+
+/* =========================================================
+   STUDENT - TASK SUBMISSION HISTORY
+========================================================= */
+
+app.get(
+  "/student/tasks/:taskId/submission-history/:studentId",
+  async (req, res) => {
+    const taskId = Number(req.params.taskId);
+    const studentId = Number(req.params.studentId);
+
+    if (
+      !Number.isInteger(taskId) ||
+      taskId <= 0 ||
+      !Number.isInteger(studentId) ||
+      studentId <= 0
+    ) {
+      return res.status(400).json({
+        message: "รหัสงานหรือรหัสนิสิตไม่ถูกต้อง",
+      });
+    }
+
+    const query = (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        db.query(sql, params, (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    };
+
+    try {
+      // =========================================
+      // 1. ตรวจสิทธิ์และดึงข้อมูลงาน
+      // =========================================
+
+      const taskRows = await query(
+        `
+          SELECT
+            t.id,
+            t.project_id,
+            t.task_name,
+            t.review_status,
+
+            p.title AS project_title,
+            ph.phase_name
+
+          FROM project_tasks t
+
+          INNER JOIN projects p
+            ON p.id = t.project_id
+
+          LEFT JOIN project_phases ph
+            ON ph.id = t.phase_id
+
+          INNER JOIN project_members pm
+            ON pm.project_id = t.project_id
+
+          WHERE t.id = ?
+            AND pm.user_id = ?
+
+          LIMIT 1
+        `,
+        [taskId, studentId],
+      );
+
+      if (taskRows.length === 0) {
+        return res.status(403).json({
+          message: "ไม่พบงานหรือคุณไม่มีสิทธิ์ดูประวัตินี้",
+        });
+      }
+
+      const task = taskRows[0];
+
+      // =========================================
+      // 2. ดึงประวัติการส่งทุกครั้ง
+      // =========================================
+
+      const submissions = await query(
+        `
+          SELECT
+            ts.id,
+            ts.task_id,
+            ts.submission_number,
+            ts.student_id,
+            ts.submission_note,
+            ts.submitted_at,
+
+            ts.review_status,
+            ts.reviewed_at,
+            ts.reviewed_by,
+            ts.teacher_comment,
+
+            student.name AS student_name,
+            reviewer.name AS reviewer_name
+
+          FROM task_submissions ts
+
+          LEFT JOIN users student
+            ON student.id = ts.student_id
+
+          LEFT JOIN users reviewer
+            ON reviewer.id = ts.reviewed_by
+
+          WHERE ts.task_id = ?
+
+          ORDER BY
+            ts.submission_number DESC,
+            ts.id DESC
+        `,
+        [taskId],
+      );
+
+      // =========================================
+      // 3. ดึงไฟล์ที่นิสิตส่งในแต่ละรอบ
+      // =========================================
+
+      const submittedFiles = await query(
+        `
+          SELECT
+            sf.id,
+            sf.submission_id,
+            sf.original_name,
+            sf.file_path,
+            sf.file_size,
+            sf.mime_type
+
+          FROM task_submission_files sf
+
+          INNER JOIN task_submissions ts
+            ON ts.id = sf.submission_id
+
+          WHERE ts.task_id = ?
+
+          ORDER BY sf.id ASC
+        `,
+        [taskId],
+      );
+
+      // =========================================
+      // 4. ดึงไฟล์ที่อาจารย์แนบแต่ละรอบ
+      // =========================================
+
+      const teacherFiles = await query(
+        `
+          SELECT
+            rf.id,
+            ts.id AS submission_id,
+            rf.original_name,
+            rf.file_path,
+            rf.file_size,
+            rf.mime_type
+
+          FROM task_review_files rf
+
+          INNER JOIN task_submissions ts
+            ON ts.task_id = rf.task_id
+            AND ts.submitted_at = rf.submitted_at
+
+          WHERE ts.task_id = ?
+
+          ORDER BY rf.id ASC
+        `,
+        [taskId],
+      );
+
+      // =========================================
+      // 5. จัดไฟล์เข้าแต่ละรอบการส่ง
+      // =========================================
+
+      const history = submissions.map((submission) => {
+        const files = submittedFiles.filter(
+          (file) => Number(file.submission_id) === Number(submission.id),
+        );
+
+        const reviewFiles = teacherFiles.filter(
+          (file) => Number(file.submission_id) === Number(submission.id),
+        );
+
+        return {
+          ...submission,
+          files,
+          teacher_files: reviewFiles,
+        };
+      });
+
+      // =========================================
+      // RESPONSE
+      // =========================================
+
+      res.json({
+        task,
+        history,
+      });
+    } catch (err) {
+      console.log("Get submission history error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดประวัติการส่งงานได้",
+      });
+    }
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

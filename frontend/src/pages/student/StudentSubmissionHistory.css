@@ -1,0 +1,342 @@
+
+/* =========================================================
+   STUDENT SUBMISSION HISTORY
+========================================================= */
+
+.student-task-page .ssh-container {
+  min-height: 550px;
+  padding: 22px;
+
+  background: #ffffff;
+  border-radius: 9px;
+}
+
+/* HEADER */
+
+.student-task-page .ssh-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+
+  margin-bottom: 25px;
+}
+
+.student-task-page .ssh-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.student-task-page .ssh-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  color: #3678c5;
+  background: #ffffff;
+
+  border: 1px solid #3678c5;
+  border-radius: 6px;
+
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.student-task-page .ssh-back-link:hover {
+  background: #eef4fc;
+}
+
+/* TASK INFORMATION */
+
+.student-task-page .ssh-task-info {
+  margin-bottom: 24px;
+  padding: 18px 20px;
+
+  background: #fafafa;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.student-task-page .ssh-task-info h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-task-page .ssh-task-info p {
+  margin: 7px 0;
+  font-size: 13px;
+}
+
+/* HISTORY LIST */
+
+.student-task-page .ssh-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ROUND CARD */
+
+.student-task-page .ssh-round-card {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+/* ROUND HEADER */
+
+.student-task-page .ssh-round-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  gap: 15px;
+
+  padding: 18px 20px;
+
+  background: #ffffff;
+  border: none;
+
+  color: #222222;
+  text-align: left;
+  font-family: inherit;
+
+  cursor: pointer;
+}
+
+.student-task-page .ssh-round-header:hover {
+  background: #fafafa;
+}
+
+.student-task-page .ssh-round-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-task-page .ssh-round-header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  font-size: 13px;
+}
+
+/* ROUND BODY */
+
+.student-task-page .ssh-round-body {
+  padding: 20px;
+
+  border-top: 1px solid #dddddd;
+}
+
+.student-task-page .ssh-info p {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin: 10px 0;
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* SECTIONS */
+
+.student-task-page .ssh-section {
+  margin-top: 25px;
+}
+
+.student-task-page .ssh-section h4 {
+  margin: 0 0 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* FILE LIST */
+
+.student-task-page .ssh-file-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.student-task-page .ssh-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  max-width: 100%;
+  padding: 9px 12px;
+
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+
+  color: #333333;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.student-task-page .ssh-file span {
+  overflow-wrap: anywhere;
+}
+
+.student-task-page .ssh-file svg {
+  flex-shrink: 0;
+  color: #777777;
+}
+
+.student-task-page .ssh-file:hover {
+  background: #f3f7fc;
+  border-color: #3678c5;
+  color: #3678c5;
+}
+
+.student-task-page .ssh-no-file {
+  color: #888888;
+  font-size: 13px;
+}
+
+/* REVIEW RESULT */
+
+.student-task-page .ssh-review-box {
+  margin-top: 28px;
+  padding: 20px;
+
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+}
+
+.student-task-page .ssh-review-box > h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-task-page .ssh-divider {
+  margin: 15px 0 20px;
+  border-top: 1px solid #d6d6d6;
+}
+
+/* TEACHER COMMENT / NOTE */
+
+.student-task-page .ssh-note {
+  min-height: 65px;
+  padding: 14px 16px;
+
+  background: #d9d9d9;
+  border-radius: 5px;
+
+  color: #333333;
+  font-size: 13px;
+  line-height: 1.7;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* STATUS BADGES */
+
+.student-task-page .ssh-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 75px;
+  padding: 5px 14px;
+
+  border-radius: 20px;
+
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.student-task-page .ssh-waiting {
+  background: #f4b400;
+}
+
+.student-task-page .ssh-passed {
+  background: #20a86b;
+}
+
+.student-task-page .ssh-revision {
+  background: #ff8a00;
+}
+
+.student-task-page .ssh-other {
+  background: #999999;
+}
+
+/* EMPTY / ERROR */
+
+.student-task-page .ssh-message {
+  padding: 55px 20px;
+  text-align: center;
+
+  color: #777777;
+  font-size: 14px;
+}
+
+/* BOTTOM ACTIONS */
+
+.student-task-page .ssh-actions {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 35px;
+}
+
+.student-task-page .ssh-back-btn {
+  min-width: 200px;
+  min-height: 42px;
+
+  padding: 10px 18px;
+
+  color: #ffffff;
+  background: #3678c5;
+
+  border: none;
+  border-radius: 7px;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+.student-task-page .ssh-back-btn:hover {
+  background: #2866ae;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .student-task-page .ssh-container {
+    padding: 18px 14px;
+  }
+
+  .student-task-page .ssh-round-header {
+    padding: 15px;
+  }
+
+  .student-task-page .ssh-round-body {
+    padding: 15px;
+  }
+
+  .student-task-page .ssh-review-box {
+    padding: 15px;
+  }
+}

@@ -1,0 +1,391 @@
+
+/* =========================================================
+   STUDENT DOCUMENTS
+========================================================= */
+
+.student-task-page .sd-container {
+  min-height: 550px;
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+
+  background: white;
+  border-radius: 9px;
+}
+
+.student-task-page .sd-container > h3 {
+  margin: 0 0 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   SEARCH AND FILTER
+========================================================= */
+
+.student-task-page .sd-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  margin: 5px 0 40px;
+}
+
+.student-task-page .sd-search-box {
+  position: relative;
+  width: 290px;
+  max-width: 100%;
+}
+
+.student-task-page .sd-search-box input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 42px 0 16px;
+
+  background: white;
+  border: 1px solid #bfbfbf;
+  border-radius: 22px;
+  outline: none;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.student-task-page .sd-search-box input:focus {
+  border-color: #3678c5;
+}
+
+.student-task-page .sd-search-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+
+  transform: translateY(-50%);
+
+  color: #a6a6a6;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+/* SELECT FILTER */
+
+.student-task-page .sd-toolbar select {
+  height: 38px;
+  max-width: 100%;
+
+  padding: 0 30px 0 12px;
+
+  background-color: white;
+  border: 1px solid #bfbfbf;
+  border-radius: 22px;
+
+  color: #666666;
+  font-family: inherit;
+  font-size: 12px;
+
+  cursor: pointer;
+  outline: none;
+}
+
+.student-task-page .sd-toolbar select:focus {
+  border-color: #3678c5;
+}
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+.student-task-page .sd-table-wrapper {
+  width: 100%;
+
+  padding: 12px 10px 3px;
+
+  background: white;
+  border: 1px solid #c9c9c9;
+  border-radius: 9px;
+
+  overflow-x: auto;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.student-task-page .sd-table {
+  width: 100%;
+  min-width: 680px;
+
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.student-task-page .sd-table th,
+.student-task-page .sd-table td {
+  padding: 16px 10px;
+
+  border-bottom: 1px solid #d6d6d6;
+
+  text-align: center;
+  vertical-align: middle;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+
+  color: #222222;
+}
+
+.student-task-page .sd-table th {
+  font-weight: 500;
+}
+
+.student-task-page .sd-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.student-task-page .sd-table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* COLUMN WIDTH */
+
+.student-task-page .sd-table th:nth-child(1),
+.student-task-page .sd-table td:nth-child(1) {
+  width: 24%;
+}
+
+.student-task-page .sd-table th:nth-child(2),
+.student-task-page .sd-table td:nth-child(2) {
+  width: 16%;
+}
+
+.student-task-page .sd-table th:nth-child(3),
+.student-task-page .sd-table td:nth-child(3) {
+  width: 28%;
+}
+
+.student-task-page .sd-table th:nth-child(4),
+.student-task-page .sd-table td:nth-child(4) {
+  width: 17%;
+}
+
+.student-task-page .sd-table th:nth-child(5),
+.student-task-page .sd-table td:nth-child(5) {
+  width: 15%;
+}
+
+/* =========================================================
+   FILE LIST
+========================================================= */
+
+.student-task-page .sd-file-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.student-task-page .sd-file-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  max-width: 100%;
+
+  color: #333333;
+  font-size: 12px;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.student-task-page .sd-file-link svg {
+  flex-shrink: 0;
+  color: #888888;
+}
+
+.student-task-page .sd-file-link span {
+  overflow-wrap: anywhere;
+}
+
+.student-task-page .sd-file-link:hover {
+  color: #3678c5;
+  text-decoration: underline;
+}
+
+.student-task-page .sd-no-file {
+  font-size: 12px;
+  color: #999999;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.student-task-page .sd-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 72px;
+  padding: 5px 12px;
+
+  border-radius: 8px;
+
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* รอตรวจ */
+
+.student-task-page .sd-waiting {
+  background-color: #ffca00;
+}
+
+/* ผ่าน */
+
+.student-task-page .sd-passed {
+  background-color: #20a86b;
+}
+
+/* ต้องแก้ไข */
+
+.student-task-page .sd-revision {
+  background-color: #ff8a00;
+}
+
+/* อื่น ๆ */
+
+.student-task-page .sd-other {
+  background-color: #a0a0a0;
+}
+
+/* =========================================================
+   EMPTY TABLE
+========================================================= */
+
+.student-task-page .sd-empty {
+  padding: 45px 15px !important;
+  color: #888888 !important;
+  font-size: 13px;
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.student-task-page .sd-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  margin-top: auto;
+  padding-top: 25px;
+}
+
+.student-task-page .sd-pagination button,
+.student-task-page .sd-pagination span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 27px;
+  height: 27px;
+
+  background: white;
+  border: 1px solid #e4e4e4;
+
+  font-size: 12px;
+}
+
+.student-task-page .sd-pagination button {
+  cursor: pointer;
+}
+
+.student-task-page .sd-pagination button:disabled {
+  color: #aaaaaa;
+  cursor: not-allowed;
+}
+
+.student-task-page .sd-pagination span {
+  border-left: none;
+  border-right: none;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+  .student-task-page .sd-container {
+    padding: 18px 14px;
+  }
+
+  .student-task-page .sd-toolbar {
+    justify-content: flex-start;
+    margin-bottom: 25px;
+  }
+
+  .student-task-page .sd-search-box {
+    width: 100%;
+  }
+
+  .student-task-page .sd-toolbar select {
+    flex: 1;
+  }
+}
+
+/* =========================================================
+   TASK HISTORY LINK
+========================================================= */
+
+.student-task-page .sd-task-link {
+  padding: 0;
+
+  background: transparent;
+  border: none;
+
+  color: #222222;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+
+  text-align: center;
+  line-height: 1.6;
+
+  cursor: pointer;
+}
+
+.student-task-page .sd-task-link:hover {
+  color: #3678c5;
+  text-decoration: underline;
+}
+
+.student-task-page .sd-task-link:focus-visible {
+  outline: 2px solid #3678c5;
+  outline-offset: 4px;
+}
+
+/* =========================================================
+   SUBMISSION COUNT
+========================================================= */
+
+.student-task-page .sd-task-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.student-task-page .sd-submission-count {
+  color: #888888;
+  font-size: 11px;
+  font-weight: 400;
+}

@@ -1204,7 +1204,14 @@ function StudentTaskDetail() {
               แผนงาน
             </button>
 
-            <button>เอกสารและการส่งงาน</button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-detail/${projectId}/documents`)
+              }
+            >
+              เอกสารและการส่งงาน
+            </button>
 
             <button>กำหนดการสอบ</button>
 

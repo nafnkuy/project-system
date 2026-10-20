@@ -12,6 +12,8 @@ import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentProjectDetail from "./pages/student/StudentProjectDetail";
 import StudentProjectPlan from "./pages/student/StudentProjectPlan";
 import StudentTaskDetail from "./pages/student/StudentTaskDetail";
+import StudentDocuments from "./pages/student/StudentDocuments";
+import StudentSubmissionHistory from "./pages/student/StudentSubmissionHistory";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -51,6 +53,8 @@ function App() {
         <Route path="/student-project-detail/:projectId" element={<StudentProjectDetail />} />
         <Route path="/student-project-detail/:projectId/plan" element={<StudentProjectPlan />} />
         <Route path="/student-project-detail/:projectId/plan/task/:taskId" element={<StudentTaskDetail />} />
+        <Route path="/student-project-detail/:projectId/documents" element={<StudentDocuments />} />
+        <Route path="/student-project-detail/:projectId/documents/:taskId/history" element={<StudentSubmissionHistory />} />
 
         <Route path="/teacher-home" element={<TeacherHome />} />
         <Route path="/teacher-projects" element={<TeacherProjects />} />
