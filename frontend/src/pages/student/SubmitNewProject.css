@@ -12,10 +12,14 @@
   width: 100%;
   min-height: 100vh;
 
+  margin: 0;
+
   background: #f5f5f5;
 }
 
-/* ================= SIDEBAR ================= */
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
 .student-submit-project-page .sidebar {
   position: fixed;
@@ -27,15 +31,19 @@
   width: 250px;
   height: 100vh;
 
-  background: #fff;
-
-  border-right: 1px solid #ddd;
-
   display: grid;
   grid-template-rows: auto 1fr auto;
 
+  background: #ffffff;
+
+  border-right: 1px solid #dddddd;
+
   z-index: 100;
 }
+
+/* =========================================================
+   LOGO
+========================================================= */
 
 .student-submit-project-page .logo {
   display: flex;
@@ -44,49 +52,73 @@
   gap: 10px;
 
   padding: 24px 20px;
+
+  margin: 0;
 }
 
 .student-submit-project-page .logo img {
   width: 55px;
   height: 55px;
 
+  flex-shrink: 0;
+
   object-fit: contain;
+}
+
+.student-submit-project-page .logo > div {
+  min-width: 0;
 }
 
 .student-submit-project-page .logo h2 {
   margin: 0;
 
+  color: #111111;
+
   font-size: 23px;
   font-weight: 700;
+
+  white-space: nowrap;
 }
 
 .student-submit-project-page .logo p {
   margin: 0;
 
-  color: #666;
+  color: #666666;
 
   font-size: 9.5px;
+  font-weight: 400;
+
   line-height: 1.2;
+
+  white-space: nowrap;
 }
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
 .student-submit-project-page .sidebar nav {
   width: 100%;
+
   margin: 0;
 }
 
 .student-submit-project-page .sidebar ul {
-  list-style: none;
+  width: 100%;
 
   margin: 0;
   padding: 0;
+
+  list-style: none;
 }
 
 .student-submit-project-page .sidebar li {
   width: 100%;
 
+  margin: 0;
   padding: 18px 0;
 
-  color: #222;
+  color: #222222;
 
   font-size: 14px;
   font-weight: 400;
@@ -102,8 +134,15 @@
 
 .student-submit-project-page .sidebar li.active {
   background: #2f5d7c;
-  color: #fff;
+
+  color: #ffffff;
+
+  font-weight: 400;
 }
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 .student-submit-project-page .logout-btn {
   width: 190px;
@@ -115,14 +154,21 @@
   border-radius: 8px;
 
   background: #3b75c4;
-  color: #fff;
+  color: #ffffff;
 
   font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
 
-/* ================= MAIN ================= */
+.student-submit-project-page .logout-btn:hover {
+  background: #2f6db5;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
 
 .student-submit-project-page .main {
   width: calc(100% - 250px);
@@ -133,9 +179,13 @@
   background: #f5f5f5;
 }
 
-/* ================= HEADER ================= */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .student-submit-project-page .header {
+  position: relative;
+
   width: 100%;
   height: 70px;
 
@@ -147,12 +197,15 @@
 
   background: #f0e3a1;
 
-  position: relative;
+  border: none;
+
   z-index: 50;
 }
 
 .student-submit-project-page .header h2 {
   margin: 0;
+
+  color: #111111;
 
   font-size: 20px;
   font-weight: 400;
@@ -161,8 +214,47 @@
 .student-submit-project-page .header-right {
   display: flex;
   align-items: center;
+
   gap: 10px;
 }
+
+/* =========================================================
+   USER
+========================================================= */
+
+.student-submit-project-page .user-info {
+  height: 50px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  color: #222222;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.student-submit-project-page .profile-image {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+/* =========================================================
+   OLD NOTIFICATION SUPPORT
+========================================================= */
 
 .student-submit-project-page .notification-box {
   width: 50px;
@@ -172,9 +264,9 @@
   align-items: center;
   justify-content: center;
 
-  background: #fff;
+  background: #ffffff;
 
-  border: 1px solid #ddd;
+  border: 1px solid #dddddd;
   border-radius: 4px;
 }
 
@@ -188,6 +280,8 @@
   width: 48px;
   height: 48px;
 
+  padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,7 +289,7 @@
   border: none;
 
   background: transparent;
-  color: #999;
+  color: #999999;
 
   font-size: 20px;
 
@@ -203,171 +297,135 @@
 }
 
 .student-submit-project-page .notification-btn svg {
-  color: #999;
+  color: #999999;
 }
 
 .student-submit-project-page .notification-count {
   position: absolute;
 
-  top: -7px;
-  right: -7px;
+  top: -8px;
+  right: -8px;
 
   min-width: 18px;
   height: 18px;
+
+  padding: 0 4px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: red;
-  color: white;
-
   border-radius: 50%;
+
+  background: red;
+  color: #ffffff;
 
   font-size: 11px;
+  font-weight: 500;
 }
 
-.student-submit-project-page .user-info {
-  height: 50px;
-
-  padding: 0 14px;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  background: #fff;
-
-  border: 1px solid #ddd;
-  border-radius: 4px;
-
-  font-size: 14px;
-}
-
-.student-submit-project-page .profile-image {
-  width: 30px;
-  height: 30px;
-
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* ================= NOTIFICATION ================= */
-
-.student-submit-project-page .notification-dropdown {
-  position: absolute;
-
-  top: 42px;
-  right: 0;
-
-  width: 300px;
-
-  overflow: hidden;
-
-  background: #fff;
-
-  border: 1px solid #ddd;
-  border-radius: 8px;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  z-index: 1000;
-}
-
-.student-submit-project-page .notification-dropdown h4 {
-  margin: 0;
-  padding: 12px 14px;
-
-  border-bottom: 1px solid #eee;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.student-submit-project-page .notification-item {
-  padding: 12px 14px;
-
-  border-bottom: 1px solid #eee;
-
-  font-size: 12px;
-}
-
-.student-submit-project-page .notification-item p {
-  margin: 0 0 4px;
-}
-
-.student-submit-project-page .notification-item small {
-  color: #888;
-  font-size: 10px;
-}
-
-/* ================= FORM CARD ================= */
+/* =========================================================
+   MAIN FORM WRAPPER
+========================================================= */
 
 .student-submit-project-page .proposal-card {
   width: 80%;
+  max-width: 1100px;
 
-  margin: 40px auto 25px;
+  margin: 30px auto 35px;
 
-  padding: 40px;
+  padding: 0;
 
-  background: #fff;
+  background: transparent;
 
-  border-radius: 8px;
+  border-radius: 0;
 
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
-.student-submit-project-page .proposal-card > h3 {
-  margin: 0 0 24px;
+/* =========================================================
+   SECTION CARD
+========================================================= */
 
-  color: #222;
+.student-submit-project-page .proposal-section {
+  width: 100%;
 
-  font-size: 18px;
-  font-weight: 600;
+  margin-bottom: 20px;
+  padding: 25px;
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  box-shadow: 0 2px 8px
+    rgba(0, 0, 0, 0.05);
 }
 
-.student-submit-project-page .proposal-card > h4 {
-  margin: 22px 0 10px;
+/* =========================================================
+   SECTION TITLE
+========================================================= */
 
-  color: #222;
+.student-submit-project-page
+  .proposal-section-title {
+  margin: 0 0 20px;
+
+  color: #222222;
 
   font-size: 14px;
   font-weight: 600;
 }
 
-/* ================= FORM ================= */
+/* =========================================================
+   FORM GROUP
+========================================================= */
 
-.student-submit-project-page .form-group {
+.student-submit-project-page
+  .proposal-section
+  .form-group {
   margin-top: 18px;
 }
 
-.student-submit-project-page .form-group label {
+.student-submit-project-page
+  .proposal-section
+  .form-group:first-child {
+  margin-top: 0;
+}
+
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  label {
   display: block;
 
   margin: 0 0 8px;
 
-  color: #222;
+  color: #222222;
 
   font-size: 14px;
   font-weight: 600;
 }
 
-.student-submit-project-page .form-group > label:not(:first-child) {
-  margin-top: 18px;
-}
+/* =========================================================
+   INPUT / TEXTAREA
+========================================================= */
 
-.student-submit-project-page .form-group input,
-.student-submit-project-page .form-group select,
-.student-submit-project-page .form-group textarea {
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  input,
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  textarea {
   width: 100%;
 
   padding: 10px 12px;
 
-  background: #fff;
-  color: #222;
+  background: #ffffff;
+  color: #222222;
 
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
 
   outline: none;
 
@@ -375,12 +433,17 @@
   font-weight: 400;
 }
 
-.student-submit-project-page .form-group input,
-.student-submit-project-page .form-group select {
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  input {
   height: 42px;
 }
 
-.student-submit-project-page .form-group textarea {
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  textarea {
   min-height: 100px;
 
   resize: vertical;
@@ -388,346 +451,60 @@
   line-height: 1.6;
 }
 
-.student-submit-project-page .form-group input:focus,
-.student-submit-project-page .form-group select:focus,
-.student-submit-project-page .form-group textarea:focus {
-  border-color: #aaa;
-}
-
-.student-submit-project-page .form-group input:disabled {
-  background: #f3f3f3;
-  color: #555;
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  input:focus,
+.student-submit-project-page
+  .proposal-section
+  .form-group
+  textarea:focus {
+  border-color: #aaaaaa;
 }
 
 .student-submit-project-page
-.member-card
-.form-group
-> label.member-field-label {
-  display: block;
-
-  margin: 0 0 8px;
-
-  color: #222;
-
-  font-size: 12px;
-  font-weight: 400;
-}
-
-/* ================= RADIO ================= */
-
-.student-submit-project-page .radio-group {
-  display: flex;
-  align-items: center;
-
-  gap: 25px;
-
-  margin-top: 8px;
-}
-
-.student-submit-project-page .radio-group label {
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-
-  color: #222;
-
-  font-size: 13px;
-  font-weight: 400;
-}
-
-.student-submit-project-page .radio-group input {
-  width: 15px;
-  height: 15px;
-}
-
-/* ================= MEMBER ================= */
-
-.student-submit-project-page .member-card {
-  margin-top: 14px;
-
-  padding: 20px;
-
-  background: #fff;
-
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.student-submit-project-page .member-card h5 {
-  margin: 0 0 10px;
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* ================= SEARCH ในฟอร์ม ================= */
-
-.student-submit-project-page .search-box {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  margin: 0;
-}
-
-.student-submit-project-page .search-box input {
-  flex: 1;
-  min-width: 0;
-
-  height: 42px;
-
-  padding: 0 12px;
-
-  border: 1px solid #ddd;
-  border-radius: 6px;
-
-  outline: none;
-
-  font-size: 13px;
-}
-
-.student-submit-project-page .search-box button {
-  width: 42px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid #ddd;
-  border-radius: 6px;
-
-  background: #fff;
-  color: #555;
-
-  cursor: pointer;
-}
-
-.student-submit-project-page .search-box button:hover {
-  background: #f2f2f2;
-}
-
-/* ================= MEMBER RESULT ================= */
-
-.student-submit-project-page .member-result {
-  margin-top: 14px;
-
-  padding: 18px;
-
-  background: #fafafa;
-
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.student-submit-project-page .success-text {
-  margin: 0 0 14px;
-
-  color: #20a36a;
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.student-submit-project-page .result-item {
-  margin-bottom: 12px;
-}
-
-.student-submit-project-page .result-item label {
-  display: block;
-
-  margin-bottom: 4px;
-
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.student-submit-project-page .result-item p {
-  margin: 0;
-
-  font-size: 13px;
-}
-
-.student-submit-project-page .member-action {
-  margin-top: 18px;
-
-  display: flex;
-  justify-content: flex-end;
-
-  gap: 10px;
-}
-
-.student-submit-project-page .change-btn,
-.student-submit-project-page .invite-btn {
-  height: 34px;
-
-  padding: 0 15px;
-
-  border: none;
-  border-radius: 6px;
-
-  font-size: 12px;
-
-  cursor: pointer;
-}
-
-.student-submit-project-page .change-btn {
-  background: #eee;
-  color: #333;
-}
-
-.student-submit-project-page .invite-btn {
-  background: #20a36a;
-  color: #fff;
-}
-
-/* ================= ADVISOR ================= */
-
-.student-submit-project-page .teacher-search {
-  position: relative;
-  width: 100%;
-}
-
-.student-submit-project-page .teacher-item {
-  width: 100%;
-
-  padding: 10px 12px;
-
-  display: flex;
-  justify-content: space-between;
-
-  background: #fff;
-
-  border: 1px solid #ddd;
-  border-top: none;
-
-  font-size: 12px;
-
-  cursor: pointer;
-}
-
-.student-submit-project-page .teacher-item:hover {
-  background: #f5f5f5;
-}
-
-.student-submit-project-page .teacher-full {
-  color: #999;
-  background: #fafafa;
-}
-
-.student-submit-project-page .advisor-selected-row {
-  min-height: 42px;
-
-  padding: 0 14px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: #f8f8f8;
-
-  border: 1px solid #ddd;
-  border-radius: 6px;
-}
-
-.student-submit-project-page .advisor-name {
-  color: #222;
-
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.student-submit-project-page .change-advisor-btn {
-  border: none;
-  background: transparent;
-
-  color: #555;
-
-  font-size: 12px;
-
-  cursor: pointer;
-}
-
-.student-submit-project-page .change-advisor-btn:hover {
-  text-decoration: underline;
-}
-
-/* ================= EXAMPLE ================= */
-
-.student-submit-project-page .example-text {
-  margin: 0 0 8px;
-
-  color: #666;
-
-  font-size: 11px;
-  font-weight: 400;
-}
-
-/* ================= BUTTON ================= */
-
-.student-submit-project-page .button-group {
-  margin-top: 30px;
-
-  display: flex;
-  justify-content: center;
-
-  gap: 10px;
-}
-
-.student-submit-project-page .cancel-btn,
-.student-submit-project-page .submit-btn {
-  min-width: 140px;
-  height: 36px;
-
-  padding: 0 18px;
-
-  border: none;
-  border-radius: 6px;
-
-  color: #fff;
-
-  font-size: 12px;
-  font-weight: 400;
-
-  cursor: pointer;
-}
-
-.student-submit-project-page .cancel-btn {
-  background: #ff0000;
-}
-
-.student-submit-project-page .submit-btn {
-  background: #20a36a;
-}
-
-.student-submit-project-page .cancel-btn:hover {
-  background: #d90000;
-}
-
-.student-submit-project-page .submit-btn:hover {
-  background: #188c59;
-}
-
-@media (max-width: 1100px) {
-  .student-submit-project-page .proposal-card {
-    width: 88%;
-  }
+  .proposal-section
+  .form-group
+  input:disabled {
+  background: #f3f3f3;
+  color: #555555;
+
+  cursor: default;
 }
 
 /* =========================================================
-   CONTACT SELECT
+   TWO COLUMN
 ========================================================= */
 
-.student-submit-project-page .contact-select-wrapper {
+.student-submit-project-page
+  .proposal-two-column {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 26px;
+}
+
+.student-submit-project-page
+  .proposal-two-column
+  .form-group {
+  margin-top: 0;
+}
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+.student-submit-project-page
+  .contact-select-wrapper {
   position: relative;
+
   width: 100%;
 }
 
-.student-submit-project-page .contact-select-wrapper select {
+.student-submit-project-page
+  .contact-select-wrapper
+  select {
   width: 100%;
   height: 42px;
 
@@ -737,7 +514,7 @@
   color: #222222;
 
   border: 1px solid #dddddd;
-  border-radius: 6px;
+  border-radius: 8px;
 
   outline: none;
 
@@ -751,11 +528,14 @@
   -moz-appearance: none;
 }
 
-.student-submit-project-page .contact-select-wrapper select:focus {
+.student-submit-project-page
+  .contact-select-wrapper
+  select:focus {
   border-color: #aaaaaa;
 }
 
-.student-submit-project-page .contact-select-arrow {
+.student-submit-project-page
+  .contact-select-arrow {
   position: absolute;
 
   top: 50%;
@@ -772,10 +552,425 @@
 }
 
 /* =========================================================
-   ข้อเสนอแนะจากอาจารย์ตอนแก้ไขและส่งใหม่
+   MEMBER COUNT
 ========================================================= */
 
-.revision-suggestion-box {
+.student-submit-project-page
+  .proposal-member-info {
+  width: 100%;
+
+  margin-top: 20px;
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f7f7f7;
+
+  border-radius: 8px;
+}
+
+.student-submit-project-page
+  .proposal-member-info
+  span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #777777;
+
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.student-submit-project-page
+  .proposal-member-info
+  strong {
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   MEMBER CARD
+========================================================= */
+
+.student-submit-project-page .member-card {
+  width: 100%;
+
+  margin-top: 14px;
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.student-submit-project-page
+  .member-card:first-of-type {
+  margin-top: 0;
+}
+
+.student-submit-project-page
+  .member-card
+  h5 {
+  margin: 0 0 16px;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-submit-project-page
+  .member-card
+  .form-group
+  > label.member-field-label {
+  margin: 0 0 8px;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* =========================================================
+   CONTACT CARD
+========================================================= */
+
+.student-submit-project-page .contact-card {
+  width: 100%;
+
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.student-submit-project-page
+  .contact-card
+  .form-group:first-child {
+  margin-top: 0;
+}
+.student-submit-project-page .contact-field-column {
+  width: 100%;
+}
+
+.student-submit-project-page
+  .contact-card
+  .form-group:first-child {
+  margin-top: 0;
+}
+
+/* =========================================================
+   MEMBER GRID
+========================================================= */
+
+.student-submit-project-page
+  .member-field-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 20px;
+}
+
+.student-submit-project-page
+  .member-field-grid
+  .form-group {
+  margin-top: 0;
+}
+
+/* =========================================================
+   SEARCH BOX
+========================================================= */
+
+.student-submit-project-page .search-box {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 0;
+}
+
+.student-submit-project-page
+  .search-box
+  input {
+  flex: 1;
+  min-width: 0;
+
+  height: 42px;
+
+  padding: 0 12px;
+
+  background: #ffffff;
+  color: #222222;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+
+  outline: none;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.student-submit-project-page
+  .search-box
+  input:focus {
+  border-color: #aaaaaa;
+}
+
+.student-submit-project-page
+  .search-box
+  button {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #555555;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.student-submit-project-page
+  .search-box
+  button:hover {
+  background: #f2f2f2;
+}
+
+/* =========================================================
+   MEMBER RESULT
+========================================================= */
+
+.student-submit-project-page
+  .member-result {
+  margin-top: 14px;
+
+  padding: 18px;
+
+  background: #fafafa;
+
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.student-submit-project-page
+  .success-text {
+  margin: 0 0 14px;
+
+  color: #20a36a;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-submit-project-page
+  .result-item {
+  margin-bottom: 12px;
+}
+
+.student-submit-project-page
+  .result-item
+  label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #222222;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.student-submit-project-page
+  .result-item
+  p {
+  margin: 0;
+
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.student-submit-project-page
+  .member-action {
+  margin-top: 18px;
+
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.student-submit-project-page
+  .change-btn,
+.student-submit-project-page
+  .invite-btn {
+  height: 34px;
+
+  padding: 0 15px;
+
+  border: none;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-submit-project-page
+  .change-btn {
+  background: #eeeeee;
+  color: #333333;
+}
+
+.student-submit-project-page
+  .change-btn:hover {
+  background: #dddddd;
+}
+
+.student-submit-project-page
+  .invite-btn {
+  background: #20a36a;
+  color: #ffffff;
+}
+
+.student-submit-project-page
+  .invite-btn:hover {
+  background: #188c59;
+}
+
+/* =========================================================
+   ADVISOR
+========================================================= */
+
+.student-submit-project-page
+  .teacher-search {
+  position: relative;
+
+  width: 100%;
+}
+
+.student-submit-project-page
+  .teacher-item {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #ffffff;
+  color: #222222;
+
+  border: 1px solid #dddddd;
+  border-top: none;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-submit-project-page
+  .teacher-item:hover {
+  background: #f5f5f5;
+}
+
+.student-submit-project-page
+  .teacher-full {
+  background: #fafafa;
+  color: #999999;
+}
+
+.student-submit-project-page
+  .advisor-selected-row {
+  min-height: 42px;
+
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #f7f7f7;
+
+  border: none;
+  border-radius: 8px;
+}
+
+.student-submit-project-page
+  .advisor-name {
+  color: #222222;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-submit-project-page
+  .change-advisor-btn {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+  color: #555555;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-submit-project-page
+  .change-advisor-btn:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   EXAMPLE TEXT
+========================================================= */
+
+.student-submit-project-page
+  .example-text {
+  margin: 0 0 8px;
+
+  color: #666666;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   REVISION SUGGESTION
+========================================================= */
+
+.student-submit-project-page
+  .revision-suggestion-box {
   width: 100%;
 
   margin: 20px 0 28px;
@@ -788,7 +983,8 @@
   border-radius: 6px;
 }
 
-.revision-suggestion-title {
+.student-submit-project-page
+  .revision-suggestion-title {
   margin-bottom: 8px;
 
   color: #c2410c;
@@ -797,8 +993,9 @@
   font-weight: 600;
 }
 
-.revision-suggestion-text {
-  color: #333;
+.student-submit-project-page
+  .revision-suggestion-text {
+  color: #333333;
 
   font-size: 13px;
   font-weight: 400;
@@ -806,4 +1003,97 @@
   line-height: 1.7;
 
   white-space: pre-line;
+}
+
+/* =========================================================
+   BUTTON GROUP
+========================================================= */
+
+.student-submit-project-page
+  .button-group {
+  margin-top: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.student-submit-project-page
+  .cancel-btn,
+.student-submit-project-page
+  .submit-btn {
+  min-width: 140px;
+  height: 36px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.student-submit-project-page
+  .cancel-btn {
+  background: #ff0000;
+}
+
+.student-submit-project-page
+  .cancel-btn:hover {
+  background: #d90000;
+}
+
+/* =========================================================
+   SUBMIT
+========================================================= */
+
+.student-submit-project-page
+  .submit-btn {
+  background: #20a36a;
+}
+
+.student-submit-project-page
+  .submit-btn:hover {
+  background: #188c59;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .student-submit-project-page
+    .proposal-card {
+    width: 88%;
+  }
+}
+
+@media (max-width: 800px) {
+  .student-submit-project-page
+    .proposal-two-column,
+  .student-submit-project-page
+    .member-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-submit-project-page
+    .main {
+    overflow-x: auto;
+  }
+
+  .student-submit-project-page
+    .proposal-card {
+    min-width: 700px;
+  }
 }

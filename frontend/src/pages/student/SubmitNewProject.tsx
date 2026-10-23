@@ -8,45 +8,8 @@ import { FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
-/* =========================================================
-   TYPE
-========================================================= */
-
-interface Notification {
-  id: number;
-  project_id: number;
-
-  sender_id: number;
-  sender_username: string;
-  sender_name: string;
-
-  receiver_id: number;
-  receiver_username: string;
-  receiver_name: string;
-
-  title: string;
-  project_type: string;
-
-  description: string;
-  objectives: string;
-  skills: string;
-  requirements: string;
-
-  contact_type: string;
-  contact_value: string;
-  introduction: string;
-
-  status: string;
-  created_at: string;
-}
-
-/* =========================================================
-   COMPONENT
-========================================================= */
-
 function SubmitNewProject() {
   const navigate = useNavigate();
-
   const [searchParams] = useSearchParams();
 
   const mode = searchParams.get("mode");
@@ -66,33 +29,11 @@ function SubmitNewProject() {
   const name = sessionStorage.getItem("name");
 
   /* =========================================================
-     NOTIFICATION
-  ========================================================= */
-
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const notifications = [
-    {
-      id: 1,
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-      time: "2 ชั่วโมงที่แล้ว",
-    },
-
-    {
-      id: 2,
-      message: "ส่งคำขอเลือกหัวข้อสำเร็จ",
-      time: "1 วันที่แล้ว",
-    },
-  ];
-
-  /* =========================================================
      PROJECT FORM
   ========================================================= */
 
   const [projectTitle, setProjectTitle] = useState("");
-
   const [academicYear, setAcademicYear] = useState("");
-
   const [projectType, setProjectType] = useState("โครงงานเดี่ยว");
 
   const [projectId, setProjectId] = useState<number | null>(null);
@@ -100,9 +41,7 @@ function SubmitNewProject() {
   const [major, setMajor] = useState("");
 
   const [description, setDescription] = useState("");
-
   const [objective, setObjective] = useState("");
-
   const [skills, setSkills] = useState("");
 
   /* =========================================================
@@ -120,7 +59,6 @@ function SubmitNewProject() {
   ========================================================= */
 
   const [teacherKeyword, setTeacherKeyword] = useState("");
-
   const [teacherList, setTeacherList] = useState<any[]>([]);
 
   const [advisorId, setAdvisorId] = useState<number | null>(null);
@@ -132,9 +70,7 @@ function SubmitNewProject() {
   ========================================================= */
 
   const [contactType, setContactType] = useState("");
-
   const [contactValue, setContactValue] = useState("");
-
   const [introduction, setIntroduction] = useState("");
 
   const [revisionSuggestion, setRevisionSuggestion] = useState("");
@@ -179,8 +115,8 @@ function SubmitNewProject() {
   }, [teacherKeyword, advisorName]);
 
   /* =========================================================
-   LOAD RESUBMIT DATA
-========================================================= */
+     LOAD RESUBMIT DATA
+  ========================================================= */
 
   useEffect(() => {
     if (!isResubmit || !resubmitProjectId || !resubmitRequestId || !userId) {
@@ -189,9 +125,6 @@ function SubmitNewProject() {
 
     const loadResubmitData = async () => {
       try {
-        // ==========================================
-        // 1. โหลดข้อมูลโครงงาน + คำขอเดิม
-        // ==========================================
         const [projectRes, requestRes] = await Promise.all([
           axios.get(`http://localhost:5000/projects/${resubmitProjectId}`),
 
@@ -202,17 +135,16 @@ function SubmitNewProject() {
 
         const projectData = projectRes.data;
         const requestData = requestRes.data;
+
         if (requestData.status !== "ต้องแก้ไข") {
           alert("คำขอนี้ถูกส่งให้อาจารย์พิจารณาใหม่แล้ว");
 
           navigate("/StudentHome");
-
           return;
         }
 
-        // ==========================================
-        // PROJECT
-        // ==========================================
+        /* ================= PROJECT ================= */
+
         setProjectId(Number(resubmitProjectId));
 
         setProjectTitle(projectData.title || "");
@@ -239,9 +171,8 @@ function SubmitNewProject() {
 
         setSkills(projectData.skills || "");
 
-        // ==========================================
-        // REQUEST
-        // ==========================================
+        /* ================= REQUEST ================= */
+
         setContactType(requestData.contact_type || "");
 
         setContactValue(requestData.contact_value || "");
@@ -250,10 +181,8 @@ function SubmitNewProject() {
 
         setRevisionSuggestion(requestData.suggestion || "");
 
-        // ==========================================
-        // 2. ถ้าเป็นโครงงานคู่
-        // โหลดสมาชิกคนที่ 2 กลับมาด้วย
-        // ==========================================
+        /* ================= MEMBER 2 ================= */
+
         if (projectData.project_type === "โครงงานคู่") {
           try {
             const invitationRes = await axios.get(
@@ -283,7 +212,6 @@ function SubmitNewProject() {
             setMemberName("");
           }
         } else {
-          // ถ้าเป็นโครงงานเดี่ยว
           setMemberId("");
           setMemberUserId(null);
           setMemberName("");
@@ -299,7 +227,7 @@ function SubmitNewProject() {
     };
 
     loadResubmitData();
-  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId]);
+  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId, navigate]);
 
   /* =========================================================
      LOGOUT
@@ -307,13 +235,9 @@ function SubmitNewProject() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("username");
-
     sessionStorage.removeItem("name");
-
     sessionStorage.removeItem("profileImage");
-
     sessionStorage.removeItem("userId");
-
     sessionStorage.removeItem("major");
 
     navigate("/");
@@ -326,7 +250,6 @@ function SubmitNewProject() {
   const searchStudent = async () => {
     if (!memberId.trim()) {
       alert("กรุณากรอกรหัสนิสิต");
-
       return;
     }
 
@@ -336,9 +259,7 @@ function SubmitNewProject() {
       );
 
       setMemberName(res.data.name);
-
       setMemberUserId(res.data.id);
-
       setMemberId(res.data.username);
     } catch (err) {
       alert("ไม่พบนิสิต");
@@ -356,33 +277,27 @@ function SubmitNewProject() {
     try {
       if (!projectTitle.trim()) {
         alert("กรุณากรอกชื่อหัวข้อโครงงาน");
-
         return;
       }
 
       if (!academicYear) {
         alert("กรุณาเลือกปีการศึกษา");
-
         return;
       }
 
       if (!advisorId) {
         alert("กรุณาเลือกอาจารย์ที่ปรึกษาก่อน");
-
         return;
       }
 
       if (!memberUserId) {
         alert("กรุณาค้นหาและเลือกสมาชิกก่อน");
-
         return;
       }
 
       let currentProjectId = projectId;
 
-      /* =====================================================
-         CREATE PROJECT ก่อนส่งคำเชิญ
-      ===================================================== */
+      /* ================= CREATE PROJECT ================= */
 
       if (!currentProjectId) {
         const projectRes = await axios.post("http://localhost:5000/projects", {
@@ -422,9 +337,7 @@ function SubmitNewProject() {
         setProjectId(currentProjectId);
       }
 
-      /* =====================================================
-         SEND INVITATION
-      ===================================================== */
+      /* ================= SEND INVITATION ================= */
 
       await axios.post("http://localhost:5000/project-invitations", {
         sender_id: Number(userId),
@@ -459,7 +372,6 @@ function SubmitNewProject() {
       alert("ส่งคำเชิญแล้ว");
     } catch (err: any) {
       console.log("Invitation error:", err);
-
       console.log(err.response?.data);
 
       alert(err.response?.data?.message || "ส่งคำเชิญไม่สำเร็จ");
@@ -474,31 +386,26 @@ function SubmitNewProject() {
     try {
       if (!projectTitle.trim()) {
         alert("กรุณากรอกชื่อหัวข้อโครงงาน");
-
         return;
       }
 
       if (!academicYear) {
         alert("กรุณาเลือกปีการศึกษา");
-
         return;
       }
 
       if (!advisorId) {
         alert("กรุณาเลือกอาจารย์ที่ปรึกษาก่อน");
-
         return;
       }
 
       if (!major) {
         alert("กรุณาเลือกสาขาวิชา");
-
         return;
       }
 
       if (!contactType || !contactValue) {
         alert("กรุณากรอกข้อมูลการติดต่อ");
-
         return;
       }
 
@@ -545,7 +452,6 @@ function SubmitNewProject() {
         alert(res.data.message);
 
         navigate("/StudentHome");
-
         return;
       }
 
@@ -556,7 +462,6 @@ function SubmitNewProject() {
       if (projectType === "โครงงานคู่") {
         if (!projectId) {
           alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
-
           return;
         }
 
@@ -566,19 +471,16 @@ function SubmitNewProject() {
 
         if (invitationRes.data.status === "รอตอบรับ") {
           alert("สมาชิกคนที่ 2 ยังไม่ได้ตอบรับคำเชิญ");
-
           return;
         }
 
         if (invitationRes.data.status === "ปฏิเสธ") {
           alert("สมาชิกคนที่ 2 ปฏิเสธคำเชิญ กรุณาเลือกสมาชิกใหม่");
-
           return;
         }
 
         if (invitationRes.data.status !== "ตอบรับ") {
           alert("ไม่สามารถส่งข้อเสนอได้");
-
           return;
         }
 
@@ -597,7 +499,6 @@ function SubmitNewProject() {
         alert("ส่งข้อเสนอโครงงานสำเร็จ");
 
         navigate("/StudentHome");
-
         return;
       }
 
@@ -652,7 +553,6 @@ function SubmitNewProject() {
       navigate("/StudentHome");
     } catch (err: any) {
       console.log(err);
-
       console.log(err.response?.data);
 
       alert(err.response?.data?.message || "ส่งข้อเสนอไม่สำเร็จ");
@@ -665,9 +565,7 @@ function SubmitNewProject() {
 
   return (
     <div className="student-submit-project-page">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+      {/* ================= SIDEBAR ================= */}
 
       <aside className="sidebar">
         <div className="logo">
@@ -675,7 +573,6 @@ function SubmitNewProject() {
 
           <div>
             <h2>SPTC System</h2>
-
             <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
           </div>
         </div>
@@ -695,7 +592,9 @@ function SubmitNewProject() {
 
             <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -706,14 +605,10 @@ function SubmitNewProject() {
         </button>
       </aside>
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
+      {/* ================= MAIN ================= */}
 
       <main className="main">
-        {/* ===================================================
-            HEADER
-        =================================================== */}
+        {/* ================= HEADER ================= */}
 
         <header className="header">
           <h2>{isResubmit ? "แก้ไขคำเสนอโครงงาน" : "ส่งคำเสนอโครงงานใหม่"}</h2>
@@ -735,447 +630,404 @@ function SubmitNewProject() {
           </div>
         </header>
 
-        {/* ===================================================
-            FORM CARD
-        =================================================== */}
+        {/* ================= FORM ================= */}
 
         <div className="proposal-card">
-          <h3>{isResubmit ? "แก้ไขคำเสนอโครงงาน" : "ส่งคำเสนอโครงงานใหม่"}</h3>
+          {/* ================= TITLE ================= */}
 
-          {/* =================================================
-              PROJECT TITLE
-          ================================================= */}
-
-          <div className="form-group">
-            <label>ชื่อหัวข้อโครงงาน</label>
-
-            <input
-              type="text"
-              value={projectTitle}
-              onChange={(e) => setProjectTitle(e.target.value)}
-            />
-          </div>
-
-          {/* =================================================
-              ACADEMIC YEAR
-          ================================================= */}
-
-          <div className="form-group">
-            <label>ปีการศึกษา</label>
-
-            <div className="contact-select-wrapper">
-              <select
-                value={academicYear}
-                onChange={(e) => setAcademicYear(e.target.value)}
-              >
-                <option value="">เลือกปีการศึกษา</option>
-
-                <option value="2569/1">2569/1</option>
-
-                <option value="2569/2">2569/2</option>
-
-                <option value="2570/1">2570/1</option>
-
-                <option value="2570/2">2570/2</option>
-              </select>
-
-              <span className="contact-select-arrow">▼</span>
-            </div>
-          </div>
-
-          {/* =================================================
-              PROJECT TYPE
-          ================================================= */}
-
-          <div className="form-group">
-            <label>ประเภทโครงงาน</label>
-          </div>
-
-          <div className="radio-group">
-            <label>
-              <input
-                type="radio"
-                checked={projectType === "โครงงานเดี่ยว"}
-                onChange={() => setProjectType("โครงงานเดี่ยว")}
-              />
-              โครงงานเดี่ยว
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                checked={projectType === "โครงงานคู่"}
-                onChange={() => setProjectType("โครงงานคู่")}
-              />
-              โครงงานคู่
-            </label>
-          </div>
-
-          {/* =================================================
-    MEMBER
-================================================= */}
-
-          <h4>สมาชิกโครงงาน</h4>
-
-          {/* ================= สมาชิกคนที่ 1 ================= */}
-
-          <div className="member-card">
-            <h5>สมาชิกคนที่ 1</h5>
-
+          <section className="proposal-section">
             <div className="form-group">
-              <label className="member-field-label">รหัสประจำตัว</label>
+              <label>ชื่อหัวข้อโครงงาน *</label>
 
-              <input type="text" value={username || ""} disabled />
+              <input
+                type="text"
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="กรอกชื่อหัวข้อโครงงาน"
+              />
+            </div>
+          </section>
+
+          {/* ================= YEAR + TYPE ================= */}
+
+          <section className="proposal-section">
+            <div className="proposal-two-column">
+              <div className="form-group">
+                <label>ปีการศึกษา / ภาคเรียน *</label>
+
+                <div className="contact-select-wrapper">
+                  <select
+                    value={academicYear}
+                    onChange={(e) => setAcademicYear(e.target.value)}
+                  >
+                    <option value="">เลือกปีการศึกษา</option>
+
+                    <option value="2569/1">2569/1</option>
+
+                    <option value="2569/2">2569/2</option>
+
+                    <option value="2570/1">2570/1</option>
+
+                    <option value="2570/2">2570/2</option>
+                  </select>
+
+                  <span className="contact-select-arrow">▼</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>ประเภทโครงงาน *</label>
+
+                <div className="contact-select-wrapper">
+                  <select
+                    value={projectType}
+                    onChange={(e) => setProjectType(e.target.value)}
+                  >
+                    <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
+
+                    <option value="โครงงานคู่">โครงงานคู่</option>
+                  </select>
+
+                  <span className="contact-select-arrow">▼</span>
+                </div>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="member-field-label">ชื่อ</label>
+            <div className="proposal-member-info">
+              <span>จำนวนสมาชิก</span>
 
-              <input type="text" value={name || ""} disabled />
+              <strong>
+                {projectType === "โครงงานเดี่ยว" ? "1 คน" : "2 คน"}
+              </strong>
             </div>
-          </div>
+          </section>
 
-          {/* =================================================
-    MEMBER 2
-================================================= */}
+          {/* ================= MEMBER ================= */}
 
-          {projectType === "โครงงานคู่" && (
+          <section className="proposal-section">
+            <h4 className="proposal-section-title">สมาชิกโครงงาน</h4>
+
+            {/* MEMBER 1 */}
+
             <div className="member-card">
-              <h5>สมาชิกคนที่ 2</h5>
+              <h5>สมาชิกคนที่ 1</h5>
 
-              {/* =========================================
-        กรณีแก้ไขและส่งใหม่
-        ห้ามเปลี่ยนสมาชิก
-    ========================================= */}
-              {isResubmit ? (
-                <>
-                  <div className="form-group">
-                    <label className="member-field-label">รหัสประจำตัว</label>
+              <div className="member-field-grid">
+                <div className="form-group">
+                  <label className="member-field-label">รหัสประจำตัว</label>
 
-                    <input type="text" value={memberId} disabled />
-                  </div>
+                  <input type="text" value={username || ""} disabled />
+                </div>
 
-                  <div className="form-group">
-                    <label className="member-field-label">ชื่อ</label>
+                <div className="form-group">
+                  <label className="member-field-label">ชื่อ</label>
 
-                    <input type="text" value={memberName} disabled />
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* =========================================
-            กรณีเสนอหัวข้อใหม่
-            สามารถค้นหา / เปลี่ยน / เชิญสมาชิกได้
-        ========================================= */}
-
-                  <div className="form-group">
-                    <label className="member-field-label">รหัสประจำตัว</label>
-
-                    <div className="search-box">
-                      <input
-                        type="text"
-                        value={memberId}
-                        onChange={(e) => setMemberId(e.target.value)}
-                      />
-
-                      <button type="button" onClick={searchStudent}>
-                        <FaSearch />
-                      </button>
-                    </div>
-                  </div>
-
-                  {memberName && (
-                    <div className="member-result">
-                      <h4 className="success-text">พบข้อมูล</h4>
-
-                      <div className="result-item">
-                        <label>รหัสประจำตัว</label>
-                        <p>{memberId}</p>
-                      </div>
-
-                      <div className="result-item">
-                        <label>ชื่อ</label>
-                        <p>{memberName}</p>
-                      </div>
-
-                      <div className="member-action">
-                        <button
-                          type="button"
-                          className="change-btn"
-                          onClick={() => {
-                            setMemberId("");
-                            setMemberUserId(null);
-                            setMemberName("");
-                          }}
-                        >
-                          เปลี่ยนสมาชิก
-                        </button>
-
-                        <button
-                          type="button"
-                          className="invite-btn"
-                          onClick={sendInvitation}
-                        >
-                          เชิญเข้าร่วมโครงงาน
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
+                  <input type="text" value={name || ""} disabled />
+                </div>
+              </div>
             </div>
-          )}
-          {/* =================================================
-              CONTACT TYPE
-          ================================================= */}
 
-          <div className="form-group">
-            <label>ช่องทางการติดต่อ</label>
+            {/* MEMBER 2 */}
+
+            {projectType === "โครงงานคู่" && (
+              <div className="member-card">
+                <h5>สมาชิกคนที่ 2</h5>
+
+                {isResubmit ? (
+                  <div className="member-field-grid">
+                    <div className="form-group">
+                      <label className="member-field-label">รหัสประจำตัว</label>
+
+                      <input type="text" value={memberId} disabled />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="member-field-label">ชื่อ</label>
+
+                      <input type="text" value={memberName} disabled />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="form-group">
+                      <label className="member-field-label">รหัสประจำตัว</label>
+
+                      <div className="search-box">
+                        <input
+                          type="text"
+                          value={memberId}
+                          onChange={(e) => setMemberId(e.target.value)}
+                          placeholder="กรอกรหัสนิสิต"
+                        />
+
+                        <button type="button" onClick={searchStudent}>
+                          <FaSearch />
+                        </button>
+                      </div>
+                    </div>
+
+                    {memberName && (
+                      <div className="member-result">
+                        <h4 className="success-text">พบข้อมูล</h4>
+
+                        <div className="result-item">
+                          <label>รหัสประจำตัว</label>
+
+                          <p>{memberId}</p>
+                        </div>
+
+                        <div className="result-item">
+                          <label>ชื่อ</label>
+
+                          <p>{memberName}</p>
+                        </div>
+
+                        <div className="member-action">
+                          <button
+                            type="button"
+                            className="change-btn"
+                            onClick={() => {
+                              setMemberId("");
+
+                              setMemberUserId(null);
+
+                              setMemberName("");
+                            }}
+                          >
+                            เปลี่ยนสมาชิก
+                          </button>
+
+                          <button
+                            type="button"
+                            className="invite-btn"
+                            onClick={sendInvitation}
+                          >
+                            เชิญเข้าร่วมโครงงาน
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* ================= CONTACT ================= */}
+
+          <section className="proposal-section">
+            <h4 className="proposal-section-title">ช่องทางการติดต่อ *</h4>
 
             <div className="contact-select-wrapper">
               <select
                 value={contactType}
                 onChange={(e) => {
                   setContactType(e.target.value);
-
                   setContactValue("");
                 }}
               >
                 <option value="">เลือกช่องทางการติดต่อ</option>
-
                 <option value="Email">Email</option>
-
                 <option value="Line ID">Line ID</option>
-
                 <option value="Facebook">Facebook</option>
-
                 <option value="Discord">Discord</option>
-
                 <option value="Instagram">Instagram</option>
-
                 <option value="เบอร์โทรศัพท์">เบอร์โทรศัพท์</option>
               </select>
 
               <span className="contact-select-arrow">▼</span>
             </div>
-          </div>
 
-          {/* =================================================
-              CONTACT VALUE
-          ================================================= */}
+            {contactType !== "" && (
+              <div className="form-group">
+                <label>{contactType} *</label>
 
-          {contactType !== "" && (
+                <input
+                  type={
+                    contactType === "Email"
+                      ? "email"
+                      : contactType === "เบอร์โทรศัพท์"
+                        ? "tel"
+                        : "text"
+                  }
+                  value={contactValue}
+                  onChange={(e) => setContactValue(e.target.value)}
+                />
+              </div>
+            )}
+          </section>
+
+          {/* ================= ADVISOR ================= */}
+
+          <section className="proposal-section">
             <div className="form-group">
-              <label>{contactType}</label>
+              <label>เลือกอาจารย์ที่ปรึกษา *</label>
 
-              <input
-                type={
-                  contactType === "Email"
-                    ? "email"
-                    : contactType === "เบอร์โทรศัพท์"
-                      ? "tel"
-                      : "text"
-                }
-                value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
-                placeholder={
-                  contactType === "Email"
-                    ? "กรอกอีเมล เช่น 66160001@go.buu.ac.th"
-                    : contactType === "Line ID"
-                      ? "กรอก Line ID"
-                      : contactType === "Facebook"
-                        ? "กรอกชื่อบัญชีหรือ URL Facebook"
-                        : contactType === "Discord"
-                          ? "กรอกชื่อผู้ใช้ Discord"
-                          : contactType === "Instagram"
-                            ? "กรอกชื่อผู้ใช้ Instagram"
-                            : contactType === "เบอร์โทรศัพท์"
-                              ? "กรอกเบอร์โทรศัพท์"
-                              : ""
-                }
+              {advisorName ? (
+                <div className="advisor-selected-row">
+                  <span className="advisor-name">{advisorName}</span>
+
+                  {!isResubmit && (
+                    <button
+                      type="button"
+                      className="change-advisor-btn"
+                      onClick={() => {
+                        setAdvisorId(null);
+                        setAdvisorName("");
+                        setTeacherKeyword("");
+                        setTeacherList([]);
+                      }}
+                    >
+                      เปลี่ยนอาจารย์
+                    </button>
+                  )}
+                </div>
+              ) : (
+                !isResubmit && (
+                  <div className="teacher-search">
+                    <div className="search-box">
+                      <input
+                        type="text"
+                        value={teacherKeyword}
+                        onChange={(e) => setTeacherKeyword(e.target.value)}
+                        placeholder="พิมพ์ชื่ออาจารย์"
+                      />
+                    </div>
+
+                    {teacherList.map((teacher) => {
+                      const requiredSlots =
+                        projectType === "โครงงานคู่" ? 2 : 1;
+
+                      const canAccept =
+                        Number(teacher.remaining_capacity) >= requiredSlots;
+
+                      return (
+                        <div
+                          key={teacher.id}
+                          className={`teacher-item ${
+                            !canAccept ? "teacher-full" : ""
+                          }`}
+                          onClick={() => {
+                            if (!canAccept) {
+                              alert(
+                                projectType === "โครงงานคู่"
+                                  ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
+                                  : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
+                              );
+
+                              return;
+                            }
+
+                            setAdvisorId(teacher.id);
+                            setAdvisorName(teacher.name);
+                            setMajor(teacher.major);
+                            setTeacherKeyword(teacher.name);
+                            setTeacherList([]);
+                          }}
+                        >
+                          <span>{teacher.name}</span>
+
+                          <span>
+                            {canAccept
+                              ? `เปิดรับ (${teacher.accepted_students}/${teacher.total_capacity})`
+                              : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/${teacher.total_capacity})`}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+            </div>
+          </section>
+
+          {/* ================= DETAILS ================= */}
+
+          <section className="proposal-section">
+            <div className="form-group">
+              <label>รายละเอียดโครงงาน *</label>
+
+              <textarea
+                rows={5}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="กรอกรายละเอียดของโครงงาน"
               />
             </div>
-          )}
 
-          {/* =================================================
-              INTRODUCTION
-          ================================================= */}
+            <div className="form-group">
+              <label>วัตถุประสงค์ *</label>
 
-          <div className="form-group">
-            <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
-
-            <textarea
-              rows={4}
-              value={introduction}
-              onChange={(e) => setIntroduction(e.target.value)}
-              placeholder="กรุณาระบุเหตุผลที่ต้องการเสนอหัวข้อโครงงานนี้"
-            />
-          </div>
-
-          {/* =================================================
-              ADVISOR
-          ================================================= */}
-
-          <div className="form-group">
-            <label>เลือกอาจารย์ที่ปรึกษา</label>
-
-            {advisorName ? (
-              <div className="advisor-selected-row">
-                <span className="advisor-name">{advisorName}</span>
-
-                {/* ตอนแก้ไขตามข้อเสนอแนะ ห้ามเปลี่ยนอาจารย์ */}
-                {!isResubmit && (
-                  <button
-                    type="button"
-                    className="change-advisor-btn"
-                    onClick={() => {
-                      setAdvisorId(null);
-                      setAdvisorName("");
-                      setTeacherKeyword("");
-                      setTeacherList([]);
-                    }}
-                  >
-                    เปลี่ยนอาจารย์
-                  </button>
-                )}
-              </div>
-            ) : (
-              !isResubmit && (
-                <div className="teacher-search">
-                  <div className="search-box">
-                    <input
-                      value={teacherKeyword}
-                      onChange={(e) => setTeacherKeyword(e.target.value)}
-                      placeholder="พิมพ์ชื่ออาจารย์"
-                    />
-                  </div>
-
-                  {teacherList.map((teacher) => {
-                    const requiredSlots = projectType === "โครงงานคู่" ? 2 : 1;
-
-                    const canAccept =
-                      Number(teacher.remaining_capacity) >= requiredSlots;
-
-                    return (
-                      <div
-                        key={teacher.id}
-                        className={`teacher-item ${
-                          !canAccept ? "teacher-full" : ""
-                        }`}
-                        onClick={() => {
-                          if (!canAccept) {
-                            alert(
-                              projectType === "โครงงานคู่"
-                                ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
-                                : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
-                            );
-
-                            return;
-                          }
-
-                          setAdvisorId(teacher.id);
-                          setAdvisorName(teacher.name);
-                          setMajor(teacher.major);
-                          setTeacherKeyword(teacher.name);
-                          setTeacherList([]);
-                        }}
-                      >
-                        <span>{teacher.name}</span>
-
-                        <span>
-                          {canAccept
-                            ? `เปิดรับ (${teacher.accepted_students}/${teacher.total_capacity})`
-                            : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/${teacher.total_capacity})`}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )
-            )}
-          </div>
-
-          {/* =================================================
-    DESCRIPTION
-================================================= */}
-
-          <div className="form-group">
-            <label>รายละเอียดโครงงาน</label>
-
-            <textarea
-              rows={5}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="กรอกรายละเอียดของโครงงาน"
-            />
-          </div>
-
-          {/* =================================================
-    OBJECTIVE
-================================================= */}
-
-          <div className="form-group">
-            <label>วัตถุประสงค์</label>
-
-            <textarea
-              rows={4}
-              value={objective}
-              onChange={(e) => setObjective(e.target.value)}
-              placeholder="กรอกวัตถุประสงค์ของโครงงาน"
-            />
-          </div>
-
-          {/* =================================================
-    SKILLS
-================================================= */}
-
-          <div className="form-group">
-            <label>เทคโนโลยีที่ใช้</label>
-
-            <p className="example-text">
-              ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS
-              <br />
-              ห้ามเว้นวรรคระหว่างเครื่องหมาย |
-            </p>
-
-            <input
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              placeholder="กรอกเทคโนโลยีหรือทักษะที่จำเป็นสำหรับโครงงาน"
-            />
-          </div>
-
-          {/* =========================================
-              สิ่งที่อาจารย์ให้แก้ไข
-          ========================================= */}
-
-          {isResubmit && (
-            <div className="revision-suggestion-box">
-              <div className="revision-suggestion-title">สิ่งที่ต้องแก้ไข</div>
-
-              <div className="revision-suggestion-text">
-                {revisionSuggestion || "-"}
-              </div>
+              <textarea
+                rows={4}
+                value={objective}
+                onChange={(e) => setObjective(e.target.value)}
+                placeholder="กรอกวัตถุประสงค์ของโครงงาน"
+              />
             </div>
-          )}
 
-          {/* =================================================
-              BUTTON
-          ================================================= */}
+            <div className="form-group">
+              <label>เทคโนโลยีที่ใช้ *</label>
 
-          <div className="button-group">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={() => navigate(-1)}
-            >
-              ยกเลิก
-            </button>
+              <p className="example-text">
+                ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS
+                <br />
+                ห้ามเว้นวรรคระหว่างเครื่องหมาย |
+              </p>
 
-            <button type="button" className="submit-btn" onClick={handleSubmit}>
-              {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งข้อเสนอ"}
-            </button>
-          </div>
+              <input
+                type="text"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                placeholder="กรอกเทคโนโลยีที่ใช้ในโครงงาน"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
+
+              <textarea
+                rows={4}
+                value={introduction}
+                onChange={(e) => setIntroduction(e.target.value)}
+                placeholder="กรุณาระบุเหตุผลที่ต้องการเสนอหัวข้อโครงงานนี้"
+              />
+            </div>
+
+            {/* ================= REVISION ================= */}
+
+            {isResubmit && (
+              <div className="revision-suggestion-box">
+                <div className="revision-suggestion-title">
+                  สิ่งที่ต้องแก้ไข
+                </div>
+
+                <div className="revision-suggestion-text">
+                  {revisionSuggestion || "-"}
+                </div>
+              </div>
+            )}
+
+            {/* ================= BUTTON ================= */}
+
+            <div className="button-group">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => navigate(-1)}
+              >
+                ยกเลิก
+              </button>
+
+              <button
+                type="button"
+                className="submit-btn"
+                onClick={handleSubmit}
+              >
+                {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งข้อเสนอ"}
+              </button>
+            </div>
+          </section>
         </div>
       </main>
     </div>
