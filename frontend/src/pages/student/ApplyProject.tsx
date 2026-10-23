@@ -175,7 +175,7 @@ function ApplyProject() {
 
       setPopupMessage(
         err.response?.data?.message ||
-          "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง",
+          "เกิดข้อผิดพลาดขณะส่งคำขอสมัครเข้าร่วมโครงงาน กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
       );
     }
   };
@@ -443,17 +443,25 @@ function ApplyProject() {
 
             {popupType === "success" && (
               <>
-                <div className="popup-status-icon success">✓</div>
-
-                <h3 className="popup-title">ส่งใบสมัครสำเร็จ</h3>
+                <h3 className="popup-title">ส่งคำขอสมัครสำเร็จ</h3>
 
                 <div className="popup-divider"></div>
 
-                <p className="popup-message">
-                  ใบสมัครของคุณถูกส่งไปยังอาจารย์แล้ว
-                  <br />
-                  กรุณารอการพิจารณา
-                </p>
+                <div className="popup-success-message">
+                  <p>ใบสมัครของคุณถูกส่งเรียบร้อยแล้ว</p>
+
+                  <p>
+                    คุณสามารถติดตามสถานะคำขอได้ที่
+                    <br />
+                    <strong>“โครงงานของฉัน”</strong>
+                  </p>
+
+                  <p>
+                    ระบบจะแจ้งเตือนเมื่ออาจารย์
+                    <br />
+                    พิจารณาคำขอของคุณ
+                  </p>
+                </div>
 
                 <button
                   type="button"
@@ -467,13 +475,14 @@ function ApplyProject() {
 
             {popupType === "error" && (
               <>
-                <div className="popup-status-icon error">!</div>
-
-                <h3 className="popup-title">ไม่สามารถส่งใบสมัครได้</h3>
+                <h3 className="popup-title">ไม่สามารถส่งคำขอสมัครได้</h3>
 
                 <div className="popup-divider"></div>
 
-                <p className="popup-message">{popupMessage}</p>
+                <p className="popup-message">
+                  {popupMessage ||
+                    "เกิดข้อผิดพลาดขณะส่งคำขอสมัครเข้าร่วมโครงงาน กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง"}
+                </p>
 
                 <button
                   type="button"

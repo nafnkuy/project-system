@@ -162,7 +162,9 @@ function ProjectDetail() {
               ส่งคำเสนอโครงงานใหม่
             </li>
             <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
-            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
             <li>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
@@ -219,33 +221,36 @@ function ProjectDetail() {
           <section className="detail-section">
             <h4>ข้อมูลโครงงาน</h4>
 
-            <div className="project-meta">
-              <strong>อาจารย์ที่ปรึกษา :</strong>
-              <span>{project.advisor_name}</span>
+            <div className="project-info-block">
+              <p>
+                <strong>อาจารย์ที่ปรึกษา :</strong> {project.advisor_name}
+              </p>
 
-              <strong>สาขาวิชา :</strong>
-              <span>{project.major}</span>
+              <p>
+                <strong>สาขาวิชา :</strong> {project.major}
+              </p>
 
-              <strong>ปีการศึกษา :</strong>
-              <span>{project.academic_year}</span>
+              <p>
+                <strong>ปีการศึกษา :</strong> {project.academic_year}
+              </p>
             </div>
 
-            <br />
+            <div className="project-member-block">
+              <strong>
+                สมาชิกในโครงงาน ({currentMembers}/{maxMembers} คน)
+              </strong>
 
-            <strong>
-              สมาชิกในโครงงาน ({currentMembers}/{maxMembers} คน)
-            </strong>
-
-            <div className="member-list">
-              {project.members.length > 0 ? (
-                project.members.map((member) => (
-                  <p key={member.id}>
-                    {member.username} {member.name}
-                  </p>
-                ))
-              ) : (
-                <p>ยังไม่มีสมาชิก</p>
-              )}
+              <div className="member-list">
+                {project.members.length > 0 ? (
+                  project.members.map((member) => (
+                    <p key={member.id}>
+                      {member.username} {member.name}
+                    </p>
+                  ))
+                ) : (
+                  <p>ยังไม่มีสมาชิก</p>
+                )}
+              </div>
             </div>
           </section>
 

@@ -518,7 +518,7 @@ function StudentHome() {
           <div className="student-search">
             <input
               type="text"
-              placeholder="ค้นหาชื่อโครงงาน หรืออาจารย์"
+              placeholder="ค้นหาโครงงานหรืออาจารย์ที่ปรึกษา"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -594,7 +594,7 @@ function StudentHome() {
                           navigate(`/project-details/${project.id}`)
                         }
                       >
-                        รายละเอียด
+                        ดูรายละเอียด
                       </button>
                     </td>
                   </tr>

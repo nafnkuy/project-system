@@ -517,7 +517,24 @@
   border: none;
   border-radius: 6px;
 
-  color: #fff;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.student-apply-project-page .popup-action-btn {
+  width: 110px;
+  height: 36px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
 
   font-size: 12px;
   font-weight: 400;
@@ -572,15 +589,15 @@
 ========================================================= */
 
 .student-apply-project-page .popup-card {
-  width: 430px;
+  width: 370px;
   max-width: calc(100% - 40px);
 
-  padding: 30px 38px 32px;
+  padding: 28px 32px 30px;
 
   background: #ffffff;
 
-  border: 1px solid #777;
-  border-radius: 9px;
+  border: 1px solid #bbbbbb;
+  border-radius: 10px;
 
   box-shadow: none;
 
@@ -636,7 +653,7 @@
 
   color: #222;
 
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 
   line-height: 1.5;
@@ -678,48 +695,57 @@
 /* =========================================================
    POPUP BUTTON
 ========================================================= */
-
-.student-apply-project-page .popup-action-btn {
-  width: 110px;
-  height: 36px;
-
-  padding: 0;
-
-  border: none;
-  border-radius: 6px;
-
-  color: #ffffff;
-
-  font-size: 12px;
-  font-weight: 400;
-
-  cursor: pointer;
-
-  transition: background 0.2s ease;
+.student-apply-project-page .cancel-btn,
+.student-apply-project-page .error-btn {
+  background: #ff0000;
 }
 
+.student-apply-project-page .cancel-btn:hover,
+.student-apply-project-page .error-btn:hover {
+  background: #d90000;
+}
 
-/* ตกลง */
-
+.student-apply-project-page .submit-btn,
 .student-apply-project-page .success-btn {
   background: #20a36a;
 }
 
+.student-apply-project-page .submit-btn:hover:not(:disabled),
 .student-apply-project-page .success-btn:hover {
   background: #188c59;
 }
 
-
-/* ปิดเมื่อเกิด Error */
-
-.student-apply-project-page .error-btn {
-  background: #e05252;
+.student-apply-project-page .popup-message strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: #222;
 }
 
-.student-apply-project-page .error-btn:hover {
-  background: #c74444;
+.student-apply-project-page .popup-success-message {
+  margin-bottom: 26px;
+
+  text-align: center;
 }
 
+.student-apply-project-page .popup-success-message p {
+  margin: 0 0 18px;
+
+  color: #222;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.8;
+}
+
+.student-apply-project-page .popup-success-message p:last-child {
+  margin-bottom: 0;
+}
+
+.student-apply-project-page .popup-success-message strong {
+  font-size: 13px;
+  font-weight: 500;
+}
 
 /* =========================================================
    LOADING

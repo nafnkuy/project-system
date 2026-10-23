@@ -459,6 +459,10 @@
   vertical-align: middle;
 }
 
+.student-home-page .table-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .student-home-page .table-container th {
   padding-top: 8px;
   padding-bottom: 10px;
@@ -526,11 +530,10 @@
 ========================================================= */
 
 .student-home-page .student-project-title {
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.5;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 
