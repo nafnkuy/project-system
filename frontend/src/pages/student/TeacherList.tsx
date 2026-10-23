@@ -213,7 +213,7 @@ function TeacherList() {
             <div className="teacher-search-box">
               <input
                 type="text"
-                placeholder="ค้นหาโครงงาน/อาจารย์"
+                placeholder="ค้นหาชื่ออาจารย์"
                 value={search}
                 onChange={(e) =>
                   setSearch(e.target.value)

@@ -437,7 +437,7 @@
 }
 
 .teacher-detail-page .teacher-summary-card span {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   color: #222;
 
@@ -601,6 +601,34 @@
 
   font-size: 13px;
   font-weight: 400;
+}
+
+.teacher-detail-page .project-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 64px;
+  height: 25px;
+
+  padding: 0 10px;
+
+  border-radius: 13px;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+.teacher-detail-page .project-status.open {
+  background: #e8f6ef;
+  color: #15915d;
+}
+
+.teacher-detail-page .project-status.closed {
+  background: #f1f1f1;
+  color: #999999;
 }
 
 .teacher-detail-page .teacher-project-table th:nth-child(1),

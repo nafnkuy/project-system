@@ -3,7 +3,7 @@ import StudentNotificationBell from "./StudentNotificationBell";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBell, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import axios from "axios";
 
 import logo from "../../assets/Logo.svg";
@@ -49,14 +49,12 @@ interface TeacherDetailData {
 
 function TeacherDetail() {
   const navigate = useNavigate();
-
   const { teacherId } = useParams();
 
   const username = sessionStorage.getItem("username");
   const profileImage = sessionStorage.getItem("profileImage");
 
   const [teacher, setTeacher] = useState<TeacherDetailData | null>(null);
-
   const [loading, setLoading] = useState(true);
 
   /* =========================
@@ -70,7 +68,6 @@ function TeacherDetail() {
       .get(`http://localhost:5000/teachers/${teacherId}`)
       .then((res) => {
         console.log("Teacher Detail =", res.data);
-
         setTeacher(res.data);
       })
       .catch((err) => {
@@ -126,7 +123,9 @@ function TeacherDetail() {
 
             <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -273,8 +272,8 @@ function TeacherDetail() {
                   navigate(`/submit-new-project?advisorId=${teacher.id}`)
                 }
               >
-                ส่งคำเสนอโครงงานใหม่
                 <FaPlus />
+                ส่งคำเสนอโครงงานใหม่
               </button>
             </div>
 
@@ -282,8 +281,8 @@ function TeacherDetail() {
               <thead>
                 <tr>
                   <th>ชื่อหัวข้อ</th>
-                  <th>สถานะ</th>
                   <th>จำนวนรับ</th>
+                  <th>สถานะ</th>
                   <th>รายละเอียด</th>
                 </tr>
               </thead>
@@ -303,14 +302,26 @@ function TeacherDetail() {
                         project.status === "ปิดรับ" ? "project-row-closed" : ""
                       }
                     >
+                      {/* ชื่อหัวข้อ */}
                       <td>{project.title}</td>
 
-                      <td>{project.status}</td>
-
+                      {/* จำนวนรับ */}
                       <td>
                         {project.current_members}/{project.max_members}
                       </td>
 
+                      {/* สถานะ */}
+                      <td>
+                        <span
+                          className={`project-status ${
+                            project.status === "เปิดรับ" ? "open" : "closed"
+                          }`}
+                        >
+                          {project.status}
+                        </span>
+                      </td>
+
+                      {/* รายละเอียด */}
                       <td>
                         <button
                           type="button"
