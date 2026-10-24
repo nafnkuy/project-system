@@ -1,19 +1,14 @@
 /* =========================================================
    NOTIFICATION WRAPPER
 ========================================================= */
-
 .student-notification-wrapper {
   position: relative;
-
   width: 50px;
   height: 50px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: #ffffff;
-
   border: 1px solid #dddddd;
   border-radius: 4px;
 }
@@ -21,244 +16,334 @@
 /* =========================================================
    BELL
 ========================================================= */
-
 .student-notification-btn {
   position: relative;
-
   width: 48px;
   height: 48px;
-
   padding: 0;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border: none;
-
   background: transparent;
   color: #999999;
-
   font-size: 20px;
-
   cursor: pointer;
 }
-
-.student-notification-btn svg {
-  color: #999999;
-}
-
-.student-notification-btn:hover {
-  background: transparent;
-}
-
+.student-notification-btn svg { color: #999999; }
+.student-notification-btn:hover { background: transparent; }
 
 /* =========================================================
    BADGE
 ========================================================= */
-
 .student-notification-count {
   position: absolute;
-
   top: -8px;
   right: -8px;
-
   min-width: 18px;
   height: 18px;
-
   padding: 0 4px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: red;
   color: #ffffff;
-
   font-size: 11px;
   font-weight: 500;
 }
 
-
 /* =========================================================
    DROPDOWN
 ========================================================= */
-
 .student-notification-dropdown {
   position: absolute;
-
   top: 58px;
   right: 0;
-
   width: 310px;
-
   max-height: 420px;
   overflow-y: auto;
-
   background: #ffffff;
-
   border: 1px solid #dddddd;
   border-radius: 8px;
-
-  box-shadow:
-    0 4px 12px
-    rgba(0, 0, 0, 0.15);
-
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 1000;
 }
-
-
 .student-notification-dropdown h4 {
   margin: 0;
-
   padding: 16px;
-
   border-bottom: 1px solid #eeeeee;
-
   font-size: 14px;
   font-weight: 600;
 }
-
-
-/* =========================================================
-   ITEM
-========================================================= */
-
 .student-notification-item {
   padding: 14px 16px;
-
   border-bottom: 1px solid #eeeeee;
-
   cursor: pointer;
 }
-
-.student-notification-item:hover {
-  background: #f7f7f7;
-}
-
+.student-notification-item:hover { background: #f7f7f7; }
 .student-notification-item p {
   margin: 0 0 5px;
-
   font-size: 12px;
   line-height: 1.5;
 }
-
 .student-notification-item small {
   color: #999999;
-
   font-size: 9px;
 }
-
-
 .student-notification-empty {
   padding: 20px;
-
   text-align: center;
-
   color: #999999;
-
   font-size: 12px;
 }
 
+/* =========================================================
+   POPUP OVERLAY
+========================================================= */
+.student-notification-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  z-index: 99999;
+}
 
 /* =========================================================
    POPUP
 ========================================================= */
-
-.student-notification-overlay {
-  position: fixed;
-
-  inset: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background:
-    rgba(0, 0, 0, 0.45);
-
-  z-index: 9999;
-}
-
-
 .student-notification-popup {
-  width: 430px;
-
-  padding: 30px 38px;
-
+  box-sizing: border-box;
+  width: 506px;
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 30px 38px 32px;
   background: #ffffff;
-
-  border: 1px solid #666666;
-  border-radius: 8px;
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+  box-shadow: none;
+  font-family: "Prompt", sans-serif;
+  text-align: center;
 }
-
-
 .student-notification-popup h3 {
   margin: 0;
-
+  color: #000000;
   text-align: center;
-
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
 }
-
-
 .student-notification-divider {
   height: 1px;
-
-  margin: 20px 0;
-
+  margin: 20px 0 24px;
   background: #dddddd;
 }
-
-
 .student-notification-message {
-  white-space: pre-line;
-
+  color: #000000;
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.8;
-}
-
-
-.student-notification-question {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
   text-align: center;
 }
-
+.student-notification-question {
+  margin: 18px 0 0;
+  color: #333333;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: center;
+}
 
 /* =========================================================
    ACTIONS
 ========================================================= */
-
 .student-notification-actions {
   display: flex;
+  align-items: center;
   justify-content: center;
-
-  gap: 15px;
-
-  margin-top: 20px;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
 }
-
-
 .student-notification-actions button {
-  min-width: 100px;
-
-  padding: 10px 15px;
-
+  min-width: 110px;
+  height: 36px;
+  padding: 0 18px;
   border: none;
   border-radius: 6px;
-
   color: #ffffff;
-
+  font-family: "Prompt", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
   cursor: pointer;
 }
+.student-notification-reject { background: #ff0000; }
+.student-notification-reject:hover { background: #d90000; }
+.student-notification-accept,
+.student-notification-confirm { background: #20a36a; }
+.student-notification-accept:hover,
+.student-notification-confirm:hover { background: #188c59; }
 
+/* =========================================================
+   INVITATION POPUP ONLY — SAME LAYOUT AS REFERENCE IMAGE
+========================================================= */
+.invitation-notification-dialog .student-notification-divider {
+  margin: 20px 0 30px;
+}
+.invitation-notification-dialog .student-invitation-detail {
+  margin: 0 0 30px;
+  text-align: center;
+}
+.invitation-notification-dialog .student-invitation-last {
+  margin-bottom: 0;
+}
+.invitation-notification-dialog .student-invitation-label {
+  display: block;
+  margin: 0 0 7px;
+  color: #777777;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+.invitation-notification-dialog .student-invitation-value {
+  margin: 0;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.invitation-notification-dialog .student-invitation-divider {
+  margin: 30px 0 25px;
+}
+.invitation-notification-dialog .student-notification-question {
+  margin: 0;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+}
+.invitation-notification-dialog .student-notification-actions {
+  margin-top: 24px;
+}
 
-.student-notification-reject {
-  background: #ff0000;
+/* =========================================================
+   SYSTEM NOTIFICATION POPUP ONLY — UNCHANGED
+========================================================= */
+.system-notification-dialog .student-notification-message {
+  margin: 0;
+  text-align: center;
+}
+.system-notification-dialog .student-notification-actions { margin-top: 24px; }
+.system-notification-dialog .student-notification-confirm {
+  background: #20a36a;
+  color: #ffffff;
+}
+.system-notification-dialog .student-notification-confirm:hover { background: #188c59; }
+.system-notification-dialog .notification-reply-text {
+  margin: 0;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+  text-align: center;
+}
+.system-notification-dialog .notification-project-info {
+  margin-top: 22px;
+  text-align: center;
+}
+.system-notification-dialog .notification-project-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #777777;
+  font-size: 12px;
+  font-weight: 400;
+}
+.system-notification-dialog .notification-project-title {
+  margin: 0;
+  color: #000000;
+  font-family: "Prompt", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
+  text-align: center;
 }
 
 
-.student-notification-accept {
-  background: #20a36a;
+/* =========================================
+   INVITATION POPUP SIZE & FONT
+========================================= */
+
+/* ขนาดกล่อง */
+.student-notification-popup.invitation-notification-dialog {
+  box-sizing: border-box;
+  width: 440px;
+  max-width: calc(100vw - 40px);
+  padding: 28px 32px 30px;
+}
+
+/* หัวข้อป๊อปอัป */
+.invitation-notification-dialog h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* คำกำกับข้อมูล */
+.invitation-notification-dialog .student-invitation-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #777777;
+}
+
+/* ชื่อโครงงานและชื่อสมาชิก */
+.invitation-notification-dialog .student-invitation-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #000000;
+}
+
+/* ข้อความคำถาม */
+.invitation-notification-dialog .student-notification-question {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ข้อความบนปุ่ม */
+.invitation-notification-dialog .student-notification-actions button {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ขนาดป๊อปอัปทั้งสองแบบ */
+.student-notification-popup.invitation-notification-dialog,
+.student-notification-popup.system-notification-dialog {
+  box-sizing: border-box;
+  width: 440px;
+  max-width: calc(100vw - 40px);
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+}
+
+/* หัวข้อ */
+.invitation-notification-dialog h3,
+.system-notification-dialog h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ข้อความตอบรับ */
+.system-notification-dialog .notification-reply-text {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ชื่อหัวข้อโครงงาน */
+.system-notification-dialog .notification-project-title {
+  font-size: 13px;
+  font-weight: 500;
 }

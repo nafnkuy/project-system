@@ -770,16 +770,16 @@ function SubmitNewProject() {
                       <div className="member-result">
                         <h4 className="success-text">พบข้อมูล</h4>
 
-                        <div className="result-item">
-                          <label>รหัสประจำตัว</label>
+                        <div className="member-result-grid">
+                          <div className="result-item">
+                            <span className="result-label">รหัสประจำตัว</span>
+                            <strong className="result-value">{memberId}</strong>
+                          </div>
 
-                          <p>{memberId}</p>
-                        </div>
-
-                        <div className="result-item">
-                          <label>ชื่อ</label>
-
-                          <p>{memberName}</p>
+                          <div className="result-item">
+                            <span className="result-label">ชื่อ</span>
+                            <strong className="result-value">{memberName}</strong>
+                          </div>
                         </div>
 
                         <div className="member-action">
@@ -813,6 +813,7 @@ function SubmitNewProject() {
             )}
           </section>
 
+          <div className="proposal-contact-advisor-grid">
           {/* ================= CONTACT ================= */}
 
           <section className="proposal-section">
@@ -940,6 +941,21 @@ function SubmitNewProject() {
               )}
             </div>
           </section>
+          </div>
+
+          {/* ================= REASON ================= */}
+
+          <section className="proposal-section">
+            <div className="form-group">
+              <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
+              <textarea
+                rows={4}
+                value={introduction}
+                onChange={(e) => setIntroduction(e.target.value)}
+                placeholder="กรุณาระบุเหตุผลที่ต้องการเสนอหัวข้อโครงงานนี้"
+              />
+            </div>
+          </section>
 
           {/* ================= DETAILS ================= */}
 
@@ -983,17 +999,6 @@ function SubmitNewProject() {
               />
             </div>
 
-            <div className="form-group">
-              <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
-
-              <textarea
-                rows={4}
-                value={introduction}
-                onChange={(e) => setIntroduction(e.target.value)}
-                placeholder="กรุณาระบุเหตุผลที่ต้องการเสนอหัวข้อโครงงานนี้"
-              />
-            </div>
-
             {/* ================= REVISION ================= */}
 
             {isResubmit && (
@@ -1024,7 +1029,7 @@ function SubmitNewProject() {
                 className="submit-btn"
                 onClick={handleSubmit}
               >
-                {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งข้อเสนอ"}
+                {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งคำเสนอโครงงาน"}
               </button>
             </div>
           </section>

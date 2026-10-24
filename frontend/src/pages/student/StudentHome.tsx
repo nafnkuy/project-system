@@ -2,8 +2,9 @@ import "./StudentHome.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBell, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import logo from "../../assets/Logo.svg";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 /* =========================================================
    TYPE
@@ -29,60 +30,6 @@ interface Project {
   visibility: "แสดง" | "ซ่อน";
 }
 
-interface SystemNotification {
-  id: number;
-
-  message: string;
-
-  is_read: number;
-
-  request_id: number | null;
-
-  project_id: number | null;
-
-  created_at: string;
-}
-
-interface Notification {
-  id: number;
-
-  project_id: number;
-
-  sender_id: number;
-
-  sender_username: string;
-
-  sender_name: string;
-
-  receiver_id: number;
-
-  receiver_username: string;
-
-  receiver_name: string;
-
-  title: string;
-
-  project_type: string;
-
-  description: string;
-
-  objectives: string;
-
-  skills: string;
-
-  requirements: string;
-
-  contact_type: string;
-
-  contact_value: string;
-
-  introduction: string;
-
-  status: string;
-
-  created_at: string;
-}
-
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -93,8 +40,6 @@ function StudentHome() {
   /* =========================================================
      SESSION
   ========================================================= */
-
-  const userId = sessionStorage.getItem("userId");
 
   const username = sessionStorage.getItem("username");
 
@@ -111,28 +56,6 @@ function StudentHome() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 10;
-
-  /* ---------- NOTIFICATION ---------- */
-
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  const [systemNotifications, setSystemNotifications] = useState<
-    SystemNotification[]
-  >([]);
-
-  const unreadSystemCount = systemNotifications.filter(
-    (item) => item.is_read === 0,
-  ).length;
-
-  /* ---------- SELECTED POPUP ---------- */
-
-  const [selectedInvitation, setSelectedInvitation] =
-    useState<Notification | null>(null);
-
-  const [selectedSystemNotification, setSelectedSystemNotification] =
-    useState<SystemNotification | null>(null);
 
   /* =========================================================
      FILTER PROJECT
@@ -198,146 +121,6 @@ function StudentHome() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
-  /* =========================================================
-     PROJECT INVITATION
-  ========================================================= */
-
-  useEffect(() => {
-    if (!userId) return;
-
-    axios
-      .get(`http://localhost:5000/project-invitations/${userId}`)
-      .then((res) => {
-        console.log("Project Invitations =", res.data);
-
-        setNotifications(res.data);
-      })
-      .catch((err) => {
-        console.log("Get project invitations error:", err);
-      });
-  }, [userId]);
-
-  /* =========================================================
-     SYSTEM NOTIFICATION
-  ========================================================= */
-
-  useEffect(() => {
-    if (!userId) return;
-
-    axios
-      .get(`http://localhost:5000/notifications/${userId}`)
-      .then((res) => {
-        console.log("System Notifications =", res.data);
-
-        // เอามาแสดงในกระดิ่งเฉพาะที่ยังไม่ได้อ่าน
-        const unreadNotifications = res.data.filter(
-          (item: SystemNotification) => item.is_read === 0,
-        );
-
-        setSystemNotifications(res.data);
-      })
-      .catch((err) => {
-        console.log("Get notifications error:", err);
-      });
-  }, [userId]);
-
-  /* =========================================================
-   OPEN SYSTEM NOTIFICATION
-========================================================= */
-
-  const handleSystemNotificationClick = async (item: SystemNotification) => {
-    try {
-      // บันทึกว่าอ่านแล้วในฐานข้อมูล
-      if (item.is_read === 0) {
-        await axios.put(`http://localhost:5000/notifications/${item.id}/read`);
-      }
-
-      // เปิด popup รายละเอียด
-      setSelectedSystemNotification({
-        ...item,
-        is_read: 1,
-      });
-
-      // เอาแจ้งเตือนที่กดแล้วออกจากกล่อง
-      setSystemNotifications((prev) =>
-        prev.filter((notification) => notification.id !== item.id),
-      );
-
-      // ปิด dropdown
-      setShowNotifications(false);
-    } catch (err) {
-      console.log("Mark notification read error:", err);
-    }
-  };
-
-  /* =========================================================
-     ACCEPT INVITATION
-  ========================================================= */
-
-  const handleAcceptInvitation = async () => {
-    if (!selectedInvitation) return;
-
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/project-invitations/${selectedInvitation.id}/accept`,
-      );
-
-      alert(res.data.message);
-
-      /* เอาคำเชิญออกจากรายการ */
-
-      setNotifications((prev) =>
-        prev.filter((item) => item.id !== selectedInvitation.id),
-      );
-
-      /* ปิด popup */
-
-      setSelectedInvitation(null);
-
-      setShowNotifications(false);
-    } catch (err: any) {
-      console.log("Accept invitation error:", err);
-
-      console.log(err.response?.data);
-
-      alert(err.response?.data?.message || "ไม่สามารถตอบรับคำเชิญได้");
-    }
-  };
-
-  /* =========================================================
-     REJECT INVITATION
-  ========================================================= */
-
-  const handleRejectInvitation = async () => {
-    if (!selectedInvitation) return;
-
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/project-invitations/${selectedInvitation.id}/reject`,
-      );
-
-      alert(res.data.message);
-
-      /* เอาคำเชิญออกจากรายการ */
-
-      setNotifications((prev) =>
-        prev.filter((item) => item.id !== selectedInvitation.id),
-      );
-
-      /* ปิด popup */
-
-      setSelectedInvitation(null);
-
-      setShowNotifications(false);
-    } catch (err: any) {
-      console.log("Reject invitation error:", err);
-
-      console.log(err.response?.data);
-
-      alert(err.response?.data?.message || "ไม่สามารถปฏิเสธคำเชิญได้");
-    }
-  };
 
   /* =========================================================
      LOGOUT
@@ -424,75 +207,7 @@ function StudentHome() {
           <div className="header-right">
             {/* NOTIFICATION */}
 
-            <div className="notification-box">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-btn"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
-                  <FaBell />
-
-                  {/* จำนวนแจ้งเตือน */}
-
-                  {notifications.length + unreadSystemCount > 0 && (
-                    <span className="notification-count">
-                      {notifications.length + unreadSystemCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* ===========================================
-                    NOTIFICATION DROPDOWN
-                =========================================== */}
-
-                {showNotifications && (
-                  <div className="notification-dropdown">
-                    <h4>การแจ้งเตือน</h4>
-
-                    {/* PROJECT INVITATION */}
-
-                    {notifications.map((item) => (
-                      <div
-                        key={`invitation-${item.id}`}
-                        className="notification-item"
-                        onClick={() => {
-                          setSelectedInvitation(item);
-
-                          setShowNotifications(false);
-                        }}
-                      >
-                        <p>{item.sender_name} ได้เชิญคุณเข้าร่วมโครงงาน</p>
-
-                        <small>{item.created_at}</small>
-                      </div>
-                    ))}
-
-                    {/* SYSTEM NOTIFICATION */}
-
-                    {systemNotifications.map((item) => (
-                      <div
-                        key={`notification-${item.id}`}
-                        className="notification-item"
-                        onClick={() => handleSystemNotificationClick(item)}
-                      >
-                        <p>{item.message.split("\n")[0]}</p>
-
-                        <small>{item.created_at}</small>
-                      </div>
-                    ))}
-
-                    {/* ไม่มีแจ้งเตือน */}
-
-                    {notifications.length === 0 &&
-                      systemNotifications.length === 0 && (
-                        <div className="notification-item">
-                          <p>ไม่มีการแจ้งเตือน</p>
-                        </div>
-                      )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <StudentNotificationBell />
 
             {/* USER */}
 
@@ -636,129 +351,10 @@ function StudentHome() {
           )}
         </div>
 
-        {/* ===================================================
-            INVITATION POPUP
-        =================================================== */}
-
-        {selectedInvitation && (
-          <div className="invitation-overlay">
-            <div className="invitation-popup">
-              <h3>คำเชิญเข้าร่วมโครงงาน</h3>
-
-              <div className="invitation-divider"></div>
-
-              {/* PROJECT */}
-
-              <div className="invitation-detail">
-                <p>
-                  <strong>ชื่อหัวข้อโครงงาน</strong>
-                </p>
-
-                <p>{selectedInvitation.title}</p>
-              </div>
-
-              {/* MEMBER 1 */}
-
-              <div className="invitation-detail">
-                <p>
-                  <strong>สมาชิกคนที่ 1</strong>
-                </p>
-
-                <p>
-                  {selectedInvitation.sender_username}{" "}
-                  {selectedInvitation.sender_name}
-                </p>
-              </div>
-
-              {/* MEMBER 2 */}
-
-              <div className="invitation-detail">
-                <p>
-                  <strong>สมาชิกคนที่ 2</strong>
-                </p>
-
-                <p>
-                  {selectedInvitation.receiver_username}{" "}
-                  {selectedInvitation.receiver_name}
-                </p>
-              </div>
-
-              <div className="invitation-divider"></div>
-
-              <p className="invitation-question">
-                คุณต้องการเข้าร่วมโครงงานนี้หรือไม่
-              </p>
-
-              {/* ACTION */}
-
-              <div className="invitation-actions">
-                <button className="reject-btn" onClick={handleRejectInvitation}>
-                  ปฏิเสธ
-                </button>
-
-                <button className="accept-btn" onClick={handleAcceptInvitation}>
-                  ตกลง
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===================================================
-            SYSTEM NOTIFICATION POPUP
-        =================================================== */}
-
-        {selectedSystemNotification && (
-          <div
-            className="invitation-overlay"
-            onClick={() => setSelectedSystemNotification(null)}
-          >
-            <div
-              className="invitation-popup"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>ผลการพิจารณาโครงงาน</h3>
-
-              <div className="invitation-divider"></div>
-
-              <div className="notification-detail-message">
-                {selectedSystemNotification.message}
-              </div>
-
-              <div className="invitation-divider"></div>
-
-              <div className="invitation-actions">
-                {/* CLOSE */}
-
-                <button
-                  className="reject-btn"
-                  onClick={() => setSelectedSystemNotification(null)}
-                >
-                  ปิด
-                </button>
-
-                {/* RESUBMIT */}
-
-                {selectedSystemNotification.project_id &&
-                  selectedSystemNotification.request_id && (
-                    <button
-                      className="accept-btn"
-                      onClick={() => {
-                        navigate(
-                          `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
-                        );
-                      }}
-                    >
-                      แก้ไขและส่งใหม่
-                    </button>
-                  )}
-              </div>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );
 }
 
 export default StudentHome;
+

@@ -559,8 +559,8 @@
 }
 
 .student-apply-project-page .submit-btn:disabled {
-  background: #aaa;
-
+  background-color: #dad5d5;
+  color: #ffffff;
   cursor: not-allowed;
 }
 

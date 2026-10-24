@@ -773,7 +773,6 @@
 
 .student-home-page .invitation-detail {
   margin: 14px 0;
-
   text-align: left;
 }
 
@@ -985,4 +984,389 @@
   color: #999;
 
   font-size: 15px;
+}
+
+/* =========================================================
+   PROJECT INVITATION POPUP - matches ApplyProject styling
+   Scoped to invitation only; system notification keeps its UI.
+========================================================= */
+.student-home-page .invitation-project-popup {
+  width: 460px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: 28px 32px 30px;
+  border: 1px solid #bbbbbb;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: none;
+  text-align: center;
+}
+
+.student-home-page .invitation-project-popup h3 {
+  margin: 0;
+  color: #222222;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.student-home-page .invitation-subtitle {
+  margin: 7px 0 0;
+  color: #777777;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.student-home-page .invitation-project-popup .invitation-divider {
+  margin: 18px 0 20px;
+  background: #dddddd;
+}
+
+.student-home-page .invitation-project-summary {
+  padding: 16px 18px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.student-home-page .invitation-field-label {
+  display: block;
+  color: #666666;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.student-home-page .invitation-project-name {
+  margin: 5px 0 0;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.student-home-page .invitation-member-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.student-home-page .invitation-member-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 13px 14px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: left;
+}
+
+.student-home-page .invitation-member-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  background: #eef2f5;
+  color: #2f5d7c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-home-page .invitation-member-info {
+  min-width: 0;
+}
+
+.student-home-page .invitation-member-name {
+  margin: 3px 0 1px;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.student-home-page .invitation-member-id {
+  color: #555555;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.student-home-page .invitation-project-popup .invitation-bottom-divider {
+  margin: 20px 0 17px;
+}
+
+.student-home-page .invitation-project-popup .invitation-question {
+  margin: 0 0 19px;
+  color: #333333;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-home-page .invitation-project-popup .invitation-actions {
+  gap: 10px;
+}
+
+/* ApplyProject popup button standard */
+.student-home-page .invitation-project-popup .invitation-actions button {
+  width: 110px;
+  min-width: 110px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  font-family: "Prompt", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.student-home-page .invitation-project-popup .reject-btn {
+  background: #ff0000;
+}
+.student-home-page .invitation-project-popup .reject-btn:hover {
+  background: #d90000;
+}
+.student-home-page .invitation-project-popup .accept-btn {
+  background: #20a36a;
+}
+.student-home-page .invitation-project-popup .accept-btn:hover {
+  background: #188c59;
+}
+
+@media (max-width: 480px) {
+  .student-home-page .invitation-project-popup {
+    padding: 23px 18px 25px;
+  }
+}
+
+
+/* =========================================
+   INVITATION POPUP
+========================================= */
+
+.student-home-page .invitation-popup {
+  width: 430px;
+  max-width: calc(100% - 40px);
+
+  padding: 30px 38px 32px;
+
+  background: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+  box-shadow: none;
+
+  text-align: center;
+}
+
+/* หัวข้อป๊อปอัป */
+.student-home-page .invitation-popup h3 {
+  margin: 0;
+
+  color: #222222;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* เส้นแบ่ง */
+.student-home-page .invitation-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 20px 0 24px;
+
+  background: #dddddd;
+  border: none;
+}
+
+/* ข้อมูลแต่ละส่วน */
+.student-home-page .invitation-detail {
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+
+/* หัวข้อ Popup */
+.student-home-page .invitation-popup h3 {
+  color: #000000;
+  font-weight: 600;
+}
+
+/* คำกำกับข้อมูล */
+.student-home-page .invitation-detail strong {
+  color: #555555;
+  font-weight: 400;
+}
+
+/* ชื่อโครงงานและชื่อสมาชิก */
+.student-home-page .invitation-detail p {
+  color: #000000;
+  font-weight: 500;
+}
+
+/* คำถามด้านล่าง */
+.student-home-page .invitation-question {
+  color: #000000;
+  font-weight: 500;
+}
+
+/* กลุ่มปุ่ม */
+.student-home-page .invitation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* ขนาดปุ่ม */
+.student-home-page .invitation-actions button {
+  min-width: 100px;
+  height: 36px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+/* ปุ่มปฏิเสธ */
+.student-home-page .reject-btn {
+  background: #ff0000;
+}
+
+.student-home-page .reject-btn:hover {
+  background: #d90000;
+}
+
+/* ปุ่มตกลง */
+.student-home-page .accept-btn {
+  background: #20a36a;
+}
+
+.student-home-page .accept-btn:hover {
+  background: #188c59;
+}
+
+
+/* =========================================
+   SYSTEM NOTIFICATION POPUP
+========================================= */
+
+.student-home-page .system-popup-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.82);
+
+  z-index: 2000;
+}
+
+.student-home-page .system-popup {
+  width: 430px;
+  max-width: 100%;
+
+  padding: 30px 38px 32px;
+
+  background: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+
+  box-shadow: none;
+  text-align: center;
+}
+
+/* หัวข้อ */
+.student-home-page .system-popup h3 {
+  margin: 0;
+
+  color: #000000;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* เส้นแบ่ง */
+.student-home-page .system-popup-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 20px 0 24px;
+
+  background: #dddddd;
+}
+
+/* ข้อความแจ้งเตือน */
+.student-home-page .system-popup-message {
+  margin: 0 0 26px;
+
+  color: #000000;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+
+  text-align: center;
+}
+
+/* ปุ่ม */
+.student-home-page .system-popup-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-home-page .system-popup-actions button {
+  min-width: 110px;
+  height: 36px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+/* ปุ่มตกลง */
+.student-home-page .system-popup-close-btn {
+  background: #20a36a;
+}
+
+.student-home-page .system-popup-close-btn:hover {
+  background: #188c59;
+}
+
+/* ปุ่มแก้ไขและส่งใหม่ */
+.student-home-page .system-popup-resubmit-btn {
+  background: #3b75c4;
+}
+
+.student-home-page .system-popup-resubmit-btn:hover {
+  background: #2f6db5;
 }

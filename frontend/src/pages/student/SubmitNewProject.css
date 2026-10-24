@@ -1097,3 +1097,100 @@
     min-width: 700px;
   }
 }
+/* =========================================================
+   UPDATED LAYOUT: CONTACT / ADVISOR IN SEPARATE SIDE-BY-SIDE CARDS
+========================================================= */
+.student-submit-project-page .proposal-contact-advisor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: stretch;
+}
+
+.student-submit-project-page .proposal-contact-advisor-grid > .proposal-section {
+  min-width: 0;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   UPDATED MEMBER RESULT: LIGHT LABELS / BOLD VALUES
+========================================================= */
+.student-submit-project-page .member-result {
+  padding: 16px 18px;
+}
+
+.student-submit-project-page .member-result-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.student-submit-project-page .member-result-grid .result-item {
+  min-width: 0;
+  margin: 0;
+}
+
+.student-submit-project-page .member-result-grid .result-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #666666;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.student-submit-project-page .member-result-grid .result-value {
+  display: block;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.student-submit-project-page .member-result .member-action {
+  margin-top: 18px;
+}
+
+/* Matching secondary action buttons */
+.student-submit-project-page .change-btn,
+.student-submit-project-page .change-advisor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #555555;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.student-submit-project-page .change-btn:hover,
+.student-submit-project-page .change-advisor-btn:hover {
+  background: #f2f2f2;
+  text-decoration: none;
+}
+
+.student-submit-project-page .advisor-selected-row {
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+}
+
+@media (max-width: 950px) {
+  .student-submit-project-page .proposal-contact-advisor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .student-submit-project-page .member-result-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
