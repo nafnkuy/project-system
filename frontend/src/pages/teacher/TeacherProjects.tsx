@@ -1,9 +1,9 @@
 import "./TeacherProjects.css";
-import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {FaPlus, FaSearch, FaEllipsisV } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEllipsisV } from "react-icons/fa";
+import TeacherNotificationBell from "./TeacherNotificationBell";
 
 import logo from "../../assets/Logo.svg";
 
@@ -342,15 +342,21 @@ function TeacherProjects() {
 
             <li className="active">จัดการหัวข้อโครงงาน</li>
 
-            <li onClick={() => navigate("/teacher-requests")}>คำขอเข้าร่วมโครงงาน</li>
+            <li onClick={() => navigate("/teacher-requests")}>
+              คำขอเข้าร่วมโครงงาน
+            </li>
 
             <li>โครงงานที่ดูแล</li>
 
             <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
 
-            <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>
+              ประวัติการพิจารณา
+            </li>
 
-            <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/teacher-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li>ข้อมูลส่วนตัว</li>
           </ul>
@@ -389,49 +395,63 @@ function TeacherProjects() {
         {/* ================= CONTENT ================= */}
 
         <div className="project-content">
-          {/* ================= TOOLBAR ================= */}
-
+          {/* ================= TOOLBAR: same style as TeacherHome ================= */}
           <div className="project-toolbar">
             <div className="project-search">
-              <FaSearch />
-
               <input
                 type="text"
                 placeholder="ค้นหาชื่อหัวข้อโครงงาน"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <FaSearch className="project-search-icon" />
             </div>
 
-            {/* STATUS FILTER */}
+            {/* ตัวกรองสถานะ — ใช้ native select เหมือน TeacherHome */}
             <div className="project-select-wrapper status-select">
+              <span className="project-select-label">
+                {statusFilter === "all"
+                  ? "สถานะทั้งหมด"
+                  : statusFilter === "open"
+                    ? "เปิดรับ"
+                    : statusFilter === "closed"
+                      ? "ปิดรับ"
+                      : "ซ่อน"}
+              </span>
               <select
+                aria-label="กรองสถานะหัวข้อโครงงาน"
+                className="project-filter-select"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="project-filter-select"
               >
-                <option value="all">สถานะ</option>
+                <option value="all">สถานะทั้งหมด</option>
                 <option value="open">เปิดรับ</option>
                 <option value="closed">ปิดรับ</option>
                 <option value="hidden">ซ่อน</option>
               </select>
-
-              <span className="project-select-arrow">▼</span>
+              <span className="project-select-arrow" aria-hidden="true">▼</span>
             </div>
 
-            {/* SORT */}
+            {/* เรียงตาม — ยังเป็นล่าสุด/เก่าสุดเหมือนเดิม */}
             <div className="project-select-wrapper sort-select">
+              <span className="project-select-label">
+                {sortOrder === "latest"
+                  ? "ล่าสุด"
+                  : sortOrder === "oldest"
+                    ? "เก่าสุด"
+                    : "เรียงตาม"}
+              </span>
               <select
+                aria-label="เรียงลำดับหัวข้อโครงงาน"
+                className="project-filter-select"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="project-filter-select"
               >
                 <option value="">เรียงตาม</option>
                 <option value="latest">ล่าสุด</option>
                 <option value="oldest">เก่าสุด</option>
               </select>
-
-              <span className="project-select-arrow">▼</span>
+              <span className="project-select-arrow" aria-hidden="true">▼</span>
             </div>
           </div>
 
@@ -469,8 +489,8 @@ function TeacherProjects() {
                 className="create-project-btn"
                 onClick={() => navigate("/create-teacher-project")}
               >
-                สร้างหัวข้อโครงงาน
                 <FaPlus />
+                <span>สร้างหัวข้อโครงงาน</span>
               </button>
             </div>
 
@@ -628,6 +648,20 @@ function TeacherProjects() {
       {/* =========================
           POPUP ซ่อน / แสดงหัวข้อ
       ========================= */}
+
+      {deleteSuccessModal && (
+        <div className="confirm-modal-overlay">
+          <div className="confirm-modal" role="dialog" aria-modal="true" aria-label="ลบหัวข้อโครงงานเรียบร้อยแล้ว">
+            <h3>ลบหัวข้อโครงงานเรียบร้อยแล้ว</h3>
+            <div className="confirm-line" />
+            <div className="confirm-actions">
+              <button className="confirm-submit-btn" onClick={() => setDeleteSuccessModal(false)}>
+                ตกลง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmModal.open && (
         <div className="confirm-modal-overlay">

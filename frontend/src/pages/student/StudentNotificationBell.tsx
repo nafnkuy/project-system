@@ -63,6 +63,26 @@ interface ProjectInvitation {
   created_at: string;
 }
 
+/* Format backend ISO timestamps in Thai local time. */
+const formatNotificationDate = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const dateText = date.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Bangkok",
+  });
+  const timeText = date.toLocaleTimeString("th-TH", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Bangkok",
+  });
+  return `${dateText} เวลา ${timeText} น.`;
+};
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -234,6 +254,11 @@ function StudentNotificationBell() {
     ? "การตอบกลับคำเชิญเข้าร่วมโครงงาน"
     : "ผลการพิจารณาโครงงาน";
 
+  // แยกข้อความเหตุผลการปฏิเสธออกจากข้อความแจ้งผล เฉพาะการปฏิเสธคำขอ
+  const rejectionMatch = !isInvitationReply && notificationMessage.includes("ปฏิเสธ")
+    ? notificationMessage.match(/([\s\S]*?)\s*เหตุผลการปฏิเสธ\s*[:：]\s*([\s\S]*)$/)
+    : null;
+
   /* =========================================================
      RENDER
   ========================================================= */
@@ -300,7 +325,7 @@ function StudentNotificationBell() {
               >
                 <p>{item.sender_name} ได้เชิญคุณเข้าร่วมโครงงาน</p>
 
-                <small>{item.created_at}</small>
+                <small>{formatNotificationDate(item.created_at)}</small>
               </div>
             ))}
 
@@ -314,7 +339,7 @@ function StudentNotificationBell() {
               >
                 <p>{item.message.split("\n")[0]}</p>
 
-                <small>{item.created_at}</small>
+                <small>{formatNotificationDate(item.created_at)}</small>
               </div>
             ))}
 
@@ -440,6 +465,20 @@ function StudentNotificationBell() {
 
                     <p className="notification-project-title">
                       {notificationMessage.split('"')[1]}
+                    </p>
+                  </div>
+                </>
+              ) : rejectionMatch ? (
+                <>
+                  <p className="notification-reply-text">
+                    {rejectionMatch[1].trim()}
+                  </p>
+                  <div className="notification-rejection-reason">
+                    <p className="notification-rejection-label">
+                      เหตุผลการปฏิเสธ
+                    </p>
+                    <p className="notification-rejection-value">
+                      {rejectionMatch[2].trim() || "ไม่ได้ระบุเหตุผล"}
                     </p>
                   </div>
                 </>

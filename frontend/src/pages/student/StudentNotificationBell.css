@@ -60,13 +60,15 @@
   position: absolute;
   top: 58px;
   right: 0;
-  width: 310px;
+  width: 340px;
+  max-width: calc(100vw - 24px);
   max-height: 420px;
   overflow-y: auto;
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+  font-family: "Prompt", sans-serif;
   z-index: 1000;
 }
 .student-notification-dropdown h4 {
@@ -84,12 +86,16 @@
 .student-notification-item:hover { background: #f7f7f7; }
 .student-notification-item p {
   margin: 0 0 5px;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 13px;
+  font-weight: 400;
+  color: #222222;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 .student-notification-item small {
   color: #999999;
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .student-notification-empty {
   padding: 20px;
@@ -237,7 +243,6 @@
    ขนาดและสีให้ตรงกับป๊อปอัปมาตรฐานของ SPTC
    แก้เฉพาะป๊อปอัปผลการพิจารณา ไม่กระทบคำเชิญ
 ========================================================= */
-
 .system-notification-dialog.student-notification-popup {
   width: 506px;
   max-width: 100%;
@@ -282,6 +287,28 @@
   line-height: 1.8;
   overflow-wrap: anywhere;
   text-align: center;
+}
+
+/* แยกหัวข้อและรายละเอียดเหตุผลการปฏิเสธให้อ่านง่าย */
+.system-notification-dialog .notification-rejection-reason {
+  margin-top: 28px;
+  text-align: center;
+}
+.system-notification-dialog .notification-rejection-label {
+  margin: 0 0 6px;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.system-notification-dialog .notification-rejection-value {
+  margin: 0;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .system-notification-dialog .student-notification-actions {
