@@ -51,7 +51,7 @@ function TeacherHome() {
 
   const getDisplayStatus = (item: Request) => {
     if (item.status === "รอพิจารณา" && item.resubmitted_at) {
-      return "แก้ไขแล้ว";
+      return "ส่งแก้ไขแล้ว";
     }
 
     return item.status;
@@ -62,7 +62,7 @@ function TeacherHome() {
 
     // หน้าหลักแสดงเฉพาะงานที่อาจารย์ต้องดำเนินการ
     const isActiveRequest =
-      displayStatus === "รอพิจารณา" || displayStatus === "แก้ไขแล้ว";
+      displayStatus === "รอพิจารณา" || displayStatus === "ส่งแก้ไขแล้ว";
 
     if (!isActiveRequest) {
       return false;
@@ -262,7 +262,7 @@ function TeacherHome() {
               >
                 <option value="ทั้งหมด">สถานะทั้งหมด</option>
                 <option value="รอพิจารณา">รอพิจารณา</option>
-                <option value="แก้ไขแล้ว">แก้ไขแล้ว</option>
+                <option value="ส่งแก้ไขแล้ว">ส่งแก้ไขแล้ว</option>
               </select>
 
               <span className="select-arrow">▼</span>
@@ -392,7 +392,7 @@ function TeacherHome() {
                                 ? "rejected"
                                 : getDisplayStatus(item) === "ต้องแก้ไข"
                                   ? "revision"
-                                  : getDisplayStatus(item) === "แก้ไขแล้ว"
+                                  : getDisplayStatus(item) === "ส่งแก้ไขแล้ว"
                                     ? "resubmitted"
                                     : "pending"
                           }`}

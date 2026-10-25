@@ -8,6 +8,16 @@ import { FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
+type ResubmitEditableValues = {
+  projectTitle: string;
+  description: string;
+  objective: string;
+  skills: string;
+  contactType: string;
+  contactValue: string;
+  introduction: string;
+};
+
 function SubmitNewProject() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -75,6 +85,15 @@ function SubmitNewProject() {
 
   const [revisionSuggestion, setRevisionSuggestion] = useState("");
 
+  // ป้องกันการกดส่งคำขอ ก่อนโหลดข้อมูลเดิมในโหมดแก้ไขเสร็จ
+  const [resubmitLoadState, setResubmitLoadState] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const [resubmitLoadError, setResubmitLoadError] = useState("");
+  // จำค่าที่โหลดมาครั้งแรก เพื่อเปิดปุ่มส่งเฉพาะเมื่อมีข้อมูลเปลี่ยนจริง
+  const [originalResubmitValues, setOriginalResubmitValues] =
+    useState<ResubmitEditableValues | null>(null);
+
   /* =========================================================
      CHECK LOGIN
   ========================================================= */
@@ -116,6 +135,8 @@ function SubmitNewProject() {
 
   /* =========================================================
      LOAD RESUBMIT DATA
+     ใช้ API เดียวกับหน้า StudentProjectRequestDetail
+     ซึ่งคืนรายละเอียดโครงงาน + คำขอ + ข้อเสนอแนะ
   ========================================================= */
 
   useEffect(() => {
@@ -123,111 +144,146 @@ function SubmitNewProject() {
       return;
     }
 
+    let cancelled = false;
+
     const loadResubmitData = async () => {
+      setResubmitLoadState("loading");
+      setResubmitLoadError("");
+      setOriginalResubmitValues(null);
+
       try {
-        const [projectRes, requestRes] = await Promise.all([
-          axios.get(`http://localhost:5000/projects/${resubmitProjectId}`),
+        // หน้าแสดงรายละเอียดคำขอใช้ API นี้อยู่แล้วและแสดงข้อมูลได้ครบ
+        const detailRes = await axios.get(
+          `http://localhost:5000/student/request-detail/${resubmitRequestId}/${userId}`,
+        );
 
-          axios.get(
-            `http://localhost:5000/project-requests/${resubmitProjectId}/${userId}`,
-          ),
-        ]);
+        const detail = detailRes.data?.request ?? detailRes.data;
 
-        const projectData = projectRes.data;
-        const requestData = requestRes.data;
+        if (!detail || String(detail.request_id) !== String(resubmitRequestId)) {
+          throw new Error("ข้อมูลคำขอที่ได้รับไม่ตรงกับคำขอที่ต้องการแก้ไข");
+        }
 
-        if (requestData.status !== "ต้องแก้ไข") {
-          alert("คำขอนี้ถูกส่งให้อาจารย์พิจารณาใหม่แล้ว");
-
-          navigate("/StudentHome");
+        if (detail.request_status !== "ต้องแก้ไข") {
+          if (!cancelled) {
+            alert("คำขอนี้ไม่อยู่ในสถานะที่แก้ไขได้แล้ว");
+            navigate("/student-project");
+          }
           return;
         }
 
+        // บาง backend ยังคืนข้อมูลติดต่อจาก route นี้เท่านั้น
+        // โหลดเป็นข้อมูลเสริม โดยไม่ให้ความล้มเหลวของ route นี้ลบข้อมูลโครงงานหลัก
+        let contactData: any = {};
+        try {
+          const contactRes = await axios.get(
+            `http://localhost:5000/project-requests/${resubmitProjectId}/${userId}`,
+          );
+          contactData = contactRes.data?.request ?? contactRes.data ?? {};
+        } catch (contactError) {
+          console.warn("Load request contact fallback:", contactError);
+        }
+
+        if (cancelled) return;
+
+        // เก็บข้อมูลเดิมไว้เทียบกับค่าที่นิสิตแก้ไขในฟอร์ม
+        const initialValues: ResubmitEditableValues = {
+          projectTitle: detail.title || "",
+          description: detail.description || "",
+          objective: detail.objectives || "",
+          skills: detail.skills || "",
+          contactType: detail.contact_type || contactData.contact_type || "",
+          contactValue: detail.contact_value || contactData.contact_value || "",
+          introduction: detail.introduction || contactData.introduction || "",
+        };
+
         /* ================= PROJECT ================= */
 
-        setProjectId(Number(resubmitProjectId));
+        setProjectId(Number(detail.project_id || resubmitProjectId));
+        setProjectTitle(initialValues.projectTitle);
+        setAcademicYear(detail.academic_year || "");
+        setProjectType(detail.project_type || "โครงงานเดี่ยว");
+        setMajor(detail.major || "");
 
-        setProjectTitle(projectData.title || "");
+        const loadedAdvisorName = detail.advisor_name || detail.advisor || "";
+        setAdvisorId(detail.advisor_id ? Number(detail.advisor_id) : null);
+        setAdvisorName(loadedAdvisorName);
+        setTeacherKeyword(loadedAdvisorName);
 
-        setAcademicYear(projectData.academic_year || "");
-
-        setProjectType(projectData.project_type || "โครงงานเดี่ยว");
-
-        setAdvisorId(
-          projectData.advisor_id ? Number(projectData.advisor_id) : null,
-        );
-
-        setAdvisorName(projectData.advisor_name || projectData.advisor || "");
-
-        setTeacherKeyword(
-          projectData.advisor_name || projectData.advisor || "",
-        );
-
-        setMajor(projectData.major || "");
-
-        setDescription(projectData.description || "");
-
-        setObjective(projectData.objectives || "");
-
-        setSkills(projectData.skills || "");
+        setDescription(initialValues.description);
+        setObjective(initialValues.objective);
+        setSkills(initialValues.skills);
 
         /* ================= REQUEST ================= */
 
-        setContactType(requestData.contact_type || "");
-
-        setContactValue(requestData.contact_value || "");
-
-        setIntroduction(requestData.introduction || "");
-
-        setRevisionSuggestion(requestData.suggestion || "");
+        setContactType(initialValues.contactType);
+        setContactValue(initialValues.contactValue);
+        setIntroduction(initialValues.introduction);
+        setRevisionSuggestion(detail.suggestion || contactData.suggestion || "");
+        setOriginalResubmitValues(initialValues);
 
         /* ================= MEMBER 2 ================= */
 
-        if (projectData.project_type === "โครงงานคู่") {
-          try {
-            const invitationRes = await axios.get(
-              `http://localhost:5000/project-invitations/status/${resubmitProjectId}/${userId}`,
-            );
+        if (detail.project_type === "โครงงานคู่") {
+          // สมาชิกในคำขอจริงเชื่อถือได้มากกว่าสถานะคำเชิญเก่า
+          const otherMember = Array.isArray(detail.members)
+            ? detail.members.find(
+                (member: any) => String(member.username) !== String(username),
+              )
+            : null;
 
-            const invitationData = invitationRes.data;
-
-            console.log("Resubmit invitation data =", invitationData);
-
-            if (invitationData.status === "ตอบรับ") {
-              setMemberId(invitationData.receiver_username || "");
-
-              setMemberUserId(
-                invitationData.receiver_id
-                  ? Number(invitationData.receiver_id)
-                  : null,
+          if (otherMember) {
+            setMemberId(otherMember.username || "");
+            setMemberUserId(otherMember.id ? Number(otherMember.id) : null);
+            setMemberName(otherMember.name || "");
+          } else {
+            try {
+              const invitationRes = await axios.get(
+                `http://localhost:5000/project-invitations/status/${resubmitProjectId}/${userId}`,
               );
-
-              setMemberName(invitationData.receiver_name || "");
+              if (cancelled) return;
+              const invitation = invitationRes.data;
+              if (invitation.status === "ตอบรับ") {
+                setMemberId(invitation.receiver_username || "");
+                setMemberUserId(
+                  invitation.receiver_id ? Number(invitation.receiver_id) : null,
+                );
+                setMemberName(invitation.receiver_name || "");
+              } else {
+                setMemberId("");
+                setMemberUserId(null);
+                setMemberName("");
+              }
+            } catch (invitationError) {
+              console.warn("Load partner fallback:", invitationError);
+              setMemberId("");
+              setMemberUserId(null);
+              setMemberName("");
             }
-          } catch (invitationError: any) {
-            console.log("Load second member error =", invitationError);
-
-            setMemberId("");
-            setMemberUserId(null);
-            setMemberName("");
           }
         } else {
           setMemberId("");
           setMemberUserId(null);
           setMemberName("");
         }
-      } catch (err: any) {
-        console.log("Load resubmit data error =", err);
 
-        alert(
+        if (!cancelled) setResubmitLoadState("loaded");
+      } catch (err: any) {
+        if (cancelled) return;
+        console.error("Load resubmit data error:", err);
+        setResubmitLoadError(
           err.response?.data?.message ||
+            err.message ||
             "ไม่สามารถโหลดข้อมูลคำเสนอโครงงานเดิมได้",
         );
+        setResubmitLoadState("error");
       }
     };
 
-    loadResubmitData();
-  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId, navigate]);
+    void loadResubmitData();
+    return () => {
+      cancelled = true;
+    };
+  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId, username, navigate]);
 
   /* =========================================================
      LOGOUT
@@ -379,11 +435,47 @@ function SubmitNewProject() {
   };
 
   /* =========================================================
+     RESUBMIT: ENABLE BUTTON ONLY WHEN DATA HAS CHANGED
+  ========================================================= */
+
+  // ช่องปีการศึกษาและประเภทโครงงานถูกล็อกในโหมดแก้ไข จึงไม่ต้องนำมาเปรียบเทียบ
+  const hasResubmitChanges =
+    originalResubmitValues !== null &&
+    (projectTitle.trim() !== originalResubmitValues.projectTitle.trim() ||
+      description.trim() !== originalResubmitValues.description.trim() ||
+      objective.trim() !== originalResubmitValues.objective.trim() ||
+      skills.trim() !== originalResubmitValues.skills.trim() ||
+      contactType !== originalResubmitValues.contactType ||
+      contactValue.trim() !== originalResubmitValues.contactValue.trim() ||
+      introduction.trim() !== originalResubmitValues.introduction.trim());
+
+  const resubmitRequiredFieldsComplete =
+    projectTitle.trim() !== "" &&
+    academicYear.trim() !== "" &&
+    advisorId !== null &&
+    major.trim() !== "" &&
+    contactType.trim() !== "" &&
+    contactValue.trim() !== "" &&
+    description.trim() !== "" &&
+    objective.trim() !== "" &&
+    skills.trim() !== "";
+
+  const canResubmit =
+    resubmitLoadState === "loaded" &&
+    hasResubmitChanges &&
+    resubmitRequiredFieldsComplete;
+
+  /* =========================================================
      SUBMIT PROJECT
   ========================================================= */
 
   const handleSubmit = async () => {
     try {
+      if (isResubmit && !canResubmit) {
+        // ยังไม่แก้ข้อมูลจริง หรือกรอกข้อมูลบังคับไม่ครบ
+        return;
+      }
+
       if (!projectTitle.trim()) {
         alert("กรุณากรอกชื่อหัวข้อโครงงาน");
         return;
@@ -633,6 +725,27 @@ function SubmitNewProject() {
         {/* ================= FORM ================= */}
 
         <div className="proposal-card">
+          {isResubmit && resubmitLoadState === "loading" && (
+            <div className="resubmit-data-message" role="status">
+              กำลังโหลดข้อมูลคำเสนอโครงงานเดิม...
+            </div>
+          )}
+          {isResubmit && resubmitLoadState === "error" && (
+            <div className="resubmit-data-message error" role="alert">
+              โหลดข้อมูลคำขอเดิมไม่สำเร็จ: {resubmitLoadError}
+              กรุณากลับไปหน้ารายละเอียดคำขอ แล้วลองกดแก้ไขอีกครั้ง
+            </div>
+          )}
+          {/* ================= REVISION: READ BEFORE EDITING ================= */}
+          {isResubmit && resubmitLoadState === "loaded" && (
+            <div className="revision-suggestion-box" role="note">
+              <div className="revision-suggestion-title">สิ่งที่ต้องแก้ไข</div>
+              <div className="revision-suggestion-text">
+                {revisionSuggestion || "-"}
+              </div>
+            </div>
+          )}
+
           {/* ================= TITLE ================= */}
 
           <section className="proposal-section">
@@ -659,6 +772,7 @@ function SubmitNewProject() {
                   <select
                     value={academicYear}
                     onChange={(e) => setAcademicYear(e.target.value)}
+                    disabled={isResubmit}
                   >
                     <option value="">เลือกปีการศึกษา</option>
 
@@ -671,7 +785,9 @@ function SubmitNewProject() {
                     <option value="2570/2">2570/2</option>
                   </select>
 
-                  <span className="contact-select-arrow">▼</span>
+                  {!isResubmit && (
+                    <span className="contact-select-arrow">▼</span>
+                  )}
                 </div>
               </div>
 
@@ -682,13 +798,18 @@ function SubmitNewProject() {
                   <select
                     value={projectType}
                     onChange={(e) => setProjectType(e.target.value)}
+                    disabled={isResubmit}
+                    aria-label="ประเภทโครงงาน"
+                    title={isResubmit ? "ไม่สามารถเปลี่ยนประเภทโครงงานระหว่างแก้ไขคำขอได้" : undefined}
                   >
                     <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
 
                     <option value="โครงงานคู่">โครงงานคู่</option>
                   </select>
 
-                  <span className="contact-select-arrow">▼</span>
+                  {!isResubmit && (
+                    <span className="contact-select-arrow">▼</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -999,20 +1120,6 @@ function SubmitNewProject() {
               />
             </div>
 
-            {/* ================= REVISION ================= */}
-
-            {isResubmit && (
-              <div className="revision-suggestion-box">
-                <div className="revision-suggestion-title">
-                  สิ่งที่ต้องแก้ไข
-                </div>
-
-                <div className="revision-suggestion-text">
-                  {revisionSuggestion || "-"}
-                </div>
-              </div>
-            )}
-
             {/* ================= BUTTON ================= */}
 
             <div className="button-group">
@@ -1028,6 +1135,7 @@ function SubmitNewProject() {
                 type="button"
                 className="submit-btn"
                 onClick={handleSubmit}
+                disabled={isResubmit && !canResubmit}
               >
                 {isResubmit ? "ส่งให้อาจารย์พิจารณาใหม่" : "ส่งคำเสนอโครงงาน"}
               </button>
