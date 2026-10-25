@@ -235,6 +235,34 @@ function StudentNotificationBell() {
     : "ผลการพิจารณาโครงงาน";
 
   /* =========================================================
+   FORMAT NOTIFICATION DATE
+========================================================= */
+
+  const formatNotificationDate = (value: string) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) return value;
+
+    const dateText = date.toLocaleDateString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const timeText = date.toLocaleTimeString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${dateText} เวลา ${timeText} น.`;
+  };
+
+  /* =========================================================
      RENDER
   ========================================================= */
 
@@ -300,7 +328,7 @@ function StudentNotificationBell() {
               >
                 <p>{item.sender_name} ได้เชิญคุณเข้าร่วมโครงงาน</p>
 
-                <small>{item.created_at}</small>
+                <small>{formatNotificationDate(item.created_at)}</small>
               </div>
             ))}
 
@@ -314,7 +342,7 @@ function StudentNotificationBell() {
               >
                 <p>{item.message.split("\n")[0]}</p>
 
-                <small>{item.created_at}</small>
+                <small>{formatNotificationDate(item.created_at)}</small>
               </div>
             ))}
 
@@ -334,151 +362,163 @@ function StudentNotificationBell() {
       ===================================================== */}
       {createPortal(
         <>
-      {selectedInvitation && (
-        <div
-          className="student-notification-overlay"
-          onClick={() => setSelectedInvitation(null)}
-        >
-          <div
-            className="student-notification-popup invitation-notification-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="student-invitation-popup-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id="student-invitation-popup-title">
-              คำเชิญเข้าร่วมโครงงาน
-            </h3>
-
-            <div className="student-notification-divider" />
-
-            <div className="student-invitation-detail">
-              <span className="student-invitation-label">
-                ชื่อหัวข้อโครงงาน
-              </span>
-              <p className="student-invitation-value">
-                {selectedInvitation.title}
-              </p>
-            </div>
-
-            <div className="student-invitation-detail">
-              <span className="student-invitation-label">
-                สมาชิกคนที่ 1
-              </span>
-              <p className="student-invitation-value">
-                {selectedInvitation.sender_username}{" "}
-                {selectedInvitation.sender_name}
-              </p>
-            </div>
-
-            <div className="student-invitation-detail student-invitation-last">
-              <span className="student-invitation-label">
-                สมาชิกคนที่ 2
-              </span>
-              <p className="student-invitation-value">
-                {selectedInvitation.receiver_username}{" "}
-                {selectedInvitation.receiver_name}
-              </p>
-            </div>
-
-            <div className="student-notification-divider student-invitation-divider" />
-
-            <p className="student-notification-question">
-              คุณต้องการเข้าร่วมโครงงานนี้หรือไม่
-            </p>
-
-            <div className="student-notification-actions">
-              <button
-                type="button"
-                className="student-notification-reject"
-                onClick={handleRejectInvitation}
+          {selectedInvitation && (
+            <div
+              className="student-notification-overlay"
+              onClick={() => setSelectedInvitation(null)}
+            >
+              <div
+                className="student-notification-popup invitation-notification-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="student-invitation-popup-title"
+                onClick={(e) => e.stopPropagation()}
               >
-                ปฏิเสธ
-              </button>
+                <h3 id="student-invitation-popup-title">
+                  คำเชิญเข้าร่วมโครงงาน
+                </h3>
 
-              <button
-                type="button"
-                className="student-notification-accept"
-                onClick={handleAcceptInvitation}
-              >
-                ตกลง
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <div className="student-notification-divider" />
 
-      {/* =====================================================
-          SYSTEM NOTIFICATION POPUP
-      ===================================================== */}
-      {selectedSystemNotification && (
-        <div
-          className="student-notification-overlay"
-          onClick={() => setSelectedSystemNotification(null)}
-        >
-          <div
-            className="student-notification-popup system-notification-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="student-system-notification-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id="student-system-notification-title">{systemPopupTitle}</h3>
-            <div className="student-notification-divider" />
-
-            <div className="student-notification-message">
-              {isInvitationReply && notificationMessage.includes('"') ? (
-                <>
-                  <p className="notification-reply-text">
-                    {notificationMessage.split('"')[0].trim()}
+                <div className="student-invitation-detail">
+                  <span className="student-invitation-label">
+                    ชื่อหัวข้อโครงงาน
+                  </span>
+                  <p className="student-invitation-value">
+                    {selectedInvitation.title}
                   </p>
+                </div>
 
-                  <div className="notification-project-info">
-                    <span className="notification-project-label">
-                      ชื่อหัวข้อโครงงาน
-                    </span>
+                <div className="student-invitation-detail">
+                  <span className="student-invitation-label">
+                    สมาชิกคนที่ 1
+                  </span>
+                  <p className="student-invitation-value">
+                    {selectedInvitation.sender_username}{" "}
+                    {selectedInvitation.sender_name}
+                  </p>
+                </div>
 
-                    <p className="notification-project-title">
-                      {notificationMessage.split('"')[1]}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <p className="notification-reply-text">
-                  {selectedSystemNotification.message}
+                <div className="student-invitation-detail student-invitation-last">
+                  <span className="student-invitation-label">
+                    สมาชิกคนที่ 2
+                  </span>
+                  <p className="student-invitation-value">
+                    {selectedInvitation.receiver_username}{" "}
+                    {selectedInvitation.receiver_name}
+                  </p>
+                </div>
+
+                <div className="student-notification-divider student-invitation-divider" />
+
+                <p className="student-notification-question">
+                  คุณต้องการเข้าร่วมโครงงานนี้หรือไม่
                 </p>
-              )}
-            </div>
 
-            <div className="student-notification-actions">
-              <button
-                type="button"
-                className="student-notification-confirm"
-                onClick={() => setSelectedSystemNotification(null)}
-              >
-                ตกลง
-              </button>
-              {isRevision &&
-                !isInvitationReply &&
-                selectedSystemNotification.project_id != null &&
-                selectedSystemNotification.request_id != null && (
+                <div className="student-notification-actions">
+                  <button
+                    type="button"
+                    className="student-notification-reject"
+                    onClick={handleRejectInvitation}
+                  >
+                    ปฏิเสธ
+                  </button>
+
                   <button
                     type="button"
                     className="student-notification-accept"
-                    onClick={() => {
-                      navigate(
-                        `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
-                      );
-                      setSelectedSystemNotification(null);
-                    }}
+                    onClick={handleAcceptInvitation}
                   >
-                    แก้ไขและส่งใหม่
+                    ตกลง
                   </button>
-                )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+
+          {/* =====================================================
+          SYSTEM NOTIFICATION POPUP
+      ===================================================== */}
+          {selectedSystemNotification && (
+            <div
+              className="student-notification-overlay"
+              onClick={() => setSelectedSystemNotification(null)}
+            >
+              <div
+                className="student-notification-popup system-notification-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="student-system-notification-title"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 id="student-system-notification-title">
+                  {systemPopupTitle}
+                </h3>
+                <div className="student-notification-divider" />
+
+                <div className="student-notification-message">
+                  {isInvitationReply && notificationMessage.includes('"') ? (
+                    <>
+                      <div className="notification-reply-content">
+                        <p className="notification-reply-name">
+                          {notificationMessage
+                            .split(/ตอบรับคำเชิญ|ปฏิเสธคำเชิญ/)[0]
+                            .trim()}
+                        </p>
+
+                        <p className="notification-reply-text">
+                          {notificationMessage.includes("ตอบรับคำเชิญ")
+                            ? "ตอบรับคำเชิญเข้าร่วมโครงงานแล้ว"
+                            : "ปฏิเสธคำเชิญเข้าร่วมโครงงานแล้ว"}
+                        </p>
+                      </div>
+
+                      <div className="notification-project-info">
+                        <span className="notification-project-label">
+                          ชื่อหัวข้อโครงงาน
+                        </span>
+
+                        <p className="notification-project-title">
+                          {notificationMessage.split('"')[1]}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="notification-reply-text">
+                      {selectedSystemNotification.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="student-notification-actions">
+                  <button
+                    type="button"
+                    className="student-notification-confirm"
+                    onClick={() => setSelectedSystemNotification(null)}
+                  >
+                    ตกลง
+                  </button>
+                  {isRevision &&
+                    !isInvitationReply &&
+                    selectedSystemNotification.project_id != null &&
+                    selectedSystemNotification.request_id != null && (
+                      <button
+                        type="button"
+                        className="student-notification-accept"
+                        onClick={() => {
+                          navigate(
+                            `/submit-new-project?mode=resubmit&projectId=${selectedSystemNotification.project_id}&requestId=${selectedSystemNotification.request_id}`,
+                          );
+                          setSelectedSystemNotification(null);
+                        }}
+                      >
+                        แก้ไขและส่งใหม่
+                      </button>
+                    )}
+                </div>
+              </div>
+            </div>
+          )}
         </>,
         document.body,
       )}
