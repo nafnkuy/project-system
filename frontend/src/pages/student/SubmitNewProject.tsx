@@ -637,7 +637,7 @@ function SubmitNewProject() {
 
           <section className="proposal-section">
             <div className="form-group">
-              <label>ชื่อหัวข้อโครงงาน *</label>
+              <label>ชื่อหัวข้อโครงงาน <span className="required-star">*</span></label>
 
               <input
                 type="text"
@@ -653,7 +653,7 @@ function SubmitNewProject() {
           <section className="proposal-section">
             <div className="proposal-two-column">
               <div className="form-group">
-                <label>ปีการศึกษา / ภาคเรียน *</label>
+                <label>ปีการศึกษา / ภาคเรียน <span className="required-star">*</span></label>
 
                 <div className="contact-select-wrapper">
                   <select
@@ -676,7 +676,7 @@ function SubmitNewProject() {
               </div>
 
               <div className="form-group">
-                <label>ประเภทโครงงาน *</label>
+                <label>ประเภทโครงงาน <span className="required-star">*</span></label>
 
                 <div className="contact-select-wrapper">
                   <select
@@ -817,7 +817,7 @@ function SubmitNewProject() {
           {/* ================= CONTACT ================= */}
 
           <section className="proposal-section">
-            <h4 className="proposal-section-title">ช่องทางการติดต่อ *</h4>
+            <h4 className="proposal-section-title">ช่องทางการติดต่อ <span className="required-star">*</span></h4>
 
             <div className="contact-select-wrapper">
               <select
@@ -841,7 +841,7 @@ function SubmitNewProject() {
 
             {contactType !== "" && (
               <div className="form-group">
-                <label>{contactType} *</label>
+                <label>{contactType} <span className="required-star">*</span></label>
 
                 <input
                   type={
@@ -862,7 +862,7 @@ function SubmitNewProject() {
 
           <section className="proposal-section">
             <div className="form-group">
-              <label>เลือกอาจารย์ที่ปรึกษา *</label>
+              <label>เลือกอาจารย์ที่ปรึกษา <span className="required-star">*</span></label>
 
               {advisorName ? (
                 <div className="advisor-selected-row">
@@ -961,7 +961,7 @@ function SubmitNewProject() {
 
           <section className="proposal-section">
             <div className="form-group">
-              <label>รายละเอียดโครงงาน *</label>
+              <label>รายละเอียดโครงงาน <span className="required-star">*</span></label>
 
               <textarea
                 rows={5}
@@ -972,7 +972,7 @@ function SubmitNewProject() {
             </div>
 
             <div className="form-group">
-              <label>วัตถุประสงค์ *</label>
+              <label>วัตถุประสงค์ <span className="required-star">*</span></label>
 
               <textarea
                 rows={4}
@@ -983,7 +983,7 @@ function SubmitNewProject() {
             </div>
 
             <div className="form-group">
-              <label>เทคโนโลยีที่ใช้ *</label>
+              <label>เทคโนโลยีที่ใช้ <span className="required-star">*</span></label>
 
               <p className="example-text">
                 ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS

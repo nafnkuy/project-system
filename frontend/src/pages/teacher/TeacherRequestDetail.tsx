@@ -69,7 +69,7 @@ function TeacherRequestDetail() {
     fromPage === "home" ? "/teacher-home" : "/teacher-requests";
 
   const previousPageName =
-    fromPage === "home" ? "หน้าหลัก" : "คำขอเข้าร่วมโครงงาน";
+    fromPage === "home" ? "คำขอเข้าร่วมโครงงาน" : "คำขอเข้าร่วมโครงงาน";
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -525,18 +525,6 @@ const objectives =
                   <strong>รับนิสิต :</strong> {request.current_members} /{" "}
                   {request.max_members} คน
                 </p>
-
-                <h4>สมาชิกโครงงาน</h4>
-
-                {request.members.length === 0 ? (
-                  <p className="empty-member">ยังไม่มีสมาชิก</p>
-                ) : (
-                  request.members.map((member) => (
-                    <div className="member-row" key={member.id}>
-                      {member.username} {member.name}
-                    </div>
-                  ))
-                )}
               </div>
             </section>
 
@@ -559,64 +547,79 @@ const objectives =
                   <>
                     {request.members.map((member, index) => (
                       <div key={member.id} className="applicant-member-block">
-                        <h4>
-                          {index === 0 ? "สมาชิกคนที่ 1" : "สมาชิกคนที่ 2"}
-                        </h4>
+                        <h4>สมาชิกคนที่ {index + 1}</h4>
 
-                        <label>รหัสประจำตัว</label>
-                        <div className="readonly-box">{member.username}</div>
+                        <div className="applicant-fields-grid">
+                          <div className="applicant-field">
+                            <label>รหัสประจำตัว</label>
+                            <div className="readonly-box">{member.username}</div>
+                          </div>
 
-                        <label>ชื่อ</label>
-                        <div className="readonly-box">{member.name}</div>
+                          <div className="applicant-field">
+                            <label>ชื่อ</label>
+                            <div className="readonly-box">{member.name}</div>
+                          </div>
 
-                        <label>สาขาวิชา</label>
-                        <div className="readonly-box">
-                          {member.major || "-"}
-                        </div>
+                          <div className="applicant-field">
+                            <label>สาขาวิชา</label>
+                            <div className="readonly-box">
+                              {member.major || "-"}
+                            </div>
+                          </div>
 
-                        <label>อีเมล</label>
-                        <div className="readonly-box">
-                          {member.email || "-"}
+                          <div className="applicant-field">
+                            <label>อีเมล</label>
+                            <div className="readonly-box">
+                              {member.email || "-"}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
-
-                    <label>ช่องทางการติดต่อหลัก</label>
-                    <div className="readonly-box">
-                      {request.contact_type} : {request.contact_value}
-                    </div>
-
-                    <label>เหตุผลในการเสนอหัวข้อโครงงาน</label>
-
-                    <textarea value={request.introduction || ""} readOnly />
                   </>
                 ) : (
-                  <>
-                    <label>รหัสประจำตัว</label>
+                  <div className="applicant-member-block">
+                    <h4>
+                      {request.source === "student"
+                        ? "สมาชิกคนที่ 1"
+                        : "ข้อมูลนิสิต"}
+                    </h4>
 
-                    <div className="readonly-box">
-                      {request.student_username}
+                    <div className="applicant-fields-grid">
+                      <div className="applicant-field">
+                        <label>รหัสประจำตัว</label>
+                        <div className="readonly-box">
+                          {request.student_username}
+                        </div>
+                      </div>
+
+                      <div className="applicant-field">
+                        <label>ชื่อ</label>
+                        <div className="readonly-box">
+                          {request.student_name}
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                )}
 
-                    <label>ชื่อ</label>
-
-                    <div className="readonly-box">{request.student_name}</div>
-
+                <div className="applicant-extra-fields">
+                  <div className="applicant-field">
                     <label>ช่องทางการติดต่อ</label>
-
                     <div className="readonly-box">
                       {request.contact_type} : {request.contact_value}
                     </div>
+                  </div>
 
+                  <div className="applicant-field applicant-reason-field">
                     <label>
                       {request.source === "teacher"
                         ? "เหตุผลในการสมัครเข้าร่วมโครงงาน"
                         : "เหตุผลในการเสนอหัวข้อโครงงาน"}
                     </label>
-
                     <textarea value={request.introduction || ""} readOnly />
-                  </>
-                )}
+                  </div>
+                </div>
               </div>
             </section>
             {/* =========================

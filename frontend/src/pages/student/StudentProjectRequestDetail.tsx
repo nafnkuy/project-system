@@ -376,14 +376,12 @@ function StudentProjectRequestDetail() {
 
         <div className="student-request-content">
           <div className="student-request-card">
-            {/* ================= TITLE ================= */}
-
+            {/* ================= ชื่อโครงงาน / สถานะ ================= */}
             <div className="student-request-title-row">
               <h3>{request.title}</h3>
 
               <span className="student-request-status">
                 <span>สถานะ :</span>
-
                 <strong
                   className={`student-request-status-value ${getStatusClass(
                     request.request_status,
@@ -395,43 +393,46 @@ function StudentProjectRequestDetail() {
             </div>
 
             {/* ================= ข้อมูลคำขอ ================= */}
-
             <section className="student-request-section">
               <h4>ข้อมูลคำขอ</h4>
-
               <div className="student-request-line" />
 
               <p>
-                ประเภทคำขอ :{" "}
+                <strong>ประเภทคำขอ :</strong>{" "}
                 {request.source === "student"
                   ? "เสนอหัวข้อโครงงาน"
                   : "สมัครเข้าร่วมโครงงาน"}
               </p>
-
-              <p>วันที่ส่งคำขอ : {formatThaiDate(request.request_date)}</p>
-
-              <p>เวลา : {formatThaiTime(request.request_date)} น.</p>
+              <p>
+                <strong>วันที่ส่งคำขอ :</strong>{" "}
+                {formatThaiDate(request.request_date)}
+              </p>
+              <p>
+                <strong>เวลา :</strong> {formatThaiTime(request.request_date)} น.
+              </p>
             </section>
 
             {/* ================= ข้อมูลโครงงาน ================= */}
-
             <section className="student-request-section">
               <h4>ข้อมูลโครงงาน</h4>
-
               <div className="student-request-line" />
 
-              <p>อาจารย์ที่ปรึกษา : {request.advisor_name || "-"}</p>
-
-              <p>ประเภทโครงงาน : {request.project_type || "-"}</p>
-
-              <p>สาขาวิชา : {request.major || "-"}</p>
-
-              <p>ปีการศึกษา : {request.academic_year || "-"}</p>
+              <p>
+                <strong>อาจารย์ที่ปรึกษา :</strong> {request.advisor_name || "-"}
+              </p>
+              <p>
+                <strong>ประเภทโครงงาน :</strong> {request.project_type || "-"}
+              </p>
+              <p>
+                <strong>สาขาวิชา :</strong> {request.major || "-"}
+              </p>
+              <p>
+                <strong>ปีการศึกษา :</strong> {request.academic_year || "-"}
+              </p>
 
               <div className="student-request-member-title">
                 สมาชิกในโครงงาน ({request.members.length}/{request.max_members})
               </div>
-
               <div className="student-request-members">
                 {request.members.map((member) => (
                   <p key={member.id}>
@@ -441,103 +442,86 @@ function StudentProjectRequestDetail() {
               </div>
             </section>
 
-            {/* ================= รายละเอียด ================= */}
+            {/* ================= รายละเอียด / วัตถุประสงค์ / เทคโนโลยี : การ์ดเดียว ================= */}
+            <section className="student-request-section student-request-overview">
+              <div className="student-request-overview-block">
+                <h4>รายละเอียดโครงงาน</h4>
+                <div className="student-request-line" />
+                <p className="student-request-description">
+                  {request.description || "-"}
+                </p>
+              </div>
 
-            <section className="student-request-section">
-              <h4>รายละเอียดโครงงาน</h4>
-
-              <div className="student-request-line" />
-
-              <p className="student-request-description">
-                {request.description || "-"}
-              </p>
-            </section>
-
-            {/* ================= วัตถุประสงค์ ================= */}
-
-            <section className="student-request-section">
-              <h4>วัตถุประสงค์</h4>
-
-              <div className="student-request-line" />
-
-              {objectives.length > 0 ? (
-                <ul className="student-request-objectives">
-                  {objectives.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>-</p>
-              )}
-            </section>
-
-            {/* ================= เทคโนโลยี ================= */}
-
-            <section className="student-request-section">
-              <h4>เทคโนโลยีที่ใช้</h4>
-
-              <div className="student-request-line" />
-
-              <div className="student-request-skills">
-                {skills.length > 0 ? (
-                  skills.map((skill, index) => {
-                    const style = skillStyles[skill] || defaultSkillStyle;
-
-                    return (
-                      <span
-                        key={index}
-                        className="student-request-skill"
-                        style={{
-                          backgroundColor: style.backgroundColor,
-
-                          borderColor: style.borderColor,
-                        }}
-                      >
-                        {skill}
-                      </span>
-                    );
-                  })
+              <div className="student-request-overview-block">
+                <h4>วัตถุประสงค์</h4>
+                <div className="student-request-line" />
+                {objectives.length > 0 ? (
+                  <ul className="student-request-objectives">
+                    {objectives.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
                 ) : (
                   <p>-</p>
                 )}
               </div>
+
+              <div className="student-request-overview-block">
+                <h4>เทคโนโลยีที่ใช้</h4>
+                <div className="student-request-line" />
+                <div className="student-request-skills">
+                  {skills.length > 0 ? (
+                    skills.map((skill, index) => {
+                      const style = skillStyles[skill] || defaultSkillStyle;
+                      return (
+                        <span
+                          key={index}
+                          className="student-request-skill"
+                          style={{
+                            backgroundColor: style.backgroundColor,
+                            borderColor: style.borderColor,
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <p>-</p>
+                  )}
+                </div>
+              </div>
             </section>
 
-            {/* =================================================
-                ผลการพิจารณา
-                ไม่แสดงตอนรอพิจารณา
-            ================================================= */}
-
+            {/* ================= ผลการพิจารณา (ไม่แสดงตอนรอพิจารณา) ================= */}
             {request.request_status !== "รอพิจารณา" && (
               <section className="student-request-section student-request-decision">
                 <h4>ผลการพิจารณา</h4>
-
                 <div className="student-request-line" />
 
-                <p>ผู้พิจารณา : {request.advisor_name}</p>
-
-                <p>วันที่พิจารณา : {formatThaiDate(request.decision_date)}</p>
-
-                <p>เวลา : {formatThaiTime(request.decision_date)} น.</p>
-
-                {/* ===== ต้องแก้ไข ===== */}
+                <p>
+                  <strong>ผู้พิจารณา :</strong> {request.advisor_name}
+                </p>
+                <p>
+                  <strong>วันที่พิจารณา :</strong>{" "}
+                  {formatThaiDate(request.decision_date)}
+                </p>
+                <p>
+                  <strong>เวลา :</strong> {formatThaiTime(request.decision_date)} น.
+                </p>
 
                 {request.request_status === "ต้องแก้ไข" && (
                   <div className="student-request-feedback">
                     <strong>ข้อเสนอแนะจากอาจารย์</strong>
-
                     <div className="student-request-feedback-box">
                       {request.suggestion || "-"}
                     </div>
                   </div>
                 )}
 
-                {/* ===== ปฏิเสธ ===== */}
-
                 {request.request_status === "ปฏิเสธ" && (
                   <div className="student-request-feedback">
                     <strong>เหตุผล</strong>
-
                     <div className="student-request-feedback-box">
                       {request.rejection_reason || "อาจารย์ไม่ได้ระบุเหตุผล"}
                     </div>
@@ -546,8 +530,7 @@ function StudentProjectRequestDetail() {
               </section>
             )}
 
-            {/* ================= BUTTON ================= */}
-
+            {/* ================= ปุ่ม ================= */}
             <div className="student-request-actions">
               <button
                 className="student-request-back-btn"

@@ -405,6 +405,14 @@
   font-weight: 600;
 }
 
+/* เครื่องหมาย * สำหรับช่องบังคับกรอก */
+.student-submit-project-page .required-star {
+  color: #ff0000;
+  font-size: 16px;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
 /* =========================================================
    INPUT / TEXTAREA
 ========================================================= */

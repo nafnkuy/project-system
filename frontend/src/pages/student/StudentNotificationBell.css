@@ -1,8 +1,6 @@
 /* =========================================================
-   STUDENT NOTIFICATION BELL
+   NOTIFICATION WRAPPER
 ========================================================= */
-
-/* กระดิ่ง */
 .student-notification-wrapper {
   position: relative;
   width: 50px;
@@ -15,6 +13,9 @@
   border-radius: 4px;
 }
 
+/* =========================================================
+   BELL
+========================================================= */
 .student-notification-btn {
   position: relative;
   width: 48px;
@@ -29,16 +30,12 @@
   font-size: 20px;
   cursor: pointer;
 }
+.student-notification-btn svg { color: #999999; }
+.student-notification-btn:hover { background: transparent; }
 
-.student-notification-btn svg {
-  color: #999999;
-}
-
-.student-notification-btn:hover {
-  background: transparent;
-}
-
-/* ตัวเลขแจ้งเตือน */
+/* =========================================================
+   BADGE
+========================================================= */
 .student-notification-count {
   position: absolute;
   top: -8px;
@@ -50,13 +47,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #ff0000;
+  background: red;
   color: #ffffff;
   font-size: 11px;
   font-weight: 500;
 }
 
-/* รายการที่แสดงเมื่อกดกระดิ่ง */
+/* =========================================================
+   DROPDOWN
+========================================================= */
 .student-notification-dropdown {
   position: absolute;
   top: 58px;
@@ -67,10 +66,9 @@
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 1000;
 }
-
 .student-notification-dropdown h4 {
   margin: 0;
   padding: 16px;
@@ -78,40 +76,31 @@
   font-size: 14px;
   font-weight: 600;
 }
-
 .student-notification-item {
   padding: 14px 16px;
   border-bottom: 1px solid #eeeeee;
   cursor: pointer;
 }
-
-.student-notification-item:hover {
-  background: #f7f7f7;
-}
-
+.student-notification-item:hover { background: #f7f7f7; }
 .student-notification-item p {
   margin: 0 0 5px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
 }
-
 .student-notification-item small {
   color: #999999;
-  font-size: 10px;
+  font-size: 9px;
 }
-
 .student-notification-empty {
   padding: 20px;
   text-align: center;
   color: #999999;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* =========================================================
-   POPUP — ใช้ร่วมกันทั้งสองแบบ
+   POPUP OVERLAY
 ========================================================= */
-
-/* พื้นหลังสีขาวโปร่ง ครอบ Sidebar ด้วย React Portal */
 .student-notification-overlay {
   position: fixed;
   inset: 0;
@@ -123,10 +112,13 @@
   z-index: 99999;
 }
 
+/* =========================================================
+   POPUP
+========================================================= */
 .student-notification-popup {
   box-sizing: border-box;
-  width: 440px;
-  max-width: calc(100vw - 40px);
+  width: 506px;
+  max-width: 100%;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
   padding: 30px 38px 32px;
@@ -137,41 +129,46 @@
   font-family: "Prompt", sans-serif;
   text-align: center;
 }
-
-/* หัวข้อ 14px */
 .student-notification-popup h3 {
   margin: 0;
   color: #000000;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
 }
-
 .student-notification-divider {
   height: 1px;
   margin: 20px 0 24px;
   background: #dddddd;
 }
-
-.student-notification-question {
-  margin: 18px 0 0;
+.student-notification-message {
   color: #000000;
   font-size: 13px;
   font-weight: 400;
   line-height: 1.8;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.student-notification-question {
+  margin: 18px 0 0;
+  color: #333333;
+  font-size: 13px;
+  font-weight: 400;
   text-align: center;
 }
 
-/* ปุ่มทั้งสองป๊อปอัป */
+/* =========================================================
+   ACTIONS
+========================================================= */
 .student-notification-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
   gap: 10px;
+  flex-wrap: wrap;
   margin-top: 24px;
 }
-
 .student-notification-actions button {
   min-width: 110px;
   height: 36px;
@@ -180,60 +177,38 @@
   border-radius: 6px;
   color: #ffffff;
   font-family: "Prompt", sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   cursor: pointer;
 }
-
-.student-notification-reject {
-  background: #ff0000;
-}
-
-.student-notification-reject:hover {
-  background: #d90000;
-}
-
+.student-notification-reject { background: #ff0000; }
+.student-notification-reject:hover { background: #d90000; }
 .student-notification-accept,
-.student-notification-confirm {
-  background: #20a36a;
-}
-
+.student-notification-confirm { background: #20a36a; }
 .student-notification-accept:hover,
-.student-notification-confirm:hover {
-  background: #188c59;
-}
+.student-notification-confirm:hover { background: #188c59; }
 
 /* =========================================================
-   INVITATION POPUP — คำเชิญเข้าร่วมโครงงาน
+   INVITATION POPUP ONLY — SAME LAYOUT AS REFERENCE IMAGE
 ========================================================= */
-
-/* คง Padding แบบเดิมของหน้าคำเชิญ */
-.student-notification-popup.invitation-notification-dialog {
-  padding: 28px 32px 30px;
-}
-
 .invitation-notification-dialog .student-notification-divider {
   margin: 20px 0 30px;
 }
-
 .invitation-notification-dialog .student-invitation-detail {
   margin: 0 0 30px;
   text-align: center;
 }
-
 .invitation-notification-dialog .student-invitation-last {
   margin-bottom: 0;
 }
-
 .invitation-notification-dialog .student-invitation-label {
   display: block;
   margin: 0 0 7px;
   color: #777777;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.65;
 }
-
 .invitation-notification-dialog .student-invitation-value {
   margin: 0;
   color: #000000;
@@ -243,66 +218,128 @@
   overflow-wrap: anywhere;
   text-align: center;
 }
-
 .invitation-notification-dialog .student-invitation-divider {
   margin: 30px 0 25px;
 }
-
 .invitation-notification-dialog .student-notification-question {
-  margin: 0;
-}
-
-/* =========================================================
-   SYSTEM NOTIFICATION POPUP — การตอบกลับคำเชิญ/ผลพิจารณา
-========================================================= */
-
-.system-notification-dialog .student-notification-message {
   margin: 0;
   color: #000000;
   font-size: 13px;
   font-weight: 400;
   line-height: 1.8;
-  white-space: pre-line;
+}
+.invitation-notification-dialog .student-notification-actions {
+  margin-top: 24px;
+}
+
+/* =========================================================
+   SYSTEM NOTIFICATION POPUP
+   ขนาดและสีให้ตรงกับป๊อปอัปมาตรฐานของ SPTC
+   แก้เฉพาะป๊อปอัปผลการพิจารณา ไม่กระทบคำเชิญ
+========================================================= */
+
+.system-notification-dialog.student-notification-popup {
+  width: 506px;
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 30px 38px 32px;
+
+  background: #ffffff;
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+  box-shadow: none;
+  text-align: center;
+}
+
+.system-notification-dialog h3 {
+  margin: 0;
+  color: #222222;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.system-notification-dialog .student-notification-divider {
+  margin: 18px 0 22px;
+  background: #dddddd;
+}
+
+.system-notification-dialog .student-notification-message {
+  margin: 0;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.system-notification-dialog .notification-reply-text {
+  margin: 0;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
   overflow-wrap: anywhere;
   text-align: center;
 }
 
-/* ชื่อผู้ตอบรับ อยู่บรรทัดแรก */
-.system-notification-dialog .notification-reply-name {
-  margin: 0 0 5px;
-  color: #000000;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.7;
-  text-align: center;
+.system-notification-dialog .student-notification-actions {
+  gap: 10px;
+  margin-top: 24px;
 }
 
-/* ข้อความตอบรับ อยู่บรรทัดที่สอง */
-.system-notification-dialog .notification-reply-text {
-  margin: 0;
-  color: #000000;
-  font-size: 13px;
+.system-notification-dialog .student-notification-actions button {
+  min-width: 110px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-family: "Prompt", sans-serif;
+  font-size: 12px;
   font-weight: 400;
-  line-height: 1.7;
-  text-align: center;
+}
+
+/* ปุ่มแก้ไขและส่งใหม่เป็นสีส้มตามสถานะต้องแก้ไข */
+.system-notification-dialog .student-notification-accept {
+  min-width: 130px;
+  background: #f07800;
+}
+.system-notification-dialog .student-notification-accept:hover {
+  background: #cf6500;
+}
+
+/* ถ้าป๊อปอัปมีแค่ปุ่มตกลง ให้คงสีเขียวตามเดิม */
+.system-notification-dialog .student-notification-confirm {
+  background: #20a36a;
+}
+.system-notification-dialog .student-notification-confirm:hover {
+  background: #188c59;
+}
+
+/* หากมีปุ่มแก้ไขและส่งใหม่ด้วย ปุ่มตกลงคือการปิดป๊อปอัป จึงใช้สีแดง */
+.system-notification-dialog .student-notification-actions:has(.student-notification-accept)
+.student-notification-confirm {
+  background: #ff0000;
+}
+.system-notification-dialog .student-notification-actions:has(.student-notification-accept)
+.student-notification-confirm:hover {
+  background: #d90000;
 }
 
 .system-notification-dialog .notification-project-info {
   margin-top: 22px;
   text-align: center;
 }
-
 .system-notification-dialog .notification-project-label {
   display: block;
   margin-bottom: 7px;
   color: #777777;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
 }
-
 .system-notification-dialog .notification-project-title {
   margin: 0;
-  color: #000000;
+  color: #222222;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.7;
@@ -310,24 +347,8 @@
   text-align: center;
 }
 
-
-/* =========================================
-   POPUP BUTTON STANDARD
-========================================= */
-
-.invitation-notification-dialog .student-notification-actions button,
-.system-notification-dialog .student-notification-confirm {
-  width: 110px;
-  min-width: 110px;
-  height: 36px;
-  padding: 0 18px;
-
-  border: none;
-  border-radius: 6px;
-
-  color: #ffffff;
-  font-family: "Prompt", sans-serif;
-  font-size: 12px;
-  font-weight: 400;
+@media (max-width: 480px) {
+  .system-notification-dialog.student-notification-popup {
+    padding: 24px 18px;
+  }
 }
-

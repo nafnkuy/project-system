@@ -135,21 +135,25 @@
    LOGOUT
 ========================= */
 
+
 .teacher-home-page .logout-btn {
   width: 190px;
-
   margin: 0 auto 20px;
-
   padding: 12px;
 
   border: none;
   border-radius: 8px;
 
   background: #3b75c4;
-  color: white;
+  color: #ffffff;
+
+  font-family: "Prompt", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
 
   cursor: pointer;
 }
+
 
 .teacher-home-page .logout-btn:hover {
   background: #2f6db5;
@@ -370,29 +374,32 @@
   align-items: center;
   gap: 10px;
 
-  margin-top: 0;
-  margin-bottom: 28px;
+  margin-top: 30px;
+  margin-bottom: 60px;
 }
+
 
 .teacher-home-page .search-box {
   width: 450px;
   height: 36px;
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
+  gap: 8px;
 
   padding: 0 14px;
 
   background: #ffffff;
   border: 1px solid #b7b7b7;
   border-radius: 20px;
-
-  box-sizing: border-box;
 }
 
 .teacher-home-page .search-box input {
   flex: 1;
   min-width: 0;
+  width: 0;
+  height: 100%;
 
   border: none;
   outline: none;
@@ -603,7 +610,7 @@
   border: none;
   border-bottom: 1px solid #ddd;
 
-  padding: 9px 5px;
+  padding: 12px 8px;
 
   font-size: 13px;
   font-weight: 400;
@@ -615,11 +622,10 @@
 .teacher-home-page .table-container th {
   font-size: 13px;
   font-weight: 500;
-
   background: #ffffff;
 
-  padding-top: 8px;
-  padding-bottom: 10px;
+  padding-top: 11px;
+  padding-bottom: 13px;
 }
 
 
@@ -687,50 +693,53 @@
    Request Status
 ========================= */
 
+
 .teacher-home-page .request-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  min-width: 78px;
-  height: 25px;
-
+  min-width: 80px;
+  height: 28px;
   padding: 0 12px;
 
-  border-radius: 14px;
+  border: none;
+  border-radius: 20px;
 
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
   white-space: nowrap;
 }
 
-/* รอพิจารณา = เหลือง */
+
+/* รอพิจารณา - เหลืองอ่อน */
 .teacher-home-page .request-status.pending {
-  background: #ffc400;
-  color: #ffffff;
+  background: #fff5d6;
+  color: #b88600;
 }
 
-/* ต้องแก้ไข = ส้ม */
+/* ต้องแก้ไข - ส้มอ่อน */
 .teacher-home-page .request-status.revision {
-  background: #f07800;
-  color: #ffffff;
+  background: #fff0e3;
+  color: #e07800;
 }
 
-/* อนุมัติ = เขียว */
+/* อนุมัติ - เขียวอ่อน */
 .teacher-home-page .request-status.approved {
-  background: #159c68;
-  color: #ffffff;
+  background: #e6f5ee;
+  color: #159c68;
 }
 
-/* ปฏิเสธ = แดง */
+/* ปฏิเสธ - แดงอ่อน */
 .teacher-home-page .request-status.rejected {
-  background: #ff0000;
-  color: #ffffff;
+  background: #ffeaea;
+  color: #e53935;
 }
 
-.teacher-home-page
-.request-status.resubmitted {
-  background: #3b75c4;
-  color: #ffffff;
+/* แก้ไขแล้ว - ฟ้าอ่อน */
+.teacher-home-page .request-status.resubmitted {
+  background: #e8f1ff;
+  color: #3678c5;
 }
 
 /* =========================
@@ -929,3 +938,4 @@
     margin-left: 250px;
   }
 }
+
