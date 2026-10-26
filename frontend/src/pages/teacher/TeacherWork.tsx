@@ -58,6 +58,32 @@ interface ExamListResponse {
   announced_count: number;
 }
 
+/* =========================================================
+   EXAM COMMITTEE INTERFACE
+========================================================= */
+
+interface ExamCommitteeMember {
+  committee_member_id: number;
+  schedule_id: number;
+  teacher_id: number;
+  teacher_username: string;
+  teacher_name: string;
+  invitation_status: string;
+  invited_at: string;
+  responded_at: string | null;
+}
+
+/* =========================================
+   TEACHER SEARCH OPTION
+========================================= */
+
+interface TeacherOption {
+  id: number;
+  username: string;
+  name: string;
+  major: string | null;
+}
+
 type WorkTab = "review" | "exam" | "evaluation";
 type ReviewFilter = "รอตรวจ" | "ตรวจแล้ว";
 
@@ -134,6 +160,23 @@ function TeacherWork() {
   });
 
   const [examFormError, setExamFormError] = useState("");
+
+  /* =========================================
+   SELECT EXAM COMMITTEE
+========================================= */
+
+  const [teacherOptions, setTeacherOptions] = useState<TeacherOption[]>([]);
+
+  const [committeeSearch, setCommitteeSearch] = useState("");
+
+  const [selectedCommitteeTeachers, setSelectedCommitteeTeachers] = useState<
+    TeacherOption[]
+  >([]);
+
+  const [teacherOptionsLoading, setTeacherOptionsLoading] = useState(false);
+
+  const [teacherOptionsError, setTeacherOptionsError] = useState("");
+
   const [showExamConfirm, setShowExamConfirm] = useState(false);
 
   /* =========================================================
@@ -142,6 +185,18 @@ function TeacherWork() {
 
   const [examDetailProject, setExamDetailProject] =
     useState<ExamProject | null>(null);
+
+  /* =========================================================
+   EXAM COMMITTEE STATE
+========================================================= */
+
+  const [committeeMembers, setCommitteeMembers] = useState<
+    ExamCommitteeMember[]
+  >([]);
+
+  const [committeeLoading, setCommitteeLoading] = useState(false);
+
+  const [committeeError, setCommitteeError] = useState("");
 
   /* =========================================================
    EDIT EXAM SCHEDULE STATE
@@ -263,6 +318,92 @@ function TeacherWork() {
   }, [userId]);
 
   /* =========================================================
+   LOAD EXAM COMMITTEE MEMBERS
+========================================================= */
+
+  useEffect(() => {
+    const scheduleId = examDetailProject?.schedule_id;
+
+    if (!scheduleId || !userId) {
+      setCommitteeMembers([]);
+      setCommitteeLoading(false);
+      setCommitteeError("");
+      return;
+    }
+
+    let active = true;
+
+    setCommitteeLoading(true);
+    setCommitteeError("");
+    setCommitteeMembers([]);
+
+    axios
+      .get<{ committee: ExamCommitteeMember[] }>(
+        `http://localhost:5000/teacher/exam/committee-status/${scheduleId}/${userId}`,
+      )
+      .then((res) => {
+        if (!active) return;
+
+        setCommitteeMembers(
+          Array.isArray(res.data.committee) ? res.data.committee : [],
+        );
+      })
+      .catch((err) => {
+        if (!active) return;
+
+        console.log("Load exam committee error:", err);
+        setCommitteeError("ไม่สามารถโหลดรายชื่อกรรมการสอบได้");
+      })
+      .finally(() => {
+        if (active) {
+          setCommitteeLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [examDetailProject?.schedule_id, userId]);
+
+  /* =========================================
+   LOAD TEACHERS FOR EXAM COMMITTEE
+========================================= */
+
+  useEffect(() => {
+    if (!selectedExamProject || !userId) return;
+
+    let active = true;
+
+    setTeacherOptionsLoading(true);
+    setTeacherOptionsError("");
+
+    axios
+      .get(`http://localhost:5000/teacher/exam/committee-candidates/${userId}`)
+      .then((res) => {
+        if (!active) return;
+
+        setTeacherOptions(
+          Array.isArray(res.data.teachers) ? res.data.teachers : [],
+        );
+      })
+      .catch((err) => {
+        if (!active) return;
+
+        console.log("Load teacher options error:", err);
+        setTeacherOptionsError("ไม่สามารถโหลดรายชื่ออาจารย์ได้");
+      })
+      .finally(() => {
+        if (active) {
+          setTeacherOptionsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedExamProject?.project_id, userId]);
+
+  /* =========================================================
      DASHBOARD COUNTS
   ========================================================= */
 
@@ -348,11 +489,53 @@ function TeacherWork() {
     });
   };
 
+  /* =========================================
+   SELECT COMMITTEE TEACHER
+========================================= */
+
+  const addCommitteeTeacher = (teacher: TeacherOption) => {
+    const alreadySelected = selectedCommitteeTeachers.some(
+      (item) => item.id === teacher.id,
+    );
+
+    if (alreadySelected) return;
+
+    const next = [...selectedCommitteeTeachers, teacher];
+
+    setSelectedCommitteeTeachers(next);
+    setCommitteeSearch("");
+
+    setExamForm((prev) => ({
+      ...prev,
+      committee: next.map((item) => item.name).join("\n"),
+    }));
+  };
+
+  /* =========================================
+   REMOVE COMMITTEE TEACHER
+========================================= */
+
+  const removeCommitteeTeacher = (teacherId: number) => {
+    const next = selectedCommitteeTeachers.filter(
+      (item) => item.id !== teacherId,
+    );
+
+    setSelectedCommitteeTeachers(next);
+
+    setExamForm((prev) => ({
+      ...prev,
+      committee: next.map((item) => item.name).join("\n"),
+    }));
+  };
+
   /* =========================================================
    OPEN / CLOSE EXAM MODAL
 ========================================================= */
 
   const openExamModal = (project: ExamProject) => {
+    setSelectedCommitteeTeachers([]);
+    setCommitteeSearch("");
+    setTeacherOptions([]);
     setSelectedExamProject(project);
 
     setExamForm({
@@ -591,7 +774,6 @@ function TeacherWork() {
 
         setExamData(response.data);
         setExamError("");
-
       } catch (reloadError) {
         console.error("Reload exam after edit:", reloadError);
 
@@ -1229,7 +1411,6 @@ function TeacherWork() {
                 </div>
 
                 {/* COMMITTEE */}
-
                 <div className="tw-exam-edit-field">
                   <label>
                     กรรมการสอบ <span>*</span>
@@ -1342,21 +1523,47 @@ function TeacherWork() {
 
                 {/* COMMITTEE */}
 
+                {/* COMMITTEE */}
                 <div className="tw-exam-detail-section">
                   <h4>กรรมการสอบ</h4>
 
-                  {examDetailProject.committee ? (
-                    <ul>
-                      {examDetailProject.committee
-                        .split(/\r?\n|\|/)
-                        .map((name) => name.trim())
-                        .filter(Boolean)
-                        .map((name, index) => (
-                          <li key={index}>{name}</li>
-                        ))}
-                    </ul>
+                  {committeeLoading ? (
+                    <p>กำลังโหลดรายชื่อกรรมการสอบ...</p>
+                  ) : committeeError ? (
+                    <p className="tw-committee-error">{committeeError}</p>
+                  ) : committeeMembers.length === 0 ? (
+                    <p>ยังไม่มีรายชื่อกรรมการสอบ</p>
                   ) : (
-                    <p>-</p>
+                    <div className="tw-committee-list">
+                      {committeeMembers.map((member) => (
+                        <div
+                          key={member.committee_member_id}
+                          className="tw-committee-item"
+                        >
+                          <div className="tw-committee-info">
+                            <strong>{member.teacher_name}</strong>
+
+                            <small>
+                              {member.teacher_id === Number(userId)
+                                ? "อาจารย์ที่ปรึกษา"
+                                : "กรรมการสอบ"}
+                            </small>
+                          </div>
+
+                          <span
+                            className={`tw-committee-status ${
+                              member.invitation_status === "ตอบรับ"
+                                ? "tw-committee-accepted"
+                                : member.invitation_status === "ปฏิเสธ"
+                                  ? "tw-committee-rejected"
+                                  : "tw-committee-pending"
+                            }`}
+                          >
+                            {member.invitation_status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -1425,6 +1632,13 @@ function TeacherWork() {
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
+
+                      if (selectedCommitteeTeachers.length === 0) {
+                        setExamFormError(
+                          "กรุณาเลือกกรรมการสอบอย่างน้อย 1 ท่าน",
+                        );
+                        return;
+                      }
 
                       if (examForm.start_time >= examForm.end_time) {
                         setExamFormError("เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มสอบ");
@@ -1527,22 +1741,105 @@ function TeacherWork() {
 
                     {/* กรรมการสอบ */}
 
+                    {/* กรรมการสอบ */}
+
                     <div className="tw-exam-form-group">
                       <label>
                         กรรมการสอบ <span>*</span>
                       </label>
 
-                      <textarea
-                        rows={3}
-                        required
-                        value={examForm.committee}
-                        onChange={(e) =>
-                          setExamForm({
-                            ...examForm,
-                            committee: e.target.value,
-                          })
-                        }
-                      />
+                      <div className="tw-committee-search">
+                        <input
+                          type="text"
+                          placeholder="ค้นหาชื่ออาจารย์..."
+                          value={committeeSearch}
+                          onChange={(e) => setCommitteeSearch(e.target.value)}
+                          autoComplete="off"
+                        />
+
+                        {teacherOptionsLoading && (
+                          <p className="tw-committee-hint">
+                            กำลังโหลดรายชื่ออาจารย์...
+                          </p>
+                        )}
+
+                        {teacherOptionsError && (
+                          <p className="tw-committee-error">
+                            {teacherOptionsError}
+                          </p>
+                        )}
+
+                        {!teacherOptionsLoading &&
+                          !teacherOptionsError &&
+                          committeeSearch.trim() !== "" && (
+                            <div className="tw-committee-search-results">
+                              {teacherOptions
+                                .filter((teacher) => {
+                                  const alreadySelected =
+                                    selectedCommitteeTeachers.some(
+                                      (item) => item.id === teacher.id,
+                                    );
+
+                                  const keyword = committeeSearch
+                                    .trim()
+                                    .toLowerCase();
+
+                                  const matches =
+                                    teacher.name
+                                      .toLowerCase()
+                                      .includes(keyword) ||
+                                    teacher.username
+                                      .toLowerCase()
+                                      .includes(keyword) ||
+                                    (teacher.major || "")
+                                      .toLowerCase()
+                                      .includes(keyword);
+
+                                  return !alreadySelected && matches;
+                                })
+                                .slice(0, 8)
+                                .map((teacher) => (
+                                  <button
+                                    key={teacher.id}
+                                    type="button"
+                                    className="tw-committee-search-option"
+                                    onClick={() => addCommitteeTeacher(teacher)}
+                                  >
+                                    <strong>{teacher.name}</strong>
+                                    <small>
+                                      {teacher.username} |{" "}
+                                      {teacher.major || "-"}
+                                    </small>
+                                  </button>
+                                ))}
+                            </div>
+                          )}
+                      </div>
+
+                      {/* รายชื่อกรรมการที่เลือกแล้ว */}
+
+                      {selectedCommitteeTeachers.length > 0 && (
+                        <div className="tw-committee-selected">
+                          {selectedCommitteeTeachers.map((teacher) => (
+                            <div
+                              key={teacher.id}
+                              className="tw-committee-selected-item"
+                            >
+                              <span>{teacher.name}</span>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeCommitteeTeacher(teacher.id)
+                                }
+                                aria-label={`ลบ ${teacher.name}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* หมายเหตุ */}
