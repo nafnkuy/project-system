@@ -8145,6 +8145,758 @@ app.get("/student/projects/:projectId/exam/:studentId", (req, res) => {
   });
 });
 
+/* =========================================================
+   TEACHER - UPDATE EXAM SCHEDULE
+========================================================= */
+
+app.put("/teacher/exams/:scheduleId", async (req, res) => {
+  const scheduleId = Number(req.params.scheduleId);
+
+  const {
+    advisor_id,
+    exam_date,
+    start_time,
+    end_time,
+    location,
+    committee,
+    notes,
+  } = req.body;
+
+  const advisorId = Number(advisor_id);
+  const examDate = String(exam_date || "").trim();
+  const startTime = String(start_time || "").trim();
+  const endTime = String(end_time || "").trim();
+  const examLocation = String(location || "").trim();
+  const examCommittee = String(committee || "").trim();
+  const examNotes = String(notes || "").trim();
+
+  // ตรวจข้อมูล
+
+  if (
+    !Number.isInteger(scheduleId) ||
+    scheduleId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0 ||
+    !examDate ||
+    !startTime ||
+    !endTime ||
+    !examLocation ||
+    !examCommittee
+  ) {
+    return res.status(400).json({
+      message: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน",
+    });
+  }
+
+  const parsedDate = new Date(`${examDate}T00:00:00Z`);
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(examDate) ||
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== examDate
+  ) {
+    return res.status(400).json({
+      message: "วันที่สอบไม่ถูกต้อง",
+    });
+  }
+
+  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  if (
+    !timePattern.test(startTime) ||
+    !timePattern.test(endTime) ||
+    startTime >= endTime
+  ) {
+    return res.status(400).json({
+      message: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มสอบ",
+    });
+  }
+
+  if (examLocation.length > 255) {
+    return res.status(400).json({
+      message: "ชื่อสถานที่สอบยาวเกิน 255 ตัวอักษร",
+    });
+  }
+
+  // รองรับ MySQL connection และ pool
+
+  const getConnection = () =>
+    new Promise((resolve, reject) => {
+      if (typeof db.getConnection === "function") {
+        db.getConnection((err, connection) => {
+          if (err) reject(err);
+          else resolve({ connection, pooled: true });
+        });
+      } else {
+        resolve({ connection: db, pooled: false });
+      }
+    });
+
+  const query = (connection, sql, params = []) =>
+    new Promise((resolve, reject) => {
+      connection.query(sql, params, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+  let connection;
+  let pooled = false;
+  let transactionStarted = false;
+
+  try {
+    const acquired = await getConnection();
+    connection = acquired.connection;
+    pooled = acquired.pooled;
+
+    await query(connection, "START TRANSACTION");
+    transactionStarted = true;
+
+    // 1. ตรวจว่ากำหนดการเป็นของอาจารย์จริง
+
+    const schedules = await query(
+      connection,
+      `
+        SELECT
+          s.id,
+          s.project_id,
+          p.title AS project_title
+
+        FROM project_exam_schedules s
+
+        INNER JOIN projects p
+          ON s.project_id = p.id
+
+        INNER JOIN users u
+          ON u.id = p.advisor_id
+          AND u.role = 'teacher'
+
+        WHERE s.id = ?
+          AND s.advisor_id = ?
+          AND p.advisor_id = ?
+          AND s.announced_at IS NOT NULL
+
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [scheduleId, advisorId, advisorId],
+    );
+
+    if (schedules.length === 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(403).json({
+        message: "ไม่พบกำหนดการสอบ หรือคุณไม่มีสิทธิ์แก้ไข",
+      });
+    }
+
+    const schedule = schedules[0];
+
+    // 2. อัปเดตกำหนดการสอบเดิม
+
+    await query(
+      connection,
+      `
+        UPDATE project_exam_schedules
+
+        SET
+          exam_date = ?,
+          start_time = ?,
+          end_time = ?,
+          location = ?,
+          committee = ?,
+          notes = ?
+
+        WHERE id = ?
+      `,
+      [
+        examDate,
+        startTime,
+        endTime,
+        examLocation,
+        examCommittee,
+        examNotes || null,
+        scheduleId,
+      ],
+    );
+
+    // 3. แจ้งเตือนนิสิตทุกคน
+
+    const message =
+      `อาจารย์แก้ไขกำหนดการสอบโครงงาน "${schedule.project_title}" ` +
+      `เป็นวันที่ ${examDate} เวลา ${startTime} - ${endTime} น. ` +
+      `สถานที่ ${examLocation}`;
+
+    await query(
+      connection,
+      `
+        INSERT INTO notifications
+        (
+          user_id,
+          message,
+          project_id
+        )
+
+        SELECT DISTINCT
+          pm.user_id,
+          ?,
+          ?
+
+        FROM project_members pm
+
+        WHERE pm.project_id = ?
+      `,
+      [message, schedule.project_id, schedule.project_id],
+    );
+
+    // 4. ยืนยันการบันทึก
+
+    await query(connection, "COMMIT");
+    transactionStarted = false;
+
+    res.json({
+      success: true,
+      message: "แก้ไขกำหนดการสอบเรียบร้อยแล้ว",
+    });
+  } catch (err) {
+    console.log("Update exam schedule error:", err);
+
+    if (transactionStarted && connection) {
+      try {
+        await query(connection, "ROLLBACK");
+      } catch (rollbackErr) {
+        console.log("Rollback exam error:", rollbackErr);
+      }
+    }
+
+    res.status(500).json({
+      message: "ไม่สามารถแก้ไขกำหนดการสอบได้",
+    });
+  } finally {
+    if (pooled && connection && typeof connection.release === "function") {
+      connection.release();
+    }
+  }
+});
+
+/* =========================================================
+   EXAM - GET AVAILABLE COMMITTEE TEACHERS
+========================================================= */
+
+app.get("/teacher/exam/committee-candidates/:advisorId", (req, res) => {
+  const { advisorId } = req.params;
+
+  const sql = `
+    SELECT
+      id,
+      username,
+      name,
+      major
+
+    FROM users
+
+    WHERE role = 'teacher'
+      AND id != ?
+
+    ORDER BY name ASC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.log("Get committee candidates error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดรายชื่ออาจารย์ได้",
+      });
+    }
+
+    res.json({
+      teachers: results,
+    });
+  });
+});
+
+/* =========================================================
+   EXAM - INVITE COMMITTEE MEMBER
+========================================================= */
+
+app.post("/teacher/exam/committee-invite", (req, res) => {
+  const scheduleId = Number(req.body.schedule_id);
+  const advisorId = Number(req.body.advisor_id);
+  const teacherId = Number(req.body.teacher_id);
+
+  // 1. ตรวจสอบข้อมูล
+  if (
+    !Number.isInteger(scheduleId) ||
+    scheduleId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0 ||
+    !Number.isInteger(teacherId) ||
+    teacherId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลไม่ถูกต้อง",
+    });
+  }
+
+  if (advisorId === teacherId) {
+    return res.status(400).json({
+      message: "อาจารย์ที่ปรึกษาไม่ต้องส่งคำเชิญให้ตัวเอง",
+    });
+  }
+
+  // 2. ตรวจสอบกำหนดการสอบและอาจารย์ที่ปรึกษา
+  const scheduleSql = `
+    SELECT
+      es.id,
+      es.project_id,
+      es.advisor_id,
+      p.title AS project_title
+
+    FROM project_exam_schedules es
+
+    INNER JOIN projects p
+      ON es.project_id = p.id
+
+    WHERE es.id = ?
+      AND es.advisor_id = ?
+      AND p.advisor_id = ?
+
+    LIMIT 1
+  `;
+
+  db.query(
+    scheduleSql,
+    [scheduleId, advisorId, advisorId],
+    (scheduleErr, schedules) => {
+      if (scheduleErr) {
+        console.log("Check exam schedule error:", scheduleErr);
+
+        return res.status(500).json({
+          message: "ตรวจสอบกำหนดการสอบไม่สำเร็จ",
+        });
+      }
+
+      if (schedules.length === 0) {
+        return res.status(404).json({
+          message: "ไม่พบกำหนดการสอบ หรือคุณไม่ใช่อาจารย์ที่ปรึกษา",
+        });
+      }
+
+      const schedule = schedules[0];
+
+      // 3. ตรวจสอบผู้ที่ได้รับเชิญ
+      const teacherSql = `
+        SELECT id, name
+        FROM users
+        WHERE id = ?
+          AND role = 'teacher'
+        LIMIT 1
+      `;
+
+      db.query(teacherSql, [teacherId], (teacherErr, teachers) => {
+        if (teacherErr) {
+          return res.status(500).json({
+            message: "ตรวจสอบข้อมูลอาจารย์ไม่สำเร็จ",
+          });
+        }
+
+        if (teachers.length === 0) {
+          return res.status(404).json({
+            message: "ไม่พบอาจารย์ที่ต้องการเชิญ",
+          });
+        }
+
+        // 4. เพิ่มอาจารย์ที่ปรึกษาเป็นกรรมการอัตโนมัติ
+        const advisorSql = `
+          INSERT INTO exam_committee_members
+          (
+            schedule_id,
+            teacher_id,
+            invited_by,
+            invitation_status,
+            responded_at
+          )
+          VALUES (?, ?, ?, 'ตอบรับ', NOW())
+
+          ON DUPLICATE KEY UPDATE
+            id = id
+        `;
+
+        db.query(
+          advisorSql,
+          [scheduleId, advisorId, advisorId],
+          (advisorErr) => {
+            if (advisorErr) {
+              console.log("Add advisor committee error:", advisorErr);
+
+              return res.status(500).json({
+                message: "เพิ่มอาจารย์ที่ปรึกษาไม่สำเร็จ",
+              });
+            }
+
+            // 5. บันทึกคำเชิญกรรมการ
+            const inviteSql = `
+              INSERT INTO exam_committee_members
+              (
+                schedule_id,
+                teacher_id,
+                invited_by,
+                invitation_status
+              )
+              VALUES (?, ?, ?, 'รอตอบรับ')
+            `;
+
+            db.query(
+              inviteSql,
+              [scheduleId, teacherId, advisorId],
+              (inviteErr, result) => {
+                if (inviteErr) {
+                  if (inviteErr.code === "ER_DUP_ENTRY") {
+                    return res.status(409).json({
+                      message: "อาจารย์ท่านนี้มีคำเชิญอยู่แล้ว",
+                    });
+                  }
+
+                  console.log("Invite committee error:", inviteErr);
+
+                  return res.status(500).json({
+                    message: "ส่งคำเชิญไม่สำเร็จ",
+                  });
+                }
+
+                // 6. แจ้งเตือนอาจารย์ที่ได้รับเชิญ
+                const notificationSql = `
+                  INSERT INTO notifications
+                  (
+                    user_id,
+                    message,
+                    project_id
+                  )
+                  VALUES (?, ?, ?)
+                `;
+
+                const message =
+                  `คุณได้รับคำเชิญเป็นกรรมการสอบโครงงาน ` +
+                  `"${schedule.project_title}"`;
+
+                db.query(
+                  notificationSql,
+                  [teacherId, message, schedule.project_id],
+                  (notificationErr) => {
+                    if (notificationErr) {
+                      console.log(
+                        "Committee notification error:",
+                        notificationErr,
+                      );
+                    }
+
+                    res.json({
+                      success: true,
+                      message: notificationErr
+                        ? "บันทึกคำเชิญแล้ว แต่สร้างการแจ้งเตือนไม่สำเร็จ"
+                        : "ส่งคำเชิญกรรมการเรียบร้อยแล้ว",
+                      invitation_id: result.insertId,
+                    });
+                  },
+                );
+              },
+            );
+          },
+        );
+      });
+    },
+  );
+});
+
+/* =========================================================
+   EXAM - GET COMMITTEE INVITATIONS
+========================================================= */
+
+app.get("/teacher/exam/invitations/:teacherId", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสอาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      ecm.id AS invitation_id,
+      ecm.schedule_id,
+      ecm.teacher_id,
+      ecm.invitation_status,
+      ecm.invited_at,
+      ecm.responded_at,
+
+      p.id AS project_id,
+      p.title AS project_title,
+
+      es.exam_date,
+      es.start_time,
+      es.end_time,
+      es.location,
+
+      advisor.name AS advisor_name
+
+    FROM exam_committee_members ecm
+
+    INNER JOIN project_exam_schedules es
+      ON ecm.schedule_id = es.id
+
+    INNER JOIN projects p
+      ON es.project_id = p.id
+
+    INNER JOIN users advisor
+      ON ecm.invited_by = advisor.id
+
+    WHERE ecm.teacher_id = ?
+      AND ecm.invitation_status = 'รอตอบรับ'
+
+    ORDER BY ecm.invited_at DESC, ecm.id DESC
+  `;
+
+  db.query(sql, [teacherId], (err, results) => {
+    if (err) {
+      console.log("Get exam invitations error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดคำเชิญกรรมการสอบได้",
+      });
+    }
+
+    res.json({
+      invitations: results,
+    });
+  });
+});
+
+/* =========================================================
+   EXAM - RESPOND TO COMMITTEE INVITATION
+========================================================= */
+
+app.post("/teacher/exam/invitations/:invitationId/respond", (req, res) => {
+  const invitationId = Number(req.params.invitationId);
+  const teacherId = Number(req.body.teacher_id);
+  const decision = req.body.decision;
+
+  // =========================================
+  // 1. ตรวจสอบข้อมูล
+  // =========================================
+
+  if (
+    !Number.isInteger(invitationId) ||
+    invitationId <= 0 ||
+    !Number.isInteger(teacherId) ||
+    teacherId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลคำเชิญหรืออาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  if (decision !== "ตอบรับ" && decision !== "ปฏิเสธ") {
+    return res.status(400).json({
+      message: "กรุณาเลือกตอบรับหรือปฏิเสธคำเชิญ",
+    });
+  }
+
+  // =========================================
+  // 2. ตรวจสอบคำเชิญ
+  // =========================================
+
+  const checkSql = `
+    SELECT
+      ecm.id,
+      ecm.teacher_id,
+      ecm.invited_by,
+      ecm.invitation_status,
+
+      es.project_id,
+
+      p.title AS project_title,
+
+      teacher.name AS teacher_name
+
+    FROM exam_committee_members ecm
+
+    INNER JOIN project_exam_schedules es
+      ON ecm.schedule_id = es.id
+
+    INNER JOIN projects p
+      ON es.project_id = p.id
+
+    INNER JOIN users teacher
+      ON ecm.teacher_id = teacher.id
+      AND teacher.role = 'teacher'
+
+    WHERE ecm.id = ?
+      AND ecm.teacher_id = ?
+
+    LIMIT 1
+  `;
+
+  db.query(checkSql, [invitationId, teacherId], (checkErr, rows) => {
+    if (checkErr) {
+      console.log("Check committee invitation error:", checkErr);
+
+      return res.status(500).json({
+        message: "ตรวจสอบคำเชิญไม่สำเร็จ",
+      });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบคำเชิญของอาจารย์ท่านนี้",
+      });
+    }
+
+    const invitation = rows[0];
+
+    // =========================================
+    // 3. ต้องยังไม่ตอบรับหรือปฏิเสธ
+    // =========================================
+
+    if (invitation.invitation_status !== "รอตอบรับ") {
+      return res.status(409).json({
+        message: "คำเชิญนี้ได้รับการตอบแล้ว",
+      });
+    }
+
+    // =========================================
+    // 4. อัปเดตสถานะคำเชิญ
+    // =========================================
+
+    const updateSql = `
+      UPDATE exam_committee_members
+
+      SET
+        invitation_status = ?,
+        responded_at = NOW()
+
+      WHERE id = ?
+        AND teacher_id = ?
+        AND invitation_status = 'รอตอบรับ'
+    `;
+
+    db.query(
+      updateSql,
+      [decision, invitationId, teacherId],
+      (updateErr, result) => {
+        if (updateErr) {
+          console.log("Update committee invitation error:", updateErr);
+
+          return res.status(500).json({
+            message: "ไม่สามารถบันทึกคำตอบได้",
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(409).json({
+            message: "คำเชิญนี้ได้รับการตอบแล้ว",
+          });
+        }
+
+        // =========================================
+        // 5. แจ้งเตือนอาจารย์ที่ปรึกษา
+        // =========================================
+
+        const message =
+          `${invitation.teacher_name} ${decision}คำเชิญ` +
+          `เป็นกรรมการสอบโครงงาน "${invitation.project_title}"`;
+
+        const notificationSql = `
+          INSERT INTO notifications
+          (
+            user_id,
+            message,
+            project_id
+          )
+
+          VALUES (?, ?, ?)
+        `;
+
+        db.query(
+          notificationSql,
+          [invitation.invited_by, message, invitation.project_id],
+          (notificationErr) => {
+            if (notificationErr) {
+              console.log(
+                "Committee response notification error:",
+                notificationErr,
+              );
+            }
+
+            res.json({
+              success: true,
+              message: notificationErr
+                ? "บันทึกคำตอบแล้ว แต่แจ้งเตือนอาจารย์ที่ปรึกษาไม่สำเร็จ"
+                : decision === "ตอบรับ"
+                  ? "ตอบรับคำเชิญกรรมการสอบเรียบร้อยแล้ว"
+                  : "ปฏิเสธคำเชิญกรรมการสอบเรียบร้อยแล้ว",
+              invitation_id: invitationId,
+              invitation_status: decision,
+            });
+          },
+        );
+      },
+    );
+  });
+});
+
+/* =========================================================
+   EXAM - COMMITTEE STATUS
+========================================================= */
+
+app.get("/teacher/exam/committee-status/:scheduleId/:advisorId", (req, res) => {
+  const { scheduleId, advisorId } = req.params;
+
+  const sql = `
+    SELECT
+      ecm.id AS committee_member_id,
+      ecm.schedule_id,
+      ecm.teacher_id,
+
+      u.username AS teacher_username,
+      u.name AS teacher_name,
+
+      ecm.invitation_status,
+      ecm.invited_at,
+      ecm.responded_at
+
+    FROM exam_committee_members ecm
+
+    INNER JOIN project_exam_schedules es
+      ON ecm.schedule_id = es.id
+
+    INNER JOIN users u
+      ON ecm.teacher_id = u.id
+
+    WHERE es.id = ?
+      AND es.advisor_id = ?
+      AND u.role = 'teacher'
+
+    ORDER BY ecm.id ASC
+  `;
+
+  db.query(sql, [scheduleId, advisorId], (err, results) => {
+    if (err) {
+      console.log("Get committee status error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดรายชื่อกรรมการสอบได้",
+      });
+    }
+
+    res.json({
+      committee: results,
+    });
+  });
+});
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

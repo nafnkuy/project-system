@@ -1,10 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
 
-.teacher-home-page, .teacher-home-page * {
+.teacher-home-page,
+.teacher-home-page * {
   font-family: "Prompt", sans-serif;
 }
 
-.teacher-home-page, .teacher-home-page * {
+.teacher-home-page,
+.teacher-home-page * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -37,7 +39,6 @@
 
   z-index: 100;
 }
-
 
 /* =========================
    LOGO
@@ -75,7 +76,6 @@
 
   color: #666;
 }
-
 
 /* =========================
    MENU
@@ -117,7 +117,6 @@
   background: #f0f0f0;
 }
 
-
 /* =========================
    ACTIVE MENU
 ========================= */
@@ -130,11 +129,9 @@
   font-weight: 400;
 }
 
-
 /* =========================
    LOGOUT
 ========================= */
-
 
 .teacher-home-page .logout-btn {
   width: 190px;
@@ -153,7 +150,6 @@
 
   cursor: pointer;
 }
-
 
 .teacher-home-page .logout-btn:hover {
   background: #2f6db5;
@@ -197,7 +193,6 @@
   color: #111;
 }
 
-
 /* =========================
    HEADER RIGHT
 ========================= */
@@ -209,7 +204,6 @@
 
   gap: 10px;
 }
-
 
 /* =========================
    NOTIFICATION
@@ -236,7 +230,6 @@
   cursor: pointer;
 }
 
-
 /* =========================
    NOTIFICATION WRAPPER
 ========================= */
@@ -244,7 +237,6 @@
 .teacher-home-page .notification-wrapper {
   position: relative;
 }
-
 
 /* =========================
    NOTIFICATION COUNT
@@ -270,7 +262,6 @@
 
   font-size: 10px;
 }
-
 
 /* =========================
    NOTIFICATION DROPDOWN
@@ -318,7 +309,6 @@
   background: #f5f5f5;
 }
 
-
 /* =========================
    USER
 ========================= */
@@ -341,7 +331,6 @@
 
   font-size: 14px;
 }
-
 
 /* =========================
    PROFILE IMAGE
@@ -377,7 +366,6 @@
   margin-top: 30px;
   margin-bottom: 60px;
 }
-
 
 .teacher-home-page .search-box {
   width: 450px;
@@ -424,7 +412,6 @@
   flex-shrink: 0;
   pointer-events: none;
 }
-
 
 /* =========================
    FILTER
@@ -572,7 +559,6 @@
   color: #d9534f;
 }
 
-
 /* =========================
    REQUEST TABLE
 ========================= */
@@ -627,7 +613,6 @@
   padding-top: 11px;
   padding-bottom: 13px;
 }
-
 
 /* ประเภท */
 .teacher-home-page .table-container th:nth-child(1),
@@ -693,7 +678,6 @@
    Request Status
 ========================= */
 
-
 .teacher-home-page .request-status {
   display: inline-flex;
   align-items: center;
@@ -710,7 +694,6 @@
   font-weight: 400;
   white-space: nowrap;
 }
-
 
 /* รอพิจารณา - เหลืองอ่อน */
 .teacher-home-page .request-status.pending {
@@ -767,7 +750,6 @@
   background: #f2f2f2;
 }
 
-
 /* =========================
    View All
 ========================= */
@@ -787,7 +769,6 @@
   font-family: "Prompt", sans-serif;
   font-size: 12px;
 }
-
 
 /* =========================
    Pagination
@@ -836,21 +817,17 @@
   font-weight: 500;
 }
 
-
 /* =========================
    Responsive
 ========================= */
 
 @media (max-width: 1100px) {
-
   .teacher-home-page .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
   }
-
 }
 
 @media (max-width: 700px) {
-
   .teacher-home-page .dashboard-content {
     padding: 25px 38px;
   }
@@ -870,7 +847,6 @@
   .teacher-home-page .table-container {
     overflow-x: auto;
   }
-
 }
 
 .teacher-home-page .empty-request-cell {
@@ -938,4 +914,3 @@
     margin-left: 250px;
   }
 }
-

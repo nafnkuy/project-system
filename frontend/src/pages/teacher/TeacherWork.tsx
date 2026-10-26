@@ -135,6 +135,34 @@ function TeacherWork() {
 
   const [examFormError, setExamFormError] = useState("");
   const [showExamConfirm, setShowExamConfirm] = useState(false);
+
+  /* =========================================================
+   EXAM DETAIL MODAL
+========================================================= */
+
+  const [examDetailProject, setExamDetailProject] =
+    useState<ExamProject | null>(null);
+
+  /* =========================================================
+   EDIT EXAM SCHEDULE STATE
+========================================================= */
+
+  const [examEditProject, setExamEditProject] = useState<ExamProject | null>(
+    null,
+  );
+
+  const [examEditForm, setExamEditForm] = useState({
+    exam_date: "",
+    start_time: "",
+    end_time: "",
+    location: "",
+    committee: "",
+    notes: "",
+  });
+
+  const [examEditError, setExamEditError] = useState("");
+  const [examEditSaving, setExamEditSaving] = useState(false);
+
   const [examSubmitting, setExamSubmitting] = useState(false);
 
   const itemsPerPage = 10;
@@ -427,6 +455,164 @@ function TeacherWork() {
       : activeTab === "exam"
         ? "กำหนดการสอบ"
         : "การประเมิน";
+
+  /* =========================================================
+   EXAM DATE FOR INPUT
+========================================================= */
+
+  const toExamInputDate = (value: string | null) => {
+    if (!value) return "";
+
+    // ถ้าเป็น YYYY-MM-DD อยู่แล้ว
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return value;
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    // แปลงวันที่ตามประเทศไทย
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Bangkok",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+
+    const getPart = (type: string) =>
+      parts.find((part) => part.type === type)?.value || "";
+
+    return `${getPart("year")}-` + `${getPart("month")}-` + `${getPart("day")}`;
+  };
+
+  /* =========================================================
+   OPEN EDIT EXAM
+========================================================= */
+
+  const openExamEdit = () => {
+    if (!examDetailProject?.schedule_id) return;
+
+    // เอาข้อมูลเดิมมาใส่ฟอร์ม
+
+    setExamEditForm({
+      exam_date: toExamInputDate(examDetailProject.exam_date),
+      start_time: examDetailProject.start_time?.slice(0, 5) || "",
+      end_time: examDetailProject.end_time?.slice(0, 5) || "",
+      location: examDetailProject.location || "",
+      committee: (examDetailProject.committee || "").replace(/\|/g, "\n"),
+      notes: examDetailProject.notes || "",
+    });
+
+    setExamEditError("");
+    setExamEditProject(examDetailProject);
+
+    // ปิดหน้าดูรายละเอียด
+    setExamDetailProject(null);
+  };
+
+  /* =========================================================
+   CLOSE EDIT EXAM
+========================================================= */
+
+  const closeExamEdit = () => {
+    if (examEditSaving) return;
+
+    // กลับไปดูรายละเอียดเดิม
+
+    setExamDetailProject(examEditProject);
+    setExamEditProject(null);
+    setExamEditError("");
+  };
+
+  /* =========================================================
+   SAVE EDIT EXAM
+========================================================= */
+
+  const saveExamEdit = async () => {
+    if (!examEditProject?.schedule_id || !userId || examEditSaving) {
+      return;
+    }
+
+    // ตรวจข้อมูลก่อนบันทึก
+
+    if (
+      !examEditForm.exam_date ||
+      !examEditForm.start_time ||
+      !examEditForm.end_time ||
+      !examEditForm.location.trim() ||
+      !examEditForm.committee.trim()
+    ) {
+      setExamEditError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+      return;
+    }
+
+    if (examEditForm.start_time >= examEditForm.end_time) {
+      setExamEditError("เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มสอบ");
+      return;
+    }
+
+    setExamEditSaving(true);
+    setExamEditError("");
+
+    try {
+      // 1. บันทึกข้อมูลใหม่ลง MySQL
+
+      await axios.put(
+        `http://localhost:5000/teacher/exams/${examEditProject.schedule_id}`,
+        {
+          advisor_id: Number(userId),
+          exam_date: examEditForm.exam_date,
+          start_time: examEditForm.start_time,
+          end_time: examEditForm.end_time,
+          location: examEditForm.location.trim(),
+          committee: examEditForm.committee.trim(),
+          notes: examEditForm.notes.trim(),
+        },
+      );
+
+      // 2. ปิดฟอร์มและแสดงรายละเอียดที่แก้แล้ว
+
+      // ปิดหน้าต่างแก้ไขและรายละเอียด
+      setExamEditProject(null);
+      setExamDetailProject(null);
+
+      // กลับไปที่ตารางประกาศแล้ว
+      setExamFilter("ประกาศแล้ว");
+
+      // 3. โหลดข้อมูลใหม่จาก Backend
+
+      try {
+        const response = await axios.get<ExamListResponse>(
+          `http://localhost:5000/teacher/exams/${userId}`,
+        );
+
+        setExamData(response.data);
+        setExamError("");
+
+      } catch (reloadError) {
+        console.error("Reload exam after edit:", reloadError);
+
+        setExamError(
+          "บันทึกสำเร็จแล้ว แต่โหลดรายการใหม่ไม่สำเร็จ กรุณารีเฟรชหน้า",
+        );
+      }
+    } catch (err) {
+      console.error("Save exam edit error:", err);
+
+      if (axios.isAxiosError(err)) {
+        setExamEditError(
+          err.response?.data?.message || "ไม่สามารถแก้ไขกำหนดการสอบได้",
+        );
+      } else {
+        setExamEditError("ไม่สามารถแก้ไขกำหนดการสอบได้");
+      }
+    } finally {
+      setExamEditSaving(false);
+    }
+  };
 
   /* =========================================================
      LOGOUT
@@ -913,7 +1099,9 @@ function TeacherWork() {
                                   <button
                                     type="button"
                                     className="tw-exam-action-btn"
-                                    disabled
+                                    onClick={() =>
+                                      setExamDetailProject(project)
+                                    }
                                   >
                                     ดูรายละเอียด
                                   </button>
@@ -933,6 +1121,298 @@ function TeacherWork() {
               </div>
             )}
           </section>
+
+          {/* =========================================================
+    EDIT EXAM SCHEDULE MODAL - T043
+========================================================= */}
+
+          {examEditProject && (
+            <div className="tw-exam-edit-overlay">
+              <form
+                className="tw-exam-edit-modal"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveExamEdit();
+                }}
+              >
+                {/* HEADER */}
+
+                <h3>แก้ไขกำหนดการสอบ</h3>
+
+                <div className="tw-exam-edit-divider" />
+
+                {/* PROJECT */}
+
+                <div className="tw-exam-edit-field">
+                  <label>โครงงาน</label>
+
+                  <div className="tw-exam-edit-project-name">
+                    {examEditProject.project_title}
+                  </div>
+                </div>
+
+                {/* EXAM DATE */}
+
+                <div className="tw-exam-edit-field">
+                  <label>
+                    วันที่สอบ <span>*</span>
+                  </label>
+
+                  <input
+                    type="date"
+                    required
+                    value={examEditForm.exam_date}
+                    onChange={(e) =>
+                      setExamEditForm({
+                        ...examEditForm,
+                        exam_date: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                {/* EXAM TIME */}
+
+                <div className="tw-exam-edit-field">
+                  <label>
+                    เวลา <span>*</span>
+                  </label>
+
+                  <div className="tw-exam-edit-time-row">
+                    <input
+                      type="time"
+                      required
+                      value={examEditForm.start_time}
+                      onChange={(e) =>
+                        setExamEditForm({
+                          ...examEditForm,
+                          start_time: e.target.value,
+                        })
+                      }
+                    />
+
+                    <span>ถึง</span>
+
+                    <input
+                      type="time"
+                      required
+                      value={examEditForm.end_time}
+                      onChange={(e) =>
+                        setExamEditForm({
+                          ...examEditForm,
+                          end_time: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* LOCATION */}
+
+                <div className="tw-exam-edit-field">
+                  <label>
+                    สถานที่สอบ <span>*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    required
+                    maxLength={255}
+                    value={examEditForm.location}
+                    onChange={(e) =>
+                      setExamEditForm({
+                        ...examEditForm,
+                        location: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                {/* COMMITTEE */}
+
+                <div className="tw-exam-edit-field">
+                  <label>
+                    กรรมการสอบ <span>*</span>
+                  </label>
+
+                  <textarea
+                    rows={3}
+                    required
+                    value={examEditForm.committee}
+                    onChange={(e) =>
+                      setExamEditForm({
+                        ...examEditForm,
+                        committee: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                {/* NOTES */}
+
+                <div className="tw-exam-edit-field">
+                  <label>หมายเหตุ</label>
+
+                  <textarea
+                    rows={3}
+                    value={examEditForm.notes}
+                    onChange={(e) =>
+                      setExamEditForm({
+                        ...examEditForm,
+                        notes: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                {/* ERROR */}
+
+                {examEditError && (
+                  <p className="tw-exam-edit-error">{examEditError}</p>
+                )}
+
+                {/* ACTIONS */}
+
+                <div className="tw-exam-edit-actions">
+                  <button
+                    type="button"
+                    className="tw-exam-edit-cancel"
+                    onClick={closeExamEdit}
+                    disabled={examEditSaving}
+                  >
+                    ยกเลิก
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="tw-exam-edit-save"
+                    disabled={examEditSaving}
+                  >
+                    {examEditSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* =========================================================
+    EXAM DETAIL MODAL
+========================================================= */}
+
+          {examDetailProject && (
+            <div
+              className="tw-exam-detail-overlay"
+              role="presentation"
+              onClick={() => setExamDetailProject(null)}
+            >
+              <div
+                className="tw-exam-detail-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label="รายละเอียดกำหนดการสอบ"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* TITLE */}
+
+                <h3>รายละเอียดกำหนดการสอบ</h3>
+
+                <div className="tw-exam-detail-divider" />
+
+                {/* PROJECT NAME */}
+
+                <div className="tw-exam-detail-project">
+                  <strong>{examDetailProject.project_title}</strong>
+                </div>
+
+                {/* BASIC INFO */}
+
+                <div className="tw-exam-detail-info">
+                  <p>
+                    วันที่สอบ : {formatThaiDate(examDetailProject.exam_date)}
+                  </p>
+
+                  <p>
+                    เวลา : {examDetailProject.start_time?.slice(0, 5) || "-"}
+                    {" - "}
+                    {examDetailProject.end_time?.slice(0, 5) || "-"} น.
+                  </p>
+
+                  <p>สถานที่สอบ : {examDetailProject.location || "-"}</p>
+                </div>
+
+                {/* COMMITTEE */}
+
+                <div className="tw-exam-detail-section">
+                  <h4>กรรมการสอบ</h4>
+
+                  {examDetailProject.committee ? (
+                    <ul>
+                      {examDetailProject.committee
+                        .split(/\r?\n|\|/)
+                        .map((name) => name.trim())
+                        .filter(Boolean)
+                        .map((name, index) => (
+                          <li key={index}>{name}</li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <p>-</p>
+                  )}
+                </div>
+
+                {/* NOTES */}
+
+                <div className="tw-exam-detail-section">
+                  <h4>หมายเหตุ</h4>
+
+                  <p className="tw-exam-detail-notes">
+                    {examDetailProject.notes || "-"}
+                  </p>
+                </div>
+
+                {/* ANNOUNCED DATE */}
+
+                <p className="tw-exam-detail-announced">
+                  ประกาศเมื่อ : {formatThaiDate(examDetailProject.announced_at)}
+                  {" เวลา "}
+                  {examDetailProject.announced_at &&
+                  !Number.isNaN(
+                    new Date(examDetailProject.announced_at).getTime(),
+                  )
+                    ? new Date(
+                        examDetailProject.announced_at,
+                      ).toLocaleTimeString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })
+                    : "-"}
+                  {" น."}
+                </p>
+
+                {/* BUTTONS */}
+
+                <div className="tw-exam-detail-actions">
+                  <button
+                    type="button"
+                    className="tw-exam-detail-back"
+                    onClick={() => setExamDetailProject(null)}
+                  >
+                    กลับ
+                  </button>
+
+                  <button
+                    type="button"
+                    className="tw-exam-detail-edit"
+                    onClick={openExamEdit}
+                  >
+                    แก้ไขกำหนดการ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* =================================================
     EXAM ANNOUNCEMENT MODAL
