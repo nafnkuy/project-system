@@ -7702,6 +7702,343 @@ app.get(
   },
 );
 
+/* =========================================================
+   TEACHER - EXAM SCHEDULE LIST
+========================================================= */
+
+app.get("/teacher/exams/:advisorId", (req, res) => {
+  const advisorId = Number(req.params.advisorId);
+
+  if (!Number.isInteger(advisorId) || advisorId <= 0) {
+    return res.status(400).json({
+      message: "รหัสอาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      p.id AS project_id,
+      p.title AS project_title,
+      p.academic_year,
+
+      members.student_names,
+
+      s.id AS schedule_id,
+      DATE_FORMAT(s.exam_date, '%Y-%m-%d') AS exam_date,
+      TIME_FORMAT(s.start_time, '%H:%i') AS start_time,
+      TIME_FORMAT(s.end_time, '%H:%i') AS end_time,
+      s.location,
+      s.committee,
+      s.notes,
+      s.announced_at
+
+    FROM projects p
+
+    INNER JOIN (
+      SELECT
+        pm.project_id,
+
+        GROUP_CONCAT(
+          CONCAT(u.username, ' ', u.name)
+          ORDER BY pm.id ASC
+          SEPARATOR ' | '
+        ) AS student_names
+
+      FROM project_members pm
+
+      INNER JOIN users u
+        ON pm.user_id = u.id
+
+      GROUP BY pm.project_id
+    ) members
+      ON members.project_id = p.id
+
+    LEFT JOIN project_exam_schedules s
+      ON s.project_id = p.id
+
+    WHERE p.advisor_id = ?
+
+    ORDER BY p.id DESC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.log("Get exam schedules error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดกำหนดการสอบได้",
+      });
+    }
+
+    const pending = results.filter((item) => item.schedule_id === null);
+
+    const announced = results.filter((item) => item.schedule_id !== null);
+
+    res.json({
+      pending,
+      announced,
+
+      pending_count: pending.length,
+      announced_count: announced.length,
+    });
+  });
+});
+
+/* =========================================================
+   TEACHER - ANNOUNCE EXAM SCHEDULE
+========================================================= */
+
+app.post("/teacher/exams", async (req, res) => {
+  const {
+    project_id,
+    advisor_id,
+    exam_date,
+    start_time,
+    end_time,
+    location,
+    committee,
+    notes,
+  } = req.body;
+
+  const projectId = Number(project_id);
+  const advisorId = Number(advisor_id);
+
+  const examDate = String(exam_date || "").trim();
+  const startTime = String(start_time || "").trim();
+  const endTime = String(end_time || "").trim();
+  const examLocation = String(location || "").trim();
+  const examCommittee = String(committee || "").trim();
+  const examNotes = String(notes || "").trim();
+
+  // ตรวจข้อมูลที่จำเป็น
+
+  if (
+    !Number.isInteger(projectId) ||
+    projectId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0 ||
+    !examDate ||
+    !startTime ||
+    !endTime ||
+    !examLocation ||
+    !examCommittee
+  ) {
+    return res.status(400).json({
+      message: "กรุณากรอกข้อมูลกำหนดการสอบให้ครบถ้วน",
+    });
+  }
+
+  const parsedDate = new Date(`${examDate}T00:00:00Z`);
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(examDate) ||
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== examDate
+  ) {
+    return res.status(400).json({
+      message: "วันที่สอบไม่ถูกต้อง",
+    });
+  }
+
+  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  if (
+    !timePattern.test(startTime) ||
+    !timePattern.test(endTime) ||
+    startTime >= endTime
+  ) {
+    return res.status(400).json({
+      message: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มสอบ",
+    });
+  }
+
+  if (examLocation.length > 255) {
+    return res.status(400).json({
+      message: "ชื่อสถานที่สอบยาวเกิน 255 ตัวอักษร",
+    });
+  }
+
+  // ใช้ Connection เดียวกันตลอด Transaction
+
+  const getConnection = () =>
+    new Promise((resolve, reject) => {
+      if (typeof db.getConnection === "function") {
+        db.getConnection((err, connection) => {
+          if (err) reject(err);
+          else resolve({ connection, pooled: true });
+        });
+      } else {
+        resolve({ connection: db, pooled: false });
+      }
+    });
+
+  const query = (connection, sql, params = []) =>
+    new Promise((resolve, reject) => {
+      connection.query(sql, params, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+  let connection;
+  let pooled = false;
+  let transactionStarted = false;
+
+  try {
+    const acquired = await getConnection();
+
+    connection = acquired.connection;
+    pooled = acquired.pooled;
+
+    await query(connection, "START TRANSACTION");
+    transactionStarted = true;
+
+    // 1. ตรวจว่าโครงงานเป็นของอาจารย์
+    // และมีนิสิตเป็นสมาชิกแล้ว
+
+    const projects = await query(
+      connection,
+      `
+        SELECT p.id, p.title
+        FROM projects p
+        INNER JOIN users u
+          ON u.id = p.advisor_id
+          AND u.role = 'teacher'
+        WHERE p.id = ?
+          AND p.advisor_id = ?
+          AND EXISTS (
+            SELECT 1
+            FROM project_members pm
+            WHERE pm.project_id = p.id
+          )
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [projectId, advisorId],
+    );
+
+    if (projects.length === 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(403).json({
+        message: "ไม่พบโครงงาน หรือคุณไม่มีสิทธิ์ประกาศ",
+      });
+    }
+
+    // 2. ป้องกันการประกาศซ้ำ
+
+    const existing = await query(
+      connection,
+      `
+        SELECT id
+        FROM project_exam_schedules
+        WHERE project_id = ?
+        LIMIT 1
+      `,
+      [projectId],
+    );
+
+    if (existing.length > 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(409).json({
+        message: "โครงงานนี้ประกาศกำหนดการสอบแล้ว",
+      });
+    }
+
+    // 3. บันทึกกำหนดการสอบ
+
+    const result = await query(
+      connection,
+      `
+        INSERT INTO project_exam_schedules
+        (
+          project_id,
+          advisor_id,
+          exam_date,
+          start_time,
+          end_time,
+          location,
+          committee,
+          notes,
+          announced_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `,
+      [
+        projectId,
+        advisorId,
+        examDate,
+        startTime,
+        endTime,
+        examLocation,
+        examCommittee,
+        examNotes || null,
+      ],
+    );
+
+    // 4. แจ้งเตือนนิสิตทุกคนในโครงงาน
+
+    const message =
+      `อาจารย์ประกาศกำหนดการสอบโครงงาน "${projects[0].title}" ` +
+      `วันที่ ${examDate} เวลา ${startTime} - ${endTime} น. ` +
+      `สถานที่ ${examLocation}`;
+
+    await query(
+      connection,
+      `
+        INSERT INTO notifications
+        (
+          user_id,
+          message,
+          project_id
+        )
+        SELECT DISTINCT
+          pm.user_id,
+          ?,
+          ?
+        FROM project_members pm
+        WHERE pm.project_id = ?
+      `,
+      [message, projectId, projectId],
+    );
+
+    // 5. ยืนยันข้อมูลทั้งหมด
+
+    await query(connection, "COMMIT");
+    transactionStarted = false;
+
+    res.status(201).json({
+      success: true,
+      message: "ประกาศกำหนดการสอบเรียบร้อยแล้ว",
+      schedule_id: result.insertId,
+    });
+  } catch (err) {
+    console.log("Announce exam error:", err);
+
+    if (transactionStarted && connection) {
+      try {
+        await query(connection, "ROLLBACK");
+      } catch (rollbackErr) {
+        console.log("Exam rollback error:", rollbackErr);
+      }
+    }
+
+    res.status(err.code === "ER_DUP_ENTRY" ? 409 : 500).json({
+      message:
+        err.code === "ER_DUP_ENTRY"
+          ? "โครงงานนี้ประกาศกำหนดการสอบแล้ว"
+          : "ไม่สามารถประกาศกำหนดการสอบได้",
+    });
+  } finally {
+    if (pooled && connection && typeof connection.release === "function") {
+      connection.release();
+    }
+  }
+});
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
