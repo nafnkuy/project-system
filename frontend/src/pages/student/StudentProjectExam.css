@@ -1,0 +1,175 @@
+
+/* =========================================================
+   STUDENT EXAM SCHEDULE - S058 / S059
+========================================================= */
+
+/* MAIN CONTAINER */
+
+.s058-page .s058-container {
+  background: #ffffff;
+  border-radius: 9px;
+  padding: 22px 24px;
+  min-height: 565px;
+}
+
+.s058-page .s058-container > h3 {
+  margin: 0 0 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+}
+
+/* EMPTY STATE - S058 */
+
+.s058-page .s058-empty-wrapper {
+  min-height: 455px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s058-page .s058-empty-card {
+  width: 425px;
+  max-width: 100%;
+  padding: 22px 16px 32px;
+
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+
+  background: #ffffff;
+  text-align: center;
+}
+
+.s058-page .s058-empty-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.s058-page .s058-empty-card p {
+  font-size: 13px;
+  line-height: 1.9;
+  margin: 24px 0 0;
+}
+
+/* DIVIDER */
+
+.s058-page .s058-divider {
+  width: 100%;
+  border-top: 1px solid #cccccc;
+  margin: 20px 0;
+}
+
+/* EXAM CARD - S059 */
+
+.s058-page .s058-exam-card {
+  padding: 18px 20px 28px;
+
+  border: 1px solid #bbbbbb;
+  border-radius: 9px;
+
+  background: white;
+}
+
+.s058-page .s058-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.s058-page .s058-card-heading strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* STATUS */
+
+.s058-page .s058-status {
+  padding: 6px 18px;
+
+  color: #20a86b;
+  background: #ffffff;
+
+  border: 1px solid #20a86b;
+  border-radius: 5px;
+
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* BASIC INFORMATION */
+
+.s058-page .s058-basic-info p {
+  font-size: 13px;
+  margin: 12px 0;
+  line-height: 1.7;
+}
+
+/* COMMITTEE AND NOTES */
+
+.s058-page .s058-info-section {
+  margin-top: 35px;
+}
+
+.s058-page .s058-info-section h4 {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.s058-page .s058-info-section ul {
+  margin: 0;
+  padding-left: 30px;
+}
+
+.s058-page .s058-info-section li {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.s058-page .s058-info-section p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.s058-page .s058-notes {
+  padding-left: 18px;
+  white-space: pre-wrap;
+}
+
+/* ANNOUNCEMENT DATE */
+
+.s058-page .s058-announced-date {
+  margin-top: 42px;
+  font-size: 13px;
+}
+
+/* LOADING AND ERROR */
+
+.s058-page .s058-center-message {
+  min-height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 14px;
+  color: #666666;
+  text-align: center;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .s058-page .s058-container {
+    padding: 18px;
+  }
+
+  .s058-page .s058-empty-wrapper {
+    min-height: 350px;
+  }
+
+  .s058-page .s058-exam-card {
+    padding: 16px;
+  }
+}

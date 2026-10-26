@@ -8039,6 +8039,112 @@ app.post("/teacher/exams", async (req, res) => {
   }
 });
 
+/* =========================================================
+   STUDENT - GET EXAM SCHEDULE
+========================================================= */
+
+app.get("/student/projects/:projectId/exam/:studentId", (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const studentId = Number(req.params.studentId);
+
+  if (
+    !Number.isInteger(projectId) ||
+    projectId <= 0 ||
+    !Number.isInteger(studentId) ||
+    studentId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
+    });
+  }
+
+  // ตรวจว่านิสิตเป็นสมาชิกโครงงาน
+
+  const projectSql = `
+      SELECT
+        p.id,
+        p.title,
+        advisor.name AS advisor_name
+
+      FROM projects p
+
+      INNER JOIN project_members pm
+        ON pm.project_id = p.id
+
+      LEFT JOIN users advisor
+        ON advisor.id = p.advisor_id
+
+      WHERE p.id = ?
+        AND pm.user_id = ?
+
+      LIMIT 1
+    `;
+
+  db.query(projectSql, [projectId, studentId], (projectErr, projects) => {
+    if (projectErr) {
+      console.log("Get exam project error:", projectErr);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดข้อมูลโครงงานได้",
+      });
+    }
+
+    if (projects.length === 0) {
+      return res.status(403).json({
+        message: "คุณไม่มีสิทธิ์ดูข้อมูลโครงงานนี้",
+      });
+    }
+
+    // ดึงกำหนดการสอบที่ประกาศแล้ว
+
+    const examSql = `
+          SELECT
+            s.id,
+            s.project_id,
+
+            DATE_FORMAT(
+              s.exam_date, '%Y-%m-%d'
+            ) AS exam_date,
+
+            TIME_FORMAT(
+              s.start_time, '%H:%i'
+            ) AS start_time,
+
+            TIME_FORMAT(
+              s.end_time, '%H:%i'
+            ) AS end_time,
+
+            s.location,
+            s.committee,
+            s.notes,
+            s.announced_at
+
+          FROM project_exam_schedules s
+
+          WHERE s.project_id = ?
+            AND s.announced_at IS NOT NULL
+
+          ORDER BY s.announced_at DESC
+          LIMIT 1
+        `;
+
+    db.query(examSql, [projectId], (examErr, schedules) => {
+      if (examErr) {
+        console.log("Get student exam error:", examErr);
+
+        return res.status(500).json({
+          message: "ไม่สามารถโหลดกำหนดการสอบได้",
+        });
+      }
+
+      res.json({
+        project: projects[0],
+        schedule: schedules[0] || null,
+      });
+    });
+  });
+});
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

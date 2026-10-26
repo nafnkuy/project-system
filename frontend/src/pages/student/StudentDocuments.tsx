@@ -379,7 +379,12 @@ function StudentDocuments() {
               เอกสารและการส่งงาน
             </button>
 
-            <button type="button" disabled title="ยังไม่เปิดใช้งาน">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-exam/${projectId}`)
+              }
+            >
               กำหนดการสอบ
             </button>
 

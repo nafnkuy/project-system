@@ -625,7 +625,14 @@ function StudentProjectDetail() {
               เอกสารและการส่งงาน
             </button>
 
-            <button>กำหนดการสอบ</button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-exam/${projectId}`)
+              }
+            >
+              กำหนดการสอบ
+            </button>
 
             <button>ผลการประเมิน</button>
           </div>
