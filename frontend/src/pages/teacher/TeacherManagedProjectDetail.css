@@ -1,0 +1,594 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap");
+
+/* =========================================
+   TEACHER MANAGED PROJECT DETAIL - LAYOUT
+========================================= */
+
+.teacher-managed-detail-page,
+.teacher-managed-detail-page * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+.teacher-managed-detail-page {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background: #f5f5f5;
+}
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.teacher-managed-detail-page .tmd-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+
+  background: #ffffff;
+  border-right: 1px solid #dddddd;
+
+  z-index: 100;
+}
+
+/* LOGO */
+
+.teacher-managed-detail-page .tmd-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px;
+}
+
+.teacher-managed-detail-page .tmd-logo img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.teacher-managed-detail-page .tmd-logo > div {
+  min-width: 0;
+}
+
+.teacher-managed-detail-page .tmd-logo h2 {
+  margin: 0;
+  color: #111111;
+  font-size: 23px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.teacher-managed-detail-page .tmd-logo p {
+  margin: 0;
+  color: #666666;
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* =========================================
+   SIDEBAR MENU
+========================================= */
+
+.teacher-managed-detail-page .tmd-sidebar nav {
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.teacher-managed-detail-page .tmd-sidebar ul {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teacher-managed-detail-page .tmd-sidebar li {
+  width: 100%;
+  margin: 0;
+  padding: 18px 0;
+
+  color: #222222;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.teacher-managed-detail-page .tmd-sidebar li:hover {
+  background: #f0f0f0;
+}
+
+.teacher-managed-detail-page .tmd-sidebar li.active {
+  background: #2f5d7c;
+  color: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-sidebar li.active:hover {
+  background: #2f5d7c;
+}
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+.teacher-managed-detail-page .tmd-logout {
+  width: 190px;
+  margin: 0 auto 20px;
+  padding: 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #3b75c4;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.teacher-managed-detail-page .tmd-logout:hover {
+  background: #2f6db5;
+}
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.teacher-managed-detail-page .tmd-main {
+  width: calc(100% - 250px);
+  min-width: 0;
+  min-height: 100vh;
+
+  margin-left: 250px;
+  background: #f5f5f5;
+}
+
+/* =========================================
+   TOP HEADER
+========================================= */
+
+.teacher-managed-detail-page .tmd-topbar {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  background: #f0e3a1;
+}
+
+.teacher-managed-detail-page .tmd-topbar .tmd-breadcrumb {
+  margin: 0;
+  color: #111111;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+/* HEADER RIGHT */
+
+.teacher-managed-detail-page .tmd-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.teacher-managed-detail-page .tmd-user {
+  height: 50px;
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+
+  color: #222222;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.teacher-managed-detail-page .tmd-profile-image {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* =========================================
+   CONTENT AREA
+========================================= */
+
+.teacher-managed-detail-page .tmd-page {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  padding: 32px 38px 45px;
+  background: #f5f5f5;
+}
+
+/* =========================================
+   TEACHER MANAGED PROJECT DETAIL - T060
+========================================= */
+
+.teacher-managed-detail-page .tmd-page {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  padding: 30px 36px 45px;
+  background: #f5f5f5;
+  font-family: "Prompt", sans-serif;
+}
+
+/* BREADCRUMB */
+
+.teacher-managed-detail-page .tmd-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.teacher-managed-detail-page .tmd-breadcrumb button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.teacher-managed-detail-page .tmd-breadcrumb button:hover {
+  text-decoration: underline;
+}
+
+/* PROJECT HEADING */
+
+.teacher-managed-detail-page .tmd-header {
+  margin-bottom: 22px;
+}
+
+.teacher-managed-detail-page .tmd-header h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.teacher-managed-detail-page .tmd-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #333333;
+}
+
+/* TABS */
+
+.teacher-managed-detail-page .tmd-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.teacher-managed-detail-page .tmd-tabs button {
+  min-width: 95px;
+  padding: 11px 16px;
+  border: none;
+  border-right: 1px solid #cccccc;
+  border-radius: 0;
+  background: transparent;
+  color: #222222;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-managed-detail-page .tmd-tabs button.active {
+  background: #305f7e;
+  color: white;
+}
+
+/* PAGE SECTIONS */
+
+.teacher-managed-detail-page .tmd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* PROJECT PROGRESS */
+
+.teacher-managed-detail-page .tmd-progress-box {
+  padding: 25px 22px 12px;
+  border: none;
+  border-radius: 9px 9px 0 0;
+  background: #ffffff;
+  margin-bottom: -18px;
+}
+
+.teacher-managed-detail-page .tmd-progress-box > p:first-child {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.teacher-managed-detail-page .tmd-progress-box > strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.teacher-managed-detail-page .tmd-progress-box > p:last-child {
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+/* SUMMARY CARDS */
+
+.teacher-managed-detail-page .tmd-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 15px 22px 30px;
+  border-radius: 0 0 9px 9px;
+  background: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-card {
+  min-height: 110px;
+  padding: 18px;
+  border: 1px solid #c8c8c8;
+  border-radius: 9px;
+  background: #ffffff;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.teacher-managed-detail-page .tmd-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.teacher-managed-detail-page .tmd-card:nth-child(1) strong {
+  color: #3678c5;
+}
+
+.teacher-managed-detail-page .tmd-card:nth-child(2) strong {
+  color: #20a36b;
+}
+
+.teacher-managed-detail-page .tmd-card:nth-child(3) strong {
+  color: #ffbf00;
+}
+
+.teacher-managed-detail-page .tmd-card:nth-child(4) strong {
+  color: #ff0000;
+}
+
+/* OTHER SECTION BOXES */
+
+.teacher-managed-detail-page .tmd-box {
+  padding: 22px;
+  border: none;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-box > h4 {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* CURRENT PHASE */
+
+.teacher-managed-detail-page .tmd-phase-card {
+  min-height: 150px;
+  padding: 18px;
+  border: 1px solid #cccccc;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-phase-card p {
+  margin: 9px 0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* PENDING REVIEWS */
+
+.teacher-managed-detail-page .tmd-review-card {
+  margin-bottom: 12px;
+  padding: 18px;
+  border: 1px solid #cccccc;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-review-card p {
+  margin: 6px 0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* PROJECT INFORMATION */
+
+.teacher-managed-detail-page .tmd-info-card {
+  padding: 20px;
+  border: 1px solid #cccccc;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.teacher-managed-detail-page .tmd-info-card p,
+.teacher-managed-detail-page .tmd-info-card li {
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.teacher-managed-detail-page .tmd-info-card hr {
+  margin: 15px 0 22px;
+  border: none;
+  border-top: 1px solid #cccccc;
+}
+
+.teacher-managed-detail-page .tmd-info-card ul {
+  padding-left: 25px;
+}
+
+.teacher-managed-detail-page .tmd-tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+
+.teacher-managed-detail-page .tmd-tech-tag {
+  min-width: 60px;
+  padding: 5px 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 4px;
+
+  color: #222222;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+
+/* EVALUATION TABLE */
+
+.teacher-managed-detail-page .tmd-eval-table {
+  width: 100%;
+  margin: 15px 0;
+  border-collapse: collapse;
+}
+
+.teacher-managed-detail-page .tmd-eval-table th,
+.teacher-managed-detail-page .tmd-eval-table td {
+  padding: 12px;
+  border: 1px solid #cccccc;
+  font-size: 12px;
+  text-align: center;
+}
+
+.teacher-managed-detail-page .tmd-eval-table th:first-child,
+.teacher-managed-detail-page .tmd-eval-table td:first-child {
+  text-align: left;
+}
+
+/* EVALUATION COMMENTS */
+
+.teacher-managed-detail-page .tmd-comment-box {
+  min-height: 80px;
+  padding: 14px;
+  border-radius: 5px;
+  background: #d9d9d9;
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* EMPTY EVALUATION */
+
+.teacher-managed-detail-page .tmd-empty-result {
+  width: 100%;
+  max-width: 420px;
+  margin: 75px auto;
+  padding: 24px;
+  border: 1px solid #bfbfbf;
+  border-radius: 9px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.teacher-managed-detail-page .tmd-empty-result p {
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.teacher-managed-detail-page .tmd-empty-result hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #cccccc;
+}
+
+
+/* =========================================
+   PROGRESS BAR - SAME AS STUDENT OVERVIEW
+========================================= */
+
+.teacher-managed-detail-page .tmd-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.teacher-managed-detail-page .tmd-progress-track {
+  width: 280px;
+  max-width: 75%;
+  height: 15px;
+  margin-top: 0;
+  overflow: hidden;
+  background: #dddddd;
+}
+
+.teacher-managed-detail-page .tmd-progress-fill {
+  height: 100%;
+  background: #111111;
+  transition: width 0.2s ease;
+}
+
+.teacher-managed-detail-page .tmd-progress-row > span {
+  color: #222222;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+  .teacher-managed-detail-page .tmd-summary-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teacher-managed-detail-page .tmd-page {
+    padding: 20px;
+  }
+}

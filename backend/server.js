@@ -9508,14 +9508,10 @@ app.post("/teacher/evaluations", (req, res) => {
   }
 
   const comment =
-    typeof teacher_comment === "string"
-      ? teacher_comment.trim()
-      : "";
+    typeof teacher_comment === "string" ? teacher_comment.trim() : "";
 
   const revisionDetails =
-    typeof revision_details === "string"
-      ? revision_details.trim()
-      : "";
+    typeof revision_details === "string" ? revision_details.trim() : "";
 
   if (needs_revision === 1 && !revisionDetails) {
     return res.status(400).json({
@@ -9594,10 +9590,9 @@ app.post("/teacher/evaluations", (req, res) => {
         message: "บันทึกผลการประเมินเรียบร้อยแล้ว",
         evaluation_id: result.insertId,
       });
-    }
+    },
   );
 });
-
 
 /* =========================================================
    TEACHER - EXAM EVALUATION LIST
@@ -9960,6 +9955,129 @@ app.get(
     }
   },
 );
+
+/* =========================================================
+   TEACHER - MANAGED PROJECTS
+========================================================= */
+
+app.get("/teacher/managed-projects/:advisorId", (req, res) => {
+  const advisorId = Number(req.params.advisorId);
+
+  if (!Number.isInteger(advisorId) || advisorId <= 0) {
+    return res.status(400).json({
+      message: "รหัสอาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      p.id,
+      p.title,
+
+      COALESCE(
+        (
+          SELECT GROUP_CONCAT(
+            CONCAT(u.username, ' ', u.name)
+            ORDER BY pm.id ASC
+            SEPARATOR ' | '
+          )
+          FROM project_members pm
+          INNER JOIN users u ON pm.user_id = u.id
+          WHERE pm.project_id = p.id
+        ),
+        '-'
+      ) AS students,
+
+      s.id AS schedule_id,
+      DATE_FORMAT(s.exam_date, '%Y-%m-%d') AS exam_date,
+      TIME_FORMAT(s.end_time, '%H:%i') AS end_time,
+
+      (
+        SELECT COUNT(*)
+        FROM exam_committee_members cm
+        WHERE cm.schedule_id = s.id
+          AND cm.invitation_status = 'ตอบรับ'
+      ) AS accepted_count,
+
+      (
+        SELECT COUNT(*)
+        FROM exam_committee_members cm
+        WHERE cm.schedule_id = s.id
+          AND cm.invitation_status = 'รอตอบรับ'
+      ) AS pending_invitation_count,
+
+      (
+        SELECT COUNT(*)
+        FROM exam_committee_members cm
+        INNER JOIN exam_evaluations ev
+          ON ev.committee_member_id = cm.id
+        WHERE cm.schedule_id = s.id
+          AND cm.invitation_status = 'ตอบรับ'
+      ) AS evaluation_count
+
+    FROM projects p
+
+    LEFT JOIN project_exam_schedules s
+      ON s.id = (
+        SELECT MAX(s2.id)
+        FROM project_exam_schedules s2
+        WHERE s2.project_id = p.id
+      )
+
+    WHERE p.advisor_id = ?
+
+      AND EXISTS (
+        SELECT 1
+        FROM project_members pm
+        WHERE pm.project_id = p.id
+      )
+
+    ORDER BY p.id DESC
+  `;
+
+  db.query(sql, [advisorId], (err, results) => {
+    if (err) {
+      console.error("Managed projects error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดโครงงานที่ดูแลได้",
+      });
+    }
+
+    const projects = results.map((item) => {
+      let status = "in_progress";
+
+      const accepted = Number(item.accepted_count);
+      const pending = Number(item.pending_invitation_count);
+      const evaluated = Number(item.evaluation_count);
+
+      if (item.schedule_id) {
+        if (accepted > 0 && pending === 0 && evaluated === accepted) {
+          status = "completed";
+        } else {
+          const examEnd = item.exam_date
+            ? new Date(`${item.exam_date}T${item.end_time || "23:59"}:00+07:00`)
+            : null;
+
+          if (examEnd && examEnd > new Date()) {
+            status = "waiting_exam";
+          } else {
+            status = "evaluating";
+          }
+        }
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        students: item.students,
+        status: status,
+      };
+    });
+
+    res.json(projects);
+  });
+});
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

@@ -30,6 +30,8 @@ import TeacherRequests from "./pages/teacher/TeacherRequests";
 import TeacherWork from "./pages/teacher/TeacherWork";
 import TeacherReviewDetail from "./pages/teacher/TeacherReviewDetail";
 import TeacherEvaluationDetail from "./pages/teacher/TeacherEvaluationDetail";
+import TeacherManagedProjects from "./pages/teacher/TeacherManagedProjects";
+import TeacherManagedProjectDetail from "./pages/teacher/TeacherManagedProjectDetail";
 
 
 import StaffHome from "./pages/Staff/StaffHome";
@@ -75,6 +77,8 @@ function App() {
         <Route path="/teacher-work" element={<TeacherWork />} />
         <Route path="/teacher-work/review/:taskId" element={<TeacherReviewDetail />} />
         <Route path="/teacher-work/evaluation/:committeeMemberId" element={<TeacherEvaluationDetail />}/>
+        <Route path="/teacher-managed-projects" element={<TeacherManagedProjects />} />
+        <Route path="/teacher-managed-projects/:projectId" element={<TeacherManagedProjectDetail />} />
 
 
         <Route path="/staff-home" element={<StaffHome />} />
