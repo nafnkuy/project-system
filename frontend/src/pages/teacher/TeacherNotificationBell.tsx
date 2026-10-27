@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaBell } from "react-icons/fa";
+import { createPortal } from "react-dom";
 
 interface TeacherNotification {
   id: number;
@@ -50,6 +51,9 @@ function TeacherNotificationBell() {
   >(null);
 
   const [invitationFeedback, setInvitationFeedback] = useState("");
+
+  const [selectedExamInvitation, setSelectedExamInvitation] =
+    useState<ExamInvitation | null>(null);
 
   /* =========================================
      LOAD NOTIFICATIONS
@@ -207,11 +211,9 @@ function TeacherNotificationBell() {
         prev.filter((item) => item.invitation_id !== invitationId),
       );
 
-      setInvitationFeedback(
-        decision === "ตอบรับ"
-          ? "ตอบรับคำเชิญกรรมการสอบเรียบร้อยแล้ว"
-          : "ปฏิเสธคำเชิญกรรมการสอบเรียบร้อยแล้ว",
-      );
+      setInvitationFeedback("");
+      setSelectedExamInvitation(null);
+      setShowNotifications(false);
     } catch (err) {
       console.log("Respond exam invitation error:", err);
       setInvitationFeedback("ไม่สามารถบันทึกคำตอบได้ กรุณาลองอีกครั้ง");
@@ -292,63 +294,25 @@ function TeacherNotificationBell() {
             <>
               {/* คำเชิญกรรมการสอบ */}
               {examInvitations.map((invitation) => (
-                <div
+                <button
                   key={`exam-${invitation.invitation_id}`}
-                  className="teacher-exam-invitation"
+                  type="button"
+                  className="teacher-exam-invitation-preview"
+                  onClick={() => {
+                    setInvitationFeedback("");
+                    setSelectedExamInvitation(invitation);
+                    setShowNotifications(false);
+                  }}
                 >
-                  <div className="teacher-exam-invitation-header">
+                  <div className="teacher-exam-preview-header">
                     <strong>คำเชิญเป็นกรรมการสอบ</strong>
                     <span>รอตอบรับ</span>
                   </div>
 
-                  <p className="teacher-exam-project-title">
-                    {invitation.project_title}
-                  </p>
+                  <p>{invitation.project_title}</p>
 
-                  <p>ผู้เชิญ : {invitation.advisor_name}</p>
-
-                  <p>วันที่สอบ : {formatExamDate(invitation.exam_date)}</p>
-
-                  <p>
-                    เวลา : {invitation.start_time?.slice(0, 5)}
-                    {" - "}
-                    {invitation.end_time?.slice(0, 5)} น.
-                  </p>
-
-                  <p>สถานที่ : {invitation.location}</p>
-
-                  <div className="teacher-exam-invitation-actions">
-                    <button
-                      type="button"
-                      className="teacher-exam-reject-btn"
-                      disabled={respondingInvitationId !== null}
-                      onClick={() =>
-                        handleExamInvitationResponse(
-                          invitation.invitation_id,
-                          "ปฏิเสธ",
-                        )
-                      }
-                    >
-                      ปฏิเสธ
-                    </button>
-
-                    <button
-                      type="button"
-                      className="teacher-exam-accept-btn"
-                      disabled={respondingInvitationId !== null}
-                      onClick={() =>
-                        handleExamInvitationResponse(
-                          invitation.invitation_id,
-                          "ตอบรับ",
-                        )
-                      }
-                    >
-                      {respondingInvitationId === invitation.invitation_id
-                        ? "กำลังบันทึก..."
-                        : "ตอบรับ"}
-                    </button>
-                  </div>
-                </div>
+                  <small>{formatNotificationDate(invitation.invited_at)}</small>
+                </button>
               ))}
 
               {/* การแจ้งเตือนเดิม */}
@@ -366,6 +330,111 @@ function TeacherNotificationBell() {
           )}
         </div>
       )}
+
+      {/* EXAM INVITATION POPUP */}
+      {selectedExamInvitation &&
+        createPortal(
+          <div
+            className="teacher-exam-popup-overlay"
+            onClick={() => {
+              if (respondingInvitationId === null) {
+                setSelectedExamInvitation(null);
+              }
+            }}
+          >
+            <div
+              className="teacher-exam-popup"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="teacher-exam-popup-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 id="teacher-exam-popup-title">รายละเอียดคำเชิญกรรมการสอบ</h3>
+
+              <div className="teacher-exam-popup-divider" />
+
+              <div className="teacher-exam-popup-content">
+                <h4>{selectedExamInvitation.project_title}</h4>
+
+                <p>
+                  <strong>ผู้เชิญ :</strong>{" "}
+                  {selectedExamInvitation.advisor_name}
+                </p>
+
+                <p>
+                  <strong>วันที่สอบ :</strong>{" "}
+                  {formatExamDate(selectedExamInvitation.exam_date)}
+                </p>
+
+                <p>
+                  <strong>เวลา :</strong>{" "}
+                  {selectedExamInvitation.start_time?.slice(0, 5)}
+                  {" - "}
+                  {selectedExamInvitation.end_time?.slice(0, 5)} น.
+                </p>
+
+                <p>
+                  <strong>สถานที่สอบ :</strong>{" "}
+                  {selectedExamInvitation.location}
+                </p>
+
+                <p>
+                  <strong>สถานะ :</strong>{" "}
+                  <span className="teacher-exam-popup-status">รอตอบรับ</span>
+                </p>
+
+                {invitationFeedback && (
+                  <p className="teacher-exam-popup-error" role="alert">
+                    {invitationFeedback}
+                  </p>
+                )}
+              </div>
+
+              <div className="teacher-exam-popup-actions">
+                <button
+                  type="button"
+                  className="teacher-exam-popup-back"
+                  disabled={respondingInvitationId !== null}
+                  onClick={() => setSelectedExamInvitation(null)}
+                >
+                  กลับ
+                </button>
+
+                <button
+                  type="button"
+                  className="teacher-exam-popup-reject"
+                  disabled={respondingInvitationId !== null}
+                  onClick={() =>
+                    handleExamInvitationResponse(
+                      selectedExamInvitation.invitation_id,
+                      "ปฏิเสธ",
+                    )
+                  }
+                >
+                  ปฏิเสธ
+                </button>
+
+                <button
+                  type="button"
+                  className="teacher-exam-popup-accept"
+                  disabled={respondingInvitationId !== null}
+                  onClick={() =>
+                    handleExamInvitationResponse(
+                      selectedExamInvitation.invitation_id,
+                      "ตอบรับ",
+                    )
+                  }
+                >
+                  {respondingInvitationId ===
+                  selectedExamInvitation.invitation_id
+                    ? "กำลังบันทึก..."
+                    : "ตอบรับ"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

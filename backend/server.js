@@ -7798,10 +7798,27 @@ app.post("/teacher/exams", async (req, res) => {
     location,
     committee,
     notes,
+    committee_teacher_ids,
   } = req.body;
 
   const projectId = Number(project_id);
   const advisorId = Number(advisor_id);
+
+  const teacherIds = Array.isArray(committee_teacher_ids)
+    ? committee_teacher_ids
+    : [];
+
+  if (
+    teacherIds.length === 0 ||
+    teacherIds.some(
+      (id) => !Number.isInteger(id) || id <= 0 || id === advisorId,
+    ) ||
+    new Set(teacherIds).size !== teacherIds.length
+  ) {
+    return res.status(400).json({
+      message: "กรุณาเลือกกรรมการสอบที่ถูกต้องอย่างน้อย 1 ท่าน",
+    });
+  }
 
   const examDate = String(exam_date || "").trim();
   const startTime = String(start_time || "").trim();
@@ -7950,6 +7967,30 @@ app.post("/teacher/exams", async (req, res) => {
 
     // 3. บันทึกกำหนดการสอบ
 
+    // ตรวจสอบว่า ID ที่เลือกเป็นอาจารย์จริงทุกคน
+
+    const placeholders = teacherIds.map(() => "?").join(", ");
+
+    const teachers = await query(
+      connection,
+      `
+    SELECT id
+    FROM users
+    WHERE role = 'teacher'
+      AND id IN (${placeholders})
+  `,
+      teacherIds,
+    );
+
+    if (teachers.length !== teacherIds.length) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(400).json({
+        message: "ไม่พบข้อมูลอาจารย์บางท่าน กรุณาเลือกใหม่",
+      });
+    }
+
     const result = await query(
       connection,
       `
@@ -7978,6 +8019,49 @@ app.post("/teacher/exams", async (req, res) => {
         examNotes || null,
       ],
     );
+
+    // =========================================
+    // เพิ่มอาจารย์ที่ปรึกษาเป็นกรรมการอัตโนมัติ
+    // =========================================
+
+    const scheduleId = result.insertId;
+
+    await query(
+      connection,
+      `
+    INSERT INTO exam_committee_members
+    (
+      schedule_id,
+      teacher_id,
+      invited_by,
+      invitation_status,
+      responded_at
+    )
+    VALUES (?, ?, ?, 'ตอบรับ', NOW())
+  `,
+      [scheduleId, advisorId, advisorId],
+    );
+
+    // =========================================
+    // ส่งคำเชิญให้อาจารย์ที่เลือกทุกท่าน
+    // =========================================
+
+    for (const teacherId of teacherIds) {
+      await query(
+        connection,
+        `
+      INSERT INTO exam_committee_members
+      (
+        schedule_id,
+        teacher_id,
+        invited_by,
+        invitation_status
+      )
+      VALUES (?, ?, ?, 'รอตอบรับ')
+    `,
+        [scheduleId, teacherId, advisorId],
+      );
+    }
 
     // 4. แจ้งเตือนนิสิตทุกคนในโครงงาน
 
@@ -8158,8 +8242,8 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
     start_time,
     end_time,
     location,
-    committee,
     notes,
+    committee_teacher_ids,
   } = req.body;
 
   const advisorId = Number(advisor_id);
@@ -8167,8 +8251,25 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
   const startTime = String(start_time || "").trim();
   const endTime = String(end_time || "").trim();
   const examLocation = String(location || "").trim();
-  const examCommittee = String(committee || "").trim();
+
+  const teacherIds = committee_teacher_ids;
+
   const examNotes = String(notes || "").trim();
+
+  // ตรวจสอบรายชื่อกรรมการที่เลือก
+
+  if (
+    !Array.isArray(teacherIds) ||
+    teacherIds.length === 0 ||
+    teacherIds.some(
+      (id) => !Number.isInteger(id) || id <= 0 || id === advisorId,
+    ) ||
+    new Set(teacherIds).size !== teacherIds.length
+  ) {
+    return res.status(400).json({
+      message: "กรุณาเลือกกรรมการสอบที่ถูกต้องอย่างน้อย 1 ท่าน",
+    });
+  }
 
   // ตรวจข้อมูล
 
@@ -8180,8 +8281,7 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
     !examDate ||
     !startTime ||
     !endTime ||
-    !examLocation ||
-    !examCommittee
+    !examLocation
   ) {
     return res.status(400).json({
       message: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน",
@@ -8293,6 +8393,213 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
 
     const schedule = schedules[0];
 
+    // ==========================================
+    // ตรวจสอบกรรมการที่เลือก
+    // ==========================================
+
+    const placeholders = teacherIds.map(() => "?").join(", ");
+
+    const teachers = await query(
+      connection,
+      `
+    SELECT id, name
+    FROM users
+    WHERE role = 'teacher'
+      AND id IN (${placeholders})
+  `,
+      teacherIds,
+    );
+
+    if (teachers.length !== teacherIds.length) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(400).json({
+        message: "ไม่พบข้อมูลอาจารย์บางท่าน",
+      });
+    }
+
+    // เปลี่ยน ID เป็นรายชื่อ สำหรับบันทึกในกำหนดการ
+
+    const nameById = new Map(
+      teachers.map((teacher) => [Number(teacher.id), teacher.name]),
+    );
+
+    
+const advisorRows = await query(
+  connection,
+  `
+    SELECT name
+    FROM users
+    WHERE id = ?
+      AND role = 'teacher'
+    LIMIT 1
+  `,
+  [advisorId]
+);
+
+const advisorName = advisorRows[0].name;
+
+const committeeNames = [
+  advisorName,
+  ...teacherIds.map((id) => nameById.get(id)),
+].join("\n");
+
+
+    // ==========================================
+    // ดึงกรรมการเดิมจากฐานข้อมูล
+    // ==========================================
+
+    const currentMembers = await query(
+      connection,
+      `
+    SELECT id, teacher_id, invitation_status
+    FROM exam_committee_members
+    WHERE schedule_id = ?
+    FOR UPDATE
+  `,
+      [scheduleId],
+    );
+
+    const currentByTeacherId = new Map(
+      currentMembers.map((member) => [Number(member.teacher_id), member]),
+    );
+
+    const selectedIds = new Set(teacherIds);
+
+    // หาคนที่ถูกนำออกจากรายการ
+
+    const removing = currentMembers.filter(
+      (member) =>
+        Number(member.teacher_id) !== advisorId &&
+        member.invitation_status !== "ปฏิเสธ" &&
+        !selectedIds.has(Number(member.teacher_id)),
+    );
+
+    // ==========================================
+    // ตรวจสอบว่ากรรมการให้คะแนนแล้วหรือยัง
+    // ==========================================
+
+    if (removing.length > 0) {
+      const placeholders2 = removing.map(() => "?").join(", ");
+
+      const evaluations = await query(
+        connection,
+        `
+      SELECT id
+      FROM exam_evaluations
+      WHERE committee_member_id IN (${placeholders2})
+      LIMIT 1
+    `,
+        removing.map((member) => member.id),
+      );
+
+      if (evaluations.length > 0) {
+        await query(connection, "ROLLBACK");
+        transactionStarted = false;
+
+        return res.status(409).json({
+          message: "กรรมการบางท่านบันทึกคะแนนแล้ว ไม่สามารถนำออกได้",
+        });
+      }
+    }
+
+    // ==========================================
+    // เพิ่มอาจารย์ที่ปรึกษาเป็นกรรมการอัตโนมัติ
+    // ==========================================
+
+    await query(
+      connection,
+      `
+    INSERT INTO exam_committee_members
+    (
+      schedule_id,
+      teacher_id,
+      invited_by,
+      invitation_status,
+      responded_at
+    )
+    VALUES (?, ?, ?, 'ตอบรับ', NOW())
+
+    ON DUPLICATE KEY UPDATE id = id
+  `,
+      [scheduleId, advisorId, advisorId],
+    );
+
+    // ==========================================
+    // ถอนกรรมการที่ถูกนำออก
+    // ==========================================
+
+    for (const member of removing) {
+      await query(
+        connection,
+        `
+      DELETE FROM exam_committee_members
+      WHERE id = ?
+    `,
+        [member.id],
+      );
+
+      // แจ้งอาจารย์ที่ถูกถอนจากกรรมการ
+
+      await query(
+        connection,
+        `
+      INSERT INTO notifications
+      (user_id, message, project_id)
+      VALUES (?, ?, ?)
+    `,
+        [
+          member.teacher_id,
+          `อาจารย์ที่ปรึกษาถอนคำเชิญกรรมการสอบโครงงาน "${schedule.project_title}"`,
+          schedule.project_id,
+        ],
+      );
+    }
+
+    // ==========================================
+    // เพิ่มกรรมการใหม่หรือเชิญใหม่
+    // ==========================================
+
+    for (const teacherId of teacherIds) {
+      const existing = currentByTeacherId.get(teacherId);
+
+      // กรรมการใหม่
+      if (!existing) {
+        await query(
+          connection,
+          `
+        INSERT INTO exam_committee_members
+        (
+          schedule_id,
+          teacher_id,
+          invited_by,
+          invitation_status
+        )
+        VALUES (?, ?, ?, 'รอตอบรับ')
+      `,
+          [scheduleId, teacherId, advisorId],
+        );
+      }
+
+      // กรรมการที่เคยปฏิเสธ ให้เชิญใหม่ได้
+      else if (existing.invitation_status === "ปฏิเสธ") {
+        await query(
+          connection,
+          `
+        UPDATE exam_committee_members
+        SET
+          invitation_status = 'รอตอบรับ',
+          invited_by = ?,
+          invited_at = NOW(),
+          responded_at = NULL
+        WHERE id = ?
+      `,
+          [advisorId, existing.id],
+        );
+      }
+    }
+
     // 2. อัปเดตกำหนดการสอบเดิม
 
     await query(
@@ -8310,12 +8617,13 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
 
         WHERE id = ?
       `,
+
       [
         examDate,
         startTime,
         endTime,
         examLocation,
-        examCommittee,
+        committeeNames,
         examNotes || null,
         scheduleId,
       ],

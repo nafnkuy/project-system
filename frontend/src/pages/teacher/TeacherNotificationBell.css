@@ -197,3 +197,171 @@
   color: #2f5d7c;
   background: #f0f6ff;
 }
+
+/* =========================================
+   EXAM INVITATION PREVIEW
+========================================= */
+
+.teacher-exam-invitation-preview {
+  width: 100%;
+  padding: 16px;
+  background: #ffffff;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  text-align: left;
+  cursor: pointer;
+}
+
+.teacher-exam-invitation-preview:hover {
+  background: #f7f7f7;
+}
+
+.teacher-exam-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.teacher-exam-preview-header strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222222;
+}
+
+.teacher-exam-preview-header span {
+  padding: 5px 10px;
+  border-radius: 12px;
+  background: #fff4d6;
+  color: #b88600;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.teacher-exam-invitation-preview p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333333;
+  overflow-wrap: anywhere;
+}
+
+.teacher-exam-invitation-preview small {
+  color: #999999;
+  font-size: 10px;
+}
+
+/* =========================================
+   EXAM INVITATION POPUP
+========================================= */
+
+.teacher-exam-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.teacher-exam-popup {
+  width: 100%;
+  max-width: 430px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.teacher-exam-popup h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222222;
+}
+
+.teacher-exam-popup-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: #dddddd;
+}
+
+.teacher-exam-popup-content h4 {
+  margin: 0 0 24px;
+  color: #222222;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.teacher-exam-popup-content p {
+  margin: 0 0 16px;
+  color: #333333;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.teacher-exam-popup-content strong {
+  font-weight: 600;
+}
+
+.teacher-exam-popup-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #fff4d6;
+  color: #b88600;
+  font-size: 11px;
+}
+
+.teacher-exam-popup-error {
+  color: #d32f2f !important;
+}
+
+.teacher-exam-popup-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.teacher-exam-popup-actions button {
+  min-width: 100px;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-exam-popup-back {
+  background: #3979c5;
+  border: 1px solid #3979c5;
+  color: #ffffff;
+}
+
+.teacher-exam-popup-reject {
+  background: #ffffff;
+  border: 1px solid #ff3333;
+  color: #ff3333;
+}
+
+.teacher-exam-popup-accept {
+  background: #20a36d;
+  border: 1px solid #20a36d;
+  color: #ffffff;
+}
+
+.teacher-exam-popup-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

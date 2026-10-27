@@ -218,6 +218,18 @@ function TeacherWork() {
   const [examEditError, setExamEditError] = useState("");
   const [examEditSaving, setExamEditSaving] = useState(false);
 
+  const [editCommitteeSearch, setEditCommitteeSearch] = useState("");
+
+  const [editTeacherOptions, setEditTeacherOptions] = useState<TeacherOption[]>(
+    [],
+  );
+
+  const [editSelectedTeachers, setEditSelectedTeachers] = useState<
+    TeacherOption[]
+  >([]);
+
+  const [editCommitteeLoading, setEditCommitteeLoading] = useState(false);
+
   const [examSubmitting, setExamSubmitting] = useState(false);
 
   const itemsPerPage = 10;
@@ -583,6 +595,11 @@ function TeacherWork() {
         location: examForm.location,
         committee: examForm.committee,
         notes: examForm.notes,
+
+        // ส่ง ID ของอาจารย์ที่เลือกไปยัง Backend
+        committee_teacher_ids: selectedCommitteeTeachers.map(
+          (teacher) => teacher.id,
+        ),
       });
 
       // 2. ปิด Modal หลังบันทึกสำเร็จ
@@ -671,29 +688,82 @@ function TeacherWork() {
     return `${getPart("year")}-` + `${getPart("month")}-` + `${getPart("day")}`;
   };
 
+  const updateEditCommittee = (teachers: TeacherOption[]) => {
+    setEditSelectedTeachers(teachers);
+
+    setExamEditForm((prev) => ({
+      ...prev,
+      committee: teachers.map((teacher) => teacher.name).join("\n"),
+    }));
+  };
+
   /* =========================================================
    OPEN EDIT EXAM
 ========================================================= */
 
-  const openExamEdit = () => {
-    if (!examDetailProject?.schedule_id) return;
+  const openExamEdit = async () => {
+    if (!examDetailProject?.schedule_id || !userId) return;
 
-    // เอาข้อมูลเดิมมาใส่ฟอร์ม
-
-    setExamEditForm({
-      exam_date: toExamInputDate(examDetailProject.exam_date),
-      start_time: examDetailProject.start_time?.slice(0, 5) || "",
-      end_time: examDetailProject.end_time?.slice(0, 5) || "",
-      location: examDetailProject.location || "",
-      committee: (examDetailProject.committee || "").replace(/\|/g, "\n"),
-      notes: examDetailProject.notes || "",
-    });
+    const project = examDetailProject;
 
     setExamEditError("");
-    setExamEditProject(examDetailProject);
+    setEditCommitteeSearch("");
+    setEditCommitteeLoading(true);
+    setEditTeacherOptions([]);
+    setEditSelectedTeachers([]);
 
-    // ปิดหน้าดูรายละเอียด
+    setExamEditForm({
+      exam_date: toExamInputDate(project.exam_date),
+      start_time: project.start_time?.slice(0, 5) || "",
+      end_time: project.end_time?.slice(0, 5) || "",
+      location: project.location || "",
+      committee: project.committee || "",
+      notes: project.notes || "",
+    });
+
+    setExamEditProject(project);
     setExamDetailProject(null);
+
+    try {
+      const [memberRes, teacherRes] = await Promise.all([
+        axios.get(
+          `http://localhost:5000/teacher/exam/committee-status/${project.schedule_id}/${userId}`,
+        ),
+        axios.get(
+          `http://localhost:5000/teacher/exam/committee-candidates/${userId}`,
+        ),
+      ]);
+
+      const members: ExamCommitteeMember[] = memberRes.data.committee || [];
+
+      const teachers: TeacherOption[] = teacherRes.data.teachers || [];
+
+      const selected = members
+        .filter(
+          (member) =>
+            member.teacher_id !== Number(userId) &&
+            member.invitation_status !== "ปฏิเสธ",
+        )
+        .map((member) => ({
+          id: member.teacher_id,
+          username: member.teacher_username,
+          name: member.teacher_name,
+          major: null,
+        }));
+
+      setEditTeacherOptions(teachers);
+      setEditSelectedTeachers(selected);
+
+      setExamEditForm((prev) => ({
+        ...prev,
+        committee: selected.map((teacher) => teacher.name).join("\n"),
+      }));
+    } catch (err) {
+      console.error("Load edit committee error:", err);
+      setExamEditError("ไม่สามารถโหลดข้อมูลกรรมการสอบได้");
+    } finally {
+      setEditCommitteeLoading(false);
+    }
   };
 
   /* =========================================================
@@ -719,16 +789,28 @@ function TeacherWork() {
       return;
     }
 
+    if (
+      editCommitteeLoading ||
+      examEditError === "ไม่สามารถโหลดข้อมูลกรรมการสอบได้"
+    ) {
+      setExamEditError("กรุณารอหรือโหลดข้อมูลกรรมการสอบใหม่");
+      return;
+    }
+
     // ตรวจข้อมูลก่อนบันทึก
 
     if (
       !examEditForm.exam_date ||
       !examEditForm.start_time ||
       !examEditForm.end_time ||
-      !examEditForm.location.trim() ||
-      !examEditForm.committee.trim()
+      !examEditForm.location.trim()
     ) {
       setExamEditError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+      return;
+    }
+
+    if (editSelectedTeachers.length === 0) {
+      setExamEditError("กรุณาเลือกกรรมการสอบอย่างน้อย 1 ท่าน");
       return;
     }
 
@@ -747,12 +829,18 @@ function TeacherWork() {
         `http://localhost:5000/teacher/exams/${examEditProject.schedule_id}`,
         {
           advisor_id: Number(userId),
+
           exam_date: examEditForm.exam_date,
           start_time: examEditForm.start_time,
           end_time: examEditForm.end_time,
+
           location: examEditForm.location.trim(),
-          committee: examEditForm.committee.trim(),
           notes: examEditForm.notes.trim(),
+
+          // รายชื่อกรรมการที่เลือกจากช่องค้นหา
+          committee_teacher_ids: editSelectedTeachers.map(
+            (teacher) => teacher.id,
+          ),
         },
       );
 
@@ -1416,17 +1504,90 @@ function TeacherWork() {
                     กรรมการสอบ <span>*</span>
                   </label>
 
-                  <textarea
-                    rows={3}
-                    required
-                    value={examEditForm.committee}
-                    onChange={(e) =>
-                      setExamEditForm({
-                        ...examEditForm,
-                        committee: e.target.value,
-                      })
-                    }
-                  />
+                  {editCommitteeLoading ? (
+                    <p>กำลังโหลดรายชื่อกรรมการ...</p>
+                  ) : (
+                    <>
+                      <div className="tw-committee-selected">
+                        {editSelectedTeachers.map((teacher) => (
+                          <div
+                            key={teacher.id}
+                            className="tw-committee-selected-item"
+                          >
+                            <span>{teacher.name}</span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateEditCommittee(
+                                  editSelectedTeachers.filter(
+                                    (item) => item.id !== teacher.id,
+                                  ),
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="tw-committee-search">
+                        <input
+                          type="text"
+                          placeholder="ค้นหาชื่ออาจารย์เพื่อเพิ่มกรรมการ..."
+                          value={editCommitteeSearch}
+                          onChange={(e) =>
+                            setEditCommitteeSearch(e.target.value)
+                          }
+                        />
+
+                        {editCommitteeSearch.trim() !== "" && (
+                          <div className="tw-committee-search-results">
+                            {editTeacherOptions
+                              .filter((teacher) => {
+                                const selected = editSelectedTeachers.some(
+                                  (item) => item.id === teacher.id,
+                                );
+
+                                const keyword = editCommitteeSearch
+                                  .trim()
+                                  .toLowerCase();
+
+                                return (
+                                  !selected &&
+                                  (teacher.name
+                                    .toLowerCase()
+                                    .includes(keyword) ||
+                                    teacher.username
+                                      .toLowerCase()
+                                      .includes(keyword))
+                                );
+                              })
+                              .slice(0, 8)
+                              .map((teacher) => (
+                                <button
+                                  key={teacher.id}
+                                  type="button"
+                                  className="tw-committee-search-option"
+                                  onClick={() => {
+                                    updateEditCommittee([
+                                      ...editSelectedTeachers,
+                                      teacher,
+                                    ]);
+
+                                    setEditCommitteeSearch("");
+                                  }}
+                                >
+                                  <strong>{teacher.name}</strong>
+                                  <small>{teacher.username}</small>
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* NOTES */}
