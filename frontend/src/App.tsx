@@ -15,6 +15,7 @@ import StudentTaskDetail from "./pages/student/StudentTaskDetail";
 import StudentDocuments from "./pages/student/StudentDocuments";
 import StudentSubmissionHistory from "./pages/student/StudentSubmissionHistory";
 import StudentProjectExam from "./pages/student/StudentProjectExam";
+import StudentProjectEvaluation from "./pages/student/StudentProjectEvaluation";
 
 import TeacherHome from "./pages/teacher/TeacherHome";
 import TeacherProjects from "./pages/teacher/TeacherProjects";
@@ -58,6 +59,7 @@ function App() {
         <Route path="/student-project-detail/:projectId/documents" element={<StudentDocuments />} />
         <Route path="/student-project-detail/:projectId/documents/:taskId/history" element={<StudentSubmissionHistory />} />
         <Route path="/student-project-exam/:projectId" element={<StudentProjectExam />} />
+        <Route path="/student-project-detail/:projectId/evaluation"element={<StudentProjectEvaluation />} />
 
 
 

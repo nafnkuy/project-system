@@ -1,0 +1,287 @@
+
+/* =========================================
+   STUDENT PROJECT EVALUATION
+========================================= */
+
+.student-eval-page,
+.student-eval-page * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
+/* BREADCRUMB */
+
+.student-eval-page .student-eval-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-eval-page .student-eval-breadcrumb button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-breadcrumb button:hover {
+  text-decoration: underline;
+}
+
+/* TABS */
+
+.student-eval-page .student-eval-tab-label {
+  min-width: 120px;
+  height: 42px;
+  padding: 0 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #cccccc;
+  font-size: 12px;
+}
+
+/* PANEL */
+
+.student-eval-page .student-eval-panel {
+  min-height: 570px;
+  padding: 22px;
+  background: white;
+  border-radius: 9px;
+}
+
+.student-eval-page .student-eval-panel > h3 {
+  margin: 0 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-message {
+  padding: 30px;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* S060 - EMPTY RESULT */
+
+.student-eval-page .student-eval-empty-area {
+  min-height: 470px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.student-eval-page .student-eval-empty-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px 18px 40px;
+  border: 1px solid #bdbdbd;
+  border-radius: 9px;
+  background: white;
+  text-align: center;
+}
+
+.student-eval-page .student-eval-empty-box h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-divider {
+  height: 1px;
+  background: #cccccc;
+  margin: 18px 0;
+}
+
+.student-eval-page .student-eval-empty-box p {
+  margin: 32px 0 5px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+/* S061 - RESULT CARD */
+
+.student-eval-page .student-eval-result-card {
+  padding: 20px;
+  border: 1px solid #bfbfbf;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.student-eval-page .student-eval-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.student-eval-page .student-eval-result-header strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* GRADE */
+
+.student-eval-page .student-eval-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 7px 15px;
+  border-radius: 6px;
+  border: 1px solid #b8dfca;
+  background: #e7f6ed;
+  color: #16834c;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* RESULT SUMMARY */
+
+.student-eval-page .student-eval-summary {
+  font-size: 13px;
+}
+
+.student-eval-page .student-eval-summary p {
+  margin: 12px 0;
+}
+
+.student-eval-page .student-eval-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.student-eval-page .student-eval-status {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.student-eval-page .student-eval-status.is-pass {
+  color: white;
+  background: #20a36b;
+}
+
+.student-eval-page .student-eval-status.is-revision {
+  color: #996500;
+  background: #fff0c5;
+}
+
+.student-eval-page .student-eval-status.is-fail {
+  color: white;
+  background: #dc4545;
+}
+
+/* COMMITTEE */
+
+.student-eval-page .student-eval-committee {
+  margin-top: 30px;
+}
+
+.student-eval-page .student-eval-committee h4,
+.student-eval-page .student-eval-scores h4,
+.student-eval-page .student-eval-comments h4 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-eval-page .student-eval-committee ul {
+  margin: 0;
+  padding-left: 40px;
+}
+
+.student-eval-page .student-eval-committee li {
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+/* SCORES TABLE */
+
+.student-eval-page .student-eval-scores {
+  margin-top: 45px;
+}
+
+.student-eval-page .student-eval-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.student-eval-page .student-eval-score-table {
+  width: 100%;
+  border: 1px solid #bfbfbf;
+  border-spacing: 0;
+  border-radius: 8px;
+  border-collapse: separate;
+  overflow: hidden;
+}
+
+.student-eval-page .student-eval-score-table th,
+.student-eval-page .student-eval-score-table td {
+  padding: 12px 14px;
+  border-right: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  font-size: 12px;
+}
+
+.student-eval-page .student-eval-score-table tr > :last-child {
+  border-right: none;
+}
+
+.student-eval-page .student-eval-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.student-eval-page .student-eval-score-table th {
+  font-weight: 500;
+}
+
+.student-eval-page .student-eval-score-table th:first-child,
+.student-eval-page .student-eval-score-table td:first-child {
+  width: 65%;
+  text-align: left;
+}
+
+.student-eval-page .student-eval-score-table th:nth-child(2),
+.student-eval-page .student-eval-score-table td:nth-child(2),
+.student-eval-page .student-eval-score-table th:nth-child(3),
+.student-eval-page .student-eval-score-table td:nth-child(3) {
+  text-align: center;
+}
+
+.student-eval-page .student-eval-total-row {
+  font-weight: 600;
+}
+
+/* COMMENTS */
+
+.student-eval-page .student-eval-comments {
+  margin-top: 45px;
+  margin-bottom: 35px;
+}
+
+.student-eval-page .student-eval-comment-box {
+  min-height: 95px;
+  padding: 16px 20px;
+  border-radius: 5px;
+  background: #d9d9d9;
+}
+
+.student-eval-page .student-eval-comment-box p {
+  margin: 0 0 12px;
+  color: #222222;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.student-eval-page .student-eval-comment-box p:last-child {
+  margin-bottom: 0;
+}

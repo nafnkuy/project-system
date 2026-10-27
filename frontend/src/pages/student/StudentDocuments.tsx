@@ -388,7 +388,12 @@ function StudentDocuments() {
               กำหนดการสอบ
             </button>
 
-            <button type="button" disabled title="ยังไม่เปิดใช้งาน">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-detail/${projectId}/evaluation`)
+              }
+            >
               ผลการประเมิน
             </button>
           </div>

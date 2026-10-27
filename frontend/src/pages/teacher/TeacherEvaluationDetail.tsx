@@ -23,8 +23,19 @@ interface EvaluationProject {
   location: string;
   advisor_name: string;
   student_names: string;
+
   evaluation_id: number | null;
+
+  score_correctness: number | null;
+  score_design: number | null;
+  score_presentation: number | null;
+  score_documentation: number | null;
+  score_questions: number | null;
+
   total_score: number | null;
+  teacher_comment: string | null;
+  needs_revision: number | null;
+  revision_details: string | null;
   evaluated_at: string | null;
 }
 
@@ -101,6 +112,9 @@ function TeacherEvaluationDetail() {
   const [form, setForm] = useState<EvaluationForm>(initialForm);
   const [formError, setFormError] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   /* =========================================
      LOAD EVALUATION DATA
@@ -237,6 +251,51 @@ function TeacherEvaluationDetail() {
     }
 
     setShowConfirm(true);
+  };
+
+  const saveEvaluation = async () => {
+    if (!project || !userId || saving) return;
+
+    setSaving(true);
+    setSaveError("");
+
+    try {
+      await axios.post("http://localhost:5000/teacher/evaluations", {
+        committee_member_id: project.committee_member_id,
+        teacher_id: Number(userId),
+
+        score_correctness: Number(form.score_correctness),
+        score_design: Number(form.score_design),
+        score_presentation: Number(form.score_presentation),
+        score_documentation: Number(form.score_documentation),
+        score_questions: Number(form.score_questions),
+
+        teacher_comment: form.teacher_comment.trim(),
+
+        needs_revision: form.needs_revision === "มี" ? 1 : 0,
+
+        revision_details:
+          form.needs_revision === "มี" ? form.revision_details.trim() : "",
+      });
+
+      // บันทึกสำเร็จแล้ว
+      setShowConfirm(false);
+
+      // กลับไปหน้า การประเมิน
+      navigate("/teacher-work?tab=evaluation");
+    } catch (err) {
+      console.error("Save evaluation error:", err);
+
+      if (axios.isAxiosError(err)) {
+        setSaveError(
+          err.response?.data?.message || "ไม่สามารถบันทึกผลการประเมินได้",
+        );
+      } else {
+        setSaveError("ไม่สามารถบันทึกผลการประเมินได้");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const goBack = () => {
@@ -547,11 +606,137 @@ function TeacherEvaluationDetail() {
                       )}
                     </>
                   ) : (
-                    <div className="tw-eval-recorded">
-                      <h4>ผลประเมินที่บันทึกแล้ว</h4>
+                    <>
+                      {/* =========================================
+      SAVED EVALUATION RESULT
+  ========================================= */}
 
-                      <p>คะแนนรวม : {project.total_score} / 100</p>
-                    </div>
+                      <div className="tw-eval-section">
+                        <h4>แบบประเมิน</h4>
+
+                        <div className="tw-eval-table-wrap">
+                          <table className="tw-eval-score-table">
+                            <thead>
+                              <tr>
+                                <th>เกณฑ์การประเมิน</th>
+                                <th>คะแนนเต็ม</th>
+                                <th>คะแนนที่ได้</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {criteria.map((item) => (
+                                <tr key={item.key}>
+                                  <td>{item.label}</td>
+
+                                  <td>{item.max}</td>
+
+                                  <td>{project[item.key] ?? "-"}</td>
+                                </tr>
+                              ))}
+
+                              <tr className="tw-eval-total-row">
+                                <td>รวม</td>
+                                <td>100</td>
+                                <td>{project.total_score ?? "-"}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* =========================================
+      TEACHER COMMENT
+  ========================================= */}
+
+                      <div className="tw-eval-field">
+                        <label>ความคิดเห็น / ข้อเสนอแนะ</label>
+
+                        <textarea
+                          rows={4}
+                          value={
+                            project.teacher_comment?.trim() ||
+                            "ไม่มีความคิดเห็นเพิ่มเติม"
+                          }
+                          readOnly
+                        />
+                      </div>
+
+                      {/* =========================================
+      REVISION STATUS
+  ========================================= */}
+
+                      <div className="tw-eval-field">
+                        <label>ประเด็นที่ต้องแก้ไข</label>
+
+                        <div className="tw-eval-choices">
+                          <label
+                            className={`tw-eval-choice ${
+                              project.needs_revision === 0 ? "selected" : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              checked={project.needs_revision === 0}
+                              disabled
+                            />
+                            <span>ไม่มี</span>
+                          </label>
+
+                          <label
+                            className={`tw-eval-choice ${
+                              project.needs_revision === 1 ? "selected" : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              checked={project.needs_revision === 1}
+                              disabled
+                            />
+                            <span>มี</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* =========================================
+      REVISION DETAILS
+  ========================================= */}
+
+                      {project.needs_revision === 1 && (
+                        <div className="tw-eval-field">
+                          <label>ระบุประเด็นที่ต้องแก้ไข</label>
+
+                          <textarea
+                            rows={4}
+                            value={project.revision_details?.trim() || "-"}
+                            readOnly
+                          />
+                        </div>
+                      )}
+
+                      {/* =========================================
+      EVALUATED DATE
+  ========================================= */}
+
+                      <div className="tw-eval-recorded">
+                        <p>
+                          บันทึกผลเมื่อ :{" "}
+                          {project.evaluated_at
+                            ? new Date(project.evaluated_at).toLocaleString(
+                                "th-TH",
+                                {
+                                  timeZone: "Asia/Bangkok",
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )
+                            : "-"}
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -614,6 +799,12 @@ function TeacherEvaluationDetail() {
               และประเด็นที่ต้องแก้ไขของคุณ
             </p>
 
+            {saveError && (
+              <p className="tw-eval-error" role="alert">
+                {saveError}
+              </p>
+            )}
+
             <div className="tw-eval-confirm-actions">
               <button
                 type="button"
@@ -626,10 +817,10 @@ function TeacherEvaluationDetail() {
               <button
                 type="button"
                 className="tw-eval-modal-save"
-                disabled
-                title="ยังไม่ได้เชื่อม API บันทึกคะแนน"
+                onClick={saveEvaluation}
+                disabled={saving}
               >
-                ยืนยันการประเมิน
+                {saving ? "กำลังบันทึก..." : "ยืนยันการประเมิน"}
               </button>
             </div>
           </div>

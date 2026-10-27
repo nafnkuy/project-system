@@ -424,3 +424,20 @@
 .teacher-eval-page .tw-eval-breadcrumb-current {
   cursor: default;
 }
+
+/* ผลประเมินที่บันทึกแล้ว อ่านได้อย่างเดียว */
+
+.teacher-eval-page .tw-eval-choice input[type="radio"]:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.teacher-eval-page .tw-eval-choice:has(input:disabled) {
+  cursor: default;
+}
+
+.teacher-eval-page .tw-eval-field textarea[readonly] {
+  background-color: #f5f5f5;
+  color: #333333;
+  cursor: default;
+}

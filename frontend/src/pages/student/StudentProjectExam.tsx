@@ -343,7 +343,14 @@ function StudentProjectExam() {
               กำหนดการสอบ
             </button>
 
-            <button>ผลการประเมิน</button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-detail/${projectId}/evaluation`)
+              }
+            >
+              ผลการประเมิน
+            </button>
           </div>
 
           {/* EXAM CONTENT */}

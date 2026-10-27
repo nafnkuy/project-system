@@ -9446,6 +9446,160 @@ app.get("/teacher/exam/committee-status/:scheduleId/:advisorId", (req, res) => {
 });
 
 /* =========================================================
+   TEACHER - SAVE EXAM EVALUATION
+========================================================= */
+
+app.post("/teacher/evaluations", (req, res) => {
+  const {
+    committee_member_id,
+    teacher_id,
+    score_correctness,
+    score_design,
+    score_presentation,
+    score_documentation,
+    score_questions,
+    teacher_comment,
+    needs_revision,
+    revision_details,
+  } = req.body;
+
+  const memberId = Number(committee_member_id);
+  const teacherId = Number(teacher_id);
+
+  if (
+    !Number.isInteger(memberId) ||
+    memberId <= 0 ||
+    !Number.isInteger(teacherId) ||
+    teacherId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลกรรมการสอบไม่ถูกต้อง",
+    });
+  }
+
+  // ตรวจคะแนนทั้ง 5 หัวข้อ
+  const scores = [
+    [score_correctness, 30],
+    [score_design, 25],
+    [score_presentation, 20],
+    [score_documentation, 15],
+    [score_questions, 10],
+  ];
+
+  const validScores = scores.every(([score, max]) => {
+    return (
+      typeof score === "number" &&
+      Number.isInteger(score) &&
+      score >= 0 &&
+      score <= max
+    );
+  });
+
+  if (!validScores) {
+    return res.status(400).json({
+      message: "กรุณากรอกคะแนนให้ถูกต้องครบทุกหัวข้อ",
+    });
+  }
+
+  if (needs_revision !== 0 && needs_revision !== 1) {
+    return res.status(400).json({
+      message: "กรุณาระบุว่ามีประเด็นที่ต้องแก้ไขหรือไม่",
+    });
+  }
+
+  const comment =
+    typeof teacher_comment === "string"
+      ? teacher_comment.trim()
+      : "";
+
+  const revisionDetails =
+    typeof revision_details === "string"
+      ? revision_details.trim()
+      : "";
+
+  if (needs_revision === 1 && !revisionDetails) {
+    return res.status(400).json({
+      message: "กรุณาระบุประเด็นที่ต้องแก้ไข",
+    });
+  }
+
+  // ตรวจสิทธิ์กรรมการและบันทึกคะแนน
+  const sql = `
+    INSERT INTO exam_evaluations
+    (
+      committee_member_id,
+      score_correctness,
+      score_design,
+      score_presentation,
+      score_documentation,
+      score_questions,
+      teacher_comment,
+      needs_revision,
+      revision_details
+    )
+
+    SELECT
+      ecm.id,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?
+
+    FROM exam_committee_members ecm
+
+    INNER JOIN project_exam_schedules s
+      ON s.id = ecm.schedule_id
+
+    WHERE ecm.id = ?
+      AND ecm.teacher_id = ?
+      AND ecm.invitation_status = 'ตอบรับ'
+      AND s.announced_at IS NOT NULL
+  `;
+
+  db.query(
+    sql,
+    [
+      score_correctness,
+      score_design,
+      score_presentation,
+      score_documentation,
+      score_questions,
+      comment || null,
+      needs_revision,
+      needs_revision === 1 ? revisionDetails : null,
+      memberId,
+      teacherId,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Save evaluation error:", err);
+
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(409).json({
+            message: "กรรมการท่านนี้บันทึกผลการประเมินแล้ว",
+          });
+        }
+
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกผลการประเมินได้",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(403).json({
+          message: "ไม่พบสิทธิ์ประเมินหรือยังไม่ได้ตอบรับคำเชิญ",
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "บันทึกผลการประเมินเรียบร้อยแล้ว",
+        evaluation_id: result.insertId,
+      });
+    }
+  );
+});
+
+
+/* =========================================================
    TEACHER - EXAM EVALUATION LIST
 ========================================================= */
 
@@ -9475,9 +9629,21 @@ app.get("/teacher/evaluations/:teacherId", (req, res) => {
 
       COALESCE(students.student_names, '-') AS student_names,
 
+      
       ev.id AS evaluation_id,
+
+      ev.score_correctness,
+      ev.score_design,
+      ev.score_presentation,
+      ev.score_documentation,
+      ev.score_questions,
+
       ev.total_score,
+      ev.teacher_comment,
+      ev.needs_revision,
+      ev.revision_details,
       ev.evaluated_at
+
 
     FROM exam_committee_members ecm
 
@@ -9540,6 +9706,260 @@ app.get("/teacher/evaluations/:teacherId", (req, res) => {
     });
   });
 });
+
+/* =========================================================
+   STUDENT - PROJECT EVALUATION RESULT
+========================================================= */
+
+app.get(
+  "/student/projects/:projectId/evaluation/:studentId",
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const studentId = Number(req.params.studentId);
+
+    if (
+      !Number.isInteger(projectId) ||
+      projectId <= 0 ||
+      !Number.isInteger(studentId) ||
+      studentId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
+      });
+    }
+
+    const query = (sql, params = []) =>
+      new Promise((resolve, reject) => {
+        db.query(sql, params, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+
+    try {
+      // 1. ตรวจสอบว่านิสิตเป็นสมาชิกโครงงานจริง
+
+      const projects = await query(
+        `
+          SELECT
+            p.id,
+            p.title,
+            s.id AS schedule_id
+
+          FROM projects p
+
+          INNER JOIN project_members pm
+            ON pm.project_id = p.id
+
+          LEFT JOIN project_exam_schedules s
+            ON s.project_id = p.id
+
+          WHERE p.id = ?
+            AND pm.user_id = ?
+
+          LIMIT 1
+        `,
+        [projectId, studentId],
+      );
+
+      if (projects.length === 0) {
+        return res.status(404).json({
+          message: "ไม่พบโครงงานหรือไม่มีสิทธิ์ดูผลการประเมิน",
+        });
+      }
+
+      const project = projects[0];
+
+      const pendingResult = {
+        status: "pending",
+        project_title: project.title,
+      };
+
+      // ยังไม่ได้ประกาศกำหนดการสอบ
+
+      if (!project.schedule_id) {
+        return res.json(pendingResult);
+      }
+
+      // 2. ดึงกรรมการและคะแนนแต่ละท่าน
+
+      const members = await query(
+        `
+          SELECT
+            ecm.teacher_id,
+            ecm.invitation_status,
+
+            u.name AS teacher_name,
+
+            ev.id AS evaluation_id,
+            ev.score_correctness,
+            ev.score_design,
+            ev.score_presentation,
+            ev.score_documentation,
+            ev.score_questions,
+            ev.total_score,
+            ev.teacher_comment,
+            ev.needs_revision,
+            ev.evaluated_at
+
+          FROM exam_committee_members ecm
+
+          INNER JOIN users u
+            ON u.id = ecm.teacher_id
+
+          LEFT JOIN exam_evaluations ev
+            ON ev.committee_member_id = ecm.id
+
+          WHERE ecm.schedule_id = ?
+
+          ORDER BY
+            CASE
+              WHEN ecm.teacher_id = (
+                SELECT advisor_id
+                FROM project_exam_schedules
+                WHERE id = ?
+              ) THEN 0
+              ELSE 1
+            END,
+            ecm.id ASC
+        `,
+        [project.schedule_id, project.schedule_id],
+      );
+
+      // 3. ต้องไม่มีคำเชิญที่ยังรอตอบรับ
+
+      const hasPendingInvitation = members.some(
+        (member) => member.invitation_status === "รอตอบรับ",
+      );
+
+      const acceptedMembers = members.filter(
+        (member) => member.invitation_status === "ตอบรับ",
+      );
+
+      // 4. กรรมการที่ตอบรับทุกท่านต้องบันทึกคะแนนครบ
+
+      const allEvaluated =
+        acceptedMembers.length > 0 &&
+        acceptedMembers.every(
+          (member) =>
+            member.evaluation_id !== null && member.total_score !== null,
+        );
+
+      if (hasPendingInvitation || !allEvaluated) {
+        return res.json(pendingResult);
+      }
+
+      // 5. คำนวณคะแนนเฉลี่ย
+
+      const average = (field) => {
+        const sum = acceptedMembers.reduce(
+          (total, member) => total + Number(member[field]),
+          0,
+        );
+
+        return Number((sum / acceptedMembers.length).toFixed(2));
+      };
+
+      const totalScore = average("total_score");
+
+      // 6. แปลงคะแนนเฉลี่ยเป็นเกรด
+
+      const getGrade = (score) => {
+        if (score >= 80) return "A";
+        if (score >= 75) return "B+";
+        if (score >= 70) return "B";
+        if (score >= 65) return "C+";
+        if (score >= 60) return "C";
+        if (score >= 55) return "D+";
+        if (score >= 50) return "D";
+        return "E/F";
+      };
+
+      // 7. ตรวจว่ามีกรรมการระบุให้แก้ไขหรือไม่
+
+      const hasRevision = acceptedMembers.some(
+        (member) => Number(member.needs_revision) === 1,
+      );
+
+      const resultStatus =
+        totalScore < 50 ? "ไม่ผ่าน" : hasRevision ? "ต้องแก้ไข" : "ผ่าน";
+
+      // 8. วันที่กรรมการคนสุดท้ายบันทึกคะแนน
+
+      const evaluatedDates = acceptedMembers
+        .map((member) => new Date(member.evaluated_at))
+        .filter((date) => !Number.isNaN(date.getTime()));
+
+      const publishedAt =
+        evaluatedDates.length > 0
+          ? new Date(Math.max(...evaluatedDates.map((date) => date.getTime())))
+          : null;
+
+      // 9. รวบรวมความคิดเห็นของกรรมการ
+
+      const comments = acceptedMembers
+        .filter(
+          (member) =>
+            member.teacher_comment && member.teacher_comment.trim() !== "",
+        )
+        .map((member) => ({
+          teacher_name: member.teacher_name,
+          comment: member.teacher_comment,
+        }));
+
+      // 10. ส่งผลให้ฝั่งนิสิต
+
+      return res.json({
+        status: "published",
+
+        project_title: project.title,
+
+        result_status: resultStatus,
+        grade: getGrade(totalScore),
+        total_score: totalScore,
+        evaluated_at: publishedAt,
+
+        committee: acceptedMembers.map((member) => member.teacher_name),
+
+        scores: [
+          {
+            label: "ความถูกต้องและความสมบูรณ์ของระบบ",
+            max: 30,
+            score: average("score_correctness"),
+          },
+          {
+            label: "การออกแบบและพัฒนาระบบ",
+            max: 25,
+            score: average("score_design"),
+          },
+          {
+            label: "การนำเสนอ",
+            max: 20,
+            score: average("score_presentation"),
+          },
+          {
+            label: "เอกสารประกอบโครงงาน",
+            max: 15,
+            score: average("score_documentation"),
+          },
+          {
+            label: "การตอบคำถาม",
+            max: 10,
+            score: average("score_questions"),
+          },
+        ],
+
+        comments: comments,
+      });
+    } catch (err) {
+      console.error("Student evaluation error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดผลการประเมินได้",
+      });
+    }
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

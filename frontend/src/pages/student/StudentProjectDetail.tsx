@@ -627,14 +627,19 @@ function StudentProjectDetail() {
 
             <button
               type="button"
-              onClick={() =>
-                navigate(`/student-project-exam/${projectId}`)
-              }
+              onClick={() => navigate(`/student-project-exam/${projectId}`)}
             >
               กำหนดการสอบ
             </button>
 
-            <button>ผลการประเมิน</button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/student-project-detail/${projectId}/evaluation`)
+              }
+            >
+              ผลการประเมิน
+            </button>
           </div>
 
           {/* =================================================
