@@ -1,0 +1,338 @@
+
+/* =========================================
+   EVALUATION DETAIL PAGE
+========================================= */
+
+.teacher-eval-page .tw-eval-panel {
+  padding: 22px;
+  min-height: 650px;
+}
+
+.teacher-eval-page .tw-eval-panel > h3 {
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* PROJECT CARD */
+
+.teacher-eval-page .tw-eval-card {
+  padding: 16px 18px 30px;
+  border: 1px solid #c9c9c9;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.teacher-eval-page .tw-eval-project-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.teacher-eval-page .tw-eval-divider {
+  border-top: 1px solid #cccccc;
+  margin: 14px 0 20px;
+}
+
+/* EXAM INFORMATION */
+
+.teacher-eval-page .tw-eval-info {
+  font-size: 13px;
+}
+
+.teacher-eval-page .tw-eval-info > strong {
+  display: block;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.teacher-eval-page .tw-eval-info p {
+  margin: 10px 0;
+  line-height: 1.7;
+}
+
+.teacher-eval-page .tw-eval-advisor {
+  margin-top: 28px !important;
+}
+
+.teacher-eval-page .tw-eval-students {
+  padding-left: 28px;
+}
+
+.teacher-eval-page .tw-eval-students p {
+  margin: 5px 0;
+}
+
+/* EVALUATION TABLE */
+
+.teacher-eval-page .tw-eval-section {
+  margin-top: 55px;
+}
+
+.teacher-eval-page .tw-eval-section h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.teacher-eval-page .tw-eval-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.teacher-eval-page .tw-eval-score-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #bfbfbf;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.teacher-eval-page .tw-eval-score-table th,
+.teacher-eval-page .tw-eval-score-table td {
+  padding: 10px 12px;
+  border-right: 1px solid #c9c9c9;
+  border-bottom: 1px solid #c9c9c9;
+  font-size: 12px;
+}
+
+.teacher-eval-page .tw-eval-score-table tr > :last-child {
+  border-right: none;
+}
+
+.teacher-eval-page .tw-eval-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-eval-page .tw-eval-score-table th {
+  font-weight: 500;
+}
+
+.teacher-eval-page .tw-eval-score-table th:first-child,
+.teacher-eval-page .tw-eval-score-table td:first-child {
+  width: 65%;
+  text-align: left;
+}
+
+.teacher-eval-page .tw-eval-score-table th:nth-child(2),
+.teacher-eval-page .tw-eval-score-table td:nth-child(2) {
+  width: 17%;
+  text-align: center;
+}
+
+.teacher-eval-page .tw-eval-score-table th:nth-child(3),
+.teacher-eval-page .tw-eval-score-table td:nth-child(3) {
+  width: 18%;
+  text-align: center;
+}
+
+.teacher-eval-page .tw-eval-score-table input {
+  width: 80px;
+  max-width: 100%;
+  height: 31px;
+  padding: 5px 8px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  background: white;
+  color: #222;
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+}
+
+.teacher-eval-page .tw-eval-score-table input:focus {
+  border-color: #3678c5;
+}
+
+.teacher-eval-page .tw-eval-total-row td {
+  font-weight: 600;
+}
+
+/* COMMENT / REVISION */
+
+.teacher-eval-page .tw-eval-field {
+  margin-top: 40px;
+}
+
+.teacher-eval-page .tw-eval-field > label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.teacher-eval-page .tw-eval-field textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #222222;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.teacher-eval-page .tw-eval-choices {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.teacher-eval-page .tw-eval-choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.teacher-eval-page .tw-eval-required,
+.teacher-eval-page .tw-eval-error {
+  color: #df3030;
+}
+
+.teacher-eval-page .tw-eval-error {
+  margin: 20px 0 0;
+  font-size: 12px;
+}
+
+.teacher-eval-page .tw-eval-recorded {
+  margin-top: 35px;
+  font-size: 13px;
+}
+
+/* ACTIONS */
+
+.teacher-eval-page .tw-eval-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.teacher-eval-page .tw-eval-actions button {
+  min-width: 140px;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 7px;
+  color: #ffffff;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.teacher-eval-page .tw-eval-cancel-btn {
+  background: #ff0000;
+}
+
+.teacher-eval-page .tw-eval-save-btn {
+  background: #20a86b;
+}
+
+/* CONFIRMATION POPUP */
+
+.teacher-eval-page .tw-eval-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.teacher-eval-page .tw-eval-confirm-modal {
+  width: 100%;
+  max-width: 390px;
+  padding: 25px 24px;
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 9px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.teacher-eval-page .tw-eval-confirm-modal h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.teacher-eval-page .tw-eval-confirm-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: #cccccc;
+}
+
+.teacher-eval-page .tw-eval-confirm-modal p {
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.teacher-eval-page .tw-eval-confirm-project {
+  display: block;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.teacher-eval-page .tw-eval-confirm-score {
+  margin: 30px 0;
+}
+
+.teacher-eval-page .tw-eval-confirm-score strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.teacher-eval-page .tw-eval-confirm-note {
+  margin-bottom: 28px !important;
+}
+
+.teacher-eval-page .tw-eval-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.teacher-eval-page .tw-eval-confirm-actions button {
+  min-width: 120px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-eval-page .tw-eval-modal-cancel {
+  background: #ff0000;
+}
+
+.teacher-eval-page .tw-eval-modal-save {
+  background: #20a86b;
+}
+
+.teacher-eval-page .tw-eval-modal-save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  .teacher-eval-page .tw-eval-score-table {
+    min-width: 520px;
+  }
+
+  .teacher-eval-page .tw-eval-confirm-actions {
+    flex-wrap: wrap;
+  }
+}

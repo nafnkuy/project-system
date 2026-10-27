@@ -8425,26 +8425,24 @@ app.put("/teacher/exams/:scheduleId", async (req, res) => {
       teachers.map((teacher) => [Number(teacher.id), teacher.name]),
     );
 
-    
-const advisorRows = await query(
-  connection,
-  `
+    const advisorRows = await query(
+      connection,
+      `
     SELECT name
     FROM users
     WHERE id = ?
       AND role = 'teacher'
     LIMIT 1
   `,
-  [advisorId]
-);
+      [advisorId],
+    );
 
-const advisorName = advisorRows[0].name;
+    const advisorName = advisorRows[0].name;
 
-const committeeNames = [
-  advisorName,
-  ...teacherIds.map((id) => nameById.get(id)),
-].join("\n");
-
+    const committeeNames = [
+      advisorName,
+      ...teacherIds.map((id) => nameById.get(id)),
+    ].join("\n");
 
     // ==========================================
     // ดึงกรรมการเดิมจากฐานข้อมูล
@@ -8680,6 +8678,248 @@ const committeeNames = [
 
     res.status(500).json({
       message: "ไม่สามารถแก้ไขกำหนดการสอบได้",
+    });
+  } finally {
+    if (pooled && connection && typeof connection.release === "function") {
+      connection.release();
+    }
+  }
+});
+
+/* =========================================================
+   TEACHER - CANCEL EXAM SCHEDULE
+========================================================= */
+
+app.delete("/teacher/exams/:scheduleId", async (req, res) => {
+  const scheduleId = Number(req.params.scheduleId);
+  const advisorId = Number(req.body.advisor_id);
+
+  if (
+    !Number.isInteger(scheduleId) ||
+    scheduleId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลกำหนดการสอบไม่ถูกต้อง",
+    });
+  }
+
+  // ใช้รูปแบบ Connection เดียวกับ API ประกาศกำหนดการสอบ
+
+  const getConnection = () =>
+    new Promise((resolve, reject) => {
+      if (typeof db.getConnection === "function") {
+        db.getConnection((err, connection) => {
+          if (err) reject(err);
+          else resolve({ connection, pooled: true });
+        });
+      } else {
+        resolve({ connection: db, pooled: false });
+      }
+    });
+
+  const query = (connection, sql, params = []) =>
+    new Promise((resolve, reject) => {
+      connection.query(sql, params, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+  let connection;
+  let pooled = false;
+  let transactionStarted = false;
+
+  try {
+    const acquired = await getConnection();
+
+    connection = acquired.connection;
+    pooled = acquired.pooled;
+
+    await query(connection, "START TRANSACTION");
+    transactionStarted = true;
+
+    // =========================================
+    // 1. ตรวจสอบว่ากำหนดการสอบเป็นของอาจารย์
+    // =========================================
+
+    const schedules = await query(
+      connection,
+      `
+        SELECT
+          s.id,
+          s.project_id,
+          p.title AS project_title
+
+        FROM project_exam_schedules s
+
+        INNER JOIN projects p
+          ON p.id = s.project_id
+
+        WHERE s.id = ?
+          AND s.advisor_id = ?
+          AND p.advisor_id = ?
+
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [scheduleId, advisorId, advisorId],
+    );
+
+    if (schedules.length === 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(404).json({
+        message: "ไม่พบกำหนดการสอบ หรือไม่มีสิทธิ์ยกเลิก",
+      });
+    }
+
+    const schedule = schedules[0];
+
+    // =========================================
+    // 2. ป้องกันการลบข้อมูลที่มีผลประเมินแล้ว
+    // =========================================
+
+    const evaluations = await query(
+      connection,
+      `
+        SELECT ev.id
+        FROM exam_evaluations ev
+
+        INNER JOIN exam_committee_members ecm
+          ON ev.committee_member_id = ecm.id
+
+        WHERE ecm.schedule_id = ?
+
+        LIMIT 1
+      `,
+      [scheduleId],
+    );
+
+    if (evaluations.length > 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(409).json({
+        message: "กำหนดการนี้มีข้อมูลผลประเมินแล้ว ไม่สามารถยกเลิกได้",
+      });
+    }
+
+    // =========================================
+    // 3. แจ้งเตือนกรรมการสอบที่ได้รับเชิญ
+    // =========================================
+
+    const committeeMessage =
+      `อาจารย์ที่ปรึกษายกเลิกกำหนดการสอบโครงงาน ` +
+      `"${schedule.project_title}"`;
+
+    await query(
+      connection,
+      `
+        INSERT INTO notifications
+        (
+          user_id,
+          message,
+          project_id
+        )
+
+        SELECT DISTINCT
+          ecm.teacher_id,
+          ?,
+          ?
+
+        FROM exam_committee_members ecm
+
+        WHERE ecm.schedule_id = ?
+          AND ecm.teacher_id != ?
+          AND ecm.invitation_status IN ('รอตอบรับ', 'ตอบรับ')
+      `,
+      [committeeMessage, schedule.project_id, scheduleId, advisorId],
+    );
+
+    // =========================================
+    // 4. แจ้งเตือนนิสิตในโครงงาน
+    // =========================================
+
+    const studentMessage =
+      `อาจารย์ยกเลิกกำหนดการสอบโครงงาน ` +
+      `"${schedule.project_title}" กรุณารอประกาศกำหนดการสอบใหม่`;
+
+    await query(
+      connection,
+      `
+        INSERT INTO notifications
+        (
+          user_id,
+          message,
+          project_id
+        )
+
+        SELECT DISTINCT
+          pm.user_id,
+          ?,
+          ?
+
+        FROM project_members pm
+
+        WHERE pm.project_id = ?
+      `,
+      [studentMessage, schedule.project_id, schedule.project_id],
+    );
+
+    // =========================================
+    // 5. ลบคำเชิญและรายชื่อกรรมการสอบ
+    // =========================================
+
+    await query(
+      connection,
+      `
+        DELETE FROM exam_committee_members
+        WHERE schedule_id = ?
+      `,
+      [scheduleId],
+    );
+
+    // =========================================
+    // 6. ลบกำหนดการสอบเดิม
+    // =========================================
+
+    await query(
+      connection,
+      `
+        DELETE FROM project_exam_schedules
+        WHERE id = ?
+          AND advisor_id = ?
+      `,
+      [scheduleId, advisorId],
+    );
+
+    // =========================================
+    // 7. ยืนยันการเปลี่ยนแปลง
+    // =========================================
+
+    await query(connection, "COMMIT");
+    transactionStarted = false;
+
+    res.json({
+      success: true,
+      message: "ยกเลิกกำหนดการสอบเรียบร้อยแล้ว",
+    });
+  } catch (err) {
+    console.log("Cancel exam schedule error:", err);
+
+    if (transactionStarted && connection) {
+      try {
+        await query(connection, "ROLLBACK");
+      } catch (rollbackErr) {
+        console.log("Cancel exam rollback error:", rollbackErr);
+      }
+    }
+
+    res.status(500).json({
+      message: "ไม่สามารถยกเลิกกำหนดการสอบได้",
     });
   } finally {
     if (pooled && connection && typeof connection.release === "function") {
@@ -9201,6 +9441,102 @@ app.get("/teacher/exam/committee-status/:scheduleId/:advisorId", (req, res) => {
 
     res.json({
       committee: results,
+    });
+  });
+});
+
+/* =========================================================
+   TEACHER - EXAM EVALUATION LIST
+========================================================= */
+
+app.get("/teacher/evaluations/:teacherId", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสอาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      ecm.id AS committee_member_id,
+
+      s.id AS schedule_id,
+      DATE_FORMAT(s.exam_date, '%Y-%m-%d') AS exam_date,
+      TIME_FORMAT(s.start_time, '%H:%i') AS start_time,
+      TIME_FORMAT(s.end_time, '%H:%i') AS end_time,
+      s.location,
+
+      p.id AS project_id,
+      p.title AS project_title,
+
+      advisor.name AS advisor_name,
+
+      COALESCE(students.student_names, '-') AS student_names,
+
+      ev.id AS evaluation_id,
+      ev.total_score,
+      ev.evaluated_at
+
+    FROM exam_committee_members ecm
+
+    INNER JOIN project_exam_schedules s
+      ON ecm.schedule_id = s.id
+
+    INNER JOIN projects p
+      ON s.project_id = p.id
+
+    INNER JOIN users advisor
+      ON p.advisor_id = advisor.id
+
+    LEFT JOIN (
+      SELECT
+        pm.project_id,
+
+        GROUP_CONCAT(
+          CONCAT(u.username, ' ', u.name)
+          ORDER BY pm.id ASC
+          SEPARATOR ' | '
+        ) AS student_names
+
+      FROM project_members pm
+
+      INNER JOIN users u
+        ON pm.user_id = u.id
+
+      GROUP BY pm.project_id
+    ) students
+      ON students.project_id = p.id
+
+    LEFT JOIN exam_evaluations ev
+      ON ev.committee_member_id = ecm.id
+
+    WHERE ecm.teacher_id = ?
+      AND ecm.invitation_status = 'ตอบรับ'
+      AND s.announced_at IS NOT NULL
+
+    ORDER BY s.exam_date DESC, s.start_time DESC
+  `;
+
+  db.query(sql, [teacherId], (err, results) => {
+    if (err) {
+      console.log("Get evaluation list error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดรายการประเมินได้",
+      });
+    }
+
+    const pending = results.filter((item) => item.evaluation_id === null);
+
+    const evaluated = results.filter((item) => item.evaluation_id !== null);
+
+    res.json({
+      pending,
+      evaluated,
+      pending_count: pending.length,
+      evaluated_count: evaluated.length,
     });
   });
 });

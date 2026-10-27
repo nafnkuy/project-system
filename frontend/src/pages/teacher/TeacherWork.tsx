@@ -3,6 +3,7 @@ import "./TeacherWork.css";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { createPortal } from "react-dom";
 import { FaSearch } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
@@ -82,6 +83,37 @@ interface TeacherOption {
   username: string;
   name: string;
   major: string | null;
+}
+
+/* =========================================================
+   EXAM EVALUATION INTERFACE
+========================================================= */
+
+interface EvaluationProject {
+  committee_member_id: number;
+
+  schedule_id: number;
+  project_id: number;
+  project_title: string;
+
+  exam_date: string;
+  start_time: string;
+  end_time: string;
+  location: string;
+
+  advisor_name: string;
+  student_names: string;
+
+  evaluation_id: number | null;
+  total_score: number | null;
+  evaluated_at: string | null;
+}
+
+interface EvaluationListResponse {
+  pending: EvaluationProject[];
+  evaluated: EvaluationProject[];
+  pending_count: number;
+  evaluated_count: number;
 }
 
 type WorkTab = "review" | "exam" | "evaluation";
@@ -218,6 +250,12 @@ function TeacherWork() {
   const [examEditError, setExamEditError] = useState("");
   const [examEditSaving, setExamEditSaving] = useState(false);
 
+  const [showExamCancelConfirm, setShowExamCancelConfirm] = useState(false);
+
+  const [examCancelling, setExamCancelling] = useState(false);
+
+  const [examCancelError, setExamCancelError] = useState("");
+
   const [editCommitteeSearch, setEditCommitteeSearch] = useState("");
 
   const [editTeacherOptions, setEditTeacherOptions] = useState<TeacherOption[]>(
@@ -231,6 +269,30 @@ function TeacherWork() {
   const [editCommitteeLoading, setEditCommitteeLoading] = useState(false);
 
   const [examSubmitting, setExamSubmitting] = useState(false);
+
+  /* =========================================================
+   EVALUATION STATE
+========================================================= */
+
+  const [evaluationData, setEvaluationData] = useState<EvaluationListResponse>({
+    pending: [],
+    evaluated: [],
+    pending_count: 0,
+    evaluated_count: 0,
+  });
+
+  const [evaluationFilter, setEvaluationFilter] = useState<
+    "รอประเมิน" | "ประเมินแล้ว"
+  >("รอประเมิน");
+
+  const [evaluationSearch, setEvaluationSearch] = useState("");
+
+  const [evaluationLoading, setEvaluationLoading] = useState(true);
+
+  const [evaluationError, setEvaluationError] = useState("");
+
+  const [selectedEvaluation, setSelectedEvaluation] =
+    useState<EvaluationProject | null>(null);
 
   const itemsPerPage = 10;
 
@@ -328,6 +390,50 @@ function TeacherWork() {
       cancelled = true;
     };
   }, [userId]);
+
+  /* =========================================================
+   LOAD EXAM EVALUATIONS
+========================================================= */
+
+  useEffect(() => {
+    if (!userId) {
+      setEvaluationLoading(false);
+      return;
+    }
+
+    let active = true;
+
+    setEvaluationLoading(true);
+    setEvaluationError("");
+
+    axios
+      .get<EvaluationListResponse>(
+        `http://localhost:5000/teacher/evaluations/${userId}`,
+      )
+      .then((res) => {
+        if (!active) return;
+
+        setEvaluationData(res.data);
+      })
+      .catch((err) => {
+        if (!active) return;
+
+        console.error("Load evaluations error:", err);
+
+        setEvaluationError(
+          err.response?.data?.message || "ไม่สามารถโหลดรายการประเมินได้",
+        );
+      })
+      .finally(() => {
+        if (active) {
+          setEvaluationLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [userId, activeTab, examData.announced_count]);
 
   /* =========================================================
    LOAD EXAM COMMITTEE MEMBERS
@@ -436,6 +542,19 @@ function TeacherWork() {
     const studentNames = (project.student_names || "").toLowerCase();
 
     return projectName.includes(keyword) || studentNames.includes(keyword);
+  });
+
+  const filteredEvaluations = (
+    evaluationFilter === "รอประเมิน"
+      ? evaluationData.pending
+      : evaluationData.evaluated
+  ).filter((item) => {
+    const keyword = evaluationSearch.trim().toLowerCase();
+
+    return (
+      item.project_title.toLowerCase().includes(keyword) ||
+      item.student_names.toLowerCase().includes(keyword)
+    );
   });
 
   /* =========================================================
@@ -884,6 +1003,62 @@ function TeacherWork() {
     }
   };
 
+  const cancelExamSchedule = async () => {
+    if (!examDetailProject?.schedule_id || !userId || examCancelling) {
+      return;
+    }
+
+    setExamCancelling(true);
+    setExamCancelError("");
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/teacher/exams/${examDetailProject.schedule_id}`,
+        {
+          data: {
+            advisor_id: Number(userId),
+          },
+        },
+      );
+
+      // ปิด Pop-up ทั้งสองชั้น
+      setShowExamCancelConfirm(false);
+      setExamDetailProject(null);
+
+      // กลับไปแสดงรายการรอประกาศ
+      setExamFilter("รอประกาศ");
+      setExamLoading(true);
+
+      try {
+        const response = await axios.get<ExamListResponse>(
+          `http://localhost:5000/teacher/exams/${userId}`,
+        );
+
+        setExamData(response.data);
+        setExamError("");
+      } catch (reloadError) {
+        console.error("Reload exams error:", reloadError);
+        setExamError(
+          "ยกเลิกสำเร็จแล้ว แต่โหลดรายการใหม่ไม่สำเร็จ กรุณารีเฟรชหน้า",
+        );
+      } finally {
+        setExamLoading(false);
+      }
+    } catch (err) {
+      console.error("Cancel exam error:", err);
+
+      if (axios.isAxiosError(err)) {
+        setExamCancelError(
+          err.response?.data?.message || "ไม่สามารถยกเลิกกำหนดการสอบได้",
+        );
+      } else {
+        setExamCancelError("ไม่สามารถยกเลิกกำหนดการสอบได้");
+      }
+    } finally {
+      setExamCancelling(false);
+    }
+  };
+
   /* =========================================================
      LOGOUT
   ========================================================= */
@@ -1010,7 +1185,13 @@ function TeacherWork() {
             <div className="tw-dashboard-card">
               <span className="tw-card-title">รอการประเมิน</span>
 
-              <strong className="tw-card-number tw-yellow">—</strong>
+              <strong className="tw-card-number tw-yellow">
+                {evaluationLoading
+                  ? "..."
+                  : evaluationError
+                    ? "-"
+                    : evaluationData.pending_count}
+              </strong>
             </div>
           </div>
 
@@ -1386,9 +1567,166 @@ function TeacherWork() {
                 </div>
               </>
             ) : (
-              <div className="tw-placeholder">
-                ส่วนการประเมินจะเชื่อมข้อมูลในขั้นถัดไป
-              </div>
+              <>
+                {selectedEvaluation ? (
+                  <div className="tw-evaluation-preview">
+                    <h3>ประเมินโครงงาน</h3>
+
+                    <div className="tw-evaluation-preview-info">
+                      <strong>{selectedEvaluation.project_title}</strong>
+
+                      <p>
+                        วันที่สอบ :{" "}
+                        {formatThaiDate(selectedEvaluation.exam_date)}
+                      </p>
+
+                      <p>
+                        เวลา : {selectedEvaluation.start_time} -{" "}
+                        {selectedEvaluation.end_time} น.
+                      </p>
+
+                      <p>สถานที่ : {selectedEvaluation.location}</p>
+
+                      <p>
+                        อาจารย์ที่ปรึกษา : {selectedEvaluation.advisor_name}
+                      </p>
+
+                      <p>นิสิต : {selectedEvaluation.student_names}</p>
+
+                      {selectedEvaluation.evaluation_id !== null && (
+                        <p>
+                          คะแนนที่บันทึก : {selectedEvaluation.total_score} /
+                          100
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="tw-exam-action-btn"
+                      onClick={() => setSelectedEvaluation(null)}
+                    >
+                      กลับไปรายการประเมิน
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* STATUS FILTER */}
+
+                    <div className="tw-review-filters">
+                      <button
+                        type="button"
+                        className={
+                          evaluationFilter === "รอประเมิน"
+                            ? "tw-filter tw-filter-active"
+                            : "tw-filter"
+                        }
+                        onClick={() => setEvaluationFilter("รอประเมิน")}
+                      >
+                        รอประเมิน
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          evaluationFilter === "ประเมินแล้ว"
+                            ? "tw-filter tw-filter-active"
+                            : "tw-filter"
+                        }
+                        onClick={() => setEvaluationFilter("ประเมินแล้ว")}
+                      >
+                        ประเมินแล้ว
+                      </button>
+                    </div>
+
+                    {/* SEARCH */}
+
+                    <div className="tw-search-container">
+                      <div className="tw-search-box">
+                        <input
+                          type="search"
+                          placeholder="ค้นหาชื่อโครงงานหรือนิสิต"
+                          value={evaluationSearch}
+                          onChange={(e) => setEvaluationSearch(e.target.value)}
+                        />
+
+                        <FaSearch className="tw-search-icon" />
+                      </div>
+                    </div>
+
+                    {/* EVALUATION TABLE */}
+
+                    <div className="tw-table-wrap">
+                      <table className="tw-table tw-evaluation-table">
+                        <thead>
+                          <tr>
+                            <th>โครงงาน</th>
+                            <th>นิสิต</th>
+                            <th>วันที่สอบ</th>
+                            <th>การดำเนินการ</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {evaluationLoading ||
+                          evaluationError ||
+                          filteredEvaluations.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="tw-empty-cell">
+                                {evaluationLoading
+                                  ? "กำลังโหลดรายการประเมิน..."
+                                  : evaluationError
+                                    ? evaluationError
+                                    : evaluationSearch.trim()
+                                      ? "ไม่พบโครงงานที่ค้นหา"
+                                      : evaluationFilter === "รอประเมิน"
+                                        ? "ไม่มีโครงงานรอประเมิน"
+                                        : "ยังไม่มีรายการประเมินแล้ว"}
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredEvaluations.map((item) => (
+                              <tr key={item.committee_member_id}>
+                                <td>{item.project_title}</td>
+
+                                <td>
+                                  <div className="tw-exam-students">
+                                    {item.student_names
+                                      .split("|")
+                                      .map((student, index) => (
+                                        <span key={index}>
+                                          {student.trim()}
+                                        </span>
+                                      ))}
+                                  </div>
+                                </td>
+
+                                <td>{formatThaiDate(item.exam_date)}</td>
+
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="tw-exam-action-btn"
+                                    onClick={() =>
+                                      navigate(
+                                        `/teacher-work/evaluation/${item.committee_member_id}`,
+                                      )
+                                    }
+                                  >
+                                    {evaluationFilter === "รอประเมิน"
+                                      ? "ประเมิน"
+                                      : "ดูผลประเมิน"}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </section>
 
@@ -1777,10 +2115,78 @@ function TeacherWork() {
                   >
                     แก้ไขกำหนดการ
                   </button>
+                  <button
+                    type="button"
+                    className="tw-exam-detail-cancel"
+                    onClick={() => {
+                      setExamCancelError("");
+                      setShowExamCancelConfirm(true);
+                    }}
+                  >
+                    ยกเลิกกำหนดการสอบ
+                  </button>
                 </div>
               </div>
             </div>
           )}
+
+          {/* =========================================
+    CANCEL EXAM CONFIRMATION POPUP
+========================================= */}
+
+          {showExamCancelConfirm &&
+            examDetailProject &&
+            createPortal(
+              <div className="tw-exam-cancel-overlay">
+                <div
+                  className="tw-exam-cancel-modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="tw-exam-cancel-title"
+                >
+                  <h3 id="tw-exam-cancel-title">ยืนยันการยกเลิกกำหนดการสอบ</h3>
+
+                  <div className="tw-exam-cancel-divider" />
+
+                  <p>ต้องการยกเลิกกำหนดการสอบของโครงงาน</p>
+
+                  <strong>{examDetailProject.project_title}</strong>
+
+                  <p>
+                    เมื่อยกเลิกแล้ว โครงงานจะกลับไปอยู่ในรายการ "รอประกาศ"
+                    และคำเชิญกรรมการสอบเดิมจะถูกยกเลิก
+                  </p>
+
+                  {examCancelError && (
+                    <p className="tw-exam-cancel-error">{examCancelError}</p>
+                  )}
+
+                  <div className="tw-exam-cancel-actions">
+                    <button
+                      type="button"
+                      className="tw-exam-cancel-back"
+                      disabled={examCancelling}
+                      onClick={() => {
+                        setShowExamCancelConfirm(false);
+                        setExamCancelError("");
+                      }}
+                    >
+                      กลับ
+                    </button>
+
+                    <button
+                      type="button"
+                      className="tw-exam-cancel-confirm"
+                      disabled={examCancelling}
+                      onClick={cancelExamSchedule}
+                    >
+                      {examCancelling ? "กำลังยกเลิก..." : "ยืนยันการยกเลิก"}
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body,
+            )}
 
           {/* =================================================
     EXAM ANNOUNCEMENT MODAL

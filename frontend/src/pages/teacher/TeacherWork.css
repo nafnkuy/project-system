@@ -1513,3 +1513,195 @@
   color: #e53935;
   font-size: 12px;
 }
+
+/* =========================================
+   CANCEL EXAM SCHEDULE BUTTON
+========================================= */
+
+.teacher-work-page .tw-exam-detail-actions {
+  flex-wrap: wrap;
+}
+
+.teacher-work-page .tw-exam-detail-cancel {
+  min-width: 125px;
+  padding: 10px 14px;
+  background: #e44747;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-exam-detail-cancel:hover {
+  background: #c93232;
+}
+
+/* =========================================
+   CANCEL EXAM CONFIRMATION POPUP
+========================================= */
+
+
+/* ฟอนต์ Pop-up ยกเลิกกำหนดการสอบ */
+.tw-exam-cancel-overlay,
+.tw-exam-cancel-overlay * {
+  font-family: "Prompt", sans-serif;
+  box-sizing: border-box;
+}
+
+
+.tw-exam-cancel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.tw-exam-cancel-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 9px;
+
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+  font-family: inherit;
+  text-align: center;
+}
+
+.tw-exam-cancel-modal h3 {
+  margin: 0;
+  color: #222222;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tw-exam-cancel-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: #dddddd;
+}
+
+.tw-exam-cancel-modal p {
+  margin: 12px 0;
+  color: #444444;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.tw-exam-cancel-modal strong {
+  display: block;
+  color: #222222;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tw-exam-cancel-modal .tw-exam-cancel-error {
+  color: #d32f2f;
+}
+
+.tw-exam-cancel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.tw-exam-cancel-actions button {
+  min-width: 125px;
+  padding: 10px 14px;
+
+  border: none;
+  border-radius: 6px;
+
+  font-family: inherit;
+  font-size: 12px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.tw-exam-cancel-back {
+  background: #397bc5;
+}
+
+.tw-exam-cancel-confirm {
+  background: #e44747;
+}
+
+.tw-exam-cancel-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   EVALUATION TABLE
+========================================= */
+
+.teacher-work-page .tw-evaluation-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.teacher-work-page .tw-evaluation-table th:nth-child(1),
+.teacher-work-page .tw-evaluation-table td:nth-child(1) {
+  width: 34%;
+}
+
+.teacher-work-page .tw-evaluation-table th:nth-child(2),
+.teacher-work-page .tw-evaluation-table td:nth-child(2) {
+  width: 30%;
+}
+
+.teacher-work-page .tw-evaluation-table th:nth-child(3),
+.teacher-work-page .tw-evaluation-table td:nth-child(3) {
+  width: 20%;
+}
+
+.teacher-work-page .tw-evaluation-table th:nth-child(4),
+.teacher-work-page .tw-evaluation-table td:nth-child(4) {
+  width: 16%;
+}
+
+/* =========================================
+   EVALUATION DETAIL PREVIEW
+========================================= */
+
+.teacher-work-page .tw-evaluation-preview {
+  padding: 15px 5px;
+}
+
+.teacher-work-page .tw-evaluation-preview h3 {
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.teacher-work-page .tw-evaluation-preview-info {
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+}
+
+.teacher-work-page .tw-evaluation-preview-info strong {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.teacher-work-page .tw-evaluation-preview-info p {
+  margin: 10px 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
