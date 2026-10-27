@@ -592,3 +592,82 @@
     padding: 20px;
   }
 }
+
+/* =========================================
+   PROJECT INFORMATION - STUDENT STYLE
+========================================= */
+
+/* กรอบข้อมูลโครงงาน */
+.teacher-managed-detail-page .tmd-project-info-card {
+  padding: 24px 22px 36px;
+}
+
+/* ชื่อโครงงานด้านบน */
+.teacher-managed-detail-page .tmd-info-project-name {
+  margin: 0 0 28px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+
+/* หัวข้อแต่ละส่วน */
+.teacher-managed-detail-page .tmd-project-info-card > h4 {
+  margin: 34px 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+  color: #222222;
+}
+
+/* หัวข้อข้อมูลโครงงานอันแรก */
+.teacher-managed-detail-page .tmd-project-info-card > h4:first-of-type {
+  margin-top: 0;
+}
+
+/* เส้นคั่นใต้หัวข้อ */
+.teacher-managed-detail-page .tmd-project-info-card > h4 + hr {
+  margin: 0 0 18px;
+  border: none;
+  border-top: 1px solid #cccccc;
+}
+
+/* ข้อความทั่วไป */
+.teacher-managed-detail-page .tmd-project-info-card > p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+/* สมาชิกในโครงงาน */
+.teacher-managed-detail-page .tmd-info-member-list {
+  margin: 10px 0 38px;
+  padding-left: 26px;
+}
+
+.teacher-managed-detail-page .tmd-info-member-list p {
+  margin: 7px 0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* วัตถุประสงค์ */
+.teacher-managed-detail-page .tmd-project-info-card > ul {
+  margin: 16px 0 38px;
+  padding-left: 28px;
+}
+
+.teacher-managed-detail-page .tmd-project-info-card > ul li {
+  margin-bottom: 7px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* เทคโนโลยีที่ใช้ */
+.teacher-managed-detail-page .tmd-project-info-card .tmd-tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 10px;
+  margin-top: 16px;
+}

@@ -568,8 +568,6 @@ function TeacherManagedProjectDetail() {
                     <span>{overview.current_phase_progress}%</span>
                   </div>
 
-                  
-
                   <p>
                     เสร็จสิ้นแล้ว {overview.current_phase_done_tasks} จาก{" "}
                     {overview.current_phase_total_tasks} งาน
@@ -628,14 +626,13 @@ function TeacherManagedProjectDetail() {
               <div className="tmd-box">
                 <h4>ข้อมูลโครงงาน</h4>
 
-                <div className="tmd-info-card">
-                  <p>
+                <div className="tmd-info-card tmd-project-info-card">
+                  <p className="tmd-info-project-name">
                     <strong>{overview.title}</strong>
                   </p>
 
-                  <hr />
-
                   <h4>ข้อมูลโครงงาน</h4>
+                  <hr />
 
                   <p>อาจารย์ที่ปรึกษา : {overview.project_info.advisor_name}</p>
 
@@ -645,11 +642,19 @@ function TeacherManagedProjectDetail() {
 
                   <p>ปีการศึกษา : {overview.project_info.academic_year}</p>
 
-                  <h4>สมาชิกในโครงงาน</h4>
+                  <h4>
+                    สมาชิกในโครงงาน ({overview.project_info.students.length}/
+                    {overview.project_info.project_type === "โครงงานคู่"
+                      ? 2
+                      : 1}
+                    )
+                  </h4>
 
-                  {overview.project_info.students.map((student, index) => (
-                    <p key={index}>{student}</p>
-                  ))}
+                  <div className="tmd-info-member-list">
+                    {overview.project_info.students.map((student, index) => (
+                      <p key={index}>{student}</p>
+                    ))}
+                  </div>
 
                   <h4>รายละเอียดโครงงาน</h4>
                   <hr />
