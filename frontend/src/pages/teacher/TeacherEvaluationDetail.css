@@ -176,21 +176,69 @@
   resize: vertical;
 }
 
+
+/* =========================================
+   REVISION CHOICE BUTTONS
+========================================= */
+
 .teacher-eval-page .tw-eval-choices {
   display: flex;
-  gap: 18px;
   align-items: center;
+  gap: 15px;
+  margin-top: 12px;
 }
 
-.teacher-eval-page .tw-eval-choices label {
+.teacher-eval-page .tw-eval-choices .tw-eval-choice {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 10px;
+
+  min-width: 95px;
+  height: 46px;
+  padding: 0 18px;
   margin: 0;
-  font-size: 12px;
+
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 7px;
+
+  font-family: "Prompt", sans-serif;
+  font-size: 13px;
   font-weight: 400;
+  color: #222222;
+
   cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
+
+/* วงกลม Radio */
+
+.teacher-eval-page .tw-eval-choice input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+
+  accent-color: #397bc5;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* เมื่อเอาเมาส์ชี้ */
+
+.teacher-eval-page .tw-eval-choice:hover {
+  background: #f8f9fa;
+  border-color: #aaaaaa;
+}
+
+/* เมื่อเลือกตัวเลือก */
+
+.teacher-eval-page .tw-eval-choice.selected {
+  border-color: #397bc5;
+  background: #f0f6ff;
+}
+
 
 .teacher-eval-page .tw-eval-required,
 .teacher-eval-page .tw-eval-error {
@@ -335,4 +383,44 @@
   .teacher-eval-page .tw-eval-confirm-actions {
     flex-wrap: wrap;
   }
+}
+
+/* =========================================
+   EVALUATION BREADCRUMB
+========================================= */
+
+.teacher-eval-page .tw-eval-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.teacher-eval-page .tw-eval-breadcrumb button {
+  padding: 0;
+  margin: 0;
+
+  background: none;
+  border: none;
+
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+
+  cursor: pointer;
+}
+
+.teacher-eval-page .tw-eval-breadcrumb button:hover {
+  text-decoration: underline;
+}
+
+.teacher-eval-page .tw-eval-breadcrumb span {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.teacher-eval-page .tw-eval-breadcrumb-current {
+  cursor: default;
 }

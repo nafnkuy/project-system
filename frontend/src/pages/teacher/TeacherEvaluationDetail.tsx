@@ -312,12 +312,23 @@ function TeacherEvaluationDetail() {
 
       <main className="tw-main">
         <header className="tw-header">
-          <h2>
-            งานที่ต้องดำเนินการ
-            {" > "}
-            การประเมิน
-            {" > "}
-            ประเมินโครงงาน
+          <h2 className="tw-eval-breadcrumb">
+            <button type="button" onClick={() => navigate("/teacher-work")}>
+              งานที่ต้องดำเนินการ
+            </button>
+
+            <span>&gt;</span>
+
+            <button
+              type="button"
+              onClick={() => navigate("/teacher-work?tab=evaluation")}
+            >
+              การประเมิน
+            </button>
+
+            <span>&gt;</span>
+
+            <span className="tw-eval-breadcrumb-current">ประเมินโครงงาน</span>
           </h2>
 
           <div className="tw-header-right">
@@ -463,9 +474,15 @@ function TeacherEvaluationDetail() {
                         <label>ประเด็นที่ต้องแก้ไข</label>
 
                         <div className="tw-eval-choices">
-                          <label>
+                          <label
+                            className={`tw-eval-choice ${
+                              form.needs_revision === "ไม่มี" ? "selected" : ""
+                            }`}
+                          >
                             <input
-                              type="checkbox"
+                              type="radio"
+                              name="needs_revision"
+                              value="ไม่มี"
                               checked={form.needs_revision === "ไม่มี"}
                               onChange={() =>
                                 setForm((prev) => ({
@@ -475,12 +492,18 @@ function TeacherEvaluationDetail() {
                                 }))
                               }
                             />
-                            ไม่มี
+                            <span>ไม่มี</span>
                           </label>
 
-                          <label>
+                          <label
+                            className={`tw-eval-choice ${
+                              form.needs_revision === "มี" ? "selected" : ""
+                            }`}
+                          >
                             <input
-                              type="checkbox"
+                              type="radio"
+                              name="needs_revision"
+                              value="มี"
                               checked={form.needs_revision === "มี"}
                               onChange={() =>
                                 setForm((prev) => ({
@@ -489,7 +512,7 @@ function TeacherEvaluationDetail() {
                                 }))
                               }
                             />
-                            มี
+                            <span>มี</span>
                           </label>
                         </div>
                       </div>
