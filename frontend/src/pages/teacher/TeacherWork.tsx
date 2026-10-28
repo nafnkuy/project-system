@@ -1100,7 +1100,7 @@ function TeacherWork() {
               คำขอเข้าร่วมโครงงาน
             </li>
 
-            <li>โครงงานที่ดูแล</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
 
             <li className="tw-active">งานที่ต้องดำเนินการ</li>
 

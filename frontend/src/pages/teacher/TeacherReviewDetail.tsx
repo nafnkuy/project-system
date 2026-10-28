@@ -409,7 +409,7 @@ function TeacherReviewDetail() {
               คำขอเข้าร่วมโครงงาน
             </li>
 
-            <li>โครงงานที่ดูแล</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
 
             <li className="tw-active" onClick={goBack}>
               งานที่ต้องดำเนินการ
