@@ -1,0 +1,198 @@
+
+/* =========================================================
+   TEACHER EXAM REVISION DETAIL
+========================================================= */
+
+.teacher-exam-revision-page .ter-panel {
+  padding: 24px 22px 45px;
+}
+
+.teacher-exam-revision-page .ter-card {
+  border: 1px solid #bfbfbf;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 22px 24px 30px;
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.teacher-exam-revision-page .ter-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.teacher-exam-revision-page .ter-card-heading strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teacher-exam-revision-page .ter-status {
+  min-width: 90px;
+  text-align: center;
+  padding: 6px 16px;
+  border-radius: 7px;
+  background: #ffc900;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.teacher-exam-revision-page .ter-divider {
+  width: 100%;
+  border-top: 1px solid #cccccc;
+  margin: 15px 0 20px;
+}
+
+.teacher-exam-revision-page .ter-card p {
+  margin: 12px 0;
+  line-height: 1.8;
+}
+
+.teacher-exam-revision-page .ter-field {
+  margin-top: 32px;
+}
+
+.teacher-exam-revision-page .ter-field h4,
+.teacher-exam-revision-page .ter-result-card h4 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.teacher-exam-revision-page .ter-gray-box {
+  padding: 15px 18px;
+  min-height: 70px;
+  background: #d9d9d9;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.teacher-exam-revision-page .ter-revision-group + .ter-revision-group {
+  margin-top: 14px;
+}
+
+.teacher-exam-revision-page .ter-revision-group ul {
+  margin: 8px 0 0;
+  padding-left: 24px;
+}
+
+.teacher-exam-revision-page .ter-revision-group li {
+  margin: 5px 0;
+}
+
+.teacher-exam-revision-page .ter-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.teacher-exam-revision-page .ter-files a {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  color: #333333;
+  background: #ffffff;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.teacher-exam-revision-page .ter-files a:hover {
+  color: #3678c5;
+  border-color: #3678c5;
+}
+
+/* REVIEW FORM */
+
+.teacher-exam-revision-page .ter-choices {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teacher-exam-revision-page .ter-choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid #cccccc;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.teacher-exam-revision-page .ter-choices label.ter-selected {
+  border-color: #3678c5;
+  background: #f1f6ff;
+}
+
+.teacher-exam-revision-page .ter-choices input {
+  accent-color: #3678c5;
+}
+
+.teacher-exam-revision-page .ter-field textarea {
+  width: 100%;
+  min-height: 105px;
+  padding: 12px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  font: inherit;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.teacher-exam-revision-page .ter-required,
+.teacher-exam-revision-page .ter-error {
+  color: #df3030;
+}
+
+.teacher-exam-revision-page .ter-error {
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+/* ACTION BUTTONS */
+
+.teacher-exam-revision-page .ter-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px 0 0;
+}
+
+.teacher-exam-revision-page .ter-actions button {
+  min-width: 140px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 7px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.teacher-exam-revision-page .ter-cancel-btn {
+  background: #ff0000;
+}
+
+.teacher-exam-revision-page .ter-save-btn {
+  background: #20a86b;
+}
+
+.teacher-exam-revision-page .ter-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .teacher-exam-revision-page .ter-card {
+    padding: 16px;
+  }
+
+  .teacher-exam-revision-page .ter-choices,
+  .teacher-exam-revision-page .ter-actions {
+    flex-wrap: wrap;
+  }
+}

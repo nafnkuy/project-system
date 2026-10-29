@@ -10532,6 +10532,38 @@ app.post("/student/projects/:projectId/exam-revision", (req, res) => {
          VALUES (?, ?, ?, ?, 'รอตรวจ')`,
         [projectId, studentId, description, JSON.stringify(files)],
       );
+      // ==========================================
+      // แจ้งเตือนอาจารย์ที่ปรึกษาเมื่อส่งงานแก้ไข
+      // ==========================================
+
+      try {
+        const notificationSql = `
+    INSERT INTO notifications
+      (user_id, message, project_id)
+
+    SELECT
+      p.advisor_id,
+      CONCAT(
+        u.name,
+        ' ส่งงานแก้ไขหลังการสอบของโครงงาน "',
+        p.title,
+        '" รอให้คุณตรวจสอบ'
+      ),
+      p.id
+
+    FROM projects p
+
+    INNER JOIN users u
+      ON u.id = ?
+
+    WHERE p.id = ?
+      AND p.advisor_id IS NOT NULL
+  `;
+
+        await examRevisionQuery(notificationSql, [studentId, projectId]);
+      } catch (notificationError) {
+        console.error("Exam revision notification error:", notificationError);
+      }
 
       res.status(201).json({
         success: true,
@@ -10633,6 +10665,251 @@ app.get(
     }
   },
 );
+// ==========================================
+// TEACHER - งานแก้ไขหลังสอบที่รอตรวจ
+// ==========================================
+
+app.get("/teacher/exam-revisions/pending/:advisorId", async (req, res) => {
+  try {
+    const advisorId = Number(req.params.advisorId);
+
+    if (!Number.isInteger(advisorId) || advisorId <= 0) {
+      return res.status(400).json({
+        message: "รหัสอาจารย์ไม่ถูกต้อง",
+      });
+    }
+
+    const sql = `
+      SELECT
+        ers.id AS submission_id,
+        ers.project_id,
+        p.title AS project_title,
+
+        u.username AS student_username,
+        u.name AS student_name,
+
+        ers.description,
+        ers.files_json,
+        ers.submitted_at,
+        ers.status
+
+      FROM exam_revision_submissions ers
+
+      INNER JOIN projects p
+        ON ers.project_id = p.id
+
+      INNER JOIN users u
+        ON ers.student_id = u.id
+
+      WHERE p.advisor_id = ?
+        AND ers.status = 'รอตรวจ'
+
+      ORDER BY ers.submitted_at DESC
+    `;
+
+    const rows = await examRevisionQuery(sql, [advisorId]);
+
+    const pending = rows.map((row) => ({
+      submission_id: row.submission_id,
+      project_id: row.project_id,
+      project_title: row.project_title,
+      student_username: row.student_username,
+      student_name: row.student_name,
+      description: row.description,
+      submitted_at: row.submitted_at,
+      status: row.status,
+      work_type: "งานแก้ไขหลังสอบ",
+      files:
+        typeof row.files_json === "string"
+          ? JSON.parse(row.files_json)
+          : row.files_json || [],
+    }));
+
+    res.json({
+      pending,
+      pending_count: pending.length,
+    });
+  } catch (error) {
+    console.error("Load pending exam revisions error:", error);
+
+    res.status(500).json({
+      message: "ไม่สามารถโหลดงานแก้ไขหลังสอบได้",
+    });
+  }
+});
+
+/* =========================================================
+   TEACHER - EXAM REVISION DETAIL
+========================================================= */
+
+app.get("/teacher/exam-revisions/:submissionId", async (req, res) => {
+  try {
+    const submissionId = Number(req.params.submissionId);
+    const advisorId = Number(req.query.advisorId);
+
+    if (
+      !Number.isInteger(submissionId) ||
+      submissionId <= 0 ||
+      !Number.isInteger(advisorId) ||
+      advisorId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ข้อมูลไม่ถูกต้อง",
+      });
+    }
+
+    const rows = await examRevisionQuery(
+      `SELECT
+        ers.id AS submission_id,
+        ers.project_id,
+        p.title AS project_title,
+        u.name AS student_name,
+        u.username AS student_username,
+        ers.description,
+        ers.files_json,
+        ers.status,
+        ers.submitted_at,
+        ers.review_comment,
+        ers.reviewed_at
+       FROM exam_revision_submissions ers
+       INNER JOIN projects p ON p.id = ers.project_id
+       INNER JOIN users u ON u.id = ers.student_id
+       WHERE ers.id = ?
+         AND p.advisor_id = ?
+       LIMIT 1`,
+      [submissionId, advisorId],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบงานแก้ไขหรือไม่มีสิทธิ์ตรวจ",
+      });
+    }
+
+    const row = rows[0];
+
+    // ดึงสิ่งที่กรรมการแต่ละท่านให้แก้ไข
+    const comments = await examRevisionQuery(
+      `SELECT
+         teacher.name AS teacher_name,
+         ev.revision_details
+       FROM project_exam_schedules s
+       INNER JOIN exam_committee_members cm
+         ON cm.schedule_id = s.id
+       INNER JOIN users teacher
+         ON teacher.id = cm.teacher_id
+       INNER JOIN exam_evaluations ev
+         ON ev.committee_member_id = cm.id
+       WHERE s.project_id = ?
+         AND cm.invitation_status = 'ตอบรับ'
+         AND ev.needs_revision = 1
+       ORDER BY cm.id ASC`,
+      [row.project_id],
+    );
+
+    const revision_items = comments
+      .map((item) => ({
+        teacher_name: item.teacher_name,
+        details: String(item.revision_details || "")
+          .split(/\r?\n/)
+          .map((detail) => detail.trim().replace(/^[-•]\s*/, ""))
+          .filter(Boolean),
+      }))
+      .filter((item) => item.details.length > 0);
+
+    res.json({
+      submission_id: row.submission_id,
+      project_id: row.project_id,
+      project_title: row.project_title,
+      student_name: row.student_name,
+      student_username: row.student_username,
+      description: row.description,
+      status: row.status,
+      submitted_at: row.submitted_at,
+      review_comment: row.review_comment,
+      reviewed_at: row.reviewed_at,
+      files:
+        typeof row.files_json === "string"
+          ? JSON.parse(row.files_json)
+          : row.files_json || [],
+      revision_items,
+    });
+  } catch (error) {
+    console.error("Exam revision detail error:", error);
+
+    res.status(500).json({
+      message: "ไม่สามารถโหลดรายละเอียดงานแก้ไขได้",
+    });
+  }
+});
+
+/* =========================================================
+   TEACHER - SAVE EXAM REVISION REVIEW
+========================================================= */
+
+app.patch("/teacher/exam-revisions/:submissionId/review", async (req, res) => {
+  try {
+    const submissionId = Number(req.params.submissionId);
+    const advisorId = Number(req.body.advisor_id);
+    const result = req.body.result;
+    const comment = String(req.body.comment || "").trim();
+
+    if (
+      !Number.isInteger(submissionId) ||
+      submissionId <= 0 ||
+      !Number.isInteger(advisorId) ||
+      advisorId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ข้อมูลไม่ถูกต้อง",
+      });
+    }
+
+    if (result !== "ผ่าน" && result !== "ต้องแก้ไข") {
+      return res.status(400).json({
+        message: "กรุณาเลือกผลการตรวจ",
+      });
+    }
+
+    if (result === "ต้องแก้ไข" && !comment) {
+      return res.status(400).json({
+        message: "กรุณาระบุข้อเสนอแนะให้นิสิตแก้ไข",
+      });
+    }
+
+    const saved = await examRevisionQuery(
+      `UPDATE exam_revision_submissions ers
+         INNER JOIN projects p
+           ON p.id = ers.project_id
+         SET
+           ers.status = ?,
+           ers.review_comment = ?,
+           ers.reviewed_at = NOW()
+         WHERE ers.id = ?
+           AND p.advisor_id = ?
+           AND ers.status = 'รอตรวจ'`,
+      [result, comment || null, submissionId, advisorId],
+    );
+
+    if (saved.affectedRows === 0) {
+      return res.status(409).json({
+        message: "ไม่พบงานรอตรวจ หรือมีการบันทึกผลไปแล้ว",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกผลการตรวจเรียบร้อยแล้ว",
+      status: result,
+    });
+  } catch (error) {
+    console.error("Save exam revision review error:", error);
+
+    res.status(500).json({
+      message: "ไม่สามารถบันทึกผลการตรวจได้",
+    });
+  }
+});
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

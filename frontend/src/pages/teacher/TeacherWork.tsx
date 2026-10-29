@@ -117,7 +117,28 @@ interface EvaluationListResponse {
 }
 
 type WorkTab = "review" | "exam" | "evaluation";
-type ReviewFilter = "รอตรวจ" | "ตรวจแล้ว";
+interface ExamRevisionItem {
+  submission_id: number;
+  project_id: number;
+  project_title: string;
+  student_username: string;
+  student_name: string;
+  description: string;
+  submitted_at: string;
+  status: string;
+  work_type: string;
+  files: {
+    name: string;
+    path: string;
+    size: number;
+  }[];
+}
+
+interface ExamRevisionResponse {
+  pending: ExamRevisionItem[];
+  pending_count: number;
+}
+type ReviewFilter = "รอตรวจ" | "ตรวจแล้ว" | "งานแก้ไขหลังสอบ";
 
 /* =========================================================
    COMPONENT
@@ -290,6 +311,14 @@ function TeacherWork() {
   const [evaluationLoading, setEvaluationLoading] = useState(true);
 
   const [evaluationError, setEvaluationError] = useState("");
+  const [examRevisions, setExamRevisions] = useState<ExamRevisionResponse>({
+    pending: [],
+    pending_count: 0,
+  });
+
+  const [examRevisionLoading, setExamRevisionLoading] = useState(false);
+
+  const [examRevisionError, setExamRevisionError] = useState("");
 
   const [selectedEvaluation, setSelectedEvaluation] =
     useState<EvaluationProject | null>(null);
@@ -436,6 +465,47 @@ function TeacherWork() {
   }, [userId, activeTab, examData.announced_count]);
 
   /* =========================================================
+   LOAD EXAM REVISION SUBMISSIONS
+========================================================= */
+
+  useEffect(() => {
+    if (!userId || activeTab !== "review") {
+      return;
+    }
+
+    let active = true;
+
+    setExamRevisionLoading(true);
+    setExamRevisionError("");
+
+    axios
+      .get<ExamRevisionResponse>(
+        `http://localhost:5000/teacher/exam-revisions/pending/${userId}`,
+      )
+      .then((res) => {
+        if (!active) return;
+
+        setExamRevisions(res.data);
+      })
+      .catch((error) => {
+        if (!active) return;
+
+        console.error("Load exam revisions error:", error);
+
+        setExamRevisionError("ไม่สามารถโหลดงานแก้ไขหลังสอบได้");
+      })
+      .finally(() => {
+        if (active) {
+          setExamRevisionLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [userId, activeTab]);
+
+  /* =========================================================
    LOAD EXAM COMMITTEE MEMBERS
 ========================================================= */
 
@@ -554,6 +624,16 @@ function TeacherWork() {
     return (
       item.project_title.toLowerCase().includes(keyword) ||
       item.student_names.toLowerCase().includes(keyword)
+    );
+  });
+
+  const filteredExamRevisions = examRevisions.pending.filter((item) => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return (
+      item.project_title.toLowerCase().includes(keyword) ||
+      item.student_name.toLowerCase().includes(keyword) ||
+      item.student_username.toLowerCase().includes(keyword)
     );
   });
 
@@ -1100,7 +1180,9 @@ function TeacherWork() {
               คำขอเข้าร่วมโครงงาน
             </li>
 
-            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>
+              โครงงานที่ดูแล
+            </li>
 
             <li className="tw-active">งานที่ต้องดำเนินการ</li>
 
@@ -1266,6 +1348,17 @@ function TeacherWork() {
                   >
                     ตรวจแล้ว
                   </button>
+                  <button
+                    type="button"
+                    className={
+                      reviewFilter === "งานแก้ไขหลังสอบ"
+                        ? "tw-filter tw-filter-active"
+                        : "tw-filter"
+                    }
+                    onClick={() => setReviewFilter("งานแก้ไขหลังสอบ")}
+                  >
+                    งานแก้ไขหลังสอบ ({examRevisions.pending_count})
+                  </button>
                 </div>
 
                 {/* SEARCH */}
@@ -1287,129 +1380,203 @@ function TeacherWork() {
                     REVIEW TABLE
                 ================================================= */}
 
-                <div className="tw-table-wrap">
-                  <table className="tw-table">
-                    <thead>
-                      <tr>
-                        <th>งาน</th>
-                        <th>โครงงาน</th>
-                        <th>ผู้รับผิดชอบ</th>
-                        <th>วันที่ส่ง</th>
-                        <th>สถานะ</th>
-                        <th>การดำเนินการ</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {loading || error || currentTasks.length === 0 ? (
+                {reviewFilter === "งานแก้ไขหลังสอบ" ? (
+                  <div className="tw-table-wrap">
+                    <table className="tw-table">
+                      <thead>
                         <tr>
-                          <td colSpan={6} className="tw-empty-cell">
-                            {loading
-                              ? "กำลังโหลดรายการตรวจงาน..."
-                              : error
-                                ? error
-                                : searchTerm.trim()
-                                  ? "ไม่พบงานที่ตรงกับการค้นหา"
-                                  : reviewFilter === "รอตรวจ"
-                                    ? "ไม่มีงานรอตรวจ"
-                                    : "ยังไม่มีรายการตรวจแล้ว"}
-                          </td>
+                          <th>โครงงาน</th>
+                          <th>นิสิต</th>
+                          <th>ประเภทงาน</th>
+                          <th>วันที่ส่ง</th>
+                          <th>สถานะ</th>
+                          <th>การดำเนินการ</th>
                         </tr>
-                      ) : (
-                        currentTasks.map((task) => (
-                          <tr key={task.id}>
-                            {/* ชื่องาน */}
-                            <td>{task.task_name}</td>
+                      </thead>
 
-                            {/* โครงงาน */}
-                            <td>{task.project_title}</td>
-
-                            {/* ผู้รับผิดชอบ */}
-                            <td>{task.assignee_name || "-"}</td>
-
-                            {/* วันที่ส่ง */}
-                            <td>{formatThaiDate(task.submitted_at)}</td>
-
-                            {/* สถานะ */}
-                            <td>
-                              <div className="tw-review-status-cell">
-                                {task.review_status === "รอตรวจ" && (
-                                  <>
-                                    <span className="tw-review-status-badge tw-status-waiting">
-                                      รอตรวจ
-                                    </span>
-
-                                    {Number(task.submission_number) > 1 &&
-                                      task.previous_review_status ===
-                                        "แก้ไข" && (
-                                        <span className="tw-resubmission-label">
-                                          ส่งแก้ไขครั้งที่{" "}
-                                          {task.submission_number}
-                                        </span>
-                                      )}
-                                  </>
-                                )}
-
-                                {task.review_status === "ผ่าน" && (
-                                  <span className="tw-review-status-badge tw-status-passed">
-                                    ผ่าน
-                                  </span>
-                                )}
-
-                                {task.review_status === "แก้ไข" && (
-                                  <span className="tw-review-status-badge tw-status-revision">
-                                    ต้องแก้ไข
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-
-                            {/* การดำเนินการ */}
-                            <td>
-                              <button
-                                type="button"
-                                className="tw-review-btn"
-                                onClick={() =>
-                                  navigate(`/teacher-work/review/${task.id}`)
-                                }
-                              >
-                                {reviewFilter === "รอตรวจ"
-                                  ? "ตรวจงาน"
-                                  : "ดูผลการตรวจ"}
-                              </button>
+                      <tbody>
+                        {examRevisionLoading ||
+                        examRevisionError ||
+                        filteredExamRevisions.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="tw-empty-cell">
+                              {examRevisionLoading
+                                ? "กำลังโหลดงานแก้ไขหลังสอบ..."
+                                : examRevisionError
+                                  ? examRevisionError
+                                  : searchTerm.trim()
+                                    ? "ไม่พบงานที่ค้นหา"
+                                    : "ไม่มีงานแก้ไขหลังสอบรอตรวจ"}
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        ) : (
+                          filteredExamRevisions.map((item) => (
+                            <tr key={item.submission_id}>
+                              <td>{item.project_title}</td>
+
+                              <td>
+                                {item.student_username} {item.student_name}
+                              </td>
+
+                              <td>{item.work_type}</td>
+
+                              <td>{formatThaiDate(item.submitted_at)}</td>
+
+                              <td>
+                                <span className="tw-review-status-badge tw-status-waiting">
+                                  รอตรวจ
+                                </span>
+                              </td>
+
+                              <td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="tw-review-btn"
+                                    onClick={() =>
+                                      navigate(
+                                        `/teacher-work/exam-revision/${item.submission_id}`,
+                                      )
+                                    }
+                                  >
+                                    ตรวจงานแก้ไข
+                                  </button>
+                                </td>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="tw-table-wrap">
+                    <table className="tw-table">
+                      <thead>
+                        <tr>
+                          <th>งาน</th>
+                          <th>โครงงาน</th>
+                          <th>ผู้รับผิดชอบ</th>
+                          <th>วันที่ส่ง</th>
+                          <th>สถานะ</th>
+                          <th>การดำเนินการ</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {loading || error || currentTasks.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="tw-empty-cell">
+                              {loading
+                                ? "กำลังโหลดรายการตรวจงาน..."
+                                : error
+                                  ? error
+                                  : searchTerm.trim()
+                                    ? "ไม่พบงานที่ตรงกับการค้นหา"
+                                    : reviewFilter === "รอตรวจ"
+                                      ? "ไม่มีงานรอตรวจ"
+                                      : "ยังไม่มีรายการตรวจแล้ว"}
+                            </td>
+                          </tr>
+                        ) : (
+                          currentTasks.map((task) => (
+                            <tr key={task.id}>
+                              {/* ชื่องาน */}
+                              <td>{task.task_name}</td>
+
+                              {/* โครงงาน */}
+                              <td>{task.project_title}</td>
+
+                              {/* ผู้รับผิดชอบ */}
+                              <td>{task.assignee_name || "-"}</td>
+
+                              {/* วันที่ส่ง */}
+                              <td>{formatThaiDate(task.submitted_at)}</td>
+
+                              {/* สถานะ */}
+                              <td>
+                                <div className="tw-review-status-cell">
+                                  {task.review_status === "รอตรวจ" && (
+                                    <>
+                                      <span className="tw-review-status-badge tw-status-waiting">
+                                        รอตรวจ
+                                      </span>
+
+                                      {Number(task.submission_number) > 1 &&
+                                        task.previous_review_status ===
+                                          "แก้ไข" && (
+                                          <span className="tw-resubmission-label">
+                                            ส่งแก้ไขครั้งที่{" "}
+                                            {task.submission_number}
+                                          </span>
+                                        )}
+                                    </>
+                                  )}
+
+                                  {task.review_status === "ผ่าน" && (
+                                    <span className="tw-review-status-badge tw-status-passed">
+                                      ผ่าน
+                                    </span>
+                                  )}
+
+                                  {task.review_status === "แก้ไข" && (
+                                    <span className="tw-review-status-badge tw-status-revision">
+                                      ต้องแก้ไข
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* การดำเนินการ */}
+                              <td>
+                                <button
+                                  type="button"
+                                  className="tw-review-btn"
+                                  onClick={() =>
+                                    navigate(`/teacher-work/review/${task.id}`)
+                                  }
+                                >
+                                  {reviewFilter === "รอตรวจ"
+                                    ? "ตรวจงาน"
+                                    : "ดูผลการตรวจ"}
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
                 {/* PAGINATION */}
 
-                {!loading && !error && totalPages > 1 && (
-                  <div className="tw-pagination">
-                    <button
-                      type="button"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                      ก่อนหน้า
-                    </button>
+                {reviewFilter !== "งานแก้ไขหลังสอบ" &&
+                  !loading &&
+                  !error &&
+                  totalPages > 1 && (
+                    <div className="tw-pagination">
+                      <button
+                        type="button"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                      >
+                        ก่อนหน้า
+                      </button>
 
-                    <span>
-                      หน้า {currentPage} / {totalPages}
-                    </span>
+                      <span>
+                        หน้า {currentPage} / {totalPages}
+                      </span>
 
-                    <button
-                      type="button"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                      ถัดไป
-                    </button>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                      >
+                        ถัดไป
+                      </button>
+                    </div>
+                  )}
               </>
             ) : activeTab === "exam" ? (
               <>
