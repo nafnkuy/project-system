@@ -671,3 +671,308 @@
   row-gap: 10px;
   margin-top: 16px;
 }
+
+/* =========================================
+   EXPECTED GRADE
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.teacher-managed-detail-page .tmd-eval-title-row strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teacher-managed-detail-page .tmd-expected-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 15px;
+
+  background: #e8f7ee;
+  border: 1px solid #b8e5cc;
+  border-radius: 6px;
+
+  color: #008b50;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* =========================================
+   TEACHER MANAGED PROJECT - EVALUATION
+   SAME STYLE AS STUDENT EVALUATION
+========================================= */
+
+/* PANEL */
+
+.teacher-managed-detail-page .tmd-eval-panel {
+  min-height: 570px;
+  padding: 22px;
+  background: #ffffff;
+  border-radius: 9px;
+}
+
+.teacher-managed-detail-page .tmd-eval-panel > h3 {
+  margin: 0 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* DIVIDER */
+
+.teacher-managed-detail-page .tmd-eval-divider {
+  height: 1px;
+  margin: 18px 0;
+  background: #cccccc;
+}
+
+/* =========================================
+   EMPTY RESULT
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-empty-area {
+  min-height: 470px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.teacher-managed-detail-page .tmd-eval-empty-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px 18px 40px;
+  border: 1px solid #bdbdbd;
+  border-radius: 9px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.teacher-managed-detail-page .tmd-eval-empty-box h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teacher-managed-detail-page .tmd-eval-empty-box p {
+  margin: 32px 0 5px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+/* =========================================
+   RESULT CARD
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-result-card {
+  padding: 20px;
+  border: 1px solid #bfbfbf;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+/* TITLE + GRADE */
+
+.teacher-managed-detail-page .tmd-eval-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.teacher-managed-detail-page .tmd-eval-result-header strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teacher-managed-detail-page .tmd-eval-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 88px;
+  padding: 7px 15px;
+
+  border-radius: 6px;
+  border: 1px solid #b8dfca;
+  background: #e7f6ed;
+
+  color: #16834c;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* =========================================
+   RESULT SUMMARY
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-summary {
+  font-size: 13px;
+}
+
+.teacher-managed-detail-page .tmd-eval-summary p {
+  margin: 12px 0;
+}
+
+.teacher-managed-detail-page .tmd-eval-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.teacher-managed-detail-page .tmd-eval-status {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ผ่าน */
+
+.teacher-managed-detail-page .tmd-eval-status.is-pass {
+  color: #ffffff;
+  background: #20a36b;
+}
+
+/* ต้องแก้ไข */
+
+.teacher-managed-detail-page .tmd-eval-status.is-revision {
+  color: #996500;
+  background: #fff0c5;
+}
+
+/* ไม่ผ่าน */
+
+.teacher-managed-detail-page .tmd-eval-status.is-fail {
+  color: #ffffff;
+  background: #dc4545;
+}
+
+/* =========================================
+   COMMITTEE
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-committee {
+  margin-top: 30px;
+}
+
+.teacher-managed-detail-page .tmd-eval-committee h4,
+.teacher-managed-detail-page .tmd-eval-scores h4,
+.teacher-managed-detail-page .tmd-eval-comments h4 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.teacher-managed-detail-page .tmd-eval-committee ul {
+  margin: 0;
+  padding-left: 40px;
+}
+
+.teacher-managed-detail-page .tmd-eval-committee li {
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+/* =========================================
+   SCORE TABLE
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-scores {
+  margin-top: 45px;
+}
+
+.teacher-managed-detail-page .tmd-eval-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.teacher-managed-detail-page .tmd-eval-score-table {
+  width: 100%;
+  border: 1px solid #bfbfbf;
+  border-spacing: 0;
+  border-radius: 8px;
+  border-collapse: separate;
+  overflow: hidden;
+}
+
+.teacher-managed-detail-page .tmd-eval-score-table th,
+.teacher-managed-detail-page .tmd-eval-score-table td {
+  padding: 12px 14px;
+  border-right: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  font-size: 12px;
+}
+
+.teacher-managed-detail-page
+.tmd-eval-score-table tr > :last-child {
+  border-right: none;
+}
+
+.teacher-managed-detail-page
+.tmd-eval-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-managed-detail-page .tmd-eval-score-table th {
+  font-weight: 500;
+}
+
+.teacher-managed-detail-page .tmd-eval-score-table th:first-child,
+.teacher-managed-detail-page .tmd-eval-score-table td:first-child {
+  width: 65%;
+  text-align: left;
+}
+
+.teacher-managed-detail-page
+.tmd-eval-score-table th:nth-child(2),
+.teacher-managed-detail-page
+.tmd-eval-score-table td:nth-child(2),
+.teacher-managed-detail-page
+.tmd-eval-score-table th:nth-child(3),
+.teacher-managed-detail-page
+.tmd-eval-score-table td:nth-child(3) {
+  text-align: center;
+}
+
+.teacher-managed-detail-page .tmd-eval-total-row {
+  font-weight: 600;
+}
+
+/* =========================================
+   COMMENTS
+========================================= */
+
+.teacher-managed-detail-page .tmd-eval-comments {
+  margin-top: 45px;
+  margin-bottom: 35px;
+}
+
+.teacher-managed-detail-page .tmd-eval-comment-box {
+  min-height: 95px;
+  padding: 16px 20px;
+  border-radius: 5px;
+  background: #d9d9d9;
+}
+
+.teacher-managed-detail-page .tmd-eval-comment-box p {
+  margin: 0 0 12px;
+  color: #222222;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.teacher-managed-detail-page
+.tmd-eval-comment-box p:last-child {
+  margin-bottom: 0;
+}

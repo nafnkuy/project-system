@@ -24,6 +24,10 @@ interface ProjectApi {
   }[];
 }
 
+interface SubtaskApi {
+  updated_at: string | null;
+}
+
 interface TaskApi {
   id: number;
   task_name: string;
@@ -34,6 +38,9 @@ interface TaskApi {
   due_date: string | null;
   completed_subtasks: number;
   total_subtasks: number;
+
+  updated_at: string | null;
+  subtasks: SubtaskApi[];
 }
 
 interface PhaseApi {
@@ -42,6 +49,8 @@ interface PhaseApi {
   start_date: string | null;
   due_date: string | null;
   status: string;
+
+  updated_at: string | null;
   tasks: TaskApi[];
 }
 
@@ -85,6 +94,8 @@ interface OverviewData {
 
 interface EvaluationData {
   hasEvaluation: boolean;
+  resultStatus?: string;
+  evaluatedAt?: string | null;
   totalScore?: number;
   committeeNames?: string[];
   details?: {
@@ -141,6 +152,49 @@ function TeacherManagedProjectDetail() {
 
       const project = projectRes.data;
       const phases = planRes.data.phases || [];
+
+      // ==========================================
+      // LAST UPDATE - เหมือนฝั่งนิสิต
+      // ==========================================
+
+      const dates: string[] = [];
+
+      phases.forEach((phase) => {
+        if (phase.updated_at) {
+          dates.push(phase.updated_at);
+        }
+
+        phase.tasks?.forEach((task) => {
+          if (task.updated_at) {
+            dates.push(task.updated_at);
+          }
+
+          task.subtasks?.forEach((subtask) => {
+            if (subtask.updated_at) {
+              dates.push(subtask.updated_at);
+            }
+          });
+        });
+      });
+
+      const validDates = dates
+        .map((value) => new Date(value))
+        .filter((date) => !Number.isNaN(date.getTime()));
+
+      let lastUpdated = "-";
+
+      if (validDates.length > 0) {
+        const newest = new Date(
+          Math.max(...validDates.map((date) => date.getTime())),
+        );
+
+        lastUpdated = newest.toLocaleDateString("th-TH", {
+          timeZone: "Asia/Bangkok",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
 
       // รวมงานทั้งหมดจากทุก Phase
       const allTasks = phases.flatMap((phase) => phase.tasks || []);
@@ -206,7 +260,7 @@ function TeacherManagedProjectDetail() {
       // ส่งข้อมูลเข้า State ที่หน้าเว็บใช้อยู่
       setOverview({
         title: project.title,
-        updated_at: project.updated_at || "-",
+        updated_at: lastUpdated,
 
         total_tasks: allTasks.length,
         completed_tasks: completedTasks,
@@ -254,13 +308,28 @@ function TeacherManagedProjectDetail() {
   };
 
   const fetchEvaluation = async () => {
+    if (!projectId) return;
+
+    const advisorId = sessionStorage.getItem("userId");
+
+    if (!advisorId) {
+      console.error("ไม่พบ ID อาจารย์");
+      return;
+    }
+
     try {
-      const res = await axios.get(
+      const res = await axios.get<EvaluationData>(
         `http://localhost:5000/teacher/managed-projects/${projectId}/evaluation`,
+        {
+          params: {
+            advisorId: advisorId,
+          },
+        },
       );
+
       setEvaluation(res.data);
     } catch (error) {
-      console.error("โหลด evaluation ไม่สำเร็จ", error);
+      console.error("โหลดผลการประเมินไม่สำเร็จ", error);
     }
   };
 
@@ -334,6 +403,44 @@ function TeacherManagedProjectDetail() {
       backgroundColor: "#E8F8F5",
       borderColor: "#16A085",
     },
+  };
+
+  const getExpectedGrade = (score: number) => {
+    if (score >= 80) return "A";
+    if (score >= 75) return "B+";
+    if (score >= 70) return "B";
+    if (score >= 65) return "C+";
+    if (score >= 60) return "C";
+    if (score >= 55) return "D+";
+    if (score >= 50) return "D";
+    return "E/F";
+  };
+
+  const formatThaiDateTime = (value?: string | null) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return (
+      date.toLocaleString("th-TH", {
+        timeZone: "Asia/Bangkok",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }) + " น."
+    );
+  };
+
+  const formatScore = (value: number) => {
+    return Number(value).toLocaleString("th-TH", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
   };
 
   if (!overview) {
@@ -702,80 +809,159 @@ function TeacherManagedProjectDetail() {
       EVALUATION
   ========================================= */
 
-            <div className="tmd-section">
-              <div className="tmd-box">
-                <h4>ผลการประเมิน</h4>
+            <section className="tmd-eval-panel">
+              <h3>ผลการประเมิน</h3>
 
-                {evaluation?.hasEvaluation ? (
-                  <div className="tmd-info-card">
-                    <p>
-                      <strong>{overview.title}</strong>
-                    </p>
+              {!evaluation || !evaluation.hasEvaluation ? (
+                /* ยังไม่มีผลการประเมิน */
 
-                    <hr />
+                <div className="tmd-eval-empty-area">
+                  <div className="tmd-eval-empty-box">
+                    <h4>ยังไม่มีผลการประเมิน</h4>
 
-                    <p>คะแนนรวม : {evaluation.totalScore} / 100</p>
-
-                    <h4>คณะกรรมการสอบ</h4>
-
-                    <ul>
-                      {evaluation.committeeNames?.map((name, index) => (
-                        <li key={index}>{name}</li>
-                      ))}
-                    </ul>
-
-                    <table className="tmd-eval-table">
-                      <thead>
-                        <tr>
-                          <th>เกณฑ์การประเมิน</th>
-                          <th>คะแนนเต็ม</th>
-                          <th>คะแนนที่ได้</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {evaluation.details?.map((item, index) => (
-                          <tr key={index}>
-                            <td>{item.criteria}</td>
-                            <td>{item.fullScore}</td>
-                            <td>{item.score}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    <h4>ข้อเสนอแนะจากคณะกรรมการ</h4>
-
-                    <div className="tmd-comment-box">
-                      {evaluation.comment || "-"}
-                    </div>
-
-                    {evaluation.needsRevision && (
-                      <>
-                        <h4>ประเด็นที่ต้องแก้ไข</h4>
-
-                        <div className="tmd-comment-box">
-                          {evaluation.revisionDetails || "-"}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <div className="tmd-empty-result">
-                    <p>
-                      <strong>ยังไม่มีผลการประเมิน</strong>
-                    </p>
-
-                    <hr />
+                    <div className="tmd-eval-divider" />
 
                     <p>
                       ผลการประเมินจะแสดงเมื่อคณะกรรมการ
+                      <br />
                       ดำเนินการประเมินเรียบร้อยแล้ว
                     </p>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              ) : (
+                /* มีผลการประเมินแล้ว */
+
+                <div className="tmd-eval-result-card">
+                  {/* ชื่อโครงงานและเกรด */}
+
+                  <div className="tmd-eval-result-header">
+                    <strong>{overview.title}</strong>
+
+                    {typeof evaluation.totalScore === "number" && (
+                      <span className="tmd-eval-grade">
+                        เกรดที่คาดว่าจะได้รับ{" "}
+                        {getExpectedGrade(evaluation.totalScore)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="tmd-eval-divider" />
+
+                  {/* ผลการประเมิน */}
+
+                  <div className="tmd-eval-summary">
+                    <div className="tmd-eval-status-row">
+                      <span>ผลการประเมิน :</span>
+
+                      <span
+                        className={`tmd-eval-status ${
+                          evaluation.resultStatus === "ผ่าน"
+                            ? "is-pass"
+                            : evaluation.resultStatus === "ต้องแก้ไข"
+                              ? "is-revision"
+                              : evaluation.resultStatus === "ไม่ผ่าน"
+                                ? "is-fail"
+                                : ""
+                        }`}
+                      >
+                        {evaluation.resultStatus || "-"}
+                      </span>
+                    </div>
+
+                    <p>
+                      คะแนนรวม :{" "}
+                      {typeof evaluation.totalScore === "number"
+                        ? formatScore(evaluation.totalScore)
+                        : "-"}{" "}
+                      / 100
+                    </p>
+
+                    <p>
+                      วันที่สรุปผล :{" "}
+                      {formatThaiDateTime(evaluation.evaluatedAt)}
+                    </p>
+                  </div>
+
+                  {/* คณะกรรมการสอบ */}
+
+                  <div className="tmd-eval-committee">
+                    <h4>คณะกรรมการสอบ</h4>
+
+                    <ul>
+                      {(evaluation.committeeNames || []).map((name, index) => (
+                        <li key={index}>{name}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* ตารางคะแนน */}
+
+                  <div className="tmd-eval-scores">
+                    <h4>รายละเอียดคะแนน</h4>
+
+                    <div className="tmd-eval-table-wrap">
+                      <table className="tmd-eval-score-table">
+                        <thead>
+                          <tr>
+                            <th>เกณฑ์การประเมิน</th>
+                            <th>คะแนนเต็ม</th>
+                            <th>คะแนนที่ได้</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {(evaluation.details || []).map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.criteria}</td>
+                              <td>{item.fullScore}</td>
+                              <td>{formatScore(item.score)}</td>
+                            </tr>
+                          ))}
+
+                          <tr className="tmd-eval-total-row">
+                            <td>รวม</td>
+                            <td>100</td>
+                            <td>
+                              {typeof evaluation.totalScore === "number"
+                                ? formatScore(evaluation.totalScore)
+                                : "-"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* ข้อเสนอแนะจากกรรมการ */}
+
+                  <div className="tmd-eval-comments">
+                    <h4>ข้อเสนอแนะจากคณะกรรมการ</h4>
+
+                    <div className="tmd-eval-comment-box">
+                      <p>
+                        {evaluation.comment?.trim() ||
+                          "ไม่มีข้อเสนอแนะเพิ่มเติม"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* ประเด็นที่ต้องแก้ไข */}
+
+                  {evaluation.needsRevision && (
+                    <div className="tmd-eval-comments">
+                      <h4>ประเด็นที่ต้องแก้ไข</h4>
+
+                      <div className="tmd-eval-comment-box">
+                        <p>
+                          {evaluation.revisionDetails?.trim() ||
+                            "ไม่ได้ระบุรายละเอียด"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
           )}
         </div>
       </main>

@@ -9957,6 +9957,247 @@ app.get(
 );
 
 /* =========================================================
+   TEACHER - MANAGED PROJECT EVALUATION RESULT
+========================================================= */
+
+app.get("/teacher/managed-projects/:projectId/evaluation", async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const advisorId = Number(req.query.advisorId);
+
+  if (
+    !Number.isInteger(projectId) ||
+    projectId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลโครงงานหรืออาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  const query = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+      db.query(sql, params, (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  };
+
+  try {
+    // 1. ตรวจสอบว่าเป็นโครงงานที่อาจารย์ดูแล
+
+    const projects = await query(
+      `
+        SELECT
+          p.id,
+          p.title,
+
+          (
+            SELECT MAX(s.id)
+            FROM project_exam_schedules s
+            WHERE s.project_id = p.id
+              AND s.announced_at IS NOT NULL
+          ) AS schedule_id
+
+        FROM projects p
+
+        WHERE p.id = ?
+          AND p.advisor_id = ?
+
+        LIMIT 1
+        `,
+      [projectId, advisorId],
+    );
+
+    if (projects.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบโครงงานที่ดูแล",
+      });
+    }
+
+    const project = projects[0];
+
+    const pendingResult = {
+      hasEvaluation: false,
+    };
+
+    if (!project.schedule_id) {
+      return res.json(pendingResult);
+    }
+
+    // 2. ดึงกรรมการและผลคะแนนที่บันทึกไว้
+
+    const members = await query(
+      `
+        SELECT
+          cm.teacher_id,
+          cm.invitation_status,
+
+          u.name AS teacher_name,
+
+          ev.id AS evaluation_id,
+          ev.score_correctness,
+          ev.score_design,
+          ev.score_presentation,
+          ev.score_documentation,
+          ev.score_questions,
+          ev.total_score,
+          ev.teacher_comment,
+          ev.needs_revision,
+          ev.revision_details,
+          ev.evaluated_at
+
+        FROM exam_committee_members cm
+
+        INNER JOIN users u
+          ON u.id = cm.teacher_id
+
+        LEFT JOIN exam_evaluations ev
+          ON ev.committee_member_id = cm.id
+
+        WHERE cm.schedule_id = ?
+
+        ORDER BY
+          CASE
+            WHEN cm.teacher_id = ? THEN 0
+            ELSE 1
+          END,
+          cm.id ASC
+        `,
+      [project.schedule_id, advisorId],
+    );
+
+    // 3. กรรมการต้องตอบรับและประเมินครบก่อน
+
+    const hasPendingInvitation = members.some(
+      (member) => member.invitation_status === "รอตอบรับ",
+    );
+
+    const acceptedMembers = members.filter(
+      (member) => member.invitation_status === "ตอบรับ",
+    );
+
+    const allEvaluated =
+      acceptedMembers.length > 0 &&
+      acceptedMembers.every(
+        (member) =>
+          member.evaluation_id !== null && member.total_score !== null,
+      );
+
+    if (hasPendingInvitation || !allEvaluated) {
+      return res.json(pendingResult);
+    }
+
+    // 4. คำนวณคะแนนเฉลี่ยของกรรมการ
+
+    const average = (field) => {
+      const total = acceptedMembers.reduce(
+        (sum, member) => sum + Number(member[field]),
+        0,
+      );
+
+      return Number((total / acceptedMembers.length).toFixed(2));
+    };
+
+    const totalScore = average("total_score");
+
+    // 5. ตรวจผลการประเมิน
+
+    const needsRevision = acceptedMembers.some(
+      (member) => Number(member.needs_revision) === 1,
+    );
+
+    const resultStatus =
+      totalScore < 50 ? "ไม่ผ่าน" : needsRevision ? "ต้องแก้ไข" : "ผ่าน";
+
+    // 6. วันที่กรรมการคนสุดท้ายบันทึกผล
+
+    const evaluatedDates = acceptedMembers
+      .map((member) => new Date(member.evaluated_at))
+      .filter((date) => !Number.isNaN(date.getTime()));
+
+    const evaluatedAt =
+      evaluatedDates.length > 0
+        ? new Date(Math.max(...evaluatedDates.map((date) => date.getTime())))
+        : null;
+
+    // 7. รวมความคิดเห็น / ข้อเสนอแนะ
+
+    const comments = acceptedMembers
+      .filter(
+        (member) =>
+          member.teacher_comment && member.teacher_comment.trim() !== "",
+      )
+      .map((member) => `${member.teacher_name}: ${member.teacher_comment}`)
+      .join("\n");
+
+    // 8. รวมประเด็นที่ต้องแก้ไข
+
+    const revisionDetails = acceptedMembers
+      .filter(
+        (member) =>
+          Number(member.needs_revision) === 1 && member.revision_details,
+      )
+      .map((member) => `${member.teacher_name}: ${member.revision_details}`)
+      .join("\n");
+
+    // 9. ส่งผลการประเมินไปยังหน้าอาจารย์
+
+    return res.json({
+      hasEvaluation: true,
+
+      resultStatus,
+      totalScore,
+      evaluatedAt,
+
+      committeeNames: acceptedMembers.map((member) => member.teacher_name),
+
+      details: [
+        {
+          criteria: "ความถูกต้องและความสมบูรณ์ของระบบ",
+          fullScore: 30,
+          score: average("score_correctness"),
+        },
+        {
+          criteria: "การออกแบบและพัฒนาระบบ",
+          fullScore: 25,
+          score: average("score_design"),
+        },
+        {
+          criteria: "การนำเสนอ",
+          fullScore: 20,
+          score: average("score_presentation"),
+        },
+        {
+          criteria: "เอกสารประกอบโครงงาน",
+          fullScore: 15,
+          score: average("score_documentation"),
+        },
+        {
+          criteria: "การตอบคำถาม",
+          fullScore: 10,
+          score: average("score_questions"),
+        },
+      ],
+
+      comment: comments,
+      needsRevision,
+      revisionDetails,
+    });
+  } catch (error) {
+    console.error("Managed evaluation error:", error);
+
+    return res.status(500).json({
+      message: "ไม่สามารถโหลดผลการประเมินได้",
+    });
+  }
+});
+
+/* =========================================================
    TEACHER - MANAGED PROJECTS
 ========================================================= */
 

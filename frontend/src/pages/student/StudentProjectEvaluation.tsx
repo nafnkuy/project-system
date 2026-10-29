@@ -346,7 +346,7 @@ function StudentProjectEvaluation() {
                   <strong>{result.project_title}</strong>
 
                   <span className="student-eval-grade">
-                    เกรด {result.grade}
+                    เกรดที่คาดว่าจะได้รับ {result.grade}
                   </span>
                 </div>
 
