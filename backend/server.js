@@ -9795,6 +9795,7 @@ app.get(
             ev.total_score,
             ev.teacher_comment,
             ev.needs_revision,
+            ev.revision_details,
             ev.evaluated_at
 
           FROM exam_committee_members ecm
@@ -9877,7 +9878,11 @@ app.get(
       );
 
       const resultStatus =
-        totalScore < 50 ? "ไม่ผ่าน" : hasRevision ? "ต้องแก้ไข" : "ผ่าน";
+        totalScore < 50
+          ? "ไม่ผ่าน"
+          : hasRevision
+            ? "ผ่านแบบมีเงื่อนไข"
+            : "ผ่าน";
 
       // 8. วันที่กรรมการคนสุดท้ายบันทึกคะแนน
 
@@ -9901,6 +9906,27 @@ app.get(
           teacher_name: member.teacher_name,
           comment: member.teacher_comment,
         }));
+
+      // ==========================================
+      // รวบรวมประเด็นที่กรรมการระบุให้แก้ไข
+      // ==========================================
+
+      const revisionDetails = acceptedMembers
+        .filter(
+          (member) =>
+            Number(member.needs_revision) === 1 &&
+            typeof member.revision_details === "string",
+        )
+        .flatMap((member) =>
+          member.revision_details
+            .split(/\r?\n/)
+            .map((item) => item.trim().replace(/^[-•]\s*/, ""))
+            .filter((item) => item !== "")
+            .map((item) => ({
+              teacher_name: member.teacher_name,
+              detail: item,
+            })),
+        );
 
       // 10. ส่งผลให้ฝั่งนิสิต
 
@@ -9945,6 +9971,7 @@ app.get(
         ],
 
         comments: comments,
+        revision_details: revisionDetails,
       });
     } catch (err) {
       console.error("Student evaluation error:", err);
@@ -10319,6 +10346,293 @@ app.get("/teacher/managed-projects/:advisorId", (req, res) => {
     res.json(projects);
   });
 });
+
+/* =========================================================
+   STUDENT - EXAM REVISION SUBMISSION
+========================================================= */
+
+const examRevisionDir = path.join(__dirname, "uploads", "exam-revision-files");
+
+fs.mkdirSync(examRevisionDir, { recursive: true });
+
+const examRevisionUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, examRevisionDir);
+    },
+
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+      cb(null, filename);
+    },
+  }),
+
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 10,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if ([".pdf", ".doc", ".docx"].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("รองรับเฉพาะไฟล์ PDF, DOC และ DOCX"));
+    }
+  },
+}).array("files", 10);
+
+const examRevisionQuery = (sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.query(sql, params, (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+};
+
+// บันทึกงานแก้ไขหลังการสอบ
+app.post("/student/projects/:projectId/exam-revision", (req, res) => {
+  examRevisionUpload(req, res, async (uploadError) => {
+    const uploadedFiles = req.files || [];
+
+    const cleanupFiles = () => {
+      for (const file of uploadedFiles) {
+        try {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (err) {
+          console.error("Cleanup exam revision file:", err);
+        }
+      }
+    };
+
+    if (uploadError) {
+      cleanupFiles();
+
+      return res.status(400).json({
+        message: uploadError.message,
+      });
+    }
+
+    try {
+      const projectId = Number(req.params.projectId);
+      const studentId = Number(req.body.student_id);
+      const description = String(req.body.description || "").trim();
+
+      if (
+        !Number.isInteger(projectId) ||
+        projectId <= 0 ||
+        !Number.isInteger(studentId) ||
+        studentId <= 0
+      ) {
+        throw Object.assign(new Error("ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง"), {
+          statusCode: 400,
+        });
+      }
+
+      if (!description || uploadedFiles.length === 0) {
+        throw Object.assign(
+          new Error("กรุณากรอกรายละเอียดและแนบไฟล์อย่างน้อย 1 ไฟล์"),
+          { statusCode: 400 },
+        );
+      }
+
+      // ตรวจสอบสมาชิกโครงงาน
+      const members = await examRevisionQuery(
+        `SELECT u.name AS student_name
+         FROM project_members pm
+         JOIN users u ON u.id = pm.user_id
+         WHERE pm.project_id = ?
+           AND pm.user_id = ?
+         LIMIT 1`,
+        [projectId, studentId],
+      );
+
+      if (members.length === 0) {
+        throw Object.assign(new Error("ไม่มีสิทธิ์ส่งงานแก้ไขของโครงงานนี้"), {
+          statusCode: 403,
+        });
+      }
+
+      // ตรวจสอบว่ากรรมการประเมินครบ และผลเป็นผ่านแบบมีเงื่อนไข
+      const summaryRows = await examRevisionQuery(
+        `SELECT
+           COUNT(CASE WHEN cm.invitation_status = 'ตอบรับ'
+             THEN 1 END) AS accepted_count,
+
+           COUNT(CASE WHEN cm.invitation_status = 'รอตอบรับ'
+             THEN 1 END) AS pending_count,
+
+           COUNT(CASE WHEN cm.invitation_status = 'ตอบรับ'
+                      AND ev.id IS NOT NULL
+             THEN 1 END) AS evaluated_count,
+
+           MAX(CASE WHEN cm.invitation_status = 'ตอบรับ'
+             THEN COALESCE(ev.needs_revision, 0)
+             ELSE 0 END) AS needs_revision,
+
+           AVG(CASE WHEN cm.invitation_status = 'ตอบรับ'
+             THEN ev.total_score END) AS average_score
+
+         FROM project_exam_schedules s
+         JOIN exam_committee_members cm ON cm.schedule_id = s.id
+         LEFT JOIN exam_evaluations ev ON ev.committee_member_id = cm.id
+         WHERE s.project_id = ?`,
+        [projectId],
+      );
+
+      const summary = summaryRows[0];
+
+      const accepted = Number(summary.accepted_count);
+      const evaluated = Number(summary.evaluated_count);
+
+      if (
+        accepted === 0 ||
+        Number(summary.pending_count) > 0 ||
+        accepted !== evaluated ||
+        Number(summary.needs_revision) !== 1 ||
+        Number(summary.average_score) < 50
+      ) {
+        throw Object.assign(
+          new Error("โครงงานนี้ยังไม่มีผลผ่านแบบมีเงื่อนไข"),
+          { statusCode: 400 },
+        );
+      }
+
+      // ป้องกันการส่งซ้ำระหว่างรอตรวจ
+      const previous = await examRevisionQuery(
+        `SELECT status
+         FROM exam_revision_submissions
+         WHERE project_id = ?
+         ORDER BY id DESC
+         LIMIT 1`,
+        [projectId],
+      );
+
+      if (previous.length > 0 && previous[0].status !== "ต้องแก้ไข") {
+        throw Object.assign(new Error("โครงงานนี้ส่งงานแก้ไขแล้ว"), {
+          statusCode: 409,
+        });
+      }
+
+      const files = uploadedFiles.map((file) => ({
+        name: file.originalname,
+        path: `/uploads/exam-revision-files/${file.filename}`,
+        size: file.size,
+      }));
+
+      const saved = await examRevisionQuery(
+        `INSERT INTO exam_revision_submissions
+          (project_id, student_id, description, files_json, status)
+         VALUES (?, ?, ?, ?, 'รอตรวจ')`,
+        [projectId, studentId, description, JSON.stringify(files)],
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "ส่งงานแก้ไขเรียบร้อยแล้ว",
+        submission: {
+          id: saved.insertId,
+          status: "รอตรวจ",
+          student_name: members[0].student_name,
+          description,
+          files,
+          submitted_at: new Date().toISOString(),
+        },
+      });
+    } catch (err) {
+      cleanupFiles();
+      console.error("Submit exam revision error:", err);
+
+      res.status(err.statusCode || 500).json({
+        message: err.statusCode ? err.message : "ไม่สามารถบันทึกงานแก้ไขได้",
+      });
+    }
+  });
+});
+
+// ดึงงานแก้ไขล่าสุดเพื่อแสดงเมื่อเปิดหน้าอีกครั้ง
+app.get(
+  "/student/projects/:projectId/exam-revision/:studentId",
+  async (req, res) => {
+    try {
+      const projectId = Number(req.params.projectId);
+      const studentId = Number(req.params.studentId);
+
+      if (
+        !Number.isInteger(projectId) ||
+        projectId <= 0 ||
+        !Number.isInteger(studentId) ||
+        studentId <= 0
+      ) {
+        return res.status(400).json({
+          message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
+        });
+      }
+
+      const membership = await examRevisionQuery(
+        `SELECT id
+         FROM project_members
+         WHERE project_id = ? AND user_id = ?
+         LIMIT 1`,
+        [projectId, studentId],
+      );
+
+      if (membership.length === 0) {
+        return res.status(403).json({
+          message: "ไม่มีสิทธิ์ดูงานแก้ไขนี้",
+        });
+      }
+
+      const rows = await examRevisionQuery(
+        `SELECT
+           ers.id,
+           ers.description,
+           ers.status,
+           ers.submitted_at,
+           ers.files_json,
+           u.name AS student_name
+         FROM exam_revision_submissions ers
+         JOIN users u ON u.id = ers.student_id
+         WHERE ers.project_id = ?
+         ORDER BY ers.id DESC
+         LIMIT 1`,
+        [projectId],
+      );
+
+      if (rows.length === 0) {
+        return res.json({ submission: null });
+      }
+
+      const row = rows[0];
+
+      res.json({
+        submission: {
+          id: row.id,
+          description: row.description,
+          status: row.status,
+          student_name: row.student_name,
+          submitted_at: row.submitted_at,
+          files:
+            typeof row.files_json === "string"
+              ? JSON.parse(row.files_json)
+              : row.files_json,
+        },
+      });
+    } catch (err) {
+      console.error("Get exam revision error:", err);
+
+      res.status(500).json({
+        message: "ไม่สามารถโหลดงานแก้ไขได้",
+      });
+    }
+  },
+);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

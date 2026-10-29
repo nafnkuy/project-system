@@ -285,3 +285,496 @@
 .student-eval-page .student-eval-comment-box p:last-child {
   margin-bottom: 0;
 }
+/* =========================================
+   CONDITIONAL PASS - REVISION DETAILS
+========================================= */
+
+.student-eval-revision {
+  margin-top: 38px;
+}
+
+.student-eval-revision h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.student-eval-revision-list {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.student-eval-revision-list li {
+  margin-bottom: 6px;
+  line-height: 1.7;
+}
+
+.student-eval-revision-list li:last-child {
+  margin-bottom: 0;
+}
+.student-eval-page .student-eval-revision-list li {
+  margin-bottom: 10px;
+  line-height: 1.8;
+}
+
+.student-eval-page .student-eval-revision-list strong {
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+/* =========================================
+   REVISION DETAILS GROUPED BY TEACHER
+========================================= */
+
+.student-eval-page .student-eval-revision-group {
+  margin-bottom: 20px;
+}
+
+.student-eval-page .student-eval-revision-group:last-child {
+  margin-bottom: 0;
+}
+
+.student-eval-page .student-eval-revision-group strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-revision-list {
+  margin: 0;
+  padding-left: 28px;
+}
+
+.student-eval-page .student-eval-revision-list li {
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.student-eval-page .student-eval-revision-list li:last-child {
+  margin-bottom: 0;
+}
+/* ปุ่มส่งงานแก้ไข */
+
+.student-eval-page .student-eval-revision-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.student-eval-page .student-eval-revision-btn {
+  min-width: 140px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 7px;
+  background-color: #ff8a00;
+  color: white;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-revision-btn:hover {
+  background-color: #e67c00;
+}
+
+/* =========================================
+   REVISION SUBMISSION POPUP
+========================================= */
+
+.student-eval-page .student-eval-revision-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.student-eval-page .student-eval-revision-modal {
+  width: 100%;
+  max-width: 430px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 25px;
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 9px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.student-eval-page .student-eval-revision-modal h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-revision-modal-divider {
+  border-top: 1px solid #cccccc;
+  margin: 20px 0;
+}
+
+.student-eval-page .student-eval-revision-modal-issues h4 {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.student-eval-page .student-eval-revision-modal-issues strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.student-eval-page .student-eval-revision-modal-issues ul {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.student-eval-page .student-eval-revision-modal-issues li {
+  margin-bottom: 5px;
+  line-height: 1.7;
+}
+
+.student-eval-page .student-eval-revision-modal-field {
+  margin-top: 24px;
+}
+
+.student-eval-page .student-eval-revision-modal-field label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-revision-modal-field label span {
+  color: red;
+}
+
+.student-eval-page .student-eval-revision-modal-field textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.student-eval-page .student-eval-revision-modal-field input[type="file"] {
+  width: 100%;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+
+/* =========================================
+   REVISION FILE UPLOAD
+========================================= */
+
+/* ปุ่มเลือกไฟล์ */
+
+.student-eval-page .student-eval-file-picker {
+  width: 100%;
+  padding: 16px;
+  border: 1px dashed #b9c6d4;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #3678c5;
+  font-family: inherit;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.student-eval-page .student-eval-file-picker span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.student-eval-page .student-eval-file-picker small {
+  font-size: 11px;
+  color: #888888;
+}
+
+.student-eval-page .student-eval-file-picker:hover {
+  border-color: #3678c5;
+  background: #f0f6ff;
+}
+
+/* กล่องแสดงไฟล์ที่เลือก */
+
+.student-eval-page .student-eval-file-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d8e1eb;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.student-eval-page .student-eval-file-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.student-eval-page .student-eval-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-eval-page .student-eval-file-name {
+  display: block;
+  color: #333333;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* ปุ่มเปลี่ยนและลบไฟล์ */
+
+.student-eval-page .student-eval-file-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.student-eval-page .student-eval-file-actions button {
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-file-change {
+  border: 1px solid #3678c5;
+  color: #3678c5;
+}
+
+.student-eval-page .student-eval-file-remove {
+  border: 1px solid #e54b4b;
+  color: #e54b4b;
+}
+
+.student-eval-page .student-eval-file-change:hover {
+  background: #eef5ff;
+}
+
+.student-eval-page .student-eval-file-remove:hover {
+  background: #fff1f0;
+}
+
+@media (max-width: 420px) {
+  .student-eval-page .student-eval-file-card {
+    flex-wrap: wrap;
+  }
+
+  .student-eval-page .student-eval-file-actions {
+    margin-left: auto;
+  }
+}
+
+
+.student-eval-page .student-eval-revision-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 35px;
+}
+
+.student-eval-page .student-eval-revision-modal-actions button {
+  min-width: 120px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-revision-cancel {
+  background: #ff0000;
+}
+
+.student-eval-page .student-eval-revision-submit {
+  background: #20a86b;
+}
+
+.student-eval-page .student-eval-revision-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   MULTIPLE REVISION FILES
+========================================= */
+
+.student-eval-page .student-eval-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.student-eval-page .student-eval-file-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-eval-page .student-eval-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-eval-page .student-eval-file-remove {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  border: 1px solid #ff4d4f;
+  border-radius: 5px;
+  background: white;
+  color: #ff4d4f;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-file-remove:hover {
+  background: #fff1f0;
+}
+
+.student-eval-page .student-eval-file-picker {
+  margin-top: 5px;
+}
+/* ปรับกล่องเลือกไฟล์ให้เป็นปุ่มกดได้ */
+
+.student-eval-page
+.student-eval-revision-modal-field
+label.student-eval-file-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-file-picker strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3678c5;
+}
+/* =========================================
+   SUBMITTED EXAM REVISION
+========================================= */
+
+.student-eval-page .student-eval-submitted-card {
+  margin-top: 18px;
+  padding: 22px 24px 30px;
+  border: 1px solid #bfbfbf;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+}
+
+.student-eval-page .student-eval-submitted-card h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-submitted-card p {
+  margin: 14px 0;
+  line-height: 1.7;
+}
+
+.student-eval-page .student-eval-submitted-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-eval-page .student-eval-submitted-status span {
+  display: inline-block;
+  min-width: 76px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #ffc900;
+  color: #ffffff;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-submitted-field {
+  margin-top: 32px;
+}
+
+.student-eval-page .student-eval-submitted-field h5 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-submitted-description {
+  min-height: 70px;
+  padding: 16px;
+  border-radius: 5px;
+  background: #d9d9d9;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.student-eval-page .student-eval-submitted-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-eval-page .student-eval-submitted-files a {
+  padding: 8px 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 12px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.student-eval-page .student-eval-submitted-files a:hover {
+  border-color: #3678c5;
+  color: #3678c5;
+}
+
+.student-eval-page .student-eval-back-btn {
+  min-width: 140px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #3678c5;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-revision-error {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 12px;
+}
