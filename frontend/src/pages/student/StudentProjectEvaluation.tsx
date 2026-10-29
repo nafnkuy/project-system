@@ -28,6 +28,8 @@ interface ExamRevisionSubmission {
   student_name: string;
   submitted_at: string;
   description: string;
+  review_comment?: string | null;
+  reviewed_at?: string | null;
   files: {
     name: string;
     path: string;
@@ -78,6 +80,29 @@ function StudentProjectEvaluation() {
   const revisionFileInputRef = useRef<HTMLInputElement>(null);
   const [revisionSubmission, setRevisionSubmission] =
     useState<ExamRevisionSubmission | null>(null);
+
+  const [revisionSubmissions, setRevisionSubmissions] = useState<
+    ExamRevisionSubmission[]
+  >([]);
+
+  const [selectedRevisionId, setSelectedRevisionId] = useState<number | null>(
+    null,
+  );
+
+  const displayedRevision =
+    revisionSubmissions.find((item) => item.id === selectedRevisionId) ??
+    revisionSubmission;
+  const revisionPassed =
+    result?.status === "published" &&
+    result.result_status === "ผ่านแบบมีเงื่อนไข" &&
+    revisionSubmission?.status === "ผ่าน";
+
+  const finalResultStatus =
+    result?.status === "published"
+      ? revisionPassed
+        ? "ผ่าน"
+        : result.result_status
+      : "";
 
   const [revisionLoading, setRevisionLoading] = useState(true);
   const [revisionLoadError, setRevisionLoadError] = useState("");
@@ -152,12 +177,15 @@ function StudentProjectEvaluation() {
       try {
         const res = await axios.get<{
           submission: ExamRevisionSubmission | null;
+          submissions: ExamRevisionSubmission[];
         }>(
           `http://localhost:5000/student/projects/${projectId}/exam-revision/${userId}`,
         );
 
         if (active) {
           setRevisionSubmission(res.data.submission);
+          setRevisionSubmissions(res.data.submissions ?? []);
+          setSelectedRevisionId(null);
         }
       } catch (err) {
         if (active) {
@@ -270,6 +298,13 @@ function StudentProjectEvaluation() {
       );
 
       setRevisionSubmission(res.data.submission);
+
+      setRevisionSubmissions((prev) => [
+        ...prev.filter((item) => item.id !== res.data.submission.id),
+        res.data.submission,
+      ]);
+
+      setSelectedRevisionId(null);
       setShowRevisionModal(false);
       setRevisionDescription("");
       setRevisionFiles([]);
@@ -453,7 +488,7 @@ function StudentProjectEvaluation() {
                   <div className="student-eval-result-header">
                     <strong>{result.project_title}</strong>
 
-                    {result.result_status === "ผ่าน" && (
+                    {finalResultStatus === "ผ่าน" && (
                       <span className="student-eval-grade">
                         เกรดที่คาดว่าจะได้รับ {result.grade}
                       </span>
@@ -470,14 +505,14 @@ function StudentProjectEvaluation() {
 
                       <span
                         className={`student-eval-status ${
-                          result.result_status === "ผ่าน"
+                          finalResultStatus === "ผ่าน"
                             ? "is-pass"
-                            : result.result_status === "ผ่านแบบมีเงื่อนไข"
+                            : finalResultStatus === "ผ่านแบบมีเงื่อนไข"
                               ? "is-revision"
                               : "is-fail"
                         }`}
                       >
-                        {result.result_status}
+                        {finalResultStatus}
                       </span>
                     </div>
 
@@ -594,48 +629,145 @@ function StudentProjectEvaluation() {
                       <p className="student-eval-revision-error">
                         {revisionLoadError}
                       </p>
-                    ) : revisionSubmission ? (
-                      <div className="student-eval-submitted-card">
-                        <h4>งานแก้ไขที่ส่ง</h4>
-                        <div className="student-eval-divider" />
+                    ) : displayedRevision ? (
+                      <>
+                        <div className="student-eval-submitted-card">
+                          {/* HEADER + SELECT ROUND */}
+                          <div className="student-eval-round-header">
+                            <h4>งานแก้ไข</h4>
 
-                        <p className="student-eval-submitted-status">
-                          สถานะงานแก้ไข :
-                          <span>{revisionSubmission.status}</span>
-                        </p>
+                            <select
+                              value={displayedRevision.id}
+                              onChange={(e) =>
+                                setSelectedRevisionId(Number(e.target.value))
+                              }
+                              className="student-eval-round-select"
+                            >
+                              {revisionSubmissions.map((item, index) => (
+                                <option key={item.id} value={item.id}>
+                                  ครั้งที่ {index + 1}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                        <p>ส่งโดย : {revisionSubmission.student_name}</p>
+                          <div className="student-eval-divider" />
 
-                        <p>
-                          ส่งเมื่อ :{" "}
-                          {formatThaiDateTime(revisionSubmission.submitted_at)}
-                        </p>
+                          <p className="student-eval-submitted-status">
+                            สถานะงานแก้ไข :{" "}
+                            <span
+                              className={
+                                displayedRevision.status === "ผ่าน"
+                                  ? "student-eval-revision-complete"
+                                  : ""
+                              }
+                            >
+                              {displayedRevision.status === "ผ่าน"
+                                ? "แก้ไขเรียบร้อยแล้ว"
+                                : displayedRevision.status}
+                            </span>
+                          </p>
 
-                        <div className="student-eval-submitted-field">
-                          <h5>รายละเอียดการแก้ไข</h5>
+                          <p>
+                            ส่งครั้งที่{" "}
+                            {revisionSubmissions.findIndex(
+                              (item) => item.id === displayedRevision.id,
+                            ) + 1}
+                          </p>
 
-                          <div className="student-eval-submitted-description">
-                            {revisionSubmission.description}
+                          <p>ส่งโดย : {displayedRevision.student_name}</p>
+
+                          <p>
+                            ส่งเมื่อ :{" "}
+                            {formatThaiDateTime(displayedRevision.submitted_at)}
+                          </p>
+
+                          <div className="student-eval-submitted-field">
+                            <h5>รายละเอียดการแก้ไข</h5>
+
+                            <div className="student-eval-submitted-description">
+                              {displayedRevision.description}
+                            </div>
+                          </div>
+
+                          <div className="student-eval-submitted-field">
+                            <h5>ไฟล์ที่ส่ง</h5>
+
+                            <div className="student-eval-submitted-files">
+                              {displayedRevision.files.map((file, index) => (
+                                <a
+                                  key={index}
+                                  href={`http://localhost:5000${file.path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  📄 {file.name}
+                                </a>
+                              ))}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="student-eval-submitted-field">
-                          <h5>ไฟล์ที่ส่ง</h5>
+                        {/* REVIEW RESULT FOR SELECTED ROUND */}
 
-                          <div className="student-eval-submitted-files">
-                            {revisionSubmission.files.map((file, index) => (
-                              <a
-                                key={index}
-                                href={`http://localhost:5000${file.path}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                📄 {file.name}
-                              </a>
-                            ))}
+                        {(displayedRevision.status === "ต้องแก้ไข" ||
+                          displayedRevision.status === "ผ่าน") && (
+                          <div className="student-eval-advisor-review">
+                            <h4>ผลการตรวจจากอาจารย์ที่ปรึกษา</h4>
+
+                            <div className="student-eval-divider" />
+
+                            <p>
+                              สถานะงานแก้ไข :{" "}
+                              <strong>{displayedRevision.status}</strong>
+                            </p>
+
+                            <p>
+                              ตรวจเมื่อ :{" "}
+                              {formatThaiDateTime(
+                                displayedRevision.reviewed_at ?? null,
+                              )}
+                            </p>
+
+                            <div className="student-eval-advisor-review-field">
+                              <h5>ข้อเสนอแนะจากอาจารย์ที่ปรึกษา</h5>
+
+                              <div className="student-eval-advisor-review-comment">
+                                {displayedRevision.review_comment?.trim() ||
+                                  "ไม่มีข้อเสนอแนะเพิ่มเติม"}
+                              </div>
+                            </div>
                           </div>
+                        )}
+
+                        {/* ACTIONS - ONLY LATEST ROUND CAN BE RESUBMITTED */}
+
+                        <div className="student-eval-revision-actions">
+                          {revisionSubmission?.status === "ต้องแก้ไข" &&
+                          displayedRevision.id === revisionSubmission.id ? (
+                            <button
+                              type="button"
+                              className="student-eval-resubmit-btn"
+                              onClick={() => {
+                                setRevisionDescription("");
+                                setRevisionFiles([]);
+                                setRevisionError("");
+                                setShowRevisionModal(true);
+                              }}
+                            >
+                              ส่งงานแก้ไขอีกครั้ง
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="student-eval-back-btn"
+                              onClick={goToOverview}
+                            >
+                              กลับ
+                            </button>
+                          )}
                         </div>
-                      </div>
+                      </>
                     ) : (
                       <div className="student-eval-revision-actions">
                         <button
@@ -647,18 +779,6 @@ function StudentProjectEvaluation() {
                           }}
                         >
                           ส่งงานแก้ไข
-                        </button>
-                      </div>
-                    )}
-
-                    {revisionSubmission && (
-                      <div className="student-eval-revision-actions">
-                        <button
-                          type="button"
-                          className="student-eval-back-btn"
-                          onClick={goToOverview}
-                        >
-                          กลับ
                         </button>
                       </div>
                     )}

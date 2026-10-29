@@ -778,3 +778,111 @@ label.student-eval-file-picker {
   font-size: 12px;
   margin-top: 12px;
 }
+
+/* ==========================================
+   ADVISOR REVIEW RESULT
+========================================== */
+
+.student-eval-page .student-eval-advisor-review {
+  margin-top: 18px;
+  padding: 22px 24px 30px;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+}
+
+.student-eval-page .student-eval-advisor-review h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-advisor-review p {
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.student-eval-page .student-eval-advisor-review-field {
+  margin-top: 30px;
+}
+
+.student-eval-page .student-eval-advisor-review-field h5 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-advisor-review-comment {
+  min-height: 85px;
+  padding: 15px 18px;
+  background: #d9d9d9;
+  border-radius: 5px;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* ปุ่มส่งงานแก้ไขอีกครั้ง */
+
+.student-eval-page .student-eval-resubmit-btn {
+  min-width: 165px;
+  padding: 12px 22px;
+  background: #ff8a05;
+  border: none;
+  border-radius: 7px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-resubmit-btn:hover {
+  background: #e87900;
+}
+/* ==========================================
+   REVISION ROUND SELECT
+========================================== */
+
+.student-eval-page .student-eval-round-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.student-eval-page .student-eval-round-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-eval-page .student-eval-round-select {
+  min-width: 110px;
+  padding: 8px 12px;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #222222;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.student-eval-page .student-eval-round-select:focus {
+  outline: none;
+  border-color: #3678c5;
+}
+/* สถานะงานแก้ไขที่อาจารย์ตรวจผ่านแล้ว */
+
+.student-eval-page
+  .student-eval-submitted-status
+  span.student-eval-revision-complete {
+  background: #20a86b;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 500;
+}

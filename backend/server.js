@@ -9928,6 +9928,20 @@ app.get(
             })),
         );
 
+      // ดึงผลประเมินที่บันทึกไว้ในฐานข้อมูล
+      const savedRows = await query(
+        `
+    SELECT *
+    FROM project_exam_results
+    WHERE project_id = ?
+      AND schedule_id = ?
+    LIMIT 1
+  `,
+        [projectId, project.schedule_id],
+      );
+
+      const savedResult = savedRows[0] || null;
+
       // 10. ส่งผลให้ฝั่งนิสิต
 
       return res.json({
@@ -9935,10 +9949,15 @@ app.get(
 
         project_title: project.title,
 
-        result_status: resultStatus,
-        grade: getGrade(totalScore),
-        total_score: totalScore,
-        evaluated_at: publishedAt,
+        result_status: savedResult?.initial_result_status ?? resultStatus,
+
+        final_result_status: savedResult?.final_result_status ?? null,
+
+        grade: savedResult?.estimated_grade ?? getGrade(totalScore),
+
+        total_score: savedResult ? Number(savedResult.total_score) : totalScore,
+
+        evaluated_at: savedResult?.published_at ?? publishedAt,
 
         committee: acceptedMembers.map((member) => member.teacher_name),
 
@@ -10627,34 +10646,44 @@ app.get(
            ers.description,
            ers.status,
            ers.submitted_at,
+           ers.review_comment,
+           ers.reviewed_at,
            ers.files_json,
            u.name AS student_name
          FROM exam_revision_submissions ers
          JOIN users u ON u.id = ers.student_id
          WHERE ers.project_id = ?
-         ORDER BY ers.id DESC
-         LIMIT 1`,
+         ORDER BY ers.id ASC`,
         [projectId],
       );
 
       if (rows.length === 0) {
-        return res.json({ submission: null });
+        return res.json({
+          submission: null,
+          submissions: [],
+        });
       }
 
-      const row = rows[0];
-
-      res.json({
-        submission: {
+      const submissions = rows.map((row) => {
+        return {
           id: row.id,
           description: row.description,
           status: row.status,
+          review_comment: row.review_comment,
+          reviewed_at: row.reviewed_at,
           student_name: row.student_name,
           submitted_at: row.submitted_at,
+
           files:
             typeof row.files_json === "string"
-              ? JSON.parse(row.files_json)
-              : row.files_json,
-        },
+              ? JSON.parse(row.files_json || "[]")
+              : row.files_json || [],
+        };
+      });
+
+      res.json({
+        submission: submissions[submissions.length - 1] || null,
+        submissions: submissions,
       });
     } catch (err) {
       console.error("Get exam revision error:", err);
