@@ -51,6 +51,24 @@ interface ExamProject {
   notes: string | null;
   announced_at: string | null;
 }
+interface PendingExamRequest {
+  request_id: number;
+  project_id: number;
+  student_id: number;
+  status: string;
+  requested_at: string;
+  project_title: string;
+  project_type: string;
+  academic_year: string;
+  student_username: string;
+  student_name: string;
+  student_names: string | null;
+}
+
+interface PendingExamRequestsResponse {
+  pending: PendingExamRequest[];
+  pending_count: number;
+}
 
 interface ExamListResponse {
   pending: ExamProject[];
@@ -195,6 +213,18 @@ function TeacherWork() {
 
   const [examLoading, setExamLoading] = useState(true);
   const [examError, setExamError] = useState("");
+
+  /* =========================================================
+   PENDING EXAM REQUESTS
+========================================================= */
+
+  const [examRequests, setExamRequests] = useState<PendingExamRequest[]>([]);
+
+  const [examRequestsLoading, setExamRequestsLoading] = useState(true);
+
+  const [examRequestsError, setExamRequestsError] = useState("");
+  const [selectedExamRequest, setSelectedExamRequest] =
+    useState<PendingExamRequest | null>(null);
 
   /* =========================================================
    EXAM ANNOUNCEMENT MODAL
@@ -421,6 +451,47 @@ function TeacherWork() {
   }, [userId]);
 
   /* =========================================================
+   LOAD PENDING EXAM REQUESTS
+========================================================= */
+
+  useEffect(() => {
+    if (activeTab !== "exam" || !userId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    setExamRequestsLoading(true);
+    setExamRequestsError("");
+
+    axios
+      .get<PendingExamRequestsResponse>(
+        `http://localhost:5000/teacher/exam-requests/${userId}`,
+      )
+      .then((res) => {
+        if (!cancelled) {
+          setExamRequests(res.data.pending || []);
+        }
+      })
+      .catch((err) => {
+        console.error("Load exam requests error:", err);
+
+        if (!cancelled) {
+          setExamRequestsError("ไม่สามารถโหลดคำขอสอบโครงงานได้");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setExamRequestsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, userId]);
+
+  /* =========================================================
    LOAD EXAM EVALUATIONS
 ========================================================= */
 
@@ -600,19 +671,53 @@ function TeacherWork() {
   ).length;
 
   /* =================================================
-   EXAM FILTER + SEARCH
+   COMBINED EXAM TABLE
 ================================================= */
 
-  const filteredExamProjects = (
-    examFilter === "รอประกาศ" ? examData.pending : examData.announced
-  ).filter((project) => {
+  const filteredExamRows = [
+    ...examRequests.map((request) => ({
+      rowType: "request" as const,
+      id: `request-${request.request_id}`,
+      projectId: request.project_id,
+      projectTitle: request.project_title,
+      studentNames:
+        request.student_names ||
+        `${request.student_username} ${request.student_name}`,
+      requestedAt: request.requested_at as string | null,
+      status: request.status,
+      examProject: null as ExamProject | null,
+    })),
+
+    ...examData.announced.map((project) => ({
+      rowType: "announced" as const,
+      id: `announced-${project.project_id}`,
+      projectId: project.project_id,
+      projectTitle: project.project_title,
+      studentNames: project.student_names || "-",
+      requestedAt: null as string | null,
+      status: "ประกาศแล้ว",
+      examProject: project,
+    })),
+  ].filter((row) => {
+    const matchesFilter =
+      examFilter === "รอประกาศ"
+        ? row.rowType === "request"
+        : row.rowType === "announced";
+
     const keyword = examSearchTerm.trim().toLowerCase();
 
-    const projectName = project.project_title.toLowerCase();
-    const studentNames = (project.student_names || "").toLowerCase();
+    const matchesSearch =
+      row.projectTitle.toLowerCase().includes(keyword) ||
+      row.studentNames.toLowerCase().includes(keyword);
 
-    return projectName.includes(keyword) || studentNames.includes(keyword);
+    return matchesFilter && matchesSearch;
   });
+
+  const examTableLoading =
+    examFilter === "รอประกาศ" ? examRequestsLoading : examLoading;
+
+  const examTableError =
+    examFilter === "รอประกาศ" ? examRequestsError : examError;
 
   const filteredEvaluations = (
     evaluationFilter === "รอประเมิน"
@@ -1154,6 +1259,55 @@ function TeacherWork() {
 
   return (
     <div className="teacher-work-page">
+      {selectedExamRequest &&
+        createPortal(
+          <div
+            className="tw-exam-request-overlay"
+            onClick={() => setSelectedExamRequest(null)}
+          >
+            <div
+              className="tw-exam-request-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>พิจารณาคำขอสอบโครงงาน</h3>
+              <hr />
+
+              <p>
+                <strong>ชื่อโครงงาน</strong>
+              </p>
+              <p>{selectedExamRequest.project_title}</p>
+
+              <p>
+                <strong>นิสิต</strong>
+              </p>
+              <p>
+                {selectedExamRequest.student_names ||
+                  selectedExamRequest.student_name}
+              </p>
+
+              <p>
+                <strong>วันที่ส่งคำขอ</strong>
+              </p>
+              <p>{formatThaiDate(selectedExamRequest.requested_at)}</p>
+
+              <p>
+                <strong>สถานะคำขอ</strong>
+              </p>
+              <p>{selectedExamRequest.status}</p>
+
+              <div className="tw-exam-request-modal-actions">
+                <button
+                  type="button"
+                  onClick={() => setSelectedExamRequest(null)}
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -1634,98 +1788,92 @@ function TeacherWork() {
                 <div className="tw-table-wrap">
                   <table className="tw-table tw-exam-table">
                     <thead>
-                      {examFilter === "รอประกาศ" ? (
-                        <tr>
-                          <th>โครงงาน</th>
-                          <th>นิสิต</th>
-                          <th>ปีการศึกษา</th>
-                          <th>การดำเนินการ</th>
-                        </tr>
-                      ) : (
-                        <tr>
-                          <th>โครงงาน</th>
-                          <th>วันที่สอบ</th>
-                          <th>เวลา</th>
-                          <th>สถานที่</th>
-                          <th>รายละเอียด</th>
-                        </tr>
-                      )}
+                      <tr>
+                        <th>โครงงาน</th>
+                        <th>นิสิต</th>
+                        <th>วันที่ส่งคำขอ</th>
+                        <th>สถานะ</th>
+                        <th>การดำเนินการ</th>
+                      </tr>
                     </thead>
 
                     <tbody>
-                      {examLoading ||
-                      examError ||
-                      filteredExamProjects.length === 0 ? (
+                      {examTableLoading ||
+                      examTableError ||
+                      filteredExamRows.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={examFilter === "รอประกาศ" ? 4 : 5}
-                            className="tw-empty-cell"
-                          >
-                            {examLoading
+                          <td colSpan={5} className="tw-empty-cell">
+                            {examTableLoading
                               ? "กำลังโหลดข้อมูล..."
-                              : examError ||
+                              : examTableError ||
                                 (examSearchTerm.trim()
                                   ? "ไม่พบโครงงานที่ค้นหา"
                                   : examFilter === "รอประกาศ"
-                                    ? "ไม่มีโครงงานรอประกาศ"
+                                    ? "ไม่มีคำขอสอบที่รอพิจารณา"
                                     : "ยังไม่มีการประกาศกำหนดการสอบ")}
                           </td>
                         </tr>
                       ) : (
-                        filteredExamProjects.map((project) => (
-                          <tr key={project.project_id}>
-                            <td>{project.project_title}</td>
+                        filteredExamRows.map((row) => (
+                          <tr key={row.id}>
+                            <td>{row.projectTitle}</td>
 
-                            {examFilter === "รอประกาศ" ? (
-                              <>
-                                <td>
-                                  <div className="tw-exam-students">
-                                    {(project.student_names || "-")
-                                      .split("|")
-                                      .map((name, index) => (
-                                        <span key={index}>{name.trim()}</span>
-                                      ))}
-                                  </div>
-                                </td>
+                            <td>
+                              <div className="tw-exam-students">
+                                {row.studentNames
+                                  .split("|")
+                                  .map((name, index) => (
+                                    <span key={index}>{name.trim()}</span>
+                                  ))}
+                              </div>
+                            </td>
 
-                                <td>
-                                  {project.academic_year?.split("/")[0] || "-"}
-                                </td>
+                            <td>{formatThaiDate(row.requestedAt)}</td>
 
-                                <td>
-                                  <button
-                                    type="button"
-                                    className="tw-exam-action-btn"
-                                    onClick={() => openExamModal(project)}
-                                  >
-                                    ประกาศกำหนดการ
-                                  </button>
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                <td>{formatThaiDate(project.exam_date)}</td>
+                            <td>
+                              <span
+                                className={
+                                  row.status === "ประกาศแล้ว"
+                                    ? "tw-exam-request-announced"
+                                    : "tw-exam-request-pending"
+                                }
+                              >
+                                {row.status}
+                              </span>
+                            </td>
 
-                                <td>
-                                  {project.start_time || "-"} -{" "}
-                                  {project.end_time || "-"}
-                                </td>
+                            <td>
+                              {row.rowType === "request" ? (
+                                <button
+                                  type="button"
+                                  className="tw-exam-action-btn"
+                                  onClick={() => {
+                                    const request = examRequests.find(
+                                      (item) =>
+                                        item.project_id === row.projectId,
+                                    );
 
-                                <td>{project.location || "-"}</td>
-
-                                <td>
-                                  <button
-                                    type="button"
-                                    className="tw-exam-action-btn"
-                                    onClick={() =>
-                                      setExamDetailProject(project)
+                                    if (request) {
+                                      setSelectedExamRequest(request);
                                     }
-                                  >
-                                    ดูรายละเอียด
-                                  </button>
-                                </td>
-                              </>
-                            )}
+                                  }}
+                                >
+                                  พิจารณาคำขอ
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="tw-exam-action-btn"
+                                  onClick={() => {
+                                    if (row.examProject) {
+                                      setExamDetailProject(row.examProject);
+                                    }
+                                  }}
+                                >
+                                  ดูรายละเอียด
+                                </button>
+                              )}
+                            </td>
                           </tr>
                         ))
                       )}

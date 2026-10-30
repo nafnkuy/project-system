@@ -1210,3 +1210,110 @@ strong.overdue {
   font-weight: 500;
   white-space: nowrap;
 }
+
+/* =========================================================
+   EXAM READINESS
+========================================================= */
+
+.student-project-detail-page .student-exam-readiness-card {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.student-project-detail-page .student-exam-readiness-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.student-project-detail-page .student-exam-readiness-status {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-project-detail-page .student-exam-readiness-status.ready {
+  background: #dcfce7;
+  color: #16834d;
+}
+
+.student-project-detail-page .student-exam-readiness-status.not-ready {
+  background: #fef3c7;
+  color: #a16207;
+}
+
+.student-project-detail-page .student-exam-readiness-reasons {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.student-project-detail-page .student-exam-readiness-reasons ul {
+  margin: 12px 0 0;
+  padding-left: 22px;
+}
+
+.student-project-detail-page .student-exam-readiness-reasons li {
+  margin-bottom: 8px;
+}
+
+.student-project-detail-page .student-exam-readiness-success {
+  margin-top: 16px;
+  color: #16834d;
+}
+
+.student-project-detail-page .student-exam-readiness-error {
+  color: #dc2626;
+}
+/* =========================================================
+   EXAM REQUEST BUTTON
+========================================================= */
+
+.student-project-detail-page .student-exam-request-actions {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.student-project-detail-page .student-exam-request-btn {
+  min-width: 200px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #22a36f;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-project-detail-page .student-exam-request-btn:hover:not(:disabled) {
+  background: #18895b;
+}
+
+.student-project-detail-page .student-exam-request-btn:disabled {
+  background: #d1d5db;
+  color: #777777;
+  cursor: not-allowed;
+}
+
+.student-project-detail-page .student-exam-request-success {
+  color: #16834d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-project-detail-page .student-exam-request-error {
+  color: #dc2626;
+  margin-top: 12px;
+}
+.student-project-detail-page .student-exam-readiness-status.pending {
+  background: #fef3c7;
+  color: #a16207;
+}

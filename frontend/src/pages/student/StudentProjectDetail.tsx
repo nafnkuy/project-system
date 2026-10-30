@@ -93,6 +93,16 @@ interface OverviewPhase {
 interface OverviewPlanResponse {
   phases: OverviewPhase[];
 }
+interface ExamReadiness {
+  project_id: number;
+  project_title: string;
+  total_phases: number;
+  total_tasks: number;
+  passed_tasks: number;
+  progress: number;
+  can_request_exam: boolean;
+  reasons: string[];
+}
 
 /* =========================================================
    COMPONENT
@@ -129,6 +139,24 @@ function StudentProjectDetail() {
 
   const [planLoading, setPlanLoading] = useState(true);
   const [planError, setPlanError] = useState("");
+
+  /* =========================================================
+   EXAM READINESS - STATES
+========================================================= */
+
+  const [examReadiness, setExamReadiness] = useState<ExamReadiness | null>(
+    null,
+  );
+
+  const [examReadinessLoading, setExamReadinessLoading] = useState(true);
+
+  const [examReadinessError, setExamReadinessError] = useState("");
+  const [examRequestSubmitting, setExamRequestSubmitting] = useState(false);
+  const [examRequestStatus, setExamRequestStatus] = useState<string | null>(
+    null,
+  );
+  const [examRequestLoading, setExamRequestLoading] = useState(true);
+  const [examRequestError, setExamRequestError] = useState("");
 
   /* =========================================================
    CALCULATE PROJECT PROGRESS
@@ -361,6 +389,142 @@ function StudentProjectDetail() {
       cancelled = true;
     };
   }, [projectId]);
+
+  /* =========================================================
+   LOAD EXAM READINESS
+========================================================= */
+
+  useEffect(() => {
+    if (!projectId || !userId) {
+      setExamReadinessLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchExamReadiness = async () => {
+      try {
+        setExamReadinessLoading(true);
+        setExamReadinessError("");
+
+        const res = await axios.get<ExamReadiness>(
+          `http://localhost:5000/student/projects/${projectId}/exam-readiness/${userId}`,
+        );
+
+        if (!cancelled) {
+          setExamReadiness(res.data);
+        }
+      } catch (error) {
+        console.error("Load exam readiness error:", error);
+
+        if (!cancelled) {
+          setExamReadinessError("ไม่สามารถตรวจสอบความพร้อมในการขอสอบได้");
+        }
+      } finally {
+        if (!cancelled) {
+          setExamReadinessLoading(false);
+        }
+      }
+    };
+
+    fetchExamReadiness();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, userId]);
+
+  /* =========================================================
+   LOAD EXAM REQUEST STATUS
+========================================================= */
+
+  useEffect(() => {
+    if (!projectId || !userId) {
+      setExamRequestLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchExamRequestStatus = async () => {
+      try {
+        setExamRequestLoading(true);
+
+        const res = await axios.get(
+          `http://localhost:5000/student/projects/${projectId}/exam-request/${userId}`,
+        );
+
+        if (!cancelled) {
+          setExamRequestStatus(res.data.request?.status ?? null);
+        }
+      } catch (error) {
+        console.error("Load exam request status error:", error);
+
+        if (!cancelled) {
+          setExamRequestError("ไม่สามารถโหลดสถานะคำขอสอบได้");
+        }
+      } finally {
+        if (!cancelled) {
+          setExamRequestLoading(false);
+        }
+      }
+    };
+
+    fetchExamRequestStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, userId]);
+
+  /* =========================================================
+   REQUEST PROJECT EXAM
+========================================================= */
+
+  const handleExamRequest = async () => {
+    if (
+      !projectId ||
+      !userId ||
+      !examReadiness?.can_request_exam ||
+      examRequestSubmitting
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "ยืนยันการส่งคำขอสอบโครงงานให้อาจารย์ที่ปรึกษาพิจารณาหรือไม่?",
+    );
+
+    if (!confirmed) return;
+
+    setExamRequestSubmitting(true);
+    setExamRequestError("");
+
+    try {
+      await axios.post(
+        `http://localhost:5000/student/projects/${projectId}/exam-request`,
+        {
+          student_id: Number(userId),
+        },
+      );
+
+      setExamRequestStatus("รอพิจารณา");
+
+      setExamReadiness((current) =>
+        current ? { ...current, can_request_exam: false } : current,
+      );
+    } catch (error) {
+      console.error("Request exam error:", error);
+
+      setExamRequestError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message || "ไม่สามารถส่งคำขอสอบโครงงานได้"
+          : "ไม่สามารถส่งคำขอสอบโครงงานได้",
+      );
+    } finally {
+      setExamRequestSubmitting(false);
+    }
+  };
 
   /* =========================================================
      LOGOUT
@@ -969,6 +1133,112 @@ function StudentProjectDetail() {
                 <p>ยังไม่มีงานที่รออาจารย์ตรวจ</p>
               </div>
             )}
+          </section>
+
+          {/* =================================================
+    EXAM READINESS
+================================================= */}
+
+          <section className="student-overview-section">
+            <h3>ความพร้อมในการขอสอบโครงงาน</h3>
+
+            <div className="student-exam-readiness-card">
+              {examReadinessLoading ? (
+                <p>กำลังตรวจสอบความพร้อม...</p>
+              ) : examReadinessError ? (
+                <p className="student-exam-readiness-error">
+                  {examReadinessError}
+                </p>
+              ) : examReadiness ? (
+                <>
+                  <div className="student-exam-readiness-heading">
+                    <span>สถานะความพร้อม</span>
+
+                    <span
+                      className={
+                        examRequestStatus === "รอพิจารณา"
+                          ? "student-exam-readiness-status pending"
+                          : examRequestStatus === "อนุมัติ"
+                            ? "student-exam-readiness-status ready"
+                            : examReadiness.can_request_exam
+                              ? "student-exam-readiness-status ready"
+                              : "student-exam-readiness-status not-ready"
+                      }
+                    >
+                      {examRequestStatus === "รอพิจารณา"
+                        ? "รอพิจารณา"
+                        : examRequestStatus === "อนุมัติ"
+                          ? "อนุมัติให้สอบแล้ว"
+                          : examReadiness.can_request_exam
+                            ? "พร้อมขอสอบ"
+                            : "ยังไม่พร้อมสอบ"}
+                    </span>
+                  </div>
+
+                  <p>จำนวน Phase : {examReadiness.total_phases}</p>
+                  <p>งานทั้งหมด : {examReadiness.total_tasks}</p>
+                  <p>งานที่ผ่านการตรวจ : {examReadiness.passed_tasks}</p>
+
+                  {examRequestStatus !== "รอพิจารณา" &&
+                    examRequestStatus !== "อนุมัติ" &&
+                    examReadiness.reasons.length > 0 && (
+                      <div className="student-exam-readiness-reasons">
+                        <strong>สิ่งที่ต้องดำเนินการ</strong>
+
+                        <ul>
+                          {examReadiness.reasons.map((reason, index) => (
+                            <li key={index}>{reason}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                  {examReadiness.can_request_exam && (
+                    <p className="student-exam-readiness-success">
+                      โครงงานผ่านเงื่อนไขเบื้องต้นในการขอสอบแล้ว
+                    </p>
+                  )}
+                  <div className="student-exam-request-actions">
+                    {examRequestLoading ? (
+                      <p>กำลังโหลดสถานะคำขอสอบ...</p>
+                    ) : examRequestStatus === "รอพิจารณา" ? (
+                      <p className="student-exam-request-success">
+                        ส่งคำขอสอบโครงงานเรียบร้อยแล้ว
+                        กรุณารออาจารย์ที่ปรึกษาพิจารณา
+                      </p>
+                    ) : examRequestStatus === "อนุมัติ" ? (
+                      <p className="student-exam-request-success">
+                        อาจารย์ที่ปรึกษาอนุมัติคำขอสอบแล้ว
+                        กรุณารอประกาศกำหนดการสอบ
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        className="student-exam-request-btn"
+                        onClick={handleExamRequest}
+                        disabled={
+                          !examReadiness.can_request_exam ||
+                          examRequestSubmitting ||
+                          !!examRequestError
+                        }
+                      >
+                        {examRequestSubmitting
+                          ? "กำลังส่งคำขอ..."
+                          : "ขอสอบโครงงาน"}
+                      </button>
+                    )}
+
+                    {examRequestError && (
+                      <p className="student-exam-request-error">
+                        {examRequestError}
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p>ยังไม่มีข้อมูลความพร้อมในการขอสอบ</p>
+              )}
+            </div>
           </section>
 
           {/* =================================================
