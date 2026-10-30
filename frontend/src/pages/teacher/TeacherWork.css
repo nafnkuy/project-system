@@ -903,9 +903,28 @@
   gap: 15px;
 }
 
-.teacher-work-page .tw-exam-time-row input {
-  min-width: 0;
+/* Dropdown เลือกเวลาสอบ */
+.teacher-work-page .tw-exam-time-row select {
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 43px;
+
+  padding: 10px 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+
+  background: #ffffff;
+  color: #222;
+
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.teacher-work-page .tw-exam-time-row select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .teacher-work-page .tw-exam-time-row span {
@@ -1542,14 +1561,12 @@
    CANCEL EXAM CONFIRMATION POPUP
 ========================================= */
 
-
 /* ฟอนต์ Pop-up ยกเลิกกำหนดการสอบ */
 .tw-exam-cancel-overlay,
 .tw-exam-cancel-overlay * {
   font-family: "Prompt", sans-serif;
   box-sizing: border-box;
 }
-
 
 .tw-exam-cancel-overlay {
   position: fixed;
@@ -1741,56 +1758,295 @@
   font-size: 12px;
   font-weight: 600;
 }
-/* EXAM REQUEST DETAIL MODAL */
 
+
+/* =========================================================
+   EXAM REQUEST MODAL
+   MATCH EXAM ANNOUNCEMENT MODAL
+========================================================= */
+
+/* เนื่องจาก Popup นี้ใช้ createPortal ไปที่ document.body */
+.tw-exam-request-overlay,
+.tw-exam-request-overlay * {
+  box-sizing: border-box;
+  font-family: "Prompt", sans-serif;
+}
+
+/* พื้นหลัง Popup */
 .tw-exam-request-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
+/* กล่อง Popup */
 .tw-exam-request-modal {
-  width: 100%;
-  max-width: 520px;
+  width: 470px;
+  max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 28px;
-  background: #fff;
-  border-radius: 10px;
+
+  padding: 25px 22px 35px;
+
+  background: #ffffff;
+  border: 1px solid #aaa;
+  border-radius: 9px;
+
+  color: #222;
+  font-size: 13px;
 }
 
-.tw-exam-request-modal h3 {
-  margin: 0 0 16px;
-  font-size: 18px;
+/* หัวข้อ Popup */
+.tw-exam-request-modal > h3 {
+  margin: 5px 0 20px;
+  text-align: center;
+
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.tw-exam-request-modal hr {
-  border: 0;
-  border-top: 1px solid #ddd;
-  margin-bottom: 20px;
+/* เส้นคั่น */
+.tw-exam-request-modal > hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 0 0 22px;
 }
 
-.tw-exam-request-modal p {
-  margin: 10px 0;
-  line-height: 1.6;
+/* หัวข้อข้อมูล เช่น ชื่อโครงงาน / นิสิต */
+.tw-exam-request-modal > p:nth-of-type(odd) {
+  margin: 0 0 8px;
+
+  font-size: 13px;
+  font-weight: 600;
 }
 
+/* ค่าของข้อมูล */
+.tw-exam-request-modal > p:nth-of-type(even) {
+  margin: 0 0 20px;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* ช่องแสดงชื่อโครงงาน */
+.tw-exam-request-modal > p:nth-of-type(2) {
+  padding: 10px 12px;
+
+  background: #d9d9d9;
+  border-radius: 5px;
+}
+
+/* ส่วนผลการพิจารณา */
+.tw-exam-decision-section {
+  margin-top: 0;
+}
+
+.tw-exam-decision-section h4 {
+  margin: 0 0 15px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ตัวเลือกอนุมัติ / ส่งกลับแก้ไข / ปฏิเสธ */
+.tw-exam-decision-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  margin-bottom: 22px;
+}
+
+.tw-exam-decision-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.tw-exam-decision-option input {
+  margin: 0;
+  accent-color: #2f5d7c;
+  cursor: pointer;
+}
+
+/* หัวข้อความคิดเห็น */
+.tw-exam-decision-label {
+  display: block;
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tw-exam-decision-required {
+  color: #ff0000;
+}
+
+/* ช่องความคิดเห็น */
+.tw-exam-decision-textarea {
+  display: block;
+  width: 100%;
+  min-height: 85px;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+
+  color: #222;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.tw-exam-decision-textarea:focus {
+  outline: none;
+  border-color: #3678c5;
+}
+
+/* ข้อความแจ้งข้อผิดพลาด */
+.tw-exam-decision-error {
+  margin: 10px 0 0;
+  color: #d62828;
+  font-size: 12px;
+}
+
+/* ปุ่มด้านล่าง */
 .tw-exam-request-modal-actions {
   display: flex;
   justify-content: center;
-  margin-top: 28px;
+  gap: 15px;
+  margin-top: 30px;
 }
 
-.tw-exam-request-modal-actions button {
-  padding: 10px 35px;
+.tw-exam-request-modal-actions .tw-exam-decision-cancel,
+.tw-exam-request-modal-actions .tw-exam-decision-save {
+  min-width: 140px;
+  padding: 11px 15px;
+
   border: none;
-  border-radius: 6px;
-  background: #3478c0;
-  color: white;
+  border-radius: 7px;
+
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
+}
+
+/* ปุ่มยกเลิก */
+.tw-exam-request-modal-actions .tw-exam-decision-cancel {
+  background: #ff0000;
+}
+
+/* ปุ่มบันทึก */
+.tw-exam-request-modal-actions .tw-exam-decision-save {
+  background: #20a86b;
+}
+
+.tw-exam-request-modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* หน้าจอขนาดเล็ก */
+@media (max-width: 520px) {
+  .tw-exam-request-modal-actions {
+    flex-direction: column;
+  }
+
+  .tw-exam-request-modal-actions .tw-exam-decision-cancel,
+  .tw-exam-request-modal-actions .tw-exam-decision-save {
+    width: 100%;
+  }
+}
+
+.teacher-work-page .tw-exam-request-approved {
+  display: inline-block;
+  padding: 7px 15px;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #16834d;
+  font-size: 12px;
+  font-weight: 600;
+}
+/* ช่องเลือกเวลา */
+
+.tw-simple-time {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.tw-simple-time > button {
+  width: 100%;
+  height: 43px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tw-simple-time > button:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* รายการเวลา */
+
+.tw-simple-time-list {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  width: 100%;
+
+  max-height: 320px;
+  overflow-y: auto;
+
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 100;
+}
+
+.tw-simple-time-list button {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 8px 12px;
+
+  background: white;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tw-simple-time-list button:hover {
+  background: #eaf2ff;
+}
+.tw-simple-time > button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tw-simple-time > button svg {
+  font-size: 11px;
+  color: #777;
 }

@@ -7840,6 +7840,7 @@ app.get(
 app.post("/student/projects/:projectId/exam-request", (req, res) => {
   const projectId = Number(req.params.projectId);
   const studentId = Number(req.body.student_id);
+  const revisionNote = String(req.body.revision_note || "").trim();
 
   if (
     !Number.isInteger(projectId) ||
@@ -7851,15 +7852,22 @@ app.post("/student/projects/:projectId/exam-request", (req, res) => {
       message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
     });
   }
+  if (revisionNote.length > 2000) {
+  return res.status(400).json({
+    message: "รายละเอียดการแก้ไขต้องไม่เกิน 2000 ตัวอักษร",
+  });
+}
 
   const sql = `
       INSERT INTO project_exam_requests (
         project_id,
-        student_id
+        student_id,
+        revision_note
       )
 
       SELECT
         p.id,
+        ?,
         ?
 
       FROM projects p
@@ -7916,57 +7924,82 @@ app.post("/student/projects/:projectId/exam-request", (req, res) => {
               'อนุมัติ'
             )
         )
+        -- ตรวจสอบการขอสอบรอบใหม่
+        AND (
+          -- ยังไม่เคยขอสอบมาก่อน
+          NOT EXISTS (
+            SELECT 1
+            FROM project_exam_requests old_request
+            WHERE old_request.project_id = p.id
+          )
 
+          OR
+
+          -- เคยถูกส่งกลับแก้ไข และมีรายละเอียดการแก้ไข
+          (
+            ? <> ''
+
+            AND (
+              SELECT last_request.status
+              FROM project_exam_requests last_request
+              WHERE last_request.project_id = p.id
+              ORDER BY last_request.id DESC
+              LIMIT 1
+            ) = 'ส่งกลับแก้ไข'
+          )
+        )
+          
       LIMIT 1
     `;
 
-  db.query(sql, [studentId, projectId, studentId], (err, result) => {
-    if (err) {
-      console.error("Exam request error:", err);
+  db.query(
+    sql,
+    [studentId, revisionNote, projectId, studentId, revisionNote],
+    (err, result) => {
+      if (err) {
+        console.error("Exam request error:", err);
 
-      return res.status(500).json({
-        message: "ไม่สามารถส่งคำขอสอบได้",
+        return res.status(500).json({
+          message: "ไม่สามารถส่งคำขอสอบได้",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(403).json({
+          message: "โครงงานยังไม่พร้อมขอสอบ หรือมีคำขอสอบอยู่แล้ว",
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        request_id: result.insertId,
+        status: "รอพิจารณา",
+        message: "ส่งคำขอสอบโครงงานเรียบร้อยแล้ว",
       });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(403).json({
-        message: "โครงงานยังไม่พร้อมขอสอบ หรือมีคำขอสอบอยู่แล้ว",
-      });
-    }
-
-    return res.status(201).json({
-      success: true,
-      request_id: result.insertId,
-      status: "รอพิจารณา",
-      message: "ส่งคำขอสอบโครงงานเรียบร้อยแล้ว",
-    });
-  });
+    },
+  );
 });
-
 
 /* =========================================================
    STUDENT - GET PROJECT EXAM REQUEST STATUS
 ========================================================= */
 
-app.get(
-  "/student/projects/:projectId/exam-request/:studentId",
-  (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const studentId = Number(req.params.studentId);
+app.get("/student/projects/:projectId/exam-request/:studentId", (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const studentId = Number(req.params.studentId);
 
-    if (
-      !Number.isInteger(projectId) ||
-      projectId <= 0 ||
-      !Number.isInteger(studentId) ||
-      studentId <= 0
-    ) {
-      return res.status(400).json({
-        message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
-      });
-    }
+  if (
+    !Number.isInteger(projectId) ||
+    projectId <= 0 ||
+    !Number.isInteger(studentId) ||
+    studentId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลโครงงานหรือนิสิตไม่ถูกต้อง",
+    });
+  }
 
-    const sql = `
+  const sql = `
       SELECT
         er.id,
         er.project_id,
@@ -7991,22 +8024,20 @@ app.get(
       LIMIT 1
     `;
 
-    db.query(sql, [projectId, studentId], (err, rows) => {
-      if (err) {
-        console.error("Get exam request status error:", err);
+  db.query(sql, [projectId, studentId], (err, rows) => {
+    if (err) {
+      console.error("Get exam request status error:", err);
 
-        return res.status(500).json({
-          message: "ไม่สามารถโหลดสถานะคำขอสอบได้",
-        });
-      }
-
-      return res.json({
-        request: rows[0] || null,
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดสถานะคำขอสอบได้",
       });
-    });
-  }
-);
+    }
 
+    return res.json({
+      request: rows[0] || null,
+    });
+  });
+});
 
 /* =========================================================
    TEACHER - GET PENDING EXAM REQUESTS
@@ -8027,6 +8058,7 @@ app.get("/teacher/exam-requests/:advisorId", (req, res) => {
       er.project_id,
       er.student_id,
       er.status,
+      er.revision_note,
       er.requested_at,
 
       p.title AS project_title,
@@ -8066,7 +8098,7 @@ app.get("/teacher/exam-requests/:advisorId", (req, res) => {
       ON members.project_id = p.id
 
     WHERE p.advisor_id = ?
-      AND er.status = 'รอพิจารณา'
+      AND er.status IN ('รอพิจารณา', 'อนุมัติ')
 
     ORDER BY er.requested_at DESC, er.id DESC
   `;
@@ -8082,11 +8114,123 @@ app.get("/teacher/exam-requests/:advisorId", (req, res) => {
 
     res.json({
       pending: rows,
-      pending_count: rows.length,
+      pending_count: rows.filter((item) => item.status === "รอพิจารณา").length,
     });
   });
 });
 
+/* =========================================================
+   TEACHER - REVIEW EXAM REQUEST
+========================================================= */
+
+app.put("/teacher/exam-requests/:requestId/review", (req, res) => {
+  const requestId = Number(req.params.requestId);
+  const advisorId = Number(req.body.advisor_id);
+  const status = req.body.status;
+  const comment = String(req.body.advisor_comment || "").trim();
+
+  const allowedStatuses = ["อนุมัติ", "ส่งกลับแก้ไข", "ปฏิเสธ"];
+
+  // ตรวจข้อมูลเบื้องต้น
+  if (
+    !Number.isInteger(requestId) ||
+    requestId <= 0 ||
+    !Number.isInteger(advisorId) ||
+    advisorId <= 0 ||
+    !allowedStatuses.includes(status)
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลการพิจารณาไม่ถูกต้อง",
+    });
+  }
+
+  // หากไม่อนุมัติ ต้องระบุเหตุผล
+  if (status !== "อนุมัติ" && !comment) {
+    return res.status(400).json({
+      message: "กรุณาระบุเหตุผลในการพิจารณา",
+    });
+  }
+
+  const sql = `
+    UPDATE project_exam_requests er
+
+    INNER JOIN projects p
+      ON p.id = er.project_id
+
+    SET
+      er.status = ?,
+      er.advisor_comment = ?,
+      er.reviewed_by = ?,
+      er.reviewed_at = NOW()
+
+    WHERE er.id = ?
+      AND p.advisor_id = ?
+      AND er.status = 'รอพิจารณา'
+
+      -- ห้ามพิจารณาคำขอที่มีกำหนดการสอบแล้ว
+      AND NOT EXISTS (
+        SELECT 1
+        FROM project_exam_schedules s
+        WHERE s.project_id = er.project_id
+      )
+
+      -- หากอนุมัติ ต้องตรวจความพร้อมอีกครั้ง
+      AND (
+        ? <> 'อนุมัติ'
+        OR (
+          EXISTS (
+            SELECT 1
+            FROM project_phases ph
+            WHERE ph.project_id = er.project_id
+          )
+
+          AND EXISTS (
+            SELECT 1
+            FROM project_tasks t
+            WHERE t.project_id = er.project_id
+          )
+
+          AND NOT EXISTS (
+            SELECT 1
+            FROM project_tasks t
+            WHERE t.project_id = er.project_id
+              AND (
+                COALESCE(t.status, '') <> 'เสร็จสิ้น'
+                OR COALESCE(t.review_status, '') <> 'ผ่าน'
+              )
+          )
+        )
+      )
+  `;
+
+  db.query(
+    sql,
+    [status, comment || null, advisorId, requestId, advisorId, status],
+    (err, result) => {
+      if (err) {
+        console.error("Review exam request error:", err);
+
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกผลการพิจารณาได้",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(409).json({
+          message:
+            "ไม่สามารถพิจารณาคำขอได้ กรุณาตรวจสอบสถานะคำขอและความพร้อมของโครงงาน",
+        });
+      }
+
+      return res.json({
+        success: true,
+        request_id: requestId,
+        status: status,
+        message: "บันทึกผลการพิจารณาเรียบร้อยแล้ว",
+      });
+    },
+  );
+});
 
 /* =========================================================
    TEACHER - EXAM SCHEDULE LIST

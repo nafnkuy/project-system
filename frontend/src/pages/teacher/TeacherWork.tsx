@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { createPortal } from "react-dom";
 import { FaSearch } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 import TeacherNotificationBell from "./TeacherNotificationBell";
@@ -158,6 +159,14 @@ interface ExamRevisionResponse {
 }
 type ReviewFilter = "รอตรวจ" | "ตรวจแล้ว" | "งานแก้ไขหลังสอบ";
 
+// รายการเวลาสอบ ทุก 30 นาที ตั้งแต่ 07:00 - 23:30
+const examTimeOptions = Array.from({ length: 34 }, (_, index) => {
+  const hour = 7 + Math.floor(index / 2);
+  const minute = index % 2 === 0 ? "00" : "30";
+
+  return `${String(hour).padStart(2, "0")}:${minute}`;
+});
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -225,6 +234,13 @@ function TeacherWork() {
   const [examRequestsError, setExamRequestsError] = useState("");
   const [selectedExamRequest, setSelectedExamRequest] =
     useState<PendingExamRequest | null>(null);
+  const [examDecision, setExamDecision] = useState<
+    "อนุมัติ" | "ส่งกลับแก้ไข" | "ปฏิเสธ"
+  >("อนุมัติ");
+
+  const [examDecisionComment, setExamDecisionComment] = useState("");
+  const [examDecisionError, setExamDecisionError] = useState("");
+  const [examDecisionSubmitting, setExamDecisionSubmitting] = useState(false);
 
   /* =========================================================
    EXAM ANNOUNCEMENT MODAL
@@ -241,6 +257,9 @@ function TeacherWork() {
     committee: "",
     notes: "",
   });
+
+  const [showStartTimes, setShowStartTimes] = useState(false);
+  const [showEndTimes, setShowEndTimes] = useState(false);
 
   const [examFormError, setExamFormError] = useState("");
 
@@ -874,6 +893,116 @@ function TeacherWork() {
   };
 
   /* =========================================================
+   REVIEW EXAM REQUEST
+========================================================= */
+
+  const handleExamRequestDecision = async () => {
+    if (!selectedExamRequest || !userId || examDecisionSubmitting) {
+      return;
+    }
+
+    if (examDecision !== "อนุมัติ" && !examDecisionComment.trim()) {
+      setExamDecisionError("กรุณาระบุเหตุผลในการพิจารณา");
+      return;
+    }
+
+    setExamDecisionSubmitting(true);
+    setExamDecisionError("");
+
+    try {
+      await axios.put(
+        `http://localhost:5000/teacher/exam-requests/${selectedExamRequest.request_id}/review`,
+        {
+          advisor_id: Number(userId),
+          status: examDecision,
+          advisor_comment: examDecisionComment.trim(),
+        },
+      );
+
+      // อัปเดตรายการบนหน้าจอทันที
+      if (examDecision === "อนุมัติ") {
+        setExamRequests((current) =>
+          current.map((item) =>
+            item.request_id === selectedExamRequest.request_id
+              ? { ...item, status: "อนุมัติ" }
+              : item,
+          ),
+        );
+      } else {
+        setExamRequests((current) =>
+          current.filter(
+            (item) => item.request_id !== selectedExamRequest.request_id,
+          ),
+        );
+      }
+
+      // ปิดหน้าต่างหลังบันทึกสำเร็จ
+      setSelectedExamRequest(null);
+      setExamDecision("อนุมัติ");
+      setExamDecisionComment("");
+
+      // ถ้าอนุมัติแล้ว ให้เปิด Popup ประกาศกำหนดการสอบทันที
+      if (examDecision === "อนุมัติ") {
+        const projectId = selectedExamRequest.project_id;
+
+        let project = examData.pending.find(
+          (item) => item.project_id === projectId,
+        );
+
+        // กรณียังไม่มีข้อมูลโครงงานใน State ให้โหลดจาก Backend
+        if (!project) {
+          try {
+            const response = await axios.get<ExamListResponse>(
+              `http://localhost:5000/teacher/exams/${userId}`,
+            );
+
+            setExamData(response.data);
+
+            project = response.data.pending.find(
+              (item) => item.project_id === projectId,
+            );
+          } catch (error) {
+            console.error("Load exam project error:", error);
+          }
+        }
+
+        if (project) {
+          openExamModal(project);
+        } else {
+          window.alert(
+            "อนุมัติคำขอสำเร็จแล้ว แต่ไม่พบข้อมูลสำหรับกำหนดการสอบ กรุณารีเฟรชหน้า",
+          );
+        }
+      }
+
+      // โหลดข้อมูลล่าสุดจากฐานข้อมูล
+      try {
+        const response = await axios.get<PendingExamRequestsResponse>(
+          `http://localhost:5000/teacher/exam-requests/${userId}`,
+        );
+
+        setExamRequests(response.data.pending || []);
+        setExamRequestsError("");
+      } catch (reloadError) {
+        console.error("Reload exam requests error:", reloadError);
+        setExamRequestsError(
+          "บันทึกสำเร็จแล้ว แต่โหลดรายการใหม่ไม่สำเร็จ กรุณารีเฟรชหน้า",
+        );
+      }
+    } catch (error) {
+      console.error("Review exam request error:", error);
+
+      setExamDecisionError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message || "ไม่สามารถบันทึกผลการพิจารณาได้"
+          : "ไม่สามารถบันทึกผลการพิจารณาได้",
+      );
+    } finally {
+      setExamDecisionSubmitting(false);
+    }
+  };
+
+  /* =========================================================
    CONFIRM EXAM ANNOUNCEMENT
 ========================================================= */
 
@@ -1295,12 +1424,70 @@ function TeacherWork() {
               </p>
               <p>{selectedExamRequest.status}</p>
 
+              <hr />
+
+              <div className="tw-exam-decision-section">
+                <h4>ผลการพิจารณา</h4>
+
+                <div className="tw-exam-decision-options">
+                  {(["อนุมัติ", "ส่งกลับแก้ไข", "ปฏิเสธ"] as const).map(
+                    (status) => (
+                      <label key={status} className="tw-exam-decision-option">
+                        <input
+                          type="radio"
+                          name="examDecision"
+                          value={status}
+                          checked={examDecision === status}
+                          onChange={() => {
+                            setExamDecision(status);
+                            setExamDecisionError("");
+                          }}
+                        />
+                        {status === "อนุมัติ" ? "อนุมัติให้สอบ" : status}
+                      </label>
+                    ),
+                  )}
+                </div>
+
+                <label className="tw-exam-decision-label">
+                  ความคิดเห็นของอาจารย์
+                  {examDecision !== "อนุมัติ" && (
+                    <span className="tw-exam-decision-required"> *</span>
+                  )}
+                </label>
+
+                <textarea
+                  className="tw-exam-decision-textarea"
+                  placeholder="ระบุความคิดเห็นหรือเหตุผลในการพิจารณา..."
+                  value={examDecisionComment}
+                  onChange={(e) => setExamDecisionComment(e.target.value)}
+                  rows={4}
+                />
+
+                {examDecisionError && (
+                  <p className="tw-exam-decision-error">{examDecisionError}</p>
+                )}
+              </div>
+
               <div className="tw-exam-request-modal-actions">
                 <button
                   type="button"
+                  className="tw-exam-decision-cancel"
+                  disabled={examDecisionSubmitting}
                   onClick={() => setSelectedExamRequest(null)}
                 >
-                  ปิด
+                  ยกเลิก
+                </button>
+
+                <button
+                  type="button"
+                  className="tw-exam-decision-save"
+                  disabled={examDecisionSubmitting}
+                  onClick={handleExamRequestDecision}
+                >
+                  {examDecisionSubmitting
+                    ? "กำลังบันทึก..."
+                    : "บันทึกผลการพิจารณา"}
                 </button>
               </div>
             </div>
@@ -1414,7 +1601,18 @@ function TeacherWork() {
               <span className="tw-card-title">รอประกาศกำหนดการสอบ</span>
 
               <strong className="tw-card-number tw-orange">
-                {examLoading ? "..." : examError ? "-" : examData.pending_count}
+                {examRequestsLoading
+                  ? "..."
+                  : examRequestsError
+                    ? "-"
+                    : examRequests.filter(
+                        (request) =>
+                          request.status === "อนุมัติ" &&
+                          !examData.announced.some(
+                            (project) =>
+                              project.project_id === request.project_id,
+                          ),
+                      ).length}
               </strong>
             </div>
 
@@ -1835,7 +2033,9 @@ function TeacherWork() {
                                 className={
                                   row.status === "ประกาศแล้ว"
                                     ? "tw-exam-request-announced"
-                                    : "tw-exam-request-pending"
+                                    : row.status === "อนุมัติ"
+                                      ? "tw-exam-request-approved"
+                                      : "tw-exam-request-pending"
                                 }
                               >
                                 {row.status}
@@ -1844,22 +2044,44 @@ function TeacherWork() {
 
                             <td>
                               {row.rowType === "request" ? (
-                                <button
-                                  type="button"
-                                  className="tw-exam-action-btn"
-                                  onClick={() => {
-                                    const request = examRequests.find(
-                                      (item) =>
-                                        item.project_id === row.projectId,
-                                    );
+                                row.status === "อนุมัติ" ? (
+                                  <button
+                                    type="button"
+                                    className="tw-exam-action-btn"
+                                    onClick={() => {
+                                      const project = examData.pending.find(
+                                        (item) =>
+                                          item.project_id === row.projectId,
+                                      );
 
-                                    if (request) {
-                                      setSelectedExamRequest(request);
-                                    }
-                                  }}
-                                >
-                                  พิจารณาคำขอ
-                                </button>
+                                      if (project) {
+                                        openExamModal(project);
+                                      }
+                                    }}
+                                  >
+                                    ประกาศกำหนดการ
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="tw-exam-action-btn"
+                                    onClick={() => {
+                                      const request = examRequests.find(
+                                        (item) =>
+                                          item.project_id === row.projectId,
+                                      );
+
+                                      if (request) {
+                                        setExamDecision("อนุมัติ");
+                                        setExamDecisionComment("");
+                                        setExamDecisionError("");
+                                        setSelectedExamRequest(request);
+                                      }
+                                    }}
+                                  >
+                                    พิจารณาคำขอ
+                                  </button>
+                                )
                               ) : (
                                 <button
                                   type="button"
@@ -2573,31 +2795,85 @@ function TeacherWork() {
                       </label>
 
                       <div className="tw-exam-time-row">
-                        <input
-                          type="time"
-                          required
-                          value={examForm.start_time}
-                          onChange={(e) =>
-                            setExamForm({
-                              ...examForm,
-                              start_time: e.target.value,
-                            })
-                          }
-                        />
+                        {/* เวลาเริ่มสอบ */}
+                        <div className="tw-simple-time">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowStartTimes(!showStartTimes);
+                              setShowEndTimes(false);
+                            }}
+                          >
+                            <span>
+                              {examForm.start_time || "เลือกเวลาเริ่ม"}
+                            </span>
+                            <FaChevronDown />
+                          </button>
+
+                          {showStartTimes && (
+                            <div className="tw-simple-time-list">
+                              {examTimeOptions.map((time) => (
+                                <button
+                                  type="button"
+                                  key={time}
+                                  onClick={() => {
+                                    setExamForm({
+                                      ...examForm,
+                                      start_time: time,
+                                      end_time: "",
+                                    });
+
+                                    setShowStartTimes(false);
+                                  }}
+                                >
+                                  {time} น.
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
 
                         <span>ถึง</span>
 
-                        <input
-                          type="time"
-                          required
-                          value={examForm.end_time}
-                          onChange={(e) =>
-                            setExamForm({
-                              ...examForm,
-                              end_time: e.target.value,
-                            })
-                          }
-                        />
+                        {/* เวลาสิ้นสุด */}
+                        <div className="tw-simple-time">
+                          <button
+                            type="button"
+                            disabled={!examForm.start_time}
+                            onClick={() => {
+                              setShowEndTimes(!showEndTimes);
+                              setShowStartTimes(false);
+                            }}
+                          >
+                            <span>
+                              {examForm.end_time || "เลือกเวลาสิ้นสุด"}
+                            </span>
+                            <FaChevronDown />
+                          </button>
+
+                          {showEndTimes && (
+                            <div className="tw-simple-time-list">
+                              {examTimeOptions
+                                .filter((time) => time > examForm.start_time)
+                                .map((time) => (
+                                  <button
+                                    type="button"
+                                    key={time}
+                                    onClick={() => {
+                                      setExamForm({
+                                        ...examForm,
+                                        end_time: time,
+                                      });
+
+                                      setShowEndTimes(false);
+                                    }}
+                                  >
+                                    {time} น.
+                                  </button>
+                                ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 

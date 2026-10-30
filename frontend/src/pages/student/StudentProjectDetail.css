@@ -1317,3 +1317,180 @@ strong.overdue {
   background: #fef3c7;
   color: #a16207;
 }
+/* ส่งคำขอสอบอีกครั้ง */
+
+.student-exam-resubmit {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.student-exam-resubmit-form {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 20px 24px;
+
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  text-align: left;
+}
+
+.student-exam-resubmit-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-exam-resubmit-hint {
+  margin: 0 0 15px;
+  font-size: 12px;
+  color: #777;
+  line-height: 1.6;
+}
+
+.student-exam-resubmit-form textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px;
+
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.student-exam-resubmit-form textarea:focus {
+  outline: none;
+  border-color: #3678c5;
+}
+
+.student-exam-resubmit-form button {
+  display: block;
+  margin: 20px auto 0;
+}
+/* =========================================
+   ปรับความพร้อมในการขอสอบ
+   ให้เหมือนส่วนข้อมูลโครงงาน
+========================================= */
+
+/* กล่องหลัก */
+.student-project-detail-page .student-exam-readiness-card {
+  padding: 25px 24px;
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 8px;
+}
+
+/* หัวข้อสถานะความพร้อม */
+.student-project-detail-page .student-exam-readiness-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #cccccc;
+}
+
+.student-project-detail-page .student-exam-readiness-heading > span:first-child {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* จำนวน Phase และจำนวนงาน */
+.student-project-detail-page .student-exam-readiness-card > p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* ความคิดเห็นอาจารย์ และสิ่งที่ต้องดำเนินการ */
+.student-project-detail-page .student-exam-readiness-reasons {
+  margin-top: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.student-project-detail-page .student-exam-readiness-reasons strong {
+  display: block;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #cccccc;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-project-detail-page .student-exam-readiness-reasons p,
+.student-project-detail-page .student-exam-readiness-reasons li {
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ส่วนส่งคำขอสอบอีกครั้ง */
+.student-project-detail-page .student-exam-request-actions {
+  margin-top: 28px;
+}
+
+.student-project-detail-page .student-exam-resubmit {
+  width: 100%;
+  text-align: left;
+}
+
+/* เอากล่องเทาซ้อนออก */
+.student-project-detail-page .student-exam-resubmit-form {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* หัวข้อรายละเอียดสิ่งที่แก้ไข */
+.student-project-detail-page .student-exam-resubmit-form label {
+  display: block;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #cccccc;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* คำอธิบาย */
+.student-project-detail-page .student-exam-resubmit-hint {
+  margin: 0 0 15px;
+  font-size: 12px;
+  color: #666666;
+  line-height: 1.7;
+}
+
+/* ช่องกรอกรายละเอียด */
+.student-project-detail-page .student-exam-resubmit-form textarea {
+  display: block;
+  width: 100%;
+  min-height: 110px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+/* ปุ่มส่งคำขอสอบ */
+.student-project-detail-page .student-exam-resubmit-form button {
+  display: block;
+  margin: 24px auto 0;
+}

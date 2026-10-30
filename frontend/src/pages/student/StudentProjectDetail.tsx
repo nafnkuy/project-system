@@ -157,6 +157,8 @@ function StudentProjectDetail() {
   );
   const [examRequestLoading, setExamRequestLoading] = useState(true);
   const [examRequestError, setExamRequestError] = useState("");
+  const [revisionNote, setRevisionNote] = useState("");
+  const [examRequestComment, setExamRequestComment] = useState("");
 
   /* =========================================================
    CALCULATE PROJECT PROGRESS
@@ -456,6 +458,8 @@ function StudentProjectDetail() {
 
         if (!cancelled) {
           setExamRequestStatus(res.data.request?.status ?? null);
+
+          setExamRequestComment(res.data.request?.advisor_comment || "");
         }
       } catch (error) {
         console.error("Load exam request status error:", error);
@@ -490,6 +494,10 @@ function StudentProjectDetail() {
     ) {
       return;
     }
+    if (examRequestStatus === "ส่งกลับแก้ไข" && revisionNote.trim() === "") {
+      setExamRequestError("กรุณาระบุรายละเอียดสิ่งที่แก้ไขแล้ว");
+      return;
+    }
 
     const confirmed = window.confirm(
       "ยืนยันการส่งคำขอสอบโครงงานให้อาจารย์ที่ปรึกษาพิจารณาหรือไม่?",
@@ -505,10 +513,12 @@ function StudentProjectDetail() {
         `http://localhost:5000/student/projects/${projectId}/exam-request`,
         {
           student_id: Number(userId),
+          revision_note: revisionNote.trim(),
         },
       );
 
       setExamRequestStatus("รอพิจารณา");
+      setRevisionNote("");
 
       setExamReadiness((current) =>
         current ? { ...current, can_request_exam: false } : current,
@@ -1160,24 +1170,37 @@ function StudentProjectDetail() {
                           ? "student-exam-readiness-status pending"
                           : examRequestStatus === "อนุมัติ"
                             ? "student-exam-readiness-status ready"
-                            : examReadiness.can_request_exam
-                              ? "student-exam-readiness-status ready"
-                              : "student-exam-readiness-status not-ready"
+                            : examRequestStatus === "ส่งกลับแก้ไข"
+                              ? "student-exam-readiness-status pending"
+                              : examReadiness.can_request_exam
+                                ? "student-exam-readiness-status ready"
+                                : "student-exam-readiness-status not-ready"
                       }
                     >
                       {examRequestStatus === "รอพิจารณา"
                         ? "รอพิจารณา"
                         : examRequestStatus === "อนุมัติ"
                           ? "อนุมัติให้สอบแล้ว"
-                          : examReadiness.can_request_exam
-                            ? "พร้อมขอสอบ"
-                            : "ยังไม่พร้อมสอบ"}
+                          : examRequestStatus === "ส่งกลับแก้ไข"
+                            ? "ส่งกลับแก้ไข"
+                            : examReadiness.can_request_exam
+                              ? "พร้อมขอสอบ"
+                              : "ยังไม่พร้อมสอบ"}
                     </span>
                   </div>
 
                   <p>จำนวน Phase : {examReadiness.total_phases}</p>
                   <p>งานทั้งหมด : {examReadiness.total_tasks}</p>
                   <p>งานที่ผ่านการตรวจ : {examReadiness.passed_tasks}</p>
+                  {examRequestStatus === "ส่งกลับแก้ไข" && (
+                    <div className="student-exam-readiness-reasons">
+                      <strong>ความคิดเห็นจากอาจารย์ที่ปรึกษา</strong>
+
+                      <p style={{ whiteSpace: "pre-wrap" }}>
+                        {examRequestComment || "ไม่มีรายละเอียดเพิ่มเติม"}
+                      </p>
+                    </div>
+                  )}
 
                   {examRequestStatus !== "รอพิจารณา" &&
                     examRequestStatus !== "อนุมัติ" &&
@@ -1193,7 +1216,7 @@ function StudentProjectDetail() {
                       </div>
                     )}
 
-                  {examReadiness.can_request_exam && (
+                  {examReadiness.can_request_exam && !examRequestStatus && (
                     <p className="student-exam-readiness-success">
                       โครงงานผ่านเงื่อนไขเบื้องต้นในการขอสอบแล้ว
                     </p>
@@ -1211,6 +1234,46 @@ function StudentProjectDetail() {
                         อาจารย์ที่ปรึกษาอนุมัติคำขอสอบแล้ว
                         กรุณารอประกาศกำหนดการสอบ
                       </p>
+                    ) : examRequestStatus === "ส่งกลับแก้ไข" ? (
+                      <div className="student-exam-resubmit">
+                        <div className="student-exam-resubmit-form">
+                          <label>
+                            รายละเอียดสิ่งที่แก้ไขแล้ว
+                            <span style={{ color: "red" }}> *</span>
+                          </label>
+
+                          <p className="student-exam-resubmit-hint">
+                            หลังจากดำเนินการแก้ไขตามความคิดเห็นของอาจารย์แล้ว
+                            กรุณาระบุรายละเอียดเพื่อส่งคำขอสอบอีกครั้ง
+                          </p>
+
+                          <textarea
+                            rows={4}
+                            maxLength={2000}
+                            placeholder="อธิบายรายละเอียดสิ่งที่ดำเนินการแก้ไข..."
+                            value={revisionNote}
+                            onChange={(e) => {
+                              setRevisionNote(e.target.value);
+                              setExamRequestError("");
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            className="student-exam-request-btn"
+                            onClick={handleExamRequest}
+                            disabled={
+                              !examReadiness.can_request_exam ||
+                              revisionNote.trim() === "" ||
+                              examRequestSubmitting
+                            }
+                          >
+                            {examRequestSubmitting
+                              ? "กำลังส่งคำขอ..."
+                              : "ส่งคำขอสอบอีกครั้ง"}
+                          </button>
+                        </div>
+                      </div>
                     ) : (
                       <button
                         type="button"
