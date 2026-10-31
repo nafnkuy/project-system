@@ -188,12 +188,21 @@ function TeacherManagedProjectDetail() {
           Math.max(...validDates.map((date) => date.getTime())),
         );
 
-        lastUpdated = newest.toLocaleDateString("th-TH", {
+        const thaiDate = newest.toLocaleDateString("th-TH", {
           timeZone: "Asia/Bangkok",
           day: "numeric",
           month: "short",
           year: "numeric",
         });
+
+        const thaiTime = newest.toLocaleTimeString("th-TH", {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        lastUpdated = `${thaiDate} เวลา ${thaiTime} น.`;
       }
 
       // รวมงานทั้งหมดจากทุก Phase
