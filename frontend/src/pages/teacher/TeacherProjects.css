@@ -683,9 +683,28 @@ body,
   min-width: 60px;
 }
 
+
 .teacher-projects-page .more-menu-wrapper {
   position: relative;
+  z-index: 1;
 }
+
+/* ยกแถวที่เปิดเมนูให้อยู่เหนือแถวอื่น */
+.teacher-projects-page .project-table tbody tr:has(.menu-open) {
+  position: relative;
+  z-index: 1000;
+}
+
+/* ยกช่องจัดการและเมนูขึ้นมาด้านหน้า */
+.teacher-projects-page .project-table tbody td:has(.menu-open) {
+  position: relative;
+  z-index: 1001;
+}
+
+.teacher-projects-page .more-menu-wrapper.menu-open {
+  z-index: 1002;
+}
+
 
 .teacher-projects-page .more-btn {
   width: 28px;
@@ -718,6 +737,7 @@ body,
 }
 
 .teacher-projects-page .more-menu button {
+  display: block;
   width: 100%;
 
   padding: 10px 12px;
