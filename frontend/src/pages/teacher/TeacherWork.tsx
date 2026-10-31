@@ -54,6 +54,7 @@ interface ExamProject {
 }
 interface PendingExamRequest {
   request_id: number;
+  exam_round: number;
   project_id: number;
   student_id: number;
   status: string;
@@ -474,7 +475,8 @@ function TeacherWork() {
 ========================================================= */
 
   useEffect(() => {
-    if (activeTab !== "exam" || !userId) {
+    if (!userId) {
+      setExamRequestsLoading(false);
       return;
     }
 
@@ -698,6 +700,7 @@ function TeacherWork() {
       rowType: "request" as const,
       id: `request-${request.request_id}`,
       projectId: request.project_id,
+      examRound: request.exam_round,
       projectTitle: request.project_title,
       studentNames:
         request.student_names ||
@@ -711,6 +714,7 @@ function TeacherWork() {
       rowType: "announced" as const,
       id: `announced-${project.project_id}`,
       projectId: project.project_id,
+      examRound: null as number | null,
       projectTitle: project.project_title,
       studentNames: project.student_names || "-",
       requestedAt: null as string | null,
@@ -1404,7 +1408,22 @@ function TeacherWork() {
               <p>
                 <strong>ชื่อโครงงาน</strong>
               </p>
-              <p>{selectedExamRequest.project_title}</p>
+
+              <p>
+                {selectedExamRequest.project_title}
+
+                <span
+                  className={
+                    selectedExamRequest.exam_round > 1
+                      ? "tw-exam-round-label tw-exam-round-retake"
+                      : "tw-exam-round-label"
+                  }
+                >
+                  {selectedExamRequest.exam_round > 1
+                    ? `ยื่นขอสอบใหม่ (ครั้งที่ ${selectedExamRequest.exam_round})`
+                    : `ยื่นขอสอบครั้งที่ ${selectedExamRequest.exam_round}`}
+                </span>
+              </p>
 
               <p>
                 <strong>นิสิต</strong>
@@ -2007,7 +2026,25 @@ function TeacherWork() {
                       ) : (
                         filteredExamRows.map((row) => (
                           <tr key={row.id}>
-                            <td>{row.projectTitle}</td>
+                            <td>
+                              <div className="tw-exam-project-info">
+                                <span>{row.projectTitle}</span>
+
+                                {row.rowType === "request" && (
+                                  <span
+                                    className={
+                                      Number(row.examRound) > 1
+                                        ? "tw-exam-round-label tw-exam-round-retake"
+                                        : "tw-exam-round-label"
+                                    }
+                                  >
+                                    {Number(row.examRound) > 1
+                                      ? `ยื่นขอสอบใหม่ (ครั้งที่ ${row.examRound})`
+                                      : `ยื่นขอสอบครั้งที่ ${row.examRound}`}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
 
                             <td>
                               <div className="tw-exam-students">

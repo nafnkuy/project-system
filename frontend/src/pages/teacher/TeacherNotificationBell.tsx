@@ -306,7 +306,6 @@ function TeacherNotificationBell() {
                 >
                   <div className="teacher-exam-preview-header">
                     <strong>คำเชิญเป็นกรรมการสอบ</strong>
-                    <span>รอตอบรับ</span>
                   </div>
 
                   <p>{invitation.project_title}</p>
@@ -349,6 +348,16 @@ function TeacherNotificationBell() {
               aria-labelledby="teacher-exam-popup-title"
               onClick={(e) => e.stopPropagation()}
             >
+              <button
+                type="button"
+                className="teacher-exam-popup-close"
+                disabled={respondingInvitationId !== null}
+                onClick={() => setSelectedExamInvitation(null)}
+                aria-label="ปิดหน้าต่าง"
+              >
+                ×
+              </button>
+
               <h3 id="teacher-exam-popup-title">รายละเอียดคำเชิญกรรมการสอบ</h3>
 
               <div className="teacher-exam-popup-divider" />
@@ -380,7 +389,7 @@ function TeacherNotificationBell() {
 
                 <p>
                   <strong>สถานะ :</strong>{" "}
-                  <span className="teacher-exam-popup-status">รอตอบรับ</span>
+                  รอตอบรับ
                 </p>
 
                 {invitationFeedback && (
@@ -391,14 +400,6 @@ function TeacherNotificationBell() {
               </div>
 
               <div className="teacher-exam-popup-actions">
-                <button
-                  type="button"
-                  className="teacher-exam-popup-back"
-                  disabled={respondingInvitationId !== null}
-                  onClick={() => setSelectedExamInvitation(null)}
-                >
-                  กลับ
-                </button>
 
                 <button
                   type="button"

@@ -976,3 +976,37 @@
 .tmd-eval-comment-box p:last-child {
   margin-bottom: 0;
 }
+
+/* =========================================
+   REVISION DETAILS - STUDENT STYLE
+========================================= */
+
+/* แยกกลุ่มของกรรมการแต่ละคน */
+.teacher-managed-detail-page .tmd-eval-revision-group + .tmd-eval-revision-group {
+  margin-top: 18px;
+}
+
+/* ชื่อกรรมการ */
+.teacher-managed-detail-page .tmd-eval-revision-group strong {
+  display: block;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* รายการประเด็นที่ต้องแก้ไข */
+.teacher-managed-detail-page .tmd-eval-revision-group ul {
+  margin: 8px 0 0;
+  padding-left: 28px;
+  list-style-type: disc;
+}
+
+/* ข้อความแต่ละข้อ */
+.teacher-managed-detail-page .tmd-eval-revision-group li {
+  margin: 6px 0;
+  color: #222222;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

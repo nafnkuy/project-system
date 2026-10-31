@@ -8092,6 +8092,7 @@ app.get("/teacher/exam-requests/:advisorId", (req, res) => {
       er.project_id,
       er.student_id,
       er.status,
+      er.exam_round,
       er.revision_note,
       er.requested_at,
 

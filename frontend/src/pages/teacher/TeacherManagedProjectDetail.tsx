@@ -443,6 +443,51 @@ function TeacherManagedProjectDetail() {
     });
   };
 
+  const groupTeacherRevisionDetails = (
+    text: string,
+    teacherNames: string[],
+  ): [string, string[]][] => {
+    const groups: [string, string[]][] = [];
+    let currentGroup: [string, string[]] | null = null;
+
+    const names = [...teacherNames].sort((a, b) => b.length - a.length);
+
+    text.split(/\r?\n/).forEach((line) => {
+      const value = line.trim();
+
+      if (!value) return;
+
+      const teacherName = names.find((name) => value.startsWith(`${name}:`));
+
+      if (teacherName) {
+        currentGroup = [teacherName, []];
+        groups.push(currentGroup);
+
+        const detail = value
+          .slice(teacherName.length + 1)
+          .trim()
+          .replace(/^[-•]\s*/, "");
+
+        if (detail) {
+          currentGroup[1].push(detail);
+        }
+      } else {
+        if (!currentGroup) {
+          currentGroup = ["ไม่ระบุชื่ออาจารย์", []];
+          groups.push(currentGroup);
+        }
+
+        const detail = value.replace(/^[-•]\s*/, "");
+
+        if (detail) {
+          currentGroup[1].push(detail);
+        }
+      }
+    });
+
+    return groups;
+  };
+
   if (!overview) {
     return <div className="tmd-page">กำลังโหลด...</div>;
   }
@@ -837,12 +882,13 @@ function TeacherManagedProjectDetail() {
                   <div className="tmd-eval-result-header">
                     <strong>{overview.title}</strong>
 
-                    {typeof evaluation.totalScore === "number" && (
-                      <span className="tmd-eval-grade">
-                        เกรดที่คาดว่าจะได้รับ{" "}
-                        {getExpectedGrade(evaluation.totalScore)}
-                      </span>
-                    )}
+                    {evaluation.resultStatus === "ผ่าน" &&
+                      typeof evaluation.totalScore === "number" && (
+                        <span className="tmd-eval-grade">
+                          เกรดที่คาดว่าจะได้รับ{" "}
+                          {getExpectedGrade(evaluation.totalScore)}
+                        </span>
+                      )}
                   </div>
 
                   <div className="tmd-eval-divider" />
@@ -952,10 +998,27 @@ function TeacherManagedProjectDetail() {
                       <h4>ประเด็นที่ต้องแก้ไข</h4>
 
                       <div className="tmd-eval-comment-box">
-                        <p>
-                          {evaluation.revisionDetails?.trim() ||
-                            "ไม่ได้ระบุรายละเอียด"}
-                        </p>
+                        {evaluation.revisionDetails?.trim() ? (
+                          groupTeacherRevisionDetails(
+                            evaluation.revisionDetails,
+                            evaluation.committeeNames || [],
+                          ).map(([teacherName, details], index) => (
+                            <div
+                              key={`${teacherName}-${index}`}
+                              className="tmd-eval-revision-group"
+                            >
+                              <strong>{teacherName}</strong>
+
+                              <ul>
+                                {details.map((detail, detailIndex) => (
+                                  <li key={detailIndex}>{detail}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))
+                        ) : (
+                          <p>ไม่ได้ระบุรายละเอียด</p>
+                        )}
                       </div>
                     </div>
                   )}
