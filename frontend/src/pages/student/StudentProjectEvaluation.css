@@ -886,3 +886,33 @@ label.student-eval-file-picker {
   font-size: 12px;
   font-weight: 500;
 }
+/* สมัครสอบใหม่ */
+
+.student-eval-retake {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.student-eval-retake p {
+  margin-bottom: 25px;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.student-eval-retake-btn {
+  min-width: 180px;
+  padding: 12px 25px;
+  background: #22a06b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-eval-retake-btn:hover {
+  background: #19875a;
+}

@@ -7859,98 +7859,111 @@ app.post("/student/projects/:projectId/exam-request", (req, res) => {
   }
 
   const sql = `
-      INSERT INTO project_exam_requests (
-        project_id,
-        student_id,
-        revision_note
+  INSERT INTO project_exam_requests (
+    project_id,
+    student_id,
+    revision_note,
+    exam_round
+  )
+
+  SELECT
+    p.id,
+    ?,
+    ?,
+    COALESCE(s.exam_round, 0) + 1
+
+  FROM projects p
+
+  LEFT JOIN project_exam_schedules s
+    ON s.id = (
+      SELECT s2.id
+      FROM project_exam_schedules s2
+      WHERE s2.project_id = p.id
+      ORDER BY s2.exam_round DESC, s2.id DESC
+      LIMIT 1
+    )
+
+  LEFT JOIN project_exam_results r
+    ON r.schedule_id = s.id
+
+  WHERE p.id = ?
+
+    -- ต้องเป็นสมาชิกโครงงาน
+    AND EXISTS (
+      SELECT 1
+      FROM project_members pm
+      WHERE pm.project_id = p.id
+        AND pm.user_id = ?
+    )
+
+    -- ต้องมี Phase
+    AND EXISTS (
+      SELECT 1
+      FROM project_phases ph
+      WHERE ph.project_id = p.id
+    )
+
+    -- ต้องมีงาน
+    AND EXISTS (
+      SELECT 1
+      FROM project_tasks t
+      WHERE t.project_id = p.id
+    )
+
+    -- ทุกงานต้องผ่านการตรวจ
+    AND NOT EXISTS (
+      SELECT 1
+      FROM project_tasks t
+      WHERE t.project_id = p.id
+        AND (
+          COALESCE(t.status, '') <> 'เสร็จสิ้น'
+          OR COALESCE(t.review_status, '') <> 'ผ่าน'
+        )
+    )
+
+    -- สอบครั้งแรก หรือสอบล่าสุดไม่ผ่าน
+    AND (
+      s.id IS NULL
+      OR r.final_result_status = 'ไม่ผ่าน'
+    )
+
+    -- ห้ามมีคำขอค้างอยู่ในรอบที่จะสมัคร
+    AND NOT EXISTS (
+      SELECT 1
+      FROM project_exam_requests er
+      WHERE er.project_id = p.id
+        AND er.exam_round = COALESCE(s.exam_round, 0) + 1
+        AND er.status IN ('รอพิจารณา', 'อนุมัติ')
+    )
+
+    -- รอบใหม่ยังไม่เคยส่งคำขอ
+    -- หรือคำขอล่าสุดถูกส่งกลับแก้ไข
+    AND (
+      NOT EXISTS (
+        SELECT 1
+        FROM project_exam_requests old_request
+        WHERE old_request.project_id = p.id
+          AND old_request.exam_round =
+              COALESCE(s.exam_round, 0) + 1
       )
 
-      SELECT
-        p.id,
-        ?,
-        ?
+      OR (
+        ? <> ''
 
-      FROM projects p
-
-      WHERE p.id = ?
-
-        -- ต้องเป็นสมาชิกของโครงงาน
-        AND EXISTS (
-          SELECT 1
-          FROM project_members pm
-          WHERE pm.project_id = p.id
-            AND pm.user_id = ?
-        )
-
-        -- ต้องมี Phase
-        AND EXISTS (
-          SELECT 1
-          FROM project_phases ph
-          WHERE ph.project_id = p.id
-        )
-
-        -- ต้องมี Task
-        AND EXISTS (
-          SELECT 1
-          FROM project_tasks t
-          WHERE t.project_id = p.id
-        )
-
-        -- ทุก Task ต้องเสร็จสิ้นและผ่านการตรวจ
-        AND NOT EXISTS (
-          SELECT 1
-          FROM project_tasks t
-          WHERE t.project_id = p.id
-            AND (
-              COALESCE(t.status, '') <> 'เสร็จสิ้น'
-              OR COALESCE(t.review_status, '') <> 'ผ่าน'
-            )
-        )
-
-        -- ต้องยังไม่มีกำหนดการสอบ
-        AND NOT EXISTS (
-          SELECT 1
-          FROM project_exam_schedules s
-          WHERE s.project_id = p.id
-        )
-
-        -- ต้องไม่มีคำขอที่ยังดำเนินการอยู่
-        AND NOT EXISTS (
-          SELECT 1
-          FROM project_exam_requests er
-          WHERE er.project_id = p.id
-            AND er.status IN (
-              'รอพิจารณา',
-              'อนุมัติ'
-            )
-        )
-        -- ตรวจสอบการขอสอบรอบใหม่
         AND (
-          -- ยังไม่เคยขอสอบมาก่อน
-          NOT EXISTS (
-            SELECT 1
-            FROM project_exam_requests old_request
-            WHERE old_request.project_id = p.id
-          )
+          SELECT last_request.status
+          FROM project_exam_requests last_request
+          WHERE last_request.project_id = p.id
+            AND last_request.exam_round =
+                COALESCE(s.exam_round, 0) + 1
+          ORDER BY last_request.id DESC
+          LIMIT 1
+        ) = 'ส่งกลับแก้ไข'
+      )
+    )
 
-          OR
-
-          -- เคยถูกส่งกลับแก้ไข และมีรายละเอียดการแก้ไข
-          (
-            ? <> ''
-
-            AND (
-              SELECT last_request.status
-              FROM project_exam_requests last_request
-              WHERE last_request.project_id = p.id
-              ORDER BY last_request.id DESC
-              LIMIT 1
-            ) = 'ส่งกลับแก้ไข'
-          )
-        )
-          
-      LIMIT 1
-    `;
+  LIMIT 1
+`;
 
   db.query(
     sql,
@@ -8000,14 +8013,35 @@ app.get("/student/projects/:projectId/exam-request/:studentId", (req, res) => {
   }
 
   const sql = `
-      SELECT
-        er.id,
-        er.project_id,
-        er.student_id,
-        er.status,
-        er.advisor_comment,
-        er.requested_at,
-        er.reviewed_at
+      
+SELECT
+  er.id,
+  er.project_id,
+  er.student_id,
+  er.status,
+  er.advisor_comment,
+  er.requested_at,
+  er.reviewed_at,
+  er.exam_round,
+
+  -- รอบล่าสุดที่มีผลสอบบันทึกแล้ว
+  COALESCE(
+    (
+      SELECT MAX(r.exam_round)
+      FROM project_exam_results r
+      WHERE r.project_id = er.project_id
+    ),
+    0
+  ) AS latest_result_round,
+
+  -- ตรวจว่าคำขอนี้มีกำหนดการสอบแล้วหรือยัง
+  EXISTS (
+    SELECT 1
+    FROM project_exam_schedules s
+    WHERE s.project_id = er.project_id
+      AND s.exam_round = er.exam_round
+  ) AS has_schedule
+
 
       FROM project_exam_requests er
 
@@ -8097,8 +8131,18 @@ app.get("/teacher/exam-requests/:advisorId", (req, res) => {
     ) members
       ON members.project_id = p.id
 
-    WHERE p.advisor_id = ?
-      AND er.status IN ('รอพิจารณา', 'อนุมัติ')
+    
+WHERE p.advisor_id = ?
+  AND er.status IN ('รอพิจารณา', 'อนุมัติ')
+
+  -- แสดงเฉพาะคำขอที่ยังไม่มีกำหนดการสอบของรอบนั้น
+  AND NOT EXISTS (
+    SELECT 1
+    FROM project_exam_schedules s
+    WHERE s.project_id = er.project_id
+      AND s.exam_round = er.exam_round
+  )
+
 
     ORDER BY er.requested_at DESC, er.id DESC
   `;
@@ -8167,12 +8211,15 @@ app.put("/teacher/exam-requests/:requestId/review", (req, res) => {
       AND p.advisor_id = ?
       AND er.status = 'รอพิจารณา'
 
-      -- ห้ามพิจารณาคำขอที่มีกำหนดการสอบแล้ว
+      
+      -- ห้ามพิจารณาคำขอรอบที่มีกำหนดการสอบแล้ว
       AND NOT EXISTS (
         SELECT 1
         FROM project_exam_schedules s
         WHERE s.project_id = er.project_id
+          AND s.exam_round = er.exam_round
       )
+
 
       -- หากอนุมัติ ต้องตรวจความพร้อมอีกครั้ง
       AND (
@@ -8283,8 +8330,19 @@ app.get("/teacher/exams/:advisorId", (req, res) => {
     ) members
       ON members.project_id = p.id
 
-    LEFT JOIN project_exam_schedules s
-      ON s.project_id = p.id
+    
+      LEFT JOIN project_exam_schedules s
+        ON s.project_id = p.id
+        AND s.exam_round = COALESCE(
+          (
+            SELECT MAX(er.exam_round)
+            FROM project_exam_requests er
+            WHERE er.project_id = p.id
+              AND er.status = 'อนุมัติ'
+          ),
+          1
+        )
+
 
     WHERE p.advisor_id = ?
 
@@ -8473,6 +8531,32 @@ app.post("/teacher/exams", async (req, res) => {
       });
     }
 
+    // ตรวจสอบรอบสอบที่ได้รับอนุมัติล่าสุด
+    const approvedRequests = await query(
+      connection,
+      `
+        SELECT exam_round
+        FROM project_exam_requests
+        WHERE project_id = ?
+          AND status = 'อนุมัติ'
+        ORDER BY exam_round DESC, id DESC
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [projectId],
+    );
+
+    if (approvedRequests.length === 0) {
+      await query(connection, "ROLLBACK");
+      transactionStarted = false;
+
+      return res.status(409).json({
+        message: "ยังไม่มีคำขอสอบที่ได้รับอนุมัติ",
+      });
+    }
+
+    const examRound = Number(approvedRequests[0].exam_round);
+
     // 2. ป้องกันการประกาศซ้ำ
 
     const existing = await query(
@@ -8481,9 +8565,10 @@ app.post("/teacher/exams", async (req, res) => {
         SELECT id
         FROM project_exam_schedules
         WHERE project_id = ?
+          AND exam_round = ?
         LIMIT 1
       `,
-      [projectId],
+      [projectId, examRound],
     );
 
     if (existing.length > 0) {
@@ -8528,6 +8613,7 @@ app.post("/teacher/exams", async (req, res) => {
         (
           project_id,
           advisor_id,
+          exam_round,
           exam_date,
           start_time,
           end_time,
@@ -8536,11 +8622,12 @@ app.post("/teacher/exams", async (req, res) => {
           notes,
           announced_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `,
       [
         projectId,
         advisorId,
+        examRound,
         examDate,
         startTime,
         endTime,
@@ -9975,6 +10062,167 @@ app.get("/teacher/exam/committee-status/:scheduleId/:advisorId", (req, res) => {
   });
 });
 
+// บันทึกผลสอบรวม เมื่อกรรมการประเมินครบ
+function saveCompletedExamResult(memberId, callback) {
+  const sql = `
+    SELECT
+      s.id AS schedule_id,
+      s.project_id,
+      s.exam_round,
+      cm.invitation_status,
+      ev.id AS evaluation_id,
+      ev.score_correctness,
+      ev.score_design,
+      ev.score_presentation,
+      ev.score_documentation,
+      ev.score_questions,
+      ev.total_score,
+      ev.needs_revision
+    FROM exam_committee_members cm
+    JOIN project_exam_schedules s
+      ON s.id = cm.schedule_id
+    LEFT JOIN exam_evaluations ev
+      ON ev.committee_member_id = cm.id
+    WHERE cm.schedule_id = (
+      SELECT schedule_id
+      FROM exam_committee_members
+      WHERE id = ?
+    )
+  `;
+
+  db.query(sql, [memberId], (err, rows) => {
+    if (err) {
+      return callback(err);
+    }
+
+    if (rows.length === 0) {
+      return callback(new Error("ไม่พบกำหนดการสอบ"));
+    }
+
+    let hasPendingInvitation = false;
+    let acceptedCount = 0;
+    let evaluatedCount = 0;
+    let hasRevision = false;
+
+    let sumCorrectness = 0;
+    let sumDesign = 0;
+    let sumPresentation = 0;
+    let sumDocumentation = 0;
+    let sumQuestions = 0;
+    let sumTotal = 0;
+
+    for (const row of rows) {
+      if (row.invitation_status === "รอตอบรับ") {
+        hasPendingInvitation = true;
+      }
+
+      if (row.invitation_status === "ตอบรับ") {
+        acceptedCount++;
+
+        if (row.evaluation_id !== null) {
+          evaluatedCount++;
+
+          sumCorrectness += Number(row.score_correctness);
+          sumDesign += Number(row.score_design);
+          sumPresentation += Number(row.score_presentation);
+          sumDocumentation += Number(row.score_documentation);
+          sumQuestions += Number(row.score_questions);
+          sumTotal += Number(row.total_score);
+
+          if (Number(row.needs_revision) === 1) {
+            hasRevision = true;
+          }
+        }
+      }
+    }
+
+    // ยังมีกรรมการรอตอบรับ หรือประเมินไม่ครบ
+    if (
+      hasPendingInvitation ||
+      acceptedCount === 0 ||
+      evaluatedCount !== acceptedCount
+    ) {
+      return callback(null, false);
+    }
+
+    // คำนวณคะแนนเฉลี่ย
+    const average = (sum) => {
+      return Number((sum / acceptedCount).toFixed(2));
+    };
+
+    const totalScore = average(sumTotal);
+
+    // คำนวณเกรด
+    let grade = "F";
+
+    if (totalScore >= 80) grade = "A";
+    else if (totalScore >= 75) grade = "B+";
+    else if (totalScore >= 70) grade = "B";
+    else if (totalScore >= 65) grade = "C+";
+    else if (totalScore >= 60) grade = "C";
+    else if (totalScore >= 55) grade = "D+";
+    else if (totalScore >= 50) grade = "D";
+
+    // คำนวณผลสอบ
+    let status = "ผ่าน";
+
+    if (totalScore < 50) {
+      status = "ไม่ผ่าน";
+    } else if (hasRevision) {
+      status = "ผ่านแบบมีเงื่อนไข";
+    }
+
+    const finalStatus = status;
+
+    const insertSql = `
+      INSERT INTO project_exam_results (
+        project_id,
+        schedule_id,
+        exam_round,
+        committee_count,
+        score_correctness,
+        score_design,
+        score_presentation,
+        score_documentation,
+        score_questions,
+        total_score,
+        estimated_grade,
+        initial_result_status,
+        final_result_status,
+        published_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ON DUPLICATE KEY UPDATE id = id
+    `;
+
+    db.query(
+      insertSql,
+      [
+        rows[0].project_id,
+        rows[0].schedule_id,
+        rows[0].exam_round,
+        acceptedCount,
+        average(sumCorrectness),
+        average(sumDesign),
+        average(sumPresentation),
+        average(sumDocumentation),
+        average(sumQuestions),
+        totalScore,
+        grade,
+        status,
+        finalStatus,
+      ],
+      (saveErr, result) => {
+        if (saveErr) {
+          return callback(saveErr);
+        }
+
+        callback(null, result.affectedRows > 0);
+      },
+    );
+  });
+}
+
 /* =========================================================
    TEACHER - SAVE EXAM EVALUATION
 ========================================================= */
@@ -10115,10 +10363,24 @@ app.post("/teacher/evaluations", (req, res) => {
         });
       }
 
-      res.status(201).json({
-        success: true,
-        message: "บันทึกผลการประเมินเรียบร้อยแล้ว",
-        evaluation_id: result.insertId,
+      saveCompletedExamResult(memberId, (summaryErr, resultSaved) => {
+        if (summaryErr) {
+          console.error("Save exam result error:", summaryErr);
+
+          return res.status(201).json({
+            success: true,
+            result_saved: false,
+            message: "บันทึกคะแนนแล้ว แต่ยังบันทึกผลรวมไม่สำเร็จ",
+            evaluation_id: result.insertId,
+          });
+        }
+
+        res.status(201).json({
+          success: true,
+          result_saved: resultSaved,
+          message: "บันทึกผลการประเมินเรียบร้อยแล้ว",
+          evaluation_id: result.insertId,
+        });
       });
     },
   );
@@ -10266,24 +10528,29 @@ app.get(
 
       const projects = await query(
         `
-          SELECT
-            p.id,
-            p.title,
-            s.id AS schedule_id
+    SELECT
+      p.id,
+      p.title,
 
-          FROM projects p
+      (
+        SELECT s.id
+        FROM project_exam_schedules s
+        WHERE s.project_id = p.id
+          AND s.announced_at IS NOT NULL
+        ORDER BY s.exam_round DESC, s.id DESC
+        LIMIT 1
+      ) AS schedule_id
 
-          INNER JOIN project_members pm
-            ON pm.project_id = p.id
+    FROM projects p
 
-          LEFT JOIN project_exam_schedules s
-            ON s.project_id = p.id
+    INNER JOIN project_members pm
+      ON pm.project_id = p.id
 
-          WHERE p.id = ?
-            AND pm.user_id = ?
+    WHERE p.id = ?
+      AND pm.user_id = ?
 
-          LIMIT 1
-        `,
+    LIMIT 1
+  `,
         [projectId, studentId],
       );
 

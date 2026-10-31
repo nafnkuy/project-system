@@ -718,14 +718,6 @@ function TeacherWork() {
       examProject: project,
     })),
   ].filter((row) => {
-    //ถ้าโครงงานประกาศกำหนดการสอบแล้วไม่ต้องแสดงในหน้ารอประกาศ
-    if (row.rowType === "request") {
-      for (let i = 0; i < examData.announced.length; i++) {
-        if (row.projectId === examData.announced[i].project_id) {
-          return false;
-        }
-      }
-    }
     const matchesFilter =
       examFilter === "รอประกาศ"
         ? row.rowType === "request"
@@ -1612,12 +1604,7 @@ function TeacherWork() {
                   : examRequestsError
                     ? "-"
                     : examRequests.filter(
-                        (request) =>
-                          request.status === "อนุมัติ" &&
-                          !examData.announced.some(
-                            (project) =>
-                              project.project_id === request.project_id,
-                          ),
+                        (request) => request.status === "อนุมัติ",
                       ).length}
               </strong>
             </div>

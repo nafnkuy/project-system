@@ -55,6 +55,15 @@ type EvaluationResult =
       revision_details: RevisionDetail[];
     };
 
+interface ExamRetakeRequest {
+  id: number;
+  status: string;
+  exam_round: number;
+  latest_result_round: number;
+  has_schedule: number;
+  advisor_comment: string | null;
+}
+
 interface ProjectData {
   id: number;
   title: string;
@@ -74,6 +83,16 @@ function StudentProjectEvaluation() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // สมัครสอบใหม่
+  const [retakeRequest, setRetakeRequest] = useState<ExamRetakeRequest | null>(
+    null,
+  );
+
+  const [retakeLoading, setRetakeLoading] = useState(true);
+  const [retakeLoadError, setRetakeLoadError] = useState("");
+  const [retakeSubmitting, setRetakeSubmitting] = useState(false);
+  const [retakeSubmitError, setRetakeSubmitError] = useState("");
+  const [retakeSent, setRetakeSent] = useState(false);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [revisionDescription, setRevisionDescription] = useState("");
   const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
@@ -204,6 +223,56 @@ function StudentProjectEvaluation() {
   }, [projectId, userId]);
 
   /* =========================================
+   LOAD EXAM RETAKE REQUEST
+========================================= */
+
+  useEffect(() => {
+    if (!projectId || !userId) return;
+
+    let active = true;
+
+    const loadRetakeRequest = async () => {
+      setRetakeLoading(true);
+      setRetakeLoadError("");
+
+      try {
+        const response = await axios.get<{
+          request: ExamRetakeRequest | null;
+        }>(
+          `http://localhost:5000/student/projects/${projectId}/exam-request/${userId}`,
+        );
+
+        if (!active) return;
+
+        const request = response.data.request;
+
+        // แสดงเฉพาะคำขอที่ใหม่กว่ารอบที่มีผลสอบแล้ว
+        if (
+          request &&
+          Number(request.exam_round) > Number(request.latest_result_round)
+        ) {
+          setRetakeRequest(request);
+        } else {
+          setRetakeRequest(null);
+        }
+      } catch (err) {
+        if (!active) return;
+
+        console.error("Load retake request error:", err);
+        setRetakeLoadError("ไม่สามารถตรวจสอบสถานะคำขอสอบใหม่ได้");
+      } finally {
+        if (active) setRetakeLoading(false);
+      }
+    };
+
+    loadRetakeRequest();
+
+    return () => {
+      active = false;
+    };
+  }, [projectId, userId]);
+
+  /* =========================================
      FORMAT
   ========================================= */
 
@@ -320,6 +389,55 @@ function StudentProjectEvaluation() {
       );
     } finally {
       setRevisionSubmitting(false);
+    }
+  };
+
+  /* =========================================
+   SUBMIT EXAM RETAKE REQUEST
+========================================= */
+
+  const submitRetakeRequest = async () => {
+    if (
+      !projectId ||
+      !userId ||
+      retakeSubmitting ||
+      retakeLoading ||
+      retakeRequest ||
+      retakeSent
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "ยืนยันการสมัครสอบโครงงานครั้งใหม่หรือไม่?",
+    );
+
+    if (!confirmed) return;
+
+    setRetakeSubmitting(true);
+    setRetakeSubmitError("");
+
+    try {
+      await axios.post(
+        `http://localhost:5000/student/projects/${projectId}/exam-request`,
+        {
+          student_id: Number(userId),
+          revision_note: "",
+        },
+      );
+
+      // ส่งสำเร็จแล้ว ซ่อนปุ่มทันที
+      setRetakeSent(true);
+    } catch (err) {
+      console.error("Submit exam retake error:", err);
+
+      setRetakeSubmitError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.message || "ไม่สามารถส่งคำขอสอบใหม่ได้"
+          : "ไม่สามารถส่งคำขอสอบใหม่ได้",
+      );
+    } finally {
+      setRetakeSubmitting(false);
     }
   };
 
@@ -618,6 +736,64 @@ function StudentProjectEvaluation() {
                     </div>
                   )}
                 </div>
+
+                {/* สมัครสอบใหม่ กรณีสอบไม่ผ่าน */}
+                {result.result_status === "ไม่ผ่าน" && (
+                  <div className="student-eval-retake">
+                    {retakeLoading ? (
+                      <p>กำลังตรวจสอบสถานะคำขอสอบใหม่...</p>
+                    ) : retakeLoadError ? (
+                      <p>{retakeLoadError}</p>
+                    ) : retakeSent ? (
+                      <p>
+                        ส่งคำขอสมัครสอบใหม่เรียบร้อยแล้ว
+                        <strong> สถานะ : รอพิจารณา</strong>
+                      </p>
+                    ) : retakeRequest ? (
+                      <>
+                        <p>
+                          สถานะคำขอสอบครั้งที่ {retakeRequest.exam_round} :{" "}
+                          <strong>
+                            {Number(retakeRequest.has_schedule) === 1
+                              ? "ประกาศกำหนดการสอบแล้ว"
+                              : retakeRequest.status}
+                          </strong>
+                        </p>
+
+                        {retakeRequest.advisor_comment && (
+                          <p>
+                            ความคิดเห็นจากอาจารย์ :{" "}
+                            {retakeRequest.advisor_comment}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          ผลการประเมินครั้งนี้ไม่ผ่านเกณฑ์ที่กำหนด
+                          นิสิตสามารถสมัครเข้ารับการสอบใหม่ในรอบถัดไปได้
+                        </p>
+
+                        <button
+                          type="button"
+                          className="student-eval-retake-btn"
+                          onClick={submitRetakeRequest}
+                          disabled={retakeSubmitting}
+                        >
+                          {retakeSubmitting
+                            ? "กำลังส่งคำขอ..."
+                            : "สมัครสอบใหม่"}
+                        </button>
+                      </>
+                    )}
+
+                    {retakeSubmitError && (
+                      <p className="student-eval-revision-error">
+                        {retakeSubmitError}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* EXAM REVISION SUBMISSION */}
 
