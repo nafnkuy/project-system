@@ -234,9 +234,9 @@ function TeacherWork() {
   const [examRequestsError, setExamRequestsError] = useState("");
   const [selectedExamRequest, setSelectedExamRequest] =
     useState<PendingExamRequest | null>(null);
-  const [examDecision, setExamDecision] = useState<
-    "อนุมัติ" | "ส่งกลับแก้ไข" | "ปฏิเสธ"
-  >("อนุมัติ");
+  const [examDecision, setExamDecision] = useState<"อนุมัติ" | "ส่งกลับแก้ไข">(
+    "อนุมัติ",
+  );
 
   const [examDecisionComment, setExamDecisionComment] = useState("");
   const [examDecisionError, setExamDecisionError] = useState("");
@@ -718,6 +718,14 @@ function TeacherWork() {
       examProject: project,
     })),
   ].filter((row) => {
+    //ถ้าโครงงานประกาศกำหนดการสอบแล้วไม่ต้องแสดงในหน้ารอประกาศ
+    if (row.rowType === "request") {
+      for (let i = 0; i < examData.announced.length; i++) {
+        if (row.projectId === examData.announced[i].project_id) {
+          return false;
+        }
+      }
+    }
     const matchesFilter =
       examFilter === "รอประกาศ"
         ? row.rowType === "request"
@@ -901,8 +909,8 @@ function TeacherWork() {
       return;
     }
 
-    if (examDecision !== "อนุมัติ" && !examDecisionComment.trim()) {
-      setExamDecisionError("กรุณาระบุเหตุผลในการพิจารณา");
+    if (examDecision === "ส่งกลับแก้ไข" && !examDecisionComment.trim()) {
+      setExamDecisionError("กรุณาระบุเหตุผลที่ส่งกลับแก้ไข");
       return;
     }
 
@@ -1430,28 +1438,26 @@ function TeacherWork() {
                 <h4>ผลการพิจารณา</h4>
 
                 <div className="tw-exam-decision-options">
-                  {(["อนุมัติ", "ส่งกลับแก้ไข", "ปฏิเสธ"] as const).map(
-                    (status) => (
-                      <label key={status} className="tw-exam-decision-option">
-                        <input
-                          type="radio"
-                          name="examDecision"
-                          value={status}
-                          checked={examDecision === status}
-                          onChange={() => {
-                            setExamDecision(status);
-                            setExamDecisionError("");
-                          }}
-                        />
-                        {status === "อนุมัติ" ? "อนุมัติให้สอบ" : status}
-                      </label>
-                    ),
-                  )}
+                  {(["อนุมัติ", "ส่งกลับแก้ไข"] as const).map((status) => (
+                    <label key={status} className="tw-exam-decision-option">
+                      <input
+                        type="radio"
+                        name="examDecision"
+                        value={status}
+                        checked={examDecision === status}
+                        onChange={() => {
+                          setExamDecision(status);
+                          setExamDecisionError("");
+                        }}
+                      />
+                      {status === "อนุมัติ" ? "อนุมัติให้สอบ" : status}
+                    </label>
+                  ))}
                 </div>
 
                 <label className="tw-exam-decision-label">
                   ความคิดเห็นของอาจารย์
-                  {examDecision !== "อนุมัติ" && (
+                  {examDecision === "ส่งกลับแก้ไข" && (
                     <span className="tw-exam-decision-required"> *</span>
                   )}
                 </label>
@@ -2530,6 +2536,15 @@ function TeacherWork() {
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* TITLE */}
+                <button
+                  type="button"
+                  className="tw-exam-detail-close"
+                  onClick={() => setExamDetailProject(null)}
+                  aria-label="ปิดหน้าต่าง"
+                  title="ปิด"
+                >
+                  ×
+                </button>
 
                 <h3>รายละเอียดกำหนดการสอบ</h3>
 
@@ -2609,7 +2624,29 @@ function TeacherWork() {
                   <h4>หมายเหตุ</h4>
 
                   <p className="tw-exam-detail-notes">
-                    {examDetailProject.notes || "-"}
+                    {examDetailProject.notes
+                      ? examDetailProject.notes
+                          .split(/(https?:\/\/[^\s]+)/g)
+                          .map((text, index) => {
+                            if (
+                              text.startsWith("https://") ||
+                              text.startsWith("http://")
+                            ) {
+                              return (
+                                <a
+                                  key={index}
+                                  href={text}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {text}
+                                </a>
+                              );
+                            }
+
+                            return text;
+                          })
+                      : "-"}
                   </p>
                 </div>
 
@@ -2639,10 +2676,13 @@ function TeacherWork() {
                 <div className="tw-exam-detail-actions">
                   <button
                     type="button"
-                    className="tw-exam-detail-back"
-                    onClick={() => setExamDetailProject(null)}
+                    className="tw-exam-detail-cancel"
+                    onClick={() => {
+                      setExamCancelError("");
+                      setShowExamCancelConfirm(true);
+                    }}
                   >
-                    กลับ
+                    ยกเลิกกำหนดการสอบ
                   </button>
 
                   <button
@@ -2651,16 +2691,6 @@ function TeacherWork() {
                     onClick={openExamEdit}
                   >
                     แก้ไขกำหนดการ
-                  </button>
-                  <button
-                    type="button"
-                    className="tw-exam-detail-cancel"
-                    onClick={() => {
-                      setExamCancelError("");
-                      setShowExamCancelConfirm(true);
-                    }}
-                  >
-                    ยกเลิกกำหนดการสอบ
                   </button>
                 </div>
               </div>

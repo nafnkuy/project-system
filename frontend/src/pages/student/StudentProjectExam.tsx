@@ -1,4 +1,3 @@
-
 import "./StudentProjectDetail.css";
 import "./StudentProjectExam.css";
 
@@ -38,6 +37,25 @@ interface ExamResponse {
   project: ExamProject;
   schedule: ExamSchedule | null;
 }
+const renderNotesWithLinks = (notes: string | null | undefined) => {
+  if (!notes || notes.trim() === "") {
+    return "-";
+  }
+
+  const parts = notes.split(/(https?:\/\/[^\s]+)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("https://") || part.startsWith("http://")) {
+      return (
+        <a key={index} href={part} target="_blank" rel="noopener noreferrer">
+          {part}
+        </a>
+      );
+    }
+
+    return part;
+  });
+};
 
 /* =========================================================
    COMPONENT
@@ -81,14 +99,13 @@ function StudentProjectExam() {
         setError("");
 
         const res = await axios.get<ExamResponse>(
-          `http://localhost:5000/student/projects/${projectId}/exam/${userId}`
+          `http://localhost:5000/student/projects/${projectId}/exam/${userId}`,
         );
 
         if (cancelled) return;
 
         setProject(res.data.project);
         setSchedule(res.data.schedule);
-
       } catch (err) {
         if (cancelled) return;
 
@@ -96,13 +113,11 @@ function StudentProjectExam() {
 
         if (axios.isAxiosError(err)) {
           setError(
-            err.response?.data?.message ||
-              "ไม่สามารถโหลดกำหนดการสอบได้"
+            err.response?.data?.message || "ไม่สามารถโหลดกำหนดการสอบได้",
           );
         } else {
           setError("ไม่สามารถโหลดกำหนดการสอบได้");
         }
-
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -130,9 +145,7 @@ function StudentProjectExam() {
       return "-";
     }
 
-    const date = new Date(
-      Date.UTC(parts[0], parts[1] - 1, parts[2])
-    );
+    const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
 
     return date.toLocaleDateString("th-TH", {
       timeZone: "UTC",
@@ -197,7 +210,6 @@ function StudentProjectExam() {
 
   return (
     <div className="student-project-detail-page s058-page">
-
       {/* SIDEBAR */}
 
       <aside className="student-detail-sidebar">
@@ -212,28 +224,19 @@ function StudentProjectExam() {
 
         <nav>
           <ul>
-            <li onClick={() => navigate("/StudentHome")}>
-              หน้าหลัก
-            </li>
+            <li onClick={() => navigate("/StudentHome")}>หน้าหลัก</li>
 
-            <li onClick={() => navigate("/teachers")}>
-              รายชื่ออาจารย์
-            </li>
+            <li onClick={() => navigate("/teachers")}>รายชื่ออาจารย์</li>
 
             <li onClick={() => navigate("/submit-new-project")}>
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li
-              className="active"
-              onClick={() => navigate("/student-project")}
-            >
+            <li className="active" onClick={() => navigate("/student-project")}>
               โครงงานของฉัน
             </li>
 
-            <li
-              onClick={() => navigate("/student-notifications")}
-            >
+            <li onClick={() => navigate("/student-notifications")}>
               การแจ้งเตือน
             </li>
 
@@ -241,10 +244,7 @@ function StudentProjectExam() {
           </ul>
         </nav>
 
-        <button
-          className="student-detail-logout"
-          onClick={handleLogout}
-        >
+        <button className="student-detail-logout" onClick={handleLogout}>
           ออกจากระบบ
         </button>
       </aside>
@@ -252,7 +252,6 @@ function StudentProjectExam() {
       {/* MAIN */}
 
       <main className="student-detail-main">
-
         {/* HEADER */}
 
         <header className="student-detail-header">
@@ -263,18 +262,13 @@ function StudentProjectExam() {
             >
               โครงงานของฉัน
             </span>
-
             {" > "}
-
             <span
               className="student-detail-breadcrumb"
-              onClick={() =>
-                navigate(`/student-project-detail/${projectId}`)
-              }
+              onClick={() => navigate(`/student-project-detail/${projectId}`)}
             >
               รายละเอียดโครงงาน
             </span>
-
             {" > "}กำหนดการสอบ
           </h2>
 
@@ -284,9 +278,7 @@ function StudentProjectExam() {
             <div className="student-detail-user">
               <img
                 src={
-                  profileImage
-                    ? `http://localhost:5000${profileImage}`
-                    : logo
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
                 }
                 alt="Profile"
               />
@@ -298,7 +290,6 @@ function StudentProjectExam() {
         {/* CONTENT */}
 
         <div className="student-detail-content">
-
           {/* PROJECT TITLE */}
 
           <div className="student-detail-project-heading">
@@ -306,9 +297,7 @@ function StudentProjectExam() {
 
             <p>
               อัปเดตล่าสุด :{" "}
-              {schedule
-                ? formatDateTime(schedule.announced_at)
-                : "-"}
+              {schedule ? formatDateTime(schedule.announced_at) : "-"}
             </p>
           </div>
 
@@ -316,9 +305,7 @@ function StudentProjectExam() {
 
           <div className="student-detail-tabs">
             <button
-              onClick={() =>
-                navigate(`/student-project-detail/${projectId}`)
-              }
+              onClick={() => navigate(`/student-project-detail/${projectId}`)}
             >
               ภาพรวม
             </button>
@@ -339,9 +326,7 @@ function StudentProjectExam() {
               เอกสารและการส่งงาน
             </button>
 
-            <button className="active">
-              กำหนดการสอบ
-            </button>
+            <button className="active">กำหนดการสอบ</button>
 
             <button
               type="button"
@@ -359,17 +344,10 @@ function StudentProjectExam() {
             <h3>กำหนดการสอบ</h3>
 
             {loading ? (
-              <div className="s058-center-message">
-                กำลังโหลดกำหนดการสอบ...
-              </div>
-
+              <div className="s058-center-message">กำลังโหลดกำหนดการสอบ...</div>
             ) : error ? (
-              <div className="s058-center-message">
-                {error}
-              </div>
-
+              <div className="s058-center-message">{error}</div>
             ) : !schedule ? (
-
               /* S058 - NO SCHEDULE */
 
               <div className="s058-empty-wrapper">
@@ -378,9 +356,7 @@ function StudentProjectExam() {
 
                   <div className="s058-divider" />
 
-                  <p>
-                    อาจารย์ยังไม่ได้ประกาศกำหนดการสอบโครงงาน
-                  </p>
+                  <p>อาจารย์ยังไม่ได้ประกาศกำหนดการสอบโครงงาน</p>
 
                   <p>
                     เมื่อมีการกำหนดวัน เวลา และสถานที่สอบ
@@ -389,40 +365,27 @@ function StudentProjectExam() {
                   </p>
                 </div>
               </div>
-
             ) : (
-
               /* S059 - ANNOUNCED SCHEDULE */
 
               <div className="s058-exam-card">
-
                 <div className="s058-card-heading">
                   <strong>การสอบโครงงาน</strong>
-                  <span className="s058-status">
-                    กำหนดแล้ว
-                  </span>
+                  <span className="s058-status">กำหนดแล้ว</span>
                 </div>
 
                 <div className="s058-divider" />
 
                 <div className="s058-basic-info">
-                  <p>
-                    วันที่สอบ : {formatExamDate(schedule.exam_date)}
-                  </p>
+                  <p>วันที่สอบ : {formatExamDate(schedule.exam_date)}</p>
 
                   <p>
-                    เวลา : {schedule.start_time} -{" "}
-                    {schedule.end_time} น.
+                    เวลา : {schedule.start_time} - {schedule.end_time} น.
                   </p>
 
-                  <p>
-                    สถานที่ : {schedule.location}
-                  </p>
+                  <p>สถานที่ : {schedule.location}</p>
 
-                  <p>
-                    อาจารย์ที่ปรึกษา :{" "}
-                    {project?.advisor_name || "-"}
-                  </p>
+                  <p>อาจารย์ที่ปรึกษา : {project?.advisor_name || "-"}</p>
                 </div>
 
                 <div className="s058-info-section">
@@ -443,15 +406,13 @@ function StudentProjectExam() {
                   <h4>หมายเหตุ</h4>
 
                   <p className="s058-notes">
-                    {schedule.notes || "-"}
+                    {renderNotesWithLinks(schedule.notes)}
                   </p>
                 </div>
 
                 <p className="s058-announced-date">
-                  ประกาศเมื่อ :{" "}
-                  {formatDateTime(schedule.announced_at)}
+                  ประกาศเมื่อ : {formatDateTime(schedule.announced_at)}
                 </p>
-
               </div>
             )}
           </section>

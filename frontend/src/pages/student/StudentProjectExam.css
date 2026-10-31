@@ -173,3 +173,18 @@
     padding: 16px;
   }
 }
+/* ลิงก์ในหมายเหตุกำหนดการสอบ */
+
+.student-exam-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.student-exam-notes a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.student-exam-notes a:hover {
+  color: #1d4ed8;
+}

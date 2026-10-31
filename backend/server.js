@@ -7853,10 +7853,10 @@ app.post("/student/projects/:projectId/exam-request", (req, res) => {
     });
   }
   if (revisionNote.length > 2000) {
-  return res.status(400).json({
-    message: "รายละเอียดการแก้ไขต้องไม่เกิน 2000 ตัวอักษร",
-  });
-}
+    return res.status(400).json({
+      message: "รายละเอียดการแก้ไขต้องไม่เกิน 2000 ตัวอักษร",
+    });
+  }
 
   const sql = `
       INSERT INTO project_exam_requests (
@@ -8129,7 +8129,7 @@ app.put("/teacher/exam-requests/:requestId/review", (req, res) => {
   const status = req.body.status;
   const comment = String(req.body.advisor_comment || "").trim();
 
-  const allowedStatuses = ["อนุมัติ", "ส่งกลับแก้ไข", "ปฏิเสธ"];
+  const allowedStatuses = ["อนุมัติ", "ส่งกลับแก้ไข"];
 
   // ตรวจข้อมูลเบื้องต้น
   if (
@@ -8144,10 +8144,10 @@ app.put("/teacher/exam-requests/:requestId/review", (req, res) => {
     });
   }
 
-  // หากไม่อนุมัติ ต้องระบุเหตุผล
-  if (status !== "อนุมัติ" && !comment) {
+  // หากส่งกลับแก้ไข ต้องระบุเหตุผล
+  if (status === "ส่งกลับแก้ไข" && !comment) {
     return res.status(400).json({
-      message: "กรุณาระบุเหตุผลในการพิจารณา",
+      message: "กรุณาระบุเหตุผลที่ส่งกลับแก้ไข",
     });
   }
 
