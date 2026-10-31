@@ -50,6 +50,23 @@ interface MyProjectRequest {
   members: ProjectMember[];
 }
 
+interface PlanTask {
+  status: string;
+  updated_at: string | null;
+  subtasks?: {
+    updated_at: string | null;
+  }[];
+}
+
+interface PlanPhase {
+  updated_at: string | null;
+  tasks: PlanTask[];
+}
+
+interface PlanResponse {
+  phases: PlanPhase[];
+}
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -74,6 +91,15 @@ function StudentProject() {
   const [request, setRequest] = useState<MyProjectRequest | null>(null);
 
   const [loading, setLoading] = useState(true);
+
+  const [progressData, setProgressData] = useState({
+    totalTasks: 0,
+    completedTasks: 0,
+    lastUpdated: "-",
+  });
+
+  const [progressLoading, setProgressLoading] = useState(true);
+  const [progressError, setProgressError] = useState("");
 
   /* =========================================================
      LOGIN CHECK
@@ -122,6 +148,124 @@ function StudentProject() {
       year: "numeric",
     });
   };
+
+  const formatThaiDateTime = (value: string | null) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    const thaiDate = date.toLocaleDateString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const thaiTime = date.toLocaleTimeString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${thaiDate} เวลา ${thaiTime} น.`;
+  };
+
+  /* =========================================
+   LOAD PROJECT PROGRESS
+========================================= */
+
+  useEffect(() => {
+    if (!request || request.request_status !== "อนุมัติ") {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadProgress = async () => {
+      setProgressLoading(true);
+      setProgressError("");
+
+      try {
+        const res = await axios.get<PlanResponse>(
+          `http://localhost:5000/student/projects/${request.project_id}/plan`,
+        );
+
+        if (cancelled) return;
+
+        const phases = res.data.phases || [];
+
+        // รวมงานทั้งหมดจากทุก Phase
+        const allTasks = phases.flatMap((phase) => phase.tasks || []);
+
+        const completedTasks = allTasks.filter(
+          (task) => task.status === "เสร็จสิ้น",
+        ).length;
+
+        // หาวันที่อัปเดตล่าสุด
+        const dates: string[] = [];
+
+        phases.forEach((phase) => {
+          if (phase.updated_at) {
+            dates.push(phase.updated_at);
+          }
+
+          phase.tasks?.forEach((task) => {
+            if (task.updated_at) {
+              dates.push(task.updated_at);
+            }
+
+            task.subtasks?.forEach((subtask) => {
+              if (subtask.updated_at) {
+                dates.push(subtask.updated_at);
+              }
+            });
+          });
+        });
+
+        const validTimes = dates
+          .map((value) => new Date(value).getTime())
+          .filter((time) => Number.isFinite(time));
+
+        let lastUpdated = "-";
+
+        if (validTimes.length > 0) {
+          const newest = new Date(Math.max(...validTimes));
+          lastUpdated = formatThaiDateTime(newest.toISOString());
+        }
+
+        setProgressData({
+          totalTasks: allTasks.length,
+          completedTasks,
+          lastUpdated,
+        });
+      } catch (err) {
+        if (cancelled) return;
+
+        console.error("Load project progress error:", err);
+        setProgressError("ไม่สามารถโหลดข้อมูลความคืบหน้าได้");
+      } finally {
+        if (!cancelled) {
+          setProgressLoading(false);
+        }
+      }
+    };
+
+    loadProgress();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [request]);
+
+  const progressPercent =
+    progressData.totalTasks > 0
+      ? Math.round(
+          (progressData.completedTasks / progressData.totalTasks) * 100,
+        )
+      : 0;
 
   /* =========================================================
      STATUS
@@ -463,22 +607,33 @@ function StudentProject() {
                       <div
                         className="student-current-progress-fill"
                         style={{
-                          width: "0%",
+                          width: `${progressPercent}%`,
                         }}
                       />
                     </div>
 
-                    <span className="student-current-progress-percent">0%</span>
+                    <span className="student-current-progress-percent">
+                      {progressLoading ? "..." : `${progressPercent}%`}
+                    </span>
                   </div>
 
                   <p className="student-current-progress-text">
-                    ยังไม่มีข้อมูลความคืบหน้า
+                    {progressLoading
+                      ? "กำลังโหลดความคืบหน้า..."
+                      : progressError
+                        ? progressError
+                        : progressData.totalTasks > 0
+                          ? `เสร็จสิ้นแล้ว ${progressData.completedTasks} จาก ${progressData.totalTasks} งาน`
+                          : "ยังไม่มีข้อมูลความคืบหน้า"}
                   </p>
                 </div>
 
                 {/* ================= UPDATE ================= */}
 
-                <p className="student-current-updated">อัปเดตล่าสุด : -</p>
+                <p className="student-current-updated">
+                  อัปเดตล่าสุด :{" "}
+                  {progressLoading ? "กำลังโหลด..." : progressData.lastUpdated}
+                </p>
 
                 {/* ================= BUTTON ================= */}
 
