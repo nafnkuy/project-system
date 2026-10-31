@@ -389,3 +389,33 @@
   font-size: 11px;
   font-weight: 400;
 }
+
+/* =========================================
+   PROJECT HEADING - LAST UPDATED
+========================================= */
+
+.student-task-page .student-task-project-heading p {
+  margin: 0;
+  color: #555555;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* =========================================
+   PROJECT HEADING
+========================================= */
+
+/* ชื่อโครงงาน */
+.student-task-page .student-task-project-heading h3 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* อัปเดตล่าสุด */
+.student-task-page .student-task-project-heading p {
+  margin: 0;
+  color: #555555;
+  font-size: 11px;
+  font-weight: 400;
+}

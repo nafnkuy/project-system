@@ -71,6 +71,9 @@ interface OverviewTask {
 
   completed_subtasks: number;
   total_subtasks: number;
+  subtasks?: {
+    updated_at: string | null;
+  }[];
 }
 
 interface OverviewPhase {
@@ -307,6 +310,40 @@ function StudentProjectDetail() {
 
     return `${thaiDate} เวลา ${thaiTime} น.`;
   };
+
+  const lastUpdated = (() => {
+    const dates: string[] = [];
+
+    phases.forEach((phase) => {
+      if (phase.updated_at) {
+        dates.push(phase.updated_at);
+      }
+
+      phase.tasks?.forEach((task) => {
+        if (task.updated_at) {
+          dates.push(task.updated_at);
+        }
+
+        task.subtasks?.forEach((subtask) => {
+          if (subtask.updated_at) {
+            dates.push(subtask.updated_at);
+          }
+        });
+      });
+    });
+
+    const validTimes = dates
+      .map((value) => new Date(value).getTime())
+      .filter((time) => Number.isFinite(time));
+
+    if (validTimes.length === 0) {
+      return "-";
+    }
+
+    const newest = new Date(Math.max(...validTimes));
+
+    return formatThaiDateTime(newest.toISOString());
+  })();
 
   /* =========================================================
      LOGIN CHECK
@@ -772,7 +809,7 @@ function StudentProjectDetail() {
           <div className="student-detail-project-heading">
             <h3>{project.title}</h3>
 
-            <p>อัปเดตล่าสุด : -</p>
+            <p>อัปเดตล่าสุด : {lastUpdated}</p>
           </div>
 
           {/* =================================================

@@ -219,6 +219,51 @@ function StudentDocuments() {
     });
   };
 
+  const formatThaiDateTime = (value: string | null) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    const thaiDate = date.toLocaleDateString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const thaiTime = date.toLocaleTimeString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${thaiDate} เวลา ${thaiTime} น.`;
+  };
+
+  const lastUpdated = useMemo(() => {
+    const dates = submissions.flatMap((task) => [
+      task.submitted_at,
+      ...task.files.map((file) => file.uploaded_at),
+    ]);
+
+    const validTimes = dates
+      .map((value) => new Date(value).getTime())
+      .filter((time) => Number.isFinite(time));
+
+    if (validTimes.length === 0) {
+      return "-";
+    }
+
+    const newest = new Date(Math.max(...validTimes));
+
+    return formatThaiDateTime(newest.toISOString());
+  }, [submissions]);
+
   /* =========================================================
      STATUS DISPLAY
   ========================================================= */
@@ -352,6 +397,7 @@ function StudentDocuments() {
 
           <div className="student-task-project-heading">
             <h3>{project?.title || "-"}</h3>
+            <p>อัปเดตล่าสุด : {lastUpdated}</p>
           </div>
 
           {/* =================================================
@@ -381,9 +427,7 @@ function StudentDocuments() {
 
             <button
               type="button"
-              onClick={() =>
-                navigate(`/student-project-exam/${projectId}`)
-              }
+              onClick={() => navigate(`/student-project-exam/${projectId}`)}
             >
               กำหนดการสอบ
             </button>

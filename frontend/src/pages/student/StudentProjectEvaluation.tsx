@@ -80,6 +80,9 @@ function StudentProjectEvaluation() {
 
   const [project, setProject] = useState<ProjectData | null>(null);
   const [result, setResult] = useState<EvaluationResult | null>(null);
+  const [scheduleAnnouncedAt, setScheduleAnnouncedAt] = useState<string | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -272,6 +275,31 @@ function StudentProjectEvaluation() {
     };
   }, [projectId, userId]);
 
+  useEffect(() => {
+    if (!projectId || !userId) return;
+
+    let active = true;
+
+    axios
+      .get<{
+        schedule: {
+          announced_at: string | null;
+        } | null;
+      }>(`http://localhost:5000/student/projects/${projectId}/exam/${userId}`)
+      .then((res) => {
+        if (!active) return;
+
+        setScheduleAnnouncedAt(res.data.schedule?.announced_at || null);
+      })
+      .catch((err) => {
+        console.error("Load exam schedule date error:", err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [projectId, userId]);
+
   /* =========================================
      FORMAT
   ========================================= */
@@ -295,6 +323,31 @@ function StudentProjectEvaluation() {
       }) + " น."
     );
   };
+
+  const latestUpdatedAt = (() => {
+    const dates: (string | null | undefined)[] = [
+      project?.updated_at,
+      scheduleAnnouncedAt,
+
+      result?.status === "published" ? result.evaluated_at : null,
+
+      ...revisionSubmissions.flatMap((item) => [
+        item.submitted_at,
+        item.reviewed_at,
+      ]),
+    ];
+
+    const validTimes = dates
+      .filter((value): value is string => Boolean(value))
+      .map((value) => new Date(value).getTime())
+      .filter((time) => Number.isFinite(time));
+
+    if (validTimes.length === 0) {
+      return null;
+    }
+
+    return new Date(Math.max(...validTimes)).toISOString();
+  })();
 
   const formatScore = (value: number) => {
     return Number(value).toLocaleString("th-TH", {
@@ -528,9 +581,7 @@ function StudentProjectEvaluation() {
           <div className="student-detail-project-heading">
             <h3>{project?.title || result?.project_title || "โครงงาน"}</h3>
 
-            {project?.updated_at && (
-              <p>อัปเดตล่าสุด : {formatThaiDateTime(project.updated_at)}</p>
-            )}
+            <p>อัปเดตล่าสุด : {formatThaiDateTime(latestUpdatedAt)}</p>
           </div>
 
           {/* TABS */}

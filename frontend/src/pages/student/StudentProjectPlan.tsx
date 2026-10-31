@@ -873,6 +873,30 @@ function StudentProjectPlan() {
     });
   };
 
+  const formatThaiDateTime = (value: string | null) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    const thaiDate = date.toLocaleDateString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const thaiTime = date.toLocaleTimeString("th-TH", {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${thaiDate} เวลา ${thaiTime} น.`;
+  };
+
   /* =========================================================
      PHASE LABEL
   ========================================================= */
@@ -914,7 +938,7 @@ function StudentProjectPlan() {
       (a, b) => new Date(b).getTime() - new Date(a).getTime(),
     )[0];
 
-    return formatThaiDate(newest);
+    return formatThaiDateTime(newest);
   }, [phases]);
 
   /* =========================================================
@@ -1068,9 +1092,7 @@ function StudentProjectPlan() {
 
             <button
               type="button"
-              onClick={() =>
-                navigate(`/student-project-exam/${projectId}`)
-              }
+              onClick={() => navigate(`/student-project-exam/${projectId}`)}
             >
               กำหนดการสอบ
             </button>
