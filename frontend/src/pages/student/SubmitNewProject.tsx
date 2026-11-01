@@ -688,7 +688,7 @@ function SubmitNewProject() {
               การแจ้งเตือน
             </li>
 
-            <li>ข้อมูลส่วนตัว</li>
+            <li onClick={() => navigate("/student-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 

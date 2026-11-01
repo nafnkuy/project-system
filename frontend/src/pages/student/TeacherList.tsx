@@ -150,7 +150,7 @@ function TeacherList() {
               การแจ้งเตือน
             </li>
 
-            <li>
+            <li onClick={() => navigate("/student-profile")}>
               ข้อมูลส่วนตัว
             </li>
           </ul>

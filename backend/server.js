@@ -4,6 +4,9 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const sharp = require("sharp");
+
+const crypto = require("crypto");
+
 const wordcut = require("wordcut");
 
 const { PDFDocument } = require("pdf-lib");
@@ -14,7 +17,6 @@ wordcut.init();
 const db = require("./db");
 
 const { startEmailNotifier } = require("./emailNotifier");
-
 
 const app = express();
 
@@ -82,12 +84,51 @@ app.use(
   "/src/assets",
   express.static(path.join(__dirname, "../frontend/src/assets")),
 );
+
+/* =========================================================
+   ค้นหาตำแหน่งไฟล์รูปภาพสำหรับสร้างเอกสาร PDF
+========================================================= */
+
 const getAssetFilePath = (assetUrl) => {
-  if (!assetUrl) return null;
+  if (typeof assetUrl !== "string") {
+    return null;
+  }
 
-  const relativePath = assetUrl.replace(/^\/src\/assets\//, "");
+  // ลายเซ็นใหม่ที่เก็บใน Backend
+  const privatePrefix = "/private/signatures/";
 
-  return path.join(__dirname, "../frontend/src/assets", relativePath);
+  if (assetUrl.startsWith(privatePrefix)) {
+    const fileName = assetUrl.slice(privatePrefix.length);
+
+    // อนุญาตเฉพาะชื่อไฟล์ลายเซ็นที่ระบบสร้างขึ้น
+    const namePattern = /^student-\d+-[0-9a-f-]{36}\.png$/;
+
+    if (!namePattern.test(fileName)) {
+      return null;
+    }
+
+    return path.join(__dirname, "private", "signatures", fileName);
+  }
+
+  // ลายเซ็นเดิมที่เก็บใน frontend
+  const oldPrefix = "/src/assets/";
+
+  if (assetUrl.startsWith(oldPrefix)) {
+    const relativePath = assetUrl.slice(oldPrefix.length);
+
+    const folderPath = path.resolve(__dirname, "../frontend/src/assets");
+
+    const filePath = path.resolve(folderPath, relativePath);
+
+    // ป้องกันการอ่านไฟล์นอกโฟลเดอร์ที่กำหนด
+    if (!filePath.startsWith(folderPath + path.sep)) {
+      return null;
+    }
+
+    return filePath;
+  }
+
+  return null;
 };
 
 app.get("/", (req, res) => {
@@ -126,6 +167,386 @@ app.post("/login", (req, res) => {
         profileImage: user.profile_image,
         major: user.major,
       },
+    });
+  });
+});
+
+/* =========================================================
+   ข้อมูลส่วนตัวของนิสิต
+========================================================= */
+
+app.get("/student/profile/:studentId", (req, res) => {
+  const studentId = Number(req.params.studentId);
+
+  if (!Number.isInteger(studentId) || studentId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      id,
+      username,
+      prefix,
+      name,
+      major,
+      phone,
+      email,
+      profile_image,
+      CASE
+        WHEN signature_image IS NOT NULL
+          AND TRIM(signature_image) <> ''
+        THEN 1
+        ELSE 0
+      END AS has_signature
+    FROM users
+    WHERE id = ?
+      AND role = 'student'
+    LIMIT 1
+  `;
+
+  db.query(sql, [studentId], (err, results) => {
+    if (err) {
+      console.error("Get student profile error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดข้อมูลนิสิตได้",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลนิสิต",
+      });
+    }
+
+    res.json(results[0]);
+  });
+});
+
+/* =========================================================
+   แก้ไขข้อมูลการติดต่อของนิสิต
+========================================================= */
+
+app.put("/student/profile/:studentId/contact", (req, res) => {
+  const studentId = Number(req.params.studentId);
+
+  const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+
+  const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(studentId) || studentId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // ตรวจสอบรูปแบบอีเมล
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(email)) {
+    return res.status(400).json({
+      message: "กรุณากรอกอีเมลให้ถูกต้อง",
+    });
+  }
+
+  // ตรวจสอบเบอร์โทรศัพท์
+  const phonePattern = /^0[0-9]{8,9}$/;
+
+  if (!phonePattern.test(phone)) {
+    return res.status(400).json({
+      message: "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง",
+    });
+  }
+
+  // บันทึกข้อมูลลงฐานข้อมูล
+  const sql = `
+    UPDATE users
+    SET
+      email = ?,
+      phone = ?
+    WHERE id = ?
+      AND role = 'student'
+  `;
+
+  db.query(sql, [email, phone, studentId], (err, result) => {
+    if (err) {
+      console.error("Update student contact error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถแก้ไขข้อมูลการติดต่อได้",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลนิสิต",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
+      email,
+      phone,
+    });
+  });
+});
+
+/* =========================================================
+   อัปโหลดรูปโปรไฟล์ของนิสิต
+========================================================= */
+
+// กำหนดการรับไฟล์รูปภาพ
+const uploadStudentProfile = multer({
+  storage: multer.memoryStorage(),
+
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, callback) => {
+    if (
+      file.mimetype === "image/jpeg" ||
+      file.mimetype === "image/png" ||
+      file.mimetype === "image/webp"
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("รองรับเฉพาะ JPG, PNG และ WebP"));
+    }
+  },
+}).single("profileImage");
+
+// API บันทึกรูปโปรไฟล์
+app.put("/student/profile/:studentId/image", (req, res) => {
+  const studentId = Number(req.params.studentId);
+
+  // ตรวจสอบรหัสนิสิต
+  if (!Number.isInteger(studentId) || studentId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // รับไฟล์จากหน้าเว็บไซต์
+  uploadStudentProfile(req, res, async (uploadError) => {
+    if (uploadError) {
+      return res.status(400).json({
+        message: "ไฟล์ไม่ถูกต้องหรือมีขนาดเกิน 2 MB",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "กรุณาเลือกรูปโปรไฟล์",
+      });
+    }
+
+    // กำหนดโฟลเดอร์สำหรับเก็บรูป
+    const folderPath = path.join(__dirname, "uploads", "profile-images");
+
+    const fileName = "student-" + studentId + "-" + Date.now() + ".webp";
+
+    const filePath = path.join(folderPath, fileName);
+
+    const imageUrl = "/uploads/profile-images/" + fileName;
+
+    try {
+      // สร้างโฟลเดอร์ถ้ายังไม่มี
+      fs.mkdirSync(folderPath, {
+        recursive: true,
+      });
+
+      // ตรวจสอบภาพและปรับขนาดก่อนบันทึก
+      await sharp(req.file.buffer)
+        .resize(400, 400, {
+          fit: "cover",
+        })
+        .webp({
+          quality: 85,
+        })
+        .toFile(filePath);
+    } catch (error) {
+      console.error("ประมวลผลรูปภาพไม่สำเร็จ:", error);
+
+      return res.status(400).json({
+        message: "ไม่สามารถอ่านไฟล์รูปภาพได้",
+      });
+    }
+
+    // บันทึกตำแหน่งรูปภาพลง MySQL
+    const sql = `
+      UPDATE users
+      SET profile_image = ?
+      WHERE id = ?
+        AND role = 'student'
+    `;
+
+    db.query(sql, [imageUrl, studentId], (err, result) => {
+      if (err) {
+        console.error("บันทึกรูปโปรไฟล์ไม่สำเร็จ:", err);
+
+        fs.unlink(filePath, () => {});
+
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกรูปโปรไฟล์ได้",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        fs.unlink(filePath, () => {});
+
+        return res.status(404).json({
+          message: "ไม่พบข้อมูลนิสิต",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว",
+        profile_image: imageUrl,
+      });
+    });
+  });
+});
+
+/* =========================================================
+   รับไฟล์ลายเซ็นของนิสิต
+========================================================= */
+
+const uploadStudentSignature = multer({
+  storage: multer.memoryStorage(),
+
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, callback) => {
+    if (file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
+      callback(null, true);
+    } else {
+      callback(new Error("รองรับเฉพาะ PNG และ JPG"));
+    }
+  },
+}).single("signatureImage");
+
+/* =========================================================
+   บันทึกลายเซ็นของนิสิต
+========================================================= */
+
+app.put("/student/profile/:studentId/signature", (req, res) => {
+  const studentId = Number(req.params.studentId);
+
+  if (!Number.isInteger(studentId) || studentId <= 0) {
+    return res.status(400).json({
+      message: "รหัสนิสิตไม่ถูกต้อง",
+    });
+  }
+
+  uploadStudentSignature(req, res, (uploadError) => {
+    if (uploadError) {
+      return res.status(400).json({
+        message: "ไฟล์ลายเซ็นไม่ถูกต้องหรือมีขนาดเกิน 2 MB",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "กรุณาเพิ่มลายเซ็นก่อนบันทึก",
+      });
+    }
+
+    const password = req.body.password;
+
+    if (typeof password !== "string" || password === "") {
+      return res.status(400).json({
+        message: "กรุณายืนยันรหัสผ่านก่อนบันทึกลายเซ็น",
+      });
+    }
+
+    // ตรวจสอบเจ้าของบัญชีด้วยรหัสผ่าน
+    // วิธีนี้ใช้กับระบบทดสอบปัจจุบันที่ยังเก็บรหัสผ่านแบบเดิม
+    const checkSql = `
+      SELECT id
+      FROM users
+      WHERE id = ?
+        AND role = 'student'
+        AND password = ?
+      LIMIT 1
+    `;
+
+    db.query(checkSql, [studentId, password], async (checkError, students) => {
+      if (checkError) {
+        return res.status(500).json({
+          message: "ไม่สามารถตรวจสอบข้อมูลนิสิตได้",
+        });
+      }
+
+      if (students.length === 0) {
+        return res.status(403).json({
+          message: "รหัสผ่านไม่ถูกต้อง",
+        });
+      }
+
+      // จัดเก็บไฟล์นอกโฟลเดอร์ที่เปิดให้เข้าถึงสาธารณะ
+      const folderPath = path.join(__dirname, "private", "signatures");
+
+      const fileName =
+        "student-" + studentId + "-" + crypto.randomUUID() + ".png";
+
+      const filePath = path.join(folderPath, fileName);
+
+      const signaturePath = "/private/signatures/" + fileName;
+
+      try {
+        fs.mkdirSync(folderPath, {
+          recursive: true,
+        });
+
+        // ตรวจสอบว่าเป็นภาพจริงและแปลงเป็น PNG
+        await sharp(req.file.buffer, {
+          limitInputPixels: 10000000,
+        })
+          .resize(1200, 400, {
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .png()
+          .toFile(filePath);
+      } catch (imageError) {
+        console.error("Signature image error:", imageError);
+
+        return res.status(400).json({
+          message: "ไม่สามารถอ่านไฟล์ลายเซ็นได้",
+        });
+      }
+
+      // บันทึกตำแหน่งไฟล์ลง MySQL
+      const updateSql = `
+          UPDATE users
+          SET signature_image = ?
+          WHERE id = ?
+            AND role = 'student'
+        `;
+
+      db.query(updateSql, [signaturePath, studentId], (updateError, result) => {
+        if (updateError || result.affectedRows === 0) {
+          fs.unlink(filePath, () => {});
+
+          return res.status(500).json({
+            message: "ไม่สามารถบันทึกลายเซ็นได้",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "บันทึกลายเซ็นเรียบร้อยแล้ว",
+          has_signature: 1,
+        });
+      });
     });
   });
 });
@@ -10216,21 +10637,21 @@ function saveCompletedExamResult(memberId, callback) {
         status,
         finalStatus,
       ],
-      
-(saveErr, result) => {
-  if (saveErr) {
-    return callback(saveErr);
-  }
 
-  // แจ้งเตือนเฉพาะเมื่อบันทึกผลรวมสำเร็จ
-  const resultSaved = result.affectedRows > 0;
+      (saveErr, result) => {
+        if (saveErr) {
+          return callback(saveErr);
+        }
 
-  if (!resultSaved) {
-    return callback(null, false);
-  }
+        // แจ้งเตือนเฉพาะเมื่อบันทึกผลรวมสำเร็จ
+        const resultSaved = result.affectedRows > 0;
 
-  // ส่งแจ้งเตือนให้สมาชิกทุกคนในโครงงาน
-  const notificationSql = `
+        if (!resultSaved) {
+          return callback(null, false);
+        }
+
+        // ส่งแจ้งเตือนให้สมาชิกทุกคนในโครงงาน
+        const notificationSql = `
     INSERT INTO notifications (
       user_id,
       message,
@@ -10252,25 +10673,18 @@ function saveCompletedExamResult(memberId, callback) {
     WHERE pm.project_id = ?
   `;
 
-  db.query(
-    notificationSql,
-    [
-      rows[0].exam_round,
-      rows[0].project_id,
-    ],
-    (notificationErr) => {
-      if (notificationErr) {
-        console.error(
-          "Exam result notification error:",
-          notificationErr
+        db.query(
+          notificationSql,
+          [rows[0].exam_round, rows[0].project_id],
+          (notificationErr) => {
+            if (notificationErr) {
+              console.error("Exam result notification error:", notificationErr);
+            }
+
+            callback(null, true);
+          },
         );
-      }
-
-      callback(null, true);
-    }
-  );
-},
-
+      },
     );
   });
 }
@@ -11788,7 +12202,6 @@ app.patch("/teacher/exam-revisions/:submissionId/review", async (req, res) => {
     });
   }
 });
-
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
