@@ -415,9 +415,17 @@ function TeacherReviewDetail() {
               งานที่ต้องดำเนินการ
             </li>
 
-            <li>ประวัติการพิจารณา</li>
-            <li>การแจ้งเตือน</li>
-            <li>ข้อมูลส่วนตัว</li>
+            <li onClick={() => navigate("/teacher-decision-history")}>
+              ประวัติการพิจารณา
+            </li>
+
+            <li onClick={() => navigate("/teacher-notifications")}>
+              การแจ้งเตือน
+            </li>
+
+            <li onClick={() => navigate("/teacher-profile")}>
+              ข้อมูลส่วนตัว
+            </li>
           </ul>
         </nav>
 

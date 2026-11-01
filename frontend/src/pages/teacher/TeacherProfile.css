@@ -1,0 +1,191 @@
+
+/* =========================================================
+   หน้าข้อมูลส่วนตัวของอาจารย์
+========================================================= */
+
+.teacher-profile-page .teacher-profile-content {
+  padding: 28px 34px 45px;
+}
+
+/* จัดการ์ดข้อมูลอาจารย์และข้อมูลการติดต่อ */
+.teacher-profile-page .student-profile-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* การ์ดสองคอลัมน์ */
+.teacher-profile-page .student-profile-details-grid .student-profile-card {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* รองรับข้อความยาว */
+.teacher-profile-page .student-profile-info-row strong {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* รองรับหน้าจอขนาดเล็ก */
+@media (max-width: 1100px) {
+  .teacher-profile-page .student-profile-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .teacher-profile-page .teacher-profile-content {
+    padding: 16px;
+  }
+}
+
+/* =========================================================
+   ส่วนแก้ไขข้อมูลการติดต่อของอาจารย์
+========================================================= */
+
+.teacher-profile-page .student-profile-contact-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.teacher-profile-page .student-profile-contact-card .student-profile-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.teacher-profile-page .student-profile-contact-card .student-profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* =========================================================
+   ส่วนเพิ่มและเปลี่ยนลายเซ็นของอาจารย์
+========================================================= */
+
+/* ข้อความและปุ่มเปลี่ยนลายเซ็น */
+.teacher-profile-page .teacher-signature-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* ปุ่มเลือกวิธี */
+.teacher-profile-page .student-signature-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  margin-bottom: 18px;
+}
+
+/* พื้นที่ลายเซ็นสองคอลัมน์ */
+.teacher-profile-page .student-signature-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+/* คอลัมน์ซ้าย */
+.teacher-profile-page .student-signature-work-area {
+  min-width: 0;
+}
+
+/* ช่องวาดลายเซ็น */
+.teacher-profile-page .student-signature-canvas {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  box-sizing: border-box;
+  border: 1px solid #d8dfe4;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* คอลัมน์ขวา */
+.teacher-profile-page .student-signature-layout .student-signature-save-section {
+  width: 100%;
+  max-width: none;
+  margin-top: 0;
+  padding: 0 0 0 25px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #dddddd;
+  border-radius: 0;
+}
+
+/* หัวข้อยืนยันและปุ่มล้าง */
+.teacher-profile-page .student-signature-control-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+/* หัวข้อยืนยัน */
+.teacher-profile-page .student-signature-control-heading h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+/* ปุ่มล้างลายเซ็น */
+.teacher-profile-page .student-signature-clear-btn {
+  margin: 0;
+  padding: 9px 14px;
+  background: #ffffff;
+  color: #555555;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ช่องรหัสผ่าน */
+.teacher-profile-page .student-signature-save-section input {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* ปุ่มยกเลิกและบันทึก */
+.teacher-profile-page .student-signature-save-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.teacher-profile-page .student-signature-save-actions button {
+  min-width: 120px;
+}
+
+/* หน้าจอขนาดเล็ก */
+@media (max-width: 1100px) {
+  .teacher-profile-page .student-signature-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-profile-page .student-signature-layout .student-signature-save-section {
+    padding: 20px 0 0;
+    border-left: none;
+    border-top: 1px solid #dddddd;
+  }
+}

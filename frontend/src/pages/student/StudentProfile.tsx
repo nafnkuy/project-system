@@ -86,6 +86,12 @@ function StudentProfile() {
   // เลือกวิธีเพิ่มลายเซ็น
   const [signatureMode, setSignatureMode] = useState("");
 
+  /* =========================================================
+   เปิดหรือปิดแบบฟอร์มเพิ่มและเปลี่ยนลายเซ็น
+========================================================= */
+
+  const [isEditingSignature, setIsEditingSignature] = useState(false);
+
   // พื้นที่สำหรับวาดลายเซ็น
   const signatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -678,6 +684,7 @@ function StudentProfile() {
 
         setSignatureSuccess("บันทึกลายเซ็นเรียบร้อยแล้ว");
         setSignatureMode("");
+        setIsEditingSignature(false);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -699,6 +706,7 @@ function StudentProfile() {
 ========================================================= */
 
   const handleCancelSignature = () => {
+    setIsEditingSignature(false);
     setSignatureMode("");
     setHasDrawnSignature(false);
     setSignatureFile(null);
@@ -1013,200 +1021,230 @@ function StudentProfile() {
 
             <div className="student-profile-divider" />
 
-            {/* เลือกวิธีเพิ่มลายเซ็น */}
-            <div className="student-signature-tabs">
-              <button
-                type="button"
-                className={
-                  signatureMode === "draw"
-                    ? "student-signature-tab active"
-                    : "student-signature-tab"
-                }
-                onClick={() => {
-                  setSignatureMode("draw");
-                  setHasDrawnSignature(false);
-                  setSignatureError("");
-                  setSignatureSuccess("");
-                  setSignaturePassword("");
-                }}
-              >
-                วาดลายเซ็น
-              </button>
+            {/* ข้อความและปุ่มเพิ่มหรือเปลี่ยนลายเซ็น */}
+            <div className="student-signature-toolbar">
+              <p className="student-profile-note">
+                ลายเซ็นสำหรับใช้ลงนามในเอกสารโครงงาน
+              </p>
 
-              <button
-                type="button"
-                className={
-                  signatureMode === "upload"
-                    ? "student-signature-tab active"
-                    : "student-signature-tab"
-                }
-                onClick={() => {
-                  setSignatureMode("upload");
-                  setSignatureFile(null);
-                  setSignaturePreview("");
-                  setHasDrawnSignature(false);
-                  setSignatureError("");
-                  setSignatureSuccess("");
-                  setSignaturePassword("");
-                }}
-              >
-                อัปโหลดรูปลายเซ็น
-              </button>
+              {student !== null && isEditingSignature === false && (
+                <button
+                  type="button"
+                  className="student-profile-edit-btn"
+                  onClick={() => {
+                    setIsEditingSignature(true);
+                    setSignatureMode("");
+                    setSignatureError("");
+                    setSignatureSuccess("");
+                  }}
+                >
+                  {student.has_signature === 1
+                    ? "เปลี่ยนลายเซ็น"
+                    : "เพิ่มลายเซ็น"}
+                </button>
+              )}
             </div>
 
-            {/* จัดพื้นที่ลายเซ็นเป็นสองคอลัมน์ */}
-            <div className="student-signature-layout">
-              {/* คอลัมน์ซ้ายสำหรับวาดหรืออัปโหลดลายเซ็น */}
-              <div className="student-signature-work-area">
-                {/* วิธีที่ 1 วาดลายเซ็น */}
-                {signatureMode === "draw" && (
-                  <div className="student-signature-section">
-                    <p>กรุณาวาดลายเซ็นในช่องด้านล่าง</p>
+            {/* ข้อความเมื่อบันทึกลายเซ็นสำเร็จ */}
+            {signatureSuccess !== "" && (
+              <p className="student-profile-success">{signatureSuccess}</p>
+            )}
+            {/* แสดงส่วนจัดการลายเซ็นเมื่อกดเพิ่มหรือเปลี่ยน */}
+            {isEditingSignature && (
+              <>
+                {/* เลือกวิธีเพิ่มลายเซ็น */}
+                <div className="student-signature-tabs">
+                  <button
+                    type="button"
+                    className={
+                      signatureMode === "draw"
+                        ? "student-signature-tab active"
+                        : "student-signature-tab"
+                    }
+                    onClick={() => {
+                      setSignatureMode("draw");
+                      setHasDrawnSignature(false);
+                      setSignatureError("");
+                      setSignatureSuccess("");
+                      setSignaturePassword("");
+                    }}
+                  >
+                    วาดลายเซ็น
+                  </button>
 
-                    <canvas
-                      ref={signatureCanvasRef}
-                      width={600}
-                      height={180}
-                      className="student-signature-canvas"
-                      onPointerDown={handleSignaturePointerDown}
-                      onPointerMove={handleSignaturePointerMove}
-                      onPointerUp={handleSignaturePointerUp}
-                      onPointerCancel={handleSignaturePointerUp}
-                    />
+                  <button
+                    type="button"
+                    className={
+                      signatureMode === "upload"
+                        ? "student-signature-tab active"
+                        : "student-signature-tab"
+                    }
+                    onClick={() => {
+                      setSignatureMode("upload");
+                      setSignatureFile(null);
+                      setSignaturePreview("");
+                      setHasDrawnSignature(false);
+                      setSignatureError("");
+                      setSignatureSuccess("");
+                      setSignaturePassword("");
+                    }}
+                  >
+                    อัปโหลดรูปลายเซ็น
+                  </button>
+                </div>
 
-                    {hasDrawnSignature && (
-                      <p className="student-profile-note">
-                        วาดลายเซ็นแล้ว (ยังไม่ได้บันทึก)
-                      </p>
+                {/* จัดพื้นที่ลายเซ็นเป็นสองคอลัมน์ */}
+                <div className="student-signature-layout">
+                  {/* คอลัมน์ซ้ายสำหรับวาดหรืออัปโหลดลายเซ็น */}
+                  <div className="student-signature-work-area">
+                    {/* วิธีที่ 1 วาดลายเซ็น */}
+                    {signatureMode === "draw" && (
+                      <div className="student-signature-section">
+                        <p>กรุณาวาดลายเซ็นในช่องด้านล่าง</p>
+
+                        <canvas
+                          ref={signatureCanvasRef}
+                          width={600}
+                          height={180}
+                          className="student-signature-canvas"
+                          onPointerDown={handleSignaturePointerDown}
+                          onPointerMove={handleSignaturePointerMove}
+                          onPointerUp={handleSignaturePointerUp}
+                          onPointerCancel={handleSignaturePointerUp}
+                        />
+
+                        {hasDrawnSignature && (
+                          <p className="student-profile-note">
+                            วาดลายเซ็นแล้ว (ยังไม่ได้บันทึก)
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* วิธีที่ 2 อัปโหลดรูปลายเซ็น */}
+                    {signatureMode === "upload" && (
+                      <div className="student-signature-section">
+                        <div className="student-signature-upload-box">
+                          <h4>อัปโหลดรูปลายเซ็น</h4>
+
+                          <p>เลือกรูปภาพลายเซ็นจากเครื่องของคุณ</p>
+
+                          <p className="student-signature-upload-hint">
+                            รองรับไฟล์ PNG และ JPG ขนาดไม่เกิน 2 MB
+                          </p>
+
+                          {/* ช่องเลือกไฟล์ที่ซ่อนไว้ */}
+                          <input
+                            id="student-signature-file"
+                            type="file"
+                            accept=".png,.jpg,.jpeg"
+                            className="student-signature-file-input"
+                            onChange={handleChooseSignatureImage}
+                            disabled={savingSignature}
+                          />
+
+                          {/* ปุ่มเลือกไฟล์ */}
+                          <label
+                            htmlFor="student-signature-file"
+                            className="student-signature-upload-btn"
+                          >
+                            เลือกไฟล์ลายเซ็น
+                          </label>
+
+                          {/* ชื่อไฟล์ที่เลือก */}
+                          {signatureFile !== null && (
+                            <p className="student-signature-file-name">
+                              ไฟล์ที่เลือก : {signatureFile.name}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* แสดงตัวอย่างลายเซ็น */}
+                        {signaturePreview !== "" && (
+                          <div className="student-signature-preview">
+                            <p>ตัวอย่างลายเซ็น</p>
+
+                            <img src={signaturePreview} alt="ตัวอย่างลายเซ็น" />
+
+                            <p className="student-profile-note">
+                              เลือกรูปลายเซ็นแล้ว (ยังไม่ได้บันทึก)
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ข้อความข้อผิดพลาด */}
+                    {signatureError !== "" && (
+                      <p className="student-profile-error">{signatureError}</p>
                     )}
                   </div>
-                )}
 
-                {/* วิธีที่ 2 อัปโหลดรูปลายเซ็น */}
-                {signatureMode === "upload" && (
-                  <div className="student-signature-section">
-                    <div className="student-signature-upload-box">
-                      <h4>อัปโหลดรูปลายเซ็น</h4>
+                  {/* ยืนยันรหัสผ่านก่อนบันทึกลายเซ็น */}
+                  {signatureMode !== "" && (
+                    <div className="student-signature-save-section">
+                      {/* หัวข้อส่วนยืนยันและปุ่มล้างลายเซ็น */}
+                      <div className="student-signature-control-heading">
+                        <h4>ยืนยันและบันทึกลายเซ็น</h4>
 
-                      <p>เลือกรูปภาพลายเซ็นจากเครื่องของคุณ</p>
+                        {signatureMode === "draw" && (
+                          <button
+                            type="button"
+                            className="student-signature-clear-btn"
+                            onClick={handleClearSignature}
+                            disabled={savingSignature}
+                          >
+                            ล้างลายเซ็น
+                          </button>
+                        )}
+                      </div>
 
-                      <p className="student-signature-upload-hint">
-                        รองรับไฟล์ PNG และ JPG ขนาดไม่เกิน 2 MB
-                      </p>
+                      {/* ช่องยืนยันรหัสผ่าน */}
+                      <label htmlFor="signature-password">
+                        รหัสผ่านของบัญชี
+                      </label>
 
-                      {/* ช่องเลือกไฟล์ที่ซ่อนไว้ */}
                       <input
-                        id="student-signature-file"
-                        type="file"
-                        accept=".png,.jpg,.jpeg"
-                        className="student-signature-file-input"
-                        onChange={handleChooseSignatureImage}
+                        id="signature-password"
+                        type="password"
+                        value={signaturePassword}
+                        onChange={(event) => {
+                          setSignaturePassword(event.target.value);
+                          setSignatureError("");
+                        }}
+                        placeholder="กรอกรหัสผ่านของบัญชี"
+                        autoComplete="current-password"
                         disabled={savingSignature}
                       />
 
-                      {/* ปุ่มเลือกไฟล์ */}
-                      <label
-                        htmlFor="student-signature-file"
-                        className="student-signature-upload-btn"
-                      >
-                        เลือกไฟล์ลายเซ็น
-                      </label>
+                      <p className="student-profile-note">
+                        กรุณายืนยันรหัสผ่านเพื่อเพิ่มหรือเปลี่ยนลายเซ็น
+                      </p>
 
-                      {/* ชื่อไฟล์ที่เลือก */}
-                      {signatureFile !== null && (
-                        <p className="student-signature-file-name">
-                          ไฟล์ที่เลือก : {signatureFile.name}
-                        </p>
-                      )}
-                    </div>
+                      <div className="student-signature-save-actions">
+                        <button
+                          type="button"
+                          className="student-profile-cancel-btn"
+                          onClick={handleCancelSignature}
+                          disabled={savingSignature}
+                        >
+                          ยกเลิก
+                        </button>
 
-                    {/* แสดงตัวอย่างลายเซ็น */}
-                    {signaturePreview !== "" && (
-                      <div className="student-signature-preview">
-                        <p>ตัวอย่างลายเซ็น</p>
-
-                        <img src={signaturePreview} alt="ตัวอย่างลายเซ็น" />
-
-                        <p className="student-profile-note">
-                          เลือกรูปลายเซ็นแล้ว (ยังไม่ได้บันทึก)
-                        </p>
+                        <button
+                          type="button"
+                          className="student-signature-save-btn"
+                          onClick={handleSaveSignature}
+                          disabled={savingSignature}
+                        >
+                          {savingSignature ? "กำลังบันทึก..." : "บันทึกลายเซ็น"}
+                        </button>
                       </div>
-                    )}
-                  </div>
-                )}
-
-                {/* ข้อความข้อผิดพลาด */}
-                {signatureError !== "" && (
-                  <p className="student-profile-error">{signatureError}</p>
-                )}
-
-                {/* ข้อความเมื่อบันทึกลายเซ็นสำเร็จ */}
-                {signatureSuccess !== "" && (
-                  <p className="student-profile-success">{signatureSuccess}</p>
-                )}
-              </div>
-
-              {/* ยืนยันรหัสผ่านก่อนบันทึกลายเซ็น */}
-              {signatureMode !== "" && (
-                <div className="student-signature-save-section">
-                  {/* หัวข้อส่วนยืนยันและปุ่มล้างลายเซ็น */}
-                  <div className="student-signature-control-heading">
-                    <h4>ยืนยันและบันทึกลายเซ็น</h4>
-
-                    {signatureMode === "draw" && (
-                      <button
-                        type="button"
-                        className="student-signature-clear-btn"
-                        onClick={handleClearSignature}
-                        disabled={savingSignature}
-                      >
-                        ล้างลายเซ็น
-                      </button>
-                    )}
-                  </div>
-
-                  {/* ช่องยืนยันรหัสผ่าน */}
-                  <label htmlFor="signature-password">รหัสผ่านของบัญชี</label>
-
-                  <input
-                    id="signature-password"
-                    type="password"
-                    value={signaturePassword}
-                    onChange={(event) => {
-                      setSignaturePassword(event.target.value);
-                      setSignatureError("");
-                    }}
-                    placeholder="กรอกรหัสผ่านของบัญชี"
-                    autoComplete="current-password"
-                    disabled={savingSignature}
-                  />
-
-                  <p className="student-profile-note">
-                    กรุณายืนยันรหัสผ่านเพื่อเพิ่มหรือเปลี่ยนลายเซ็น
-                  </p>
-
-                  <div className="student-signature-save-actions">
-                    <button
-                      type="button"
-                      className="student-profile-cancel-btn"
-                      onClick={handleCancelSignature}
-                      disabled={savingSignature}
-                    >
-                      ยกเลิก
-                    </button>
-
-                    <button
-                      type="button"
-                      className="student-signature-save-btn"
-                      onClick={handleSaveSignature}
-                      disabled={savingSignature}
-                    >
-                      {savingSignature ? "กำลังบันทึก..." : "บันทึกลายเซ็น"}
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </section>
         </div>
       </main>

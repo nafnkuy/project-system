@@ -35,6 +35,7 @@ import TeacherExamRevisionDetail from "./pages/teacher/TeacherExamRevisionDetail
 import TeacherEvaluationDetail from "./pages/teacher/TeacherEvaluationDetail";
 import TeacherManagedProjects from "./pages/teacher/TeacherManagedProjects";
 import TeacherManagedProjectDetail from "./pages/teacher/TeacherManagedProjectDetail";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
 
 
 
@@ -85,6 +86,7 @@ function App() {
         <Route path="/teacher-work/evaluation/:committeeMemberId" element={<TeacherEvaluationDetail />}/>
         <Route path="/teacher-managed-projects" element={<TeacherManagedProjects />} />
         <Route path="/teacher-managed-projects/:projectId" element={<TeacherManagedProjectDetail />} />
+        <Route path="/teacher-profile" element={<TeacherProfile />} />
 
 
         <Route path="/staff-home" element={<StaffHome />} />

@@ -122,7 +122,7 @@ function CreateTeacherProject() {
             <li onClick={() => navigate("/teacher-notifications")}>
               การแจ้งเตือน
             </li>
-            <li>ข้อมูลส่วนตัว</li>
+            <li onClick={() => navigate("/teacher-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 

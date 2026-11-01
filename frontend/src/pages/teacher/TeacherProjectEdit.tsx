@@ -183,7 +183,7 @@ function TeacherProjectEdit() {
             <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
             <li onClick={() => navigate("/teacher-decision-history")}>ประวัติการพิจารณา</li>
             <li onClick={() => navigate("/teacher-notifications")}>การแจ้งเตือน</li>
-            <li>ข้อมูลส่วนตัว</li>
+            <li onClick={() => navigate("/teacher-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 

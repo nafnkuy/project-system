@@ -101,7 +101,7 @@ const getAssetFilePath = (assetUrl) => {
     const fileName = assetUrl.slice(privatePrefix.length);
 
     // อนุญาตเฉพาะชื่อไฟล์ลายเซ็นที่ระบบสร้างขึ้น
-    const namePattern = /^student-\d+-[0-9a-f-]{36}\.png$/;
+    const namePattern = /^(student|teacher)-\d+-[0-9a-f-]{36}\.png$/;
 
     if (!namePattern.test(fileName)) {
       return null;
@@ -226,7 +226,6 @@ app.get("/student/profile/:studentId", (req, res) => {
   });
 });
 
-
 /* =========================================================
    แก้ไขอีเมลสำรองและเบอร์โทรศัพท์ของนิสิต
    ไม่อนุญาตให้เปลี่ยนอีเมลหลัก
@@ -293,34 +292,29 @@ app.put("/student/profile/:studentId/contact", (req, res) => {
       AND role = 'student'
   `;
 
-  db.query(
-    sql,
-    [backupEmailValue, phone, studentId],
-    (err, result) => {
-      if (err) {
-        console.error("แก้ไขข้อมูลการติดต่อไม่สำเร็จ:", err);
+  db.query(sql, [backupEmailValue, phone, studentId], (err, result) => {
+    if (err) {
+      console.error("แก้ไขข้อมูลการติดต่อไม่สำเร็จ:", err);
 
-        return res.status(500).json({
-          message: "ไม่สามารถบันทึกข้อมูลการติดต่อได้",
-        });
-      }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({
-          message: "ไม่พบข้อมูลนิสิต",
-        });
-      }
-
-      res.json({
-        success: true,
-        message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
-        backup_email: backupEmailValue,
-        phone: phone,
+      return res.status(500).json({
+        message: "ไม่สามารถบันทึกข้อมูลการติดต่อได้",
       });
     }
-  );
-});
 
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลนิสิต",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
+      backup_email: backupEmailValue,
+      phone: phone,
+    });
+  });
+});
 
 /* =========================================================
    อัปโหลดรูปโปรไฟล์ของนิสิต
@@ -428,6 +422,95 @@ app.put("/student/profile/:studentId/image", (req, res) => {
 
         return res.status(404).json({
           message: "ไม่พบข้อมูลนิสิต",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว",
+        profile_image: imageUrl,
+      });
+    });
+  });
+});
+
+/* =========================================================
+   เปลี่ยนรูปโปรไฟล์ของอาจารย์
+========================================================= */
+
+app.put("/teacher/profile/:teacherId/image", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // รับรูปภาพด้วยตัวรับไฟล์ที่มีอยู่แล้ว
+  uploadStudentProfile(req, res, async (uploadError) => {
+    if (uploadError) {
+      return res.status(400).json({
+        message: "ไฟล์ไม่ถูกต้องหรือมีขนาดเกิน 2 MB",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "กรุณาเลือกรูปโปรไฟล์",
+      });
+    }
+
+    // กำหนดตำแหน่งสำหรับเก็บรูป
+    const folderPath = path.join(__dirname, "uploads", "profile-images");
+
+    const fileName = "teacher-" + teacherId + "-" + Date.now() + ".webp";
+
+    const filePath = path.join(folderPath, fileName);
+
+    const imageUrl = "/uploads/profile-images/" + fileName;
+
+    try {
+      // สร้างโฟลเดอร์หากยังไม่มี
+      fs.mkdirSync(folderPath, {
+        recursive: true,
+      });
+
+      // ตรวจสอบรูปภาพและแปลงเป็น WebP
+      await sharp(req.file.buffer, {
+        limitInputPixels: 10000000,
+      })
+        .resize(400, 400, {
+          fit: "cover",
+        })
+        .webp({
+          quality: 85,
+        })
+        .toFile(filePath);
+    } catch (error) {
+      console.error("ประมวลผลรูปโปรไฟล์ไม่สำเร็จ:", error);
+
+      return res.status(400).json({
+        message: "ไม่สามารถอ่านไฟล์รูปภาพได้",
+      });
+    }
+
+    // บันทึกตำแหน่งรูปลงฐานข้อมูล
+    const sql = `
+      UPDATE users
+      SET profile_image = ?
+      WHERE id = ?
+        AND role = 'teacher'
+    `;
+
+    db.query(sql, [imageUrl, teacherId], (err, result) => {
+      if (err || result.affectedRows === 0) {
+        // ลบไฟล์ใหม่หากบันทึกฐานข้อมูลไม่สำเร็จ
+        fs.unlink(filePath, () => {});
+
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกรูปโปรไฟล์ได้",
         });
       }
 
@@ -560,6 +643,292 @@ app.put("/student/profile/:studentId/signature", (req, res) => {
         `;
 
       db.query(updateSql, [signaturePath, studentId], (updateError, result) => {
+        if (updateError || result.affectedRows === 0) {
+          fs.unlink(filePath, () => {});
+
+          return res.status(500).json({
+            message: "ไม่สามารถบันทึกลายเซ็นได้",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "บันทึกลายเซ็นเรียบร้อยแล้ว",
+          has_signature: 1,
+        });
+      });
+    });
+  });
+});
+
+/* =========================================================
+   ดึงข้อมูลส่วนตัวของอาจารย์
+========================================================= */
+
+app.get("/teacher/profile/:teacherId", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // ดึงข้อมูลอาจารย์จากฐานข้อมูล
+  const sql = `
+    SELECT
+      u.id,
+      u.username,
+      u.prefix,
+      u.name,
+      u.major,
+      u.phone,
+      u.email,
+      u.backup_email,
+      u.profile_image,
+
+      tp.position,
+      tp.english_name,
+      tp.office,
+      tp.office_phone,
+
+      CASE
+        WHEN u.signature_image IS NOT NULL
+          AND TRIM(u.signature_image) <> ''
+        THEN 1
+        ELSE 0
+      END AS has_signature
+
+    FROM users u
+
+    LEFT JOIN teacher_profiles tp
+      ON u.id = tp.user_id
+
+    WHERE u.id = ?
+      AND u.role = 'teacher'
+
+    LIMIT 1
+  `;
+
+  db.query(sql, [teacherId], (err, results) => {
+    if (err) {
+      console.error("โหลดข้อมูลอาจารย์ไม่สำเร็จ:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดข้อมูลอาจารย์ได้",
+      });
+    }
+
+    // ตรวจสอบว่าพบข้อมูลอาจารย์หรือไม่
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลอาจารย์",
+      });
+    }
+
+    // ส่งข้อมูลอาจารย์กลับไปยังหน้าเว็บไซต์
+    res.json(results[0]);
+  });
+});
+
+/* =========================================================
+   แก้ไขอีเมลสำรองและเบอร์โทรศัพท์ของอาจารย์
+========================================================= */
+
+app.put("/teacher/profile/:teacherId/contact", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  // รับข้อมูลจากหน้าเว็บไซต์
+  let backupEmail = "";
+  let phone = "";
+
+  if (typeof req.body.backup_email === "string") {
+    backupEmail = req.body.backup_email.trim();
+  }
+
+  if (typeof req.body.phone === "string") {
+    phone = req.body.phone.trim();
+  }
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // ตรวจสอบรูปแบบอีเมลสำรอง
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (backupEmail !== "") {
+    if (!emailPattern.test(backupEmail)) {
+      return res.status(400).json({
+        message: "รูปแบบอีเมลสำรองไม่ถูกต้อง",
+      });
+    }
+  }
+
+  // ตรวจสอบเบอร์โทรศัพท์
+  // รองรับรูปแบบ 0812345678 และ 038-102032
+  const phonePattern = /^[0-9-]+$/;
+
+  if (!phonePattern.test(phone)) {
+    return res.status(400).json({
+      message: "เบอร์โทรศัพท์ต้องเป็นตัวเลขหรือเครื่องหมาย - เท่านั้น",
+    });
+  }
+
+  const phoneNumbers = phone.replace(/-/g, "");
+
+  if (!/^0[0-9]{8,9}$/.test(phoneNumbers)) {
+    return res.status(400).json({
+      message: "กรุณากรอกเบอร์โทรศัพท์ 9-10 หลัก",
+    });
+  }
+
+  // ถ้าไม่กรอกอีเมลสำรอง ให้เก็บเป็น NULL
+  let backupEmailValue = null;
+
+  if (backupEmail !== "") {
+    backupEmailValue = backupEmail;
+  }
+
+  // บันทึกเฉพาะข้อมูลที่อนุญาตให้แก้ไข
+  const sql = `
+    UPDATE users
+    SET
+      backup_email = ?,
+      phone = ?
+    WHERE id = ?
+      AND role = 'teacher'
+  `;
+
+  db.query(sql, [backupEmailValue, phone, teacherId], (err, result) => {
+    if (err) {
+      console.error("แก้ไขข้อมูลอาจารย์ไม่สำเร็จ:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถบันทึกข้อมูลได้",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลอาจารย์",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
+      backup_email: backupEmailValue,
+      phone: phone,
+    });
+  });
+});
+
+/* =========================================================
+   บันทึกลายเซ็นของอาจารย์
+========================================================= */
+
+app.put("/teacher/profile/:teacherId/signature", (req, res) => {
+  const teacherId = Number(req.params.teacherId);
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(teacherId) || teacherId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // ใช้ตัวรับไฟล์ลายเซ็นที่สร้างไว้แล้ว
+  uploadStudentSignature(req, res, (uploadError) => {
+    if (uploadError) {
+      return res.status(400).json({
+        message: "ไฟล์ลายเซ็นไม่ถูกต้องหรือมีขนาดเกิน 2 MB",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "กรุณาเพิ่มลายเซ็นก่อนบันทึก",
+      });
+    }
+
+    const password = req.body.password;
+
+    if (typeof password !== "string" || password === "") {
+      return res.status(400).json({
+        message: "กรุณากรอกรหัสผ่านเพื่อยืนยัน",
+      });
+    }
+
+    // ตรวจสอบบัญชีอาจารย์และรหัสผ่าน
+    const checkSql = `
+      SELECT id
+      FROM users
+      WHERE id = ?
+        AND role = 'teacher'
+        AND password = ?
+      LIMIT 1
+    `;
+
+    db.query(checkSql, [teacherId, password], async (checkError, results) => {
+      if (checkError) {
+        return res.status(500).json({
+          message: "ไม่สามารถตรวจสอบบัญชีอาจารย์ได้",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(403).json({
+          message: "รหัสผ่านไม่ถูกต้อง",
+        });
+      }
+
+      // กำหนดตำแหน่งจัดเก็บลายเซ็น
+      const folderPath = path.join(__dirname, "private", "signatures");
+
+      const fileName =
+        "teacher-" + teacherId + "-" + crypto.randomUUID() + ".png";
+
+      const filePath = path.join(folderPath, fileName);
+
+      const signaturePath = "/private/signatures/" + fileName;
+
+      try {
+        fs.mkdirSync(folderPath, {
+          recursive: true,
+        });
+
+        // ตรวจสอบไฟล์ภาพและแปลงเป็น PNG
+        await sharp(req.file.buffer, {
+          limitInputPixels: 10000000,
+        })
+          .resize(1200, 400, {
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .png()
+          .toFile(filePath);
+      } catch (imageError) {
+        console.error("บันทึกภาพลายเซ็นไม่สำเร็จ:", imageError);
+
+        return res.status(400).json({
+          message: "ไม่สามารถอ่านไฟล์ลายเซ็นได้",
+        });
+      }
+
+      // เปลี่ยนตำแหน่งลายเซ็นในฐานข้อมูล
+      const updateSql = `
+          UPDATE users
+          SET signature_image = ?
+          WHERE id = ?
+            AND role = 'teacher'
+        `;
+
+      db.query(updateSql, [signaturePath, teacherId], (updateError, result) => {
         if (updateError || result.affectedRows === 0) {
           fs.unlink(filePath, () => {});
 

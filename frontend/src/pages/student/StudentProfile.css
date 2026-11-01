@@ -758,3 +758,23 @@
     gap: 8px;
   }
 }
+
+/* =========================================================
+   ข้อความและปุ่มเพิ่มหรือเปลี่ยนลายเซ็นของนิสิต
+========================================================= */
+
+.student-profile-page .student-signature-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.student-profile-page .student-signature-toolbar .student-profile-note {
+  margin: 0;
+}
+
+.student-profile-page .student-signature-toolbar .student-profile-edit-btn {
+  flex-shrink: 0;
+}
