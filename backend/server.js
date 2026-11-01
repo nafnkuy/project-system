@@ -13,6 +13,9 @@ wordcut.init();
 
 const db = require("./db");
 
+const { startEmailNotifier } = require("./emailNotifier");
+
+
 const app = express();
 
 app.use(cors());
@@ -10213,13 +10216,61 @@ function saveCompletedExamResult(memberId, callback) {
         status,
         finalStatus,
       ],
-      (saveErr, result) => {
-        if (saveErr) {
-          return callback(saveErr);
-        }
+      
+(saveErr, result) => {
+  if (saveErr) {
+    return callback(saveErr);
+  }
 
-        callback(null, result.affectedRows > 0);
-      },
+  // แจ้งเตือนเฉพาะเมื่อบันทึกผลรวมสำเร็จ
+  const resultSaved = result.affectedRows > 0;
+
+  if (!resultSaved) {
+    return callback(null, false);
+  }
+
+  // ส่งแจ้งเตือนให้สมาชิกทุกคนในโครงงาน
+  const notificationSql = `
+    INSERT INTO notifications (
+      user_id,
+      message,
+      project_id
+    )
+    SELECT DISTINCT
+      pm.user_id,
+      CONCAT(
+        'ผลการประเมินโครงงาน "',
+        p.title,
+        '" ครั้งที่ ',
+        ?,
+        ' พร้อมให้ตรวจสอบแล้ว กรุณาเข้าดูรายละเอียดในหน้าผลการประเมิน'
+      ),
+      p.id
+    FROM project_members pm
+    INNER JOIN projects p
+      ON p.id = pm.project_id
+    WHERE pm.project_id = ?
+  `;
+
+  db.query(
+    notificationSql,
+    [
+      rows[0].exam_round,
+      rows[0].project_id,
+    ],
+    (notificationErr) => {
+      if (notificationErr) {
+        console.error(
+          "Exam result notification error:",
+          notificationErr
+        );
+      }
+
+      callback(null, true);
+    }
+  );
+},
+
     );
   });
 }
@@ -11738,6 +11789,9 @@ app.patch("/teacher/exam-revisions/:submissionId/review", async (req, res) => {
   }
 });
 
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
+
+  startEmailNotifier();
 });
