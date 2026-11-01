@@ -1247,6 +1247,14 @@ strong.overdue {
   color: #a16207;
 }
 
+
+/* สถานะสอบไม่ผ่าน */
+.student-project-detail-page .student-exam-readiness-status.failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+
 .student-project-detail-page .student-exam-readiness-reasons {
   margin-top: 18px;
   padding: 14px 18px;

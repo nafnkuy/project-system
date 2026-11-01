@@ -107,6 +107,19 @@ interface ExamReadiness {
   reasons: string[];
 }
 
+interface ExamResultStatus {
+  status: "pending" | "published";
+  result_status?: string;
+}
+
+interface ExamRequestInfo {
+  status: string;
+  exam_round: number;
+  latest_result_round: number;
+  has_schedule: number;
+  advisor_comment: string | null;
+}
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -162,6 +175,11 @@ function StudentProjectDetail() {
   const [examRequestError, setExamRequestError] = useState("");
   const [revisionNote, setRevisionNote] = useState("");
   const [examRequestComment, setExamRequestComment] = useState("");
+
+  const [examResult, setExamResult] = useState<ExamResultStatus | null>(null);
+
+  const [examResultLoading, setExamResultLoading] = useState(true);
+  const [examResultError, setExamResultError] = useState("");
 
   /* =========================================================
    CALCULATE PROJECT PROGRESS
@@ -489,14 +507,25 @@ function StudentProjectDetail() {
       try {
         setExamRequestLoading(true);
 
-        const res = await axios.get(
+        const res = await axios.get<{
+          request: ExamRequestInfo | null;
+        }>(
           `http://localhost:5000/student/projects/${projectId}/exam-request/${userId}`,
         );
 
         if (!cancelled) {
-          setExamRequestStatus(res.data.request?.status ?? null);
+          const request = res.data.request;
 
-          setExamRequestComment(res.data.request?.advisor_comment || "");
+          if (
+            request &&
+            Number(request.exam_round) > Number(request.latest_result_round)
+          ) {
+            setExamRequestStatus(request.status);
+            setExamRequestComment(request.advisor_comment || "");
+          } else {
+            setExamRequestStatus(null);
+            setExamRequestComment("");
+          }
         }
       } catch (error) {
         console.error("Load exam request status error:", error);
@@ -519,25 +548,95 @@ function StudentProjectDetail() {
   }, [projectId, userId]);
 
   /* =========================================================
+   LOAD LATEST EXAM RESULT
+========================================================= */
+
+  useEffect(() => {
+    if (!projectId || !userId) {
+      setExamResultLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadExamResult = async () => {
+      setExamResultLoading(true);
+      setExamResultError("");
+
+      try {
+        const res = await axios.get<ExamResultStatus>(
+          `http://localhost:5000/student/projects/${projectId}/evaluation/${userId}`,
+        );
+
+        if (cancelled) return;
+
+        setExamResult(res.data);
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error("Load exam result error:", error);
+        setExamResultError("ไม่สามารถโหลดผลการสอบล่าสุดได้");
+      } finally {
+        if (!cancelled) {
+          setExamResultLoading(false);
+        }
+      }
+    };
+
+    loadExamResult();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, userId]);
+
+  /* =========================================================
    REQUEST PROJECT EXAM
 ========================================================= */
+
+  const isRetakeExam =
+    examResult?.status === "published" &&
+    examResult.result_status === "ไม่ผ่าน";
+
+  const isPassedExam =
+    examResult?.status === "published" && examResult.result_status === "ผ่าน";
+
+  const isConditionalExam =
+    examResult?.status === "published" &&
+    examResult.result_status === "ผ่านแบบมีเงื่อนไข";
 
   const handleExamRequest = async () => {
     if (
       !projectId ||
       !userId ||
-      !examReadiness?.can_request_exam ||
-      examRequestSubmitting
+      !examReadiness ||
+      examReadinessLoading ||
+      examRequestLoading ||
+      examResultLoading ||
+      !!examResultError ||
+      examRequestSubmitting ||
+      examRequestStatus === "รอพิจารณา" ||
+      examRequestStatus === "อนุมัติ" ||
+      isPassedExam ||
+      isConditionalExam ||
+      (!examReadiness.can_request_exam && !isRetakeExam) ||
+      (isRetakeExam &&
+        (examReadiness.total_phases === 0 ||
+          examReadiness.total_tasks === 0 ||
+          examReadiness.passed_tasks !== examReadiness.total_tasks))
     ) {
       return;
     }
+
     if (examRequestStatus === "ส่งกลับแก้ไข" && revisionNote.trim() === "") {
       setExamRequestError("กรุณาระบุรายละเอียดสิ่งที่แก้ไขแล้ว");
       return;
     }
 
     const confirmed = window.confirm(
-      "ยืนยันการส่งคำขอสอบโครงงานให้อาจารย์ที่ปรึกษาพิจารณาหรือไม่?",
+      isRetakeExam
+        ? "ยืนยันการสมัครสอบโครงงานใหม่ในรอบถัดไปหรือไม่?"
+        : "ยืนยันการส่งคำขอสอบโครงงานให้อาจารย์ที่ปรึกษาพิจารณาหรือไม่?",
     );
 
     if (!confirmed) return;
@@ -1203,15 +1302,18 @@ function StudentProjectDetail() {
 
                     <span
                       className={
-                        examRequestStatus === "รอพิจารณา"
+                        examRequestStatus === "รอพิจารณา" ||
+                        examRequestStatus === "ส่งกลับแก้ไข"
                           ? "student-exam-readiness-status pending"
-                          : examRequestStatus === "อนุมัติ"
+                          : examRequestStatus === "อนุมัติ" || isPassedExam
                             ? "student-exam-readiness-status ready"
-                            : examRequestStatus === "ส่งกลับแก้ไข"
-                              ? "student-exam-readiness-status pending"
-                              : examReadiness.can_request_exam
-                                ? "student-exam-readiness-status ready"
-                                : "student-exam-readiness-status not-ready"
+                            : isRetakeExam
+                              ? "student-exam-readiness-status failed"
+                              : isConditionalExam
+                                ? "student-exam-readiness-status not-ready"
+                                : examReadiness.can_request_exam
+                                  ? "student-exam-readiness-status ready"
+                                  : "student-exam-readiness-status not-ready"
                       }
                     >
                       {examRequestStatus === "รอพิจารณา"
@@ -1220,9 +1322,15 @@ function StudentProjectDetail() {
                           ? "อนุมัติให้สอบแล้ว"
                           : examRequestStatus === "ส่งกลับแก้ไข"
                             ? "ส่งกลับแก้ไข"
-                            : examReadiness.can_request_exam
-                              ? "พร้อมขอสอบ"
-                              : "ยังไม่พร้อมสอบ"}
+                            : isPassedExam
+                              ? "ผ่าน"
+                              : isConditionalExam
+                                ? "ผ่านแบบมีเงื่อนไข"
+                                : isRetakeExam
+                                  ? "ไม่ผ่าน"
+                                  : examReadiness.can_request_exam
+                                    ? "พร้อมขอสอบ"
+                                    : "ยังไม่พร้อมสอบ"}
                     </span>
                   </div>
 
@@ -1241,6 +1349,9 @@ function StudentProjectDetail() {
 
                   {examRequestStatus !== "รอพิจารณา" &&
                     examRequestStatus !== "อนุมัติ" &&
+                    !isRetakeExam &&
+                    !isPassedExam &&
+                    !isConditionalExam &&
                     examReadiness.reasons.length > 0 && (
                       <div className="student-exam-readiness-reasons">
                         <strong>สิ่งที่ต้องดำเนินการ</strong>
@@ -1253,13 +1364,17 @@ function StudentProjectDetail() {
                       </div>
                     )}
 
-                  {examReadiness.can_request_exam && !examRequestStatus && (
-                    <p className="student-exam-readiness-success">
-                      โครงงานผ่านเงื่อนไขเบื้องต้นในการขอสอบแล้ว
-                    </p>
-                  )}
+                  {examReadiness.can_request_exam &&
+                    !examRequestStatus &&
+                    !isRetakeExam &&
+                    !isPassedExam &&
+                    !isConditionalExam && (
+                      <p className="student-exam-readiness-success">
+                        โครงงานผ่านเงื่อนไขเบื้องต้นในการขอสอบแล้ว
+                      </p>
+                    )}
                   <div className="student-exam-request-actions">
-                    {examRequestLoading ? (
+                    {examRequestLoading || examResultLoading ? (
                       <p>กำลังโหลดสถานะคำขอสอบ...</p>
                     ) : examRequestStatus === "รอพิจารณา" ? (
                       <p className="student-exam-request-success">
@@ -1300,7 +1415,8 @@ function StudentProjectDetail() {
                             className="student-exam-request-btn"
                             onClick={handleExamRequest}
                             disabled={
-                              !examReadiness.can_request_exam ||
+                              (!examReadiness.can_request_exam &&
+                                !isRetakeExam) ||
                               revisionNote.trim() === "" ||
                               examRequestSubmitting
                             }
@@ -1311,6 +1427,39 @@ function StudentProjectDetail() {
                           </button>
                         </div>
                       </div>
+                    ) : isRetakeExam ? (
+                      <>
+                        <p>
+                          ผลการสอบครั้งล่าสุดไม่ผ่านเกณฑ์ที่กำหนด
+                          นิสิตสามารถสมัครสอบใหม่ในรอบถัดไปได้
+                        </p>
+
+                        <button
+                          type="button"
+                          className="student-exam-request-btn"
+                          onClick={handleExamRequest}
+                          disabled={
+                            examRequestSubmitting ||
+                            examReadiness.total_phases === 0 ||
+                            examReadiness.total_tasks === 0 ||
+                            examReadiness.passed_tasks !==
+                              examReadiness.total_tasks
+                          }
+                        >
+                          {examRequestSubmitting
+                            ? "กำลังส่งคำขอ..."
+                            : "สมัครสอบใหม่"}
+                        </button>
+                      </>
+                    ) : isPassedExam ? (
+                      <p className="student-exam-readiness-success">
+                        โครงงานสอบผ่านเรียบร้อยแล้ว
+                      </p>
+                    ) : isConditionalExam ? (
+                      <p>
+                        โครงงานผ่านแบบมีเงื่อนไข
+                        กรุณาดำเนินการแก้ไขตามรายละเอียดในหน้าผลการประเมิน
+                      </p>
                     ) : (
                       <button
                         type="button"
