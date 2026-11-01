@@ -27,6 +27,7 @@ interface StudentProfileData {
   major: string | null;
   phone: string | null;
   email: string | null;
+  backup_email: string | null;
   profile_image: string | null;
   has_signature: number;
 }
@@ -55,7 +56,7 @@ function StudentProfile() {
 
   const [isEditingContact, setIsEditingContact] = useState(false);
 
-  const [editEmail, setEditEmail] = useState("");
+  const [editBackupEmail, setEditBackupEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
 
   const [savingContact, setSavingContact] = useState(false);
@@ -155,7 +156,7 @@ function StudentProfile() {
 
         setStudent(response.data);
 
-        setEditEmail(response.data.email || "");
+        setEditBackupEmail(response.data.backup_email || "");
         setEditPhone(response.data.phone || "");
       } catch (err) {
         console.error("โหลดข้อมูลนิสิตไม่สำเร็จ:", err);
@@ -169,11 +170,17 @@ function StudentProfile() {
   }, [userId, navigate]);
 
   /* =========================================================
-   บันทึกข้อมูลการติดต่อของนิสิต
+   บันทึกอีเมลสำรองและเบอร์โทรศัพท์ของนิสิต
 ========================================================= */
 
   const handleSaveContact = async () => {
-    if (!userId || savingContact) return;
+    if (userId === null) {
+      return;
+    }
+
+    if (savingContact === true) {
+      return;
+    }
 
     setSavingContact(true);
     setContactError("");
@@ -183,27 +190,30 @@ function StudentProfile() {
       const response = await axios.put(
         `http://localhost:5000/student/profile/${userId}/contact`,
         {
-          email: editEmail.trim(),
+          backup_email: editBackupEmail.trim(),
           phone: editPhone.trim(),
         },
       );
 
-      setStudent((prev) =>
-        prev
-          ? {
-              ...prev,
-              email: response.data.email,
-              phone: response.data.phone,
-            }
-          : prev,
-      );
+      // อัปเดตข้อมูลที่แสดงบนหน้าเว็บ
+      setStudent((previousStudent) => {
+        if (previousStudent === null) {
+          return null;
+        }
+
+        return {
+          ...previousStudent,
+          backup_email: response.data.backup_email,
+          phone: response.data.phone,
+        };
+      });
 
       setIsEditingContact(false);
       setContactSuccess("บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
         setContactError(
-          err.response?.data?.message || "ไม่สามารถบันทึกข้อมูลได้",
+          error.response?.data?.message || "ไม่สามารถบันทึกข้อมูลได้",
         );
       } else {
         setContactError("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
@@ -218,7 +228,7 @@ function StudentProfile() {
 ========================================================= */
 
   const handleCancelContact = () => {
-    setEditEmail(student?.email || "");
+    setEditBackupEmail(student?.backup_email || "");
     setEditPhone(student?.phone || "");
 
     setContactError("");
@@ -879,7 +889,7 @@ function StudentProfile() {
             </section>
 
             {/* ข้อมูลการติดต่อ */}
-            <section className="student-profile-card">
+            <section className="student-profile-card student-profile-contact-card">
               <div className="student-profile-contact-heading">
                 <h3>ข้อมูลการติดต่อ</h3>
 
@@ -900,19 +910,36 @@ function StudentProfile() {
 
               <div className="student-profile-divider" />
 
+              {/* อีเมลหลัก ไม่อนุญาตให้แก้ไข */}
               <div className="student-profile-info-row">
-                <span>อีเมล</span>
+                <span>อีเมลหลัก</span>
+
+                {/* แสดงอีเมลหลักที่ไม่สามารถแก้ไขได้ */}
+                <div className="student-profile-primary-email">
+                  <strong>{student?.email || "-"}</strong>
+
+                  <small className="student-profile-email-hint">
+                    อีเมลหลักของบัญชี ไม่สามารถแก้ไขได้
+                  </small>
+                </div>
+              </div>
+
+              {/* อีเมลสำรอง สามารถแก้ไขได้ */}
+              <div className="student-profile-info-row">
+                <span>อีเมลสำรอง</span>
 
                 {isEditingContact ? (
                   <input
                     type="email"
                     className="student-profile-input"
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                    placeholder="กรอกอีเมล"
+                    value={editBackupEmail}
+                    onChange={(event) => {
+                      setEditBackupEmail(event.target.value);
+                    }}
+                    placeholder="กรอกอีเมลสำรอง (ไม่บังคับ)"
                   />
                 ) : (
-                  <strong>{student?.email || "-"}</strong>
+                  <strong>{student?.backup_email || "ยังไม่ได้เพิ่ม"}</strong>
                 )}
               </div>
 

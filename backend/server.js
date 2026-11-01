@@ -193,6 +193,7 @@ app.get("/student/profile/:studentId", (req, res) => {
       major,
       phone,
       email,
+      backup_email,
       profile_image,
       CASE
         WHEN signature_image IS NOT NULL
@@ -225,16 +226,28 @@ app.get("/student/profile/:studentId", (req, res) => {
   });
 });
 
+
 /* =========================================================
-   แก้ไขข้อมูลการติดต่อของนิสิต
+   แก้ไขอีเมลสำรองและเบอร์โทรศัพท์ของนิสิต
+   ไม่อนุญาตให้เปลี่ยนอีเมลหลัก
 ========================================================= */
 
 app.put("/student/profile/:studentId/contact", (req, res) => {
   const studentId = Number(req.params.studentId);
 
-  const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+  // รับข้อมูลอีเมลสำรอง
+  let backupEmail = "";
 
-  const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+  if (typeof req.body.backup_email === "string") {
+    backupEmail = req.body.backup_email.trim();
+  }
+
+  // รับข้อมูลเบอร์โทรศัพท์
+  let phone = "";
+
+  if (typeof req.body.phone === "string") {
+    phone = req.body.phone.trim();
+  }
 
   // ตรวจสอบรหัสผู้ใช้
   if (!Number.isInteger(studentId) || studentId <= 0) {
@@ -243,13 +256,15 @@ app.put("/student/profile/:studentId/contact", (req, res) => {
     });
   }
 
-  // ตรวจสอบรูปแบบอีเมล
+  // ตรวจสอบอีเมลสำรอง เฉพาะเมื่อมีการกรอก
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailPattern.test(email)) {
-    return res.status(400).json({
-      message: "กรุณากรอกอีเมลให้ถูกต้อง",
-    });
+  if (backupEmail !== "") {
+    if (!emailPattern.test(backupEmail)) {
+      return res.status(400).json({
+        message: "รูปแบบอีเมลสำรองไม่ถูกต้อง",
+      });
+    }
   }
 
   // ตรวจสอบเบอร์โทรศัพท์
@@ -261,39 +276,51 @@ app.put("/student/profile/:studentId/contact", (req, res) => {
     });
   }
 
-  // บันทึกข้อมูลลงฐานข้อมูล
+  // ถ้าไม่ได้กรอกอีเมลสำรอง ให้บันทึกเป็น NULL
+  let backupEmailValue = null;
+
+  if (backupEmail !== "") {
+    backupEmailValue = backupEmail;
+  }
+
+  // บันทึกเฉพาะอีเมลสำรองและเบอร์โทรศัพท์
   const sql = `
     UPDATE users
     SET
-      email = ?,
+      backup_email = ?,
       phone = ?
     WHERE id = ?
       AND role = 'student'
   `;
 
-  db.query(sql, [email, phone, studentId], (err, result) => {
-    if (err) {
-      console.error("Update student contact error:", err);
+  db.query(
+    sql,
+    [backupEmailValue, phone, studentId],
+    (err, result) => {
+      if (err) {
+        console.error("แก้ไขข้อมูลการติดต่อไม่สำเร็จ:", err);
 
-      return res.status(500).json({
-        message: "ไม่สามารถแก้ไขข้อมูลการติดต่อได้",
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกข้อมูลการติดต่อได้",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          message: "ไม่พบข้อมูลนิสิต",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
+        backup_email: backupEmailValue,
+        phone: phone,
       });
     }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        message: "ไม่พบข้อมูลนิสิต",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "บันทึกข้อมูลการติดต่อเรียบร้อยแล้ว",
-      email,
-      phone,
-    });
-  });
+  );
 });
+
 
 /* =========================================================
    อัปโหลดรูปโปรไฟล์ของนิสิต

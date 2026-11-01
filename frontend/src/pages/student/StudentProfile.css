@@ -679,3 +679,82 @@
     flex: 1;
   }
 }
+
+
+/* =========================================================
+   จัดรูปแบบข้อมูลการติดต่อของนิสิต
+========================================================= */
+
+/* จัดชื่อข้อมูลและค่าข้อมูลให้ตรงกัน */
+.student-profile-page .student-profile-contact-card .student-profile-info-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+/* ปรับความกว้างของชื่อข้อมูล */
+.student-profile-page .student-profile-contact-card .student-profile-info-row > span {
+  width: auto;
+  color: #666666;
+  font-size: 12px;
+}
+
+/* ปรับช่องกรอกอีเมลและเบอร์โทรศัพท์ */
+.student-profile-page .student-profile-contact-card .student-profile-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+  font-size: 12px;
+  background: #ffffff;
+}
+
+/* เปลี่ยนสีขอบเมื่อกดช่องกรอก */
+.student-profile-page .student-profile-contact-card .student-profile-input:focus {
+  border-color: #315f7d;
+}
+
+/* จัดอีเมลหลักและข้อความอธิบาย */
+.student-profile-page .student-profile-primary-email {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+}
+
+/* อีเมลหลัก */
+.student-profile-page .student-profile-primary-email strong {
+  font-size: 12px;
+  color: #222222;
+  overflow-wrap: anywhere;
+}
+
+/* ข้อความอธิบายอีเมลหลัก */
+.student-profile-page .student-profile-email-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #999999;
+  line-height: 1.5;
+}
+
+/* จัดปุ่มยกเลิกและบันทึก */
+.student-profile-page .student-profile-contact-card .student-profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/* รองรับหน้าจอขนาดเล็ก */
+@media (max-width: 600px) {
+  .student-profile-page .student-profile-contact-card .student-profile-info-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
