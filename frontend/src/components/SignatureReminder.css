@@ -1,0 +1,174 @@
+
+/* =========================================================
+   พื้นหลังป๊อปอัปแจ้งเตือนลายเซ็น
+========================================================= */
+
+.signature-reminder-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99999;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   กรอบป๊อปอัป
+========================================================= */
+
+.signature-reminder-popup {
+  width: 440px;
+  max-width: 100%;
+  padding: 30px;
+
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ไอคอนแจ้งเตือน */
+.signature-reminder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+  background: #fff4df;
+  color: #d48a11;
+
+  font-size: 25px;
+  font-weight: 600;
+}
+
+/* หัวข้อแจ้งเตือน */
+.signature-reminder-popup h3 {
+  margin: 0 0 14px;
+  color: #222222;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* รายละเอียดแจ้งเตือน */
+.signature-reminder-description {
+  margin: 0;
+  font-size: 13px;
+  color: #666666;
+  line-height: 1.9;
+}
+
+/* =========================================================
+   แนะนำตำแหน่งเพิ่มลายเซ็น
+========================================================= */
+
+.signature-reminder-location {
+  margin-top: 20px;
+  padding: 15px;
+
+  background: #f5f7f9;
+  border-radius: 6px;
+
+  text-align: center;
+}
+
+.signature-reminder-location p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #666666;
+}
+
+.signature-reminder-location p:last-child {
+  margin: 8px 0 0;
+}
+
+.signature-reminder-location strong {
+  font-size: 12px;
+  color: #315f7d;
+  font-weight: 600;
+}
+
+/* =========================================================
+   ปุ่มด้านล่างป๊อปอัป
+========================================================= */
+
+.signature-reminder-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.signature-reminder-actions button {
+  padding: 10px 18px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ปุ่มไว้ภายหลัง */
+.signature-reminder-later {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  color: #555555;
+}
+
+/* ปุ่มไปเพิ่มลายเซ็น */
+.signature-reminder-go {
+  background: #315f7d;
+  border: 1px solid #315f7d;
+  color: #ffffff;
+}
+
+.signature-reminder-go:hover {
+  background: #244b65;
+}
+
+/* =========================================================
+   รองรับหน้าจอขนาดเล็ก
+========================================================= */
+
+@media (max-width: 480px) {
+  .signature-reminder-popup {
+    padding: 22px;
+  }
+
+  .signature-reminder-actions {
+    flex-direction: column;
+  }
+
+  .signature-reminder-actions button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   กำหนดฟอนต์ของป๊อปอัปให้เหมือนระบบ SPTC
+========================================================= */
+
+.signature-reminder-overlay {
+  font-family: "Prompt", sans-serif;
+}
+
+/* ฟอนต์ข้อความภายในป๊อปอัป */
+.signature-reminder-popup {
+  font-family: "Prompt", sans-serif;
+}
+
+/* ฟอนต์ปุ่มภายในป๊อปอัป */
+.signature-reminder-actions button {
+  font-family: "Prompt", sans-serif;
+}

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
+import SignatureReminder from "./components/SignatureReminder";
 import Login from "./pages/Login";
 import StudentHome from "./pages/student/StudentHome";
 import ProjectDetail from "./pages/student/ProjectDetail";
@@ -49,6 +50,7 @@ import StaffProfile from "./pages/Staff/StaffProfile";
 function App() {
   return (
     <BrowserRouter>
+    <SignatureReminder />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/StudentHome" element={<StudentHome />} />

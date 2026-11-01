@@ -172,6 +172,55 @@ app.post("/login", (req, res) => {
 });
 
 /* =========================================================
+   ตรวจสอบว่าผู้ใช้มีลายเซ็นในระบบหรือไม่
+========================================================= */
+
+app.get("/profile/signature-status/:userId", (req, res) => {
+  const userId = Number(req.params.userId);
+
+  // ตรวจสอบรหัสผู้ใช้
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(400).json({
+      message: "รหัสผู้ใช้ไม่ถูกต้อง",
+    });
+  }
+
+  // ตรวจสอบบทบาทและสถานะลายเซ็น
+  const sql = `
+    SELECT
+      role,
+      CASE
+        WHEN signature_image IS NOT NULL
+          AND TRIM(signature_image) <> ''
+        THEN 1
+        ELSE 0
+      END AS has_signature
+    FROM users
+    WHERE id = ?
+      AND role IN ('student', 'teacher')
+    LIMIT 1
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error("ตรวจสอบลายเซ็นไม่สำเร็จ:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถตรวจสอบลายเซ็นได้",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลผู้ใช้",
+      });
+    }
+
+    res.json(results[0]);
+  });
+});
+
+/* =========================================================
    ข้อมูลส่วนตัวของนิสิต
 ========================================================= */
 
