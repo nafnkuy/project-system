@@ -800,24 +800,37 @@ td:nth-child(7) {
 }
 
 
-/* รอพิจารณา */
 
-.teacher-requests-page
-.teacher-requests-status.pending {
-  background: #ffbd00;
-
-  color: #ffffff;
+/* ===== สถานะรอพิจารณา - เหลืองอ่อน ===== */
+.teacher-requests-page .teacher-requests-status.pending {
+  background: #fff5d6;
+  color: #b88600;
 }
 
-
-/* แก้ไขแล้ว */
-
-.teacher-requests-page
-.teacher-requests-status.resubmitted {
-  background: #3b75c4;
-
-  color: #ffffff;
+/* ===== สถานะต้องแก้ไข - ส้มอ่อน ===== */
+.teacher-requests-page .teacher-requests-status.revision {
+  background: #fff0e3;
+  color: #e07800;
 }
+
+/* ===== สถานะแก้ไขแล้ว - ฟ้าอ่อน ===== */
+.teacher-requests-page .teacher-requests-status.resubmitted {
+  background: #e8f1ff;
+  color: #3678c5;
+}
+
+/* ===== สถานะอนุมัติ - เขียวอ่อน ===== */
+.teacher-requests-page .teacher-requests-status.approved {
+  background: #e6f5ee;
+  color: #159c68;
+}
+
+/* ===== สถานะปฏิเสธ - แดงอ่อน ===== */
+.teacher-requests-page .teacher-requests-status.rejected {
+  background: #ffeaea;
+  color: #e53935;
+}
+
 
 
 /* =========================================================

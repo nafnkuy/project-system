@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap");
 
-
 /* =========================================================
    RESET
    เหมือน TeacherHome
@@ -16,7 +15,6 @@
   font-family: "Prompt", sans-serif;
 }
 
-
 .teacher-history-page {
   display: flex;
 
@@ -26,7 +24,6 @@
 
   background: #f5f5f5;
 }
-
 
 /* =========================================================
    SIDEBAR
@@ -57,7 +54,6 @@
   z-index: 100;
 }
 
-
 /* =========================================================
    LOGO
 ========================================================= */
@@ -73,7 +69,6 @@
   margin-bottom: 0;
 }
 
-
 .teacher-history-page .teacher-history-logo img {
   width: 55px;
   height: 55px;
@@ -83,11 +78,9 @@
   flex-shrink: 0;
 }
 
-
 .teacher-history-page .teacher-history-logo > div {
   min-width: 0;
 }
-
 
 .teacher-history-page .teacher-history-logo h2 {
   margin: 0;
@@ -99,7 +92,6 @@
 
   white-space: nowrap;
 }
-
 
 .teacher-history-page .teacher-history-logo p {
   margin: 0;
@@ -114,7 +106,6 @@
   white-space: nowrap;
 }
 
-
 /* =========================================================
    MENU
 ========================================================= */
@@ -125,7 +116,6 @@
   margin: 0;
 }
 
-
 .teacher-history-page .teacher-history-sidebar nav ul {
   width: 100%;
 
@@ -134,7 +124,6 @@
 
   list-style: none;
 }
-
 
 .teacher-history-page .teacher-history-sidebar nav li {
   width: 100%;
@@ -159,11 +148,9 @@
   cursor: pointer;
 }
 
-
 .teacher-history-page .teacher-history-sidebar nav li:hover {
   background: #f0f0f0;
 }
-
 
 /* =========================================================
    ACTIVE MENU
@@ -176,7 +163,6 @@
 
   font-weight: 400;
 }
-
 
 /* =========================================================
    LOGOUT
@@ -202,11 +188,9 @@
   cursor: pointer;
 }
 
-
 .teacher-history-page .teacher-history-logout:hover {
   background: #2f6db5;
 }
-
 
 /* =========================================================
    MAIN
@@ -222,7 +206,6 @@
 
   background: #f5f5f5;
 }
-
 
 /* =========================================================
    HEADER
@@ -244,7 +227,6 @@
   border: none;
 }
 
-
 .teacher-history-page .teacher-history-header h2 {
   margin: 0;
 
@@ -253,7 +235,6 @@
   font-size: 20px !important;
   font-weight: 400;
 }
-
 
 /* =========================================================
    HEADER RIGHT
@@ -266,7 +247,6 @@
   gap: 10px;
 }
 
-
 /* =========================================================
    TEACHER NOTIFICATION BELL
    ให้ขนาดเหมือน TeacherHome
@@ -278,7 +258,6 @@
   width: 50px;
   height: 50px;
 }
-
 
 .teacher-history-page .teacher-notification-btn {
   position: relative;
@@ -304,16 +283,13 @@
   cursor: pointer;
 }
 
-
 .teacher-history-page .teacher-notification-btn:hover {
   background: #f7f7f7;
 }
 
-
 .teacher-history-page .teacher-notification-btn svg {
   color: #999999;
 }
-
 
 /* =========================================================
    NOTIFICATION COUNT
@@ -344,7 +320,6 @@
   font-weight: 500;
 }
 
-
 /* =========================================================
    USER
    เหมือน TeacherHome
@@ -371,7 +346,6 @@
   font-weight: 400;
 }
 
-
 .teacher-history-page .teacher-history-user img {
   width: 30px;
   height: 30px;
@@ -380,7 +354,6 @@
 
   object-fit: cover;
 }
-
 
 /* =========================================================
    CONTENT
@@ -392,7 +365,6 @@
 
   padding: 32px 38px 40px;
 }
-
 
 /* =========================================================
    SEARCH + FILTER
@@ -411,7 +383,6 @@
   margin-top: 0;
   margin-bottom: 28px;
 }
-
 
 /* =========================================================
    SEARCH
@@ -434,7 +405,6 @@
   border-radius: 20px;
 }
 
-
 .teacher-history-page .teacher-history-search svg {
   flex-shrink: 0;
 
@@ -444,7 +414,6 @@
 
   pointer-events: none;
 }
-
 
 .teacher-history-page .teacher-history-search input {
   flex: 1;
@@ -466,16 +435,12 @@
   font-weight: 400;
 }
 
-
-.teacher-history-page
-.teacher-history-search
-input::placeholder {
+.teacher-history-page .teacher-history-search input::placeholder {
   color: #999999;
 
   font-size: 12px;
   font-weight: 400;
 }
-
 
 /* =========================================================
    FILTER
@@ -488,7 +453,6 @@ input::placeholder {
   width: 135px;
   height: 36px;
 }
-
 
 .teacher-history-page .teacher-history-filter {
   width: 100%;
@@ -518,7 +482,6 @@ input::placeholder {
   -moz-appearance: none;
 }
 
-
 .teacher-history-page .teacher-history-filter:focus {
   border-color: #b7b7b7;
 
@@ -527,11 +490,9 @@ input::placeholder {
   box-shadow: none;
 }
 
-
 .teacher-history-page .teacher-history-filter option {
   font-size: 11px;
 }
-
 
 .teacher-history-page .teacher-history-select-arrow {
   position: absolute;
@@ -547,7 +508,6 @@ input::placeholder {
 
   pointer-events: none;
 }
-
 
 /* =========================================================
    HISTORY TABLE CARD
@@ -571,7 +531,6 @@ input::placeholder {
   box-shadow: none;
 }
 
-
 /* =========================================================
    CARD TITLE
 ========================================================= */
@@ -584,7 +543,6 @@ input::placeholder {
   font-size: 16px;
   font-weight: 600;
 }
-
 
 /* =========================================================
    TABLE
@@ -599,7 +557,6 @@ input::placeholder {
 
   color: #222222;
 }
-
 
 /* =========================================================
    TABLE CELL
@@ -626,7 +583,6 @@ input::placeholder {
   white-space: nowrap;
 }
 
-
 /* =========================================================
    TABLE HEADER
 ========================================================= */
@@ -641,58 +597,34 @@ input::placeholder {
   font-weight: 500;
 }
 
-
 /* แถวสุดท้ายไม่มีเส้น */
 
-.teacher-history-page
-.teacher-history-table
-tbody
-tr:last-child
-td {
+.teacher-history-page .teacher-history-table tbody tr:last-child td {
   border-bottom: none;
 }
-
 
 /* =========================================================
    COLUMN WIDTH
 ========================================================= */
 
-
 /* 1. ประเภท */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(1),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(1) {
+.teacher-history-page .teacher-history-table th:nth-child(1),
+.teacher-history-page .teacher-history-table td:nth-child(1) {
   width: 15%;
 }
 
-
 /* 2. รหัสประจำตัว */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(2),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(2) {
+.teacher-history-page .teacher-history-table th:nth-child(2),
+.teacher-history-page .teacher-history-table td:nth-child(2) {
   width: 11%;
 }
 
-
 /* 3. ชื่อนิสิต */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(3),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(3) {
+.teacher-history-page .teacher-history-table th:nth-child(3),
+.teacher-history-page .teacher-history-table td:nth-child(3) {
   width: 15%;
 
   overflow: hidden;
@@ -702,16 +634,10 @@ td:nth-child(3) {
   white-space: nowrap;
 }
 
-
 /* 4. ชื่อหัวข้อโครงงาน */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(4),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(4) {
+.teacher-history-page .teacher-history-table th:nth-child(4),
+.teacher-history-page .teacher-history-table td:nth-child(4) {
   width: 25%;
 
   max-width: 260px;
@@ -723,45 +649,26 @@ td:nth-child(4) {
   white-space: nowrap;
 }
 
-
 /* 5. วันเวลาที่พิจารณา */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(5),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(5) {
+.teacher-history-page .teacher-history-table th:nth-child(5),
+.teacher-history-page .teacher-history-table td:nth-child(5) {
   width: 17%;
 }
 
-
 /* 6. สถานะ */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(6),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(6) {
+.teacher-history-page .teacher-history-table th:nth-child(6),
+.teacher-history-page .teacher-history-table td:nth-child(6) {
   width: 9%;
 }
 
-
 /* 7. จัดการ */
 
-.teacher-history-page
-.teacher-history-table
-th:nth-child(7),
-
-.teacher-history-page
-.teacher-history-table
-td:nth-child(7) {
+.teacher-history-page .teacher-history-table th:nth-child(7),
+.teacher-history-page .teacher-history-table td:nth-child(7) {
   width: 8%;
 }
-
 
 /* =========================================================
    EMPTY / LOADING
@@ -782,7 +689,6 @@ td:nth-child(7) {
   text-align: center !important;
   vertical-align: middle !important;
 }
-
 
 /* =========================================================
    STATUS
@@ -808,36 +714,23 @@ td:nth-child(7) {
   white-space: nowrap;
 }
 
-
-/* อนุมัติ */
-
-.teacher-history-page
-.teacher-history-status.approved {
-  background: #159c68;
-
-  color: #ffffff;
+/* ===== สถานะอนุมัติ - เขียวอ่อน ===== */
+.teacher-history-page .teacher-history-status.approved {
+  background: #e6f5ee;
+  color: #159c68;
 }
 
-
-/* ต้องแก้ไข */
-
-.teacher-history-page
-.teacher-history-status.revision {
-  background: #f07800;
-
-  color: #ffffff;
+/* ===== สถานะต้องแก้ไข - ส้มอ่อน ===== */
+.teacher-history-page .teacher-history-status.revision {
+  background: #fff0e3;
+  color: #e07800;
 }
 
-
-/* ปฏิเสธ */
-
-.teacher-history-page
-.teacher-history-status.rejected {
-  background: #ff0000;
-
-  color: #ffffff;
+/* ===== สถานะปฏิเสธ - แดงอ่อน ===== */
+.teacher-history-page .teacher-history-status.rejected {
+  background: #ffeaea;
+  color: #e53935;
 }
-
 
 /* =========================================================
    DETAIL BUTTON
@@ -869,12 +762,9 @@ td:nth-child(7) {
   cursor: pointer;
 }
 
-
-.teacher-history-page
-.teacher-history-detail-btn:hover {
+.teacher-history-page .teacher-history-detail-btn:hover {
   background: #f2f2f2;
 }
-
 
 /* =========================================================
    PAGINATION
@@ -894,10 +784,7 @@ td:nth-child(7) {
   gap: 12px;
 }
 
-
-.teacher-history-page
-.teacher-history-pagination
-button {
+.teacher-history-page .teacher-history-pagination button {
   width: 30px;
   height: 30px;
 
@@ -921,17 +808,11 @@ button {
   transition: 0.2s;
 }
 
-
-.teacher-history-page
-.teacher-history-pagination
-button:hover:not(:disabled) {
+.teacher-history-page .teacher-history-pagination button:hover:not(:disabled) {
   background: #f2f2f2;
 }
 
-
-.teacher-history-page
-.teacher-history-pagination
-button:disabled {
+.teacher-history-page .teacher-history-pagination button:disabled {
   color: #aaaaaa;
 
   opacity: 0.4;
@@ -939,35 +820,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
-
-.teacher-history-page
-.teacher-history-pagination
-span {
+.teacher-history-page .teacher-history-pagination span {
   color: #222222;
 
   font-size: 14px;
   font-weight: 500;
 }
 
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
 @media (max-width: 1100px) {
-
-  .teacher-history-page
-  .teacher-history-table {
+  .teacher-history-page .teacher-history-table {
     min-width: 1050px;
   }
-
 }
 
-
 @media (max-width: 700px) {
-
-  .teacher-history-page
-  .teacher-history-main {
+  .teacher-history-page .teacher-history-main {
     width: calc(100% - 250px);
 
     margin-left: 250px;
@@ -975,24 +846,17 @@ span {
     overflow-x: auto;
   }
 
-
-  .teacher-history-page
-  .teacher-history-content {
+  .teacher-history-page .teacher-history-content {
     min-width: 900px;
 
     padding: 25px 38px;
   }
 
-
-  .teacher-history-page
-  .teacher-history-toolbar {
+  .teacher-history-page .teacher-history-toolbar {
     justify-content: flex-start;
   }
 
-
-  .teacher-history-page
-  .teacher-history-card {
+  .teacher-history-page .teacher-history-card {
     overflow-x: auto;
   }
-
 }
