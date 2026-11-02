@@ -36,21 +36,40 @@ function TeacherManagedProjects() {
   const [projects, setProjects] = useState<ManagedProject[]>([]);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  /* =========================================================
+   ตรวจสอบการเข้าสู่ระบบของอาจารย์
+========================================================= */
 
-  const fetchProjects = async () => {
-    if (!advisorId) return;
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/teacher/managed-projects/${advisorId}`,
-      );
-      setProjects(res.data || []);
-    } catch (error) {
-      console.error("โหลดโครงงานที่ดูแลไม่สำเร็จ", error);
+  useEffect(() => {
+    if (!advisorId || !username) {
+      navigate("/", { replace: true });
     }
-  };
+  }, [advisorId, username, navigate]);
+
+  /* =========================================================
+   โหลดโครงงานที่ดูแลเมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    // ไม่มีข้อมูลเข้าสู่ระบบ ไม่ต้องโหลดโครงงาน
+    if (!advisorId || !username) {
+      return;
+    }
+
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/teacher/managed-projects/${advisorId}`,
+        );
+
+        setProjects(res.data || []);
+      } catch (error) {
+        console.error("โหลดโครงงานที่ดูแลไม่สำเร็จ", error);
+      }
+    };
+
+    fetchProjects();
+  }, [advisorId, username]);
 
   const filteredProjects = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -93,209 +112,190 @@ function TeacherManagedProjects() {
     }
   };
 
-  return (
-  <div className="teacher-home-page teacher-managed-page">
+  /* =========================================================
+   ไม่แสดงหน้าโครงงานที่ดูแลเมื่อไม่ได้เข้าสู่ระบบ
+========================================================= */
 
-    {/* =========================================
+  if (!advisorId || !username) {
+    return null;
+  }
+
+  return (
+    <div className="teacher-home-page teacher-managed-page">
+      {/* =========================================
         SIDEBAR
     ========================================= */}
 
-    <aside className="sidebar">
-      <div className="logo">
-        <img src={logo} alt="Logo" />
+      <aside className="sidebar">
+        <div className="logo">
+          <img src={logo} alt="Logo" />
 
-        <div>
-          <h2>SPTC System</h2>
-          <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+          <div>
+            <h2>SPTC System</h2>
+            <p>ระบบติดตามและสื่อสารโครงงานนิสิต</p>
+          </div>
         </div>
-      </div>
 
-      <nav>
-        <ul>
-          <li onClick={() => navigate("/teacher-home")}>
-            หน้าหลัก
-          </li>
+        <nav>
+          <ul>
+            <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
 
-          <li onClick={() => navigate("/teacher-projects")}>
-            จัดการหัวข้อโครงงาน
-          </li>
+            <li onClick={() => navigate("/teacher-projects")}>
+              จัดการหัวข้อโครงงาน
+            </li>
 
-          <li onClick={() => navigate("/teacher-requests")}>
-            คำขอเข้าร่วมโครงงาน
-          </li>
+            <li onClick={() => navigate("/teacher-requests")}>
+              คำขอเข้าร่วมโครงงาน
+            </li>
 
-          <li className="active">
-            โครงงานที่ดูแล
-          </li>
+            <li className="active">โครงงานที่ดูแล</li>
 
-          <li onClick={() => navigate("/teacher-work")}>
-            งานที่ต้องดำเนินการ
-          </li>
+            <li onClick={() => navigate("/teacher-work")}>
+              งานที่ต้องดำเนินการ
+            </li>
 
-          <li
-            onClick={() =>
-              navigate("/teacher-decision-history")
-            }
-          >
-            ประวัติการพิจารณา
-          </li>
+            <li onClick={() => navigate("/teacher-decision-history")}>
+              ประวัติการพิจารณา
+            </li>
 
-          <li
-            onClick={() => navigate("/teacher-notifications")}
-          >
-            การแจ้งเตือน
-          </li>
+            <li onClick={() => navigate("/teacher-notifications")}>
+              การแจ้งเตือน
+            </li>
 
-          <li onClick={() => navigate("/teacher-profile")}>ข้อมูลส่วนตัว</li>
-        </ul>
-      </nav>
+            <li onClick={() => navigate("/teacher-profile")}>ข้อมูลส่วนตัว</li>
+          </ul>
+        </nav>
 
-      <button
-        type="button"
-        className="logout-btn"
-        onClick={handleLogout}
-      >
-        ออกจากระบบ
-      </button>
-    </aside>
+        <button type="button" className="logout-btn" onClick={handleLogout}>
+          ออกจากระบบ
+        </button>
+      </aside>
 
-    {/* =========================================
+      {/* =========================================
         MAIN
     ========================================= */}
 
-    <main className="main">
+      <main className="main">
+        {/* HEADER */}
 
-      {/* HEADER */}
+        <header className="header">
+          <h2>โครงงานที่ดูแล</h2>
 
-      <header className="header">
-        <h2>โครงงานที่ดูแล</h2>
+          <div className="header-right">
+            <TeacherNotificationBell />
 
-        <div className="header-right">
-          <TeacherNotificationBell />
+            <div className="user-info">
+              <img
+                src={
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
+                }
+                alt="Profile"
+                className="profile-image"
+              />
 
-          <div className="user-info">
-            <img
-              src={
-                profileImage
-                  ? `http://localhost:5000${profileImage}`
-                  : logo
-              }
-              alt="Profile"
-              className="profile-image"
-            />
-
-            <span>{username || "-"}</span>
+              <span>{username || "-"}</span>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* =========================================
+        {/* =========================================
           PAGE CONTENT
       ========================================= */}
 
-      <div className="tmp-page">
+        <div className="tmp-page">
+          {/* SEARCH */}
 
-        {/* SEARCH */}
+          <div className="tmp-search-wrap">
+            <div className="tmp-search-box">
+              <input
+                type="text"
+                placeholder="ค้นหาโครงงานหรือนิสิต"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="tmp-search"
+              />
 
-        <div className="tmp-search-wrap">
-          <div className="tmp-search-box">
-            <input
-              type="text"
-              placeholder="ค้นหาโครงงานหรือนิสิต"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="tmp-search"
-            />
-
-            <FaSearch className="tmp-search-icon" />
+              <FaSearch className="tmp-search-icon" />
+            </div>
           </div>
-        </div>
 
-        {/* PROJECT TABLE CARD */}
+          {/* PROJECT TABLE CARD */}
 
-        <div className="tmp-card">
-          <h3>โครงงานที่ดูแล</h3>
+          <div className="tmp-card">
+            <h3>โครงงานที่ดูแล</h3>
 
-          <div className="tmp-table-wrap">
-            <table className="tmp-table">
-              <thead>
-                <tr>
-                  <th>โครงงาน</th>
-                  <th>นิสิต</th>
-                  <th>สถานะ</th>
-                  <th>รายละเอียด</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredProjects.length > 0 ? (
-                  filteredProjects.map((project) => (
-                    <tr key={project.id}>
-
-                      {/* PROJECT TITLE */}
-
-                      <td>{project.title}</td>
-
-                      {/* STUDENTS */}
-
-                      <td>
-                        <div className="tmp-students">
-                          {project.students
-                            .split("|")
-                            .map((student, index) => (
-                              <span key={index}>
-                                {student.trim()}
-                              </span>
-                            ))}
-                        </div>
-                      </td>
-
-                      {/* STATUS */}
-
-                      <td>
-                        <span
-                          className={getStatusClass(project.status)}
-                        >
-                          {getStatusLabel(project.status)}
-                        </span>
-                      </td>
-
-                      {/* DETAILS */}
-
-                      <td>
-                        <button
-                          type="button"
-                          className="tmp-detail-btn"
-                          onClick={() =>
-                            navigate(
-                              `/teacher-managed-projects/${project.id}`
-                            )
-                          }
-                        >
-                          ดูรายละเอียด
-                        </button>
-                      </td>
-
-                    </tr>
-                  ))
-                ) : (
+            <div className="tmp-table-wrap">
+              <table className="tmp-table">
+                <thead>
                   <tr>
-                    <td colSpan={4} className="tmp-empty">
-                      {search.trim()
-                        ? "ไม่พบโครงงานที่ค้นหา"
-                        : "ยังไม่มีโครงงานที่ดูแล"}
-                    </td>
+                    <th>โครงงาน</th>
+                    <th>นิสิต</th>
+                    <th>สถานะ</th>
+                    <th>รายละเอียด</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {filteredProjects.length > 0 ? (
+                    filteredProjects.map((project) => (
+                      <tr key={project.id}>
+                        {/* PROJECT TITLE */}
+
+                        <td>{project.title}</td>
+
+                        {/* STUDENTS */}
+
+                        <td>
+                          <div className="tmp-students">
+                            {project.students
+                              .split("|")
+                              .map((student, index) => (
+                                <span key={index}>{student.trim()}</span>
+                              ))}
+                          </div>
+                        </td>
+
+                        {/* STATUS */}
+
+                        <td>
+                          <span className={getStatusClass(project.status)}>
+                            {getStatusLabel(project.status)}
+                          </span>
+                        </td>
+
+                        {/* DETAILS */}
+
+                        <td>
+                          <button
+                            type="button"
+                            className="tmp-detail-btn"
+                            onClick={() =>
+                              navigate(
+                                `/teacher-managed-projects/${project.id}`,
+                              )
+                            }
+                          >
+                            ดูรายละเอียด
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="tmp-empty">
+                        {search.trim()
+                          ? "ไม่พบโครงงานที่ค้นหา"
+                          : "ยังไม่มีโครงงานที่ดูแล"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
-      </div>
-    </main>
-  </div>
-);
-
+      </main>
+    </div>
+  );
 }
 export default TeacherManagedProjects;

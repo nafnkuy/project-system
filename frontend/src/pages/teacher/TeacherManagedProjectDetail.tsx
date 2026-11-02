@@ -113,6 +113,7 @@ function TeacherManagedProjectDetail() {
 
   const navigate = useNavigate();
 
+  const userId = sessionStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
   const profileImage = sessionStorage.getItem("profileImage");
 
@@ -131,16 +132,36 @@ function TeacherManagedProjectDetail() {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluationData | null>(null);
 
+  /* =========================================================
+   ตรวจสอบการเข้าสู่ระบบของอาจารย์
+========================================================= */
+
   useEffect(() => {
+    if (!userId || !username) {
+      navigate("/", { replace: true });
+    }
+  }, [userId, username, navigate]);
+
+  /* =========================================================
+   โหลดข้อมูลโครงงานเมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    if (!userId || !username || !projectId) {
+      return;
+    }
+
     fetchOverview();
 
     if (activeTab === "evaluation") {
       fetchEvaluation();
     }
-  }, [projectId, activeTab]);
+  }, [projectId, activeTab, userId, username]);
 
   const fetchOverview = async () => {
-    if (!projectId) return;
+    if (!userId || !username || !projectId) {
+      return;
+    }
 
     try {
       const [projectRes, planRes] = await Promise.all([
@@ -317,14 +338,11 @@ function TeacherManagedProjectDetail() {
   };
 
   const fetchEvaluation = async () => {
-    if (!projectId) return;
-
-    const advisorId = sessionStorage.getItem("userId");
-
-    if (!advisorId) {
-      console.error("ไม่พบ ID อาจารย์");
+    if (!userId || !username || !projectId) {
       return;
     }
+
+    const advisorId = userId;
 
     try {
       const res = await axios.get<EvaluationData>(
@@ -496,6 +514,18 @@ function TeacherManagedProjectDetail() {
 
     return groups;
   };
+
+  /* =========================================================
+   ไม่แสดงรายละเอียดโครงงานเมื่อไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId || !username) {
+    return null;
+  }
+
+  if (!overview) {
+    return <div className="tmd-page">กำลังโหลด...</div>;
+  }
 
   if (!overview) {
     return <div className="tmd-page">กำลังโหลด...</div>;

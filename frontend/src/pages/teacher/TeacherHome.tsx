@@ -119,26 +119,34 @@ function TeacherHome() {
     return "ไม่พบคำขอ";
   };
 
-  useEffect(() => {
-    //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
-    //ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
-    if (!userId) {
-      //ถ้าไม่มีรหัสประจำตัวให้เปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
-      navigate("/");
-    }
-  }, [userId, navigate]); //ตรวจสอบค่ารหัสประจำตัวและฟังก์ชัน navigate
+  /* =========================================================
+   ตรวจสอบการเข้าสู่ระบบของอาจารย์
+========================================================= */
 
   useEffect(() => {
-    console.log("Teacher ID =", userId);
+    if (!userId || !username) {
+      navigate("/", { replace: true });
+    }
+  }, [userId, username, navigate]);
+
+  /* =========================================================
+   โหลดคำขอของอาจารย์เมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    if (!userId || !username) {
+      return;
+    }
 
     axios
       .get(`http://localhost:5000/teacher/requests/${userId}`)
       .then((res) => {
-        console.log("API Response =", res.data); // เพิ่มบรรทัดนี้
         setRequests(res.data);
       })
-      .catch((err) => console.log(err));
-  }, []);
+      .catch((err) => {
+        console.log("โหลดคำขอไม่สำเร็จ:", err);
+      });
+  }, [userId, username]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -153,7 +161,9 @@ function TeacherHome() {
   };
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !username) {
+      return;
+    }
 
     axios
       .get(`http://localhost:5000/teacher/dashboard/${userId}`)
@@ -164,10 +174,18 @@ function TeacherHome() {
       .catch((err) => {
         console.log("Dashboard error =", err);
       });
-  }, [userId]);
+  }, [userId, username]);
 
   /*const name =
     sessionStorage.getItem("name");*/
+
+  /* =========================================================
+   ไม่แสดงหน้าอาจารย์เมื่อไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId || !username) {
+    return null;
+  }
 
   return (
     <div className="teacher-home-page">
@@ -193,9 +211,13 @@ function TeacherHome() {
               คำขอเข้าร่วมโครงงาน
             </li>
 
-            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>
+              โครงงานที่ดูแล
+            </li>
 
-            <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
+            <li onClick={() => navigate("/teacher-work")}>
+              งานที่ต้องดำเนินการ
+            </li>
 
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา
