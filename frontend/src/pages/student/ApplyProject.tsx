@@ -67,18 +67,36 @@ function ApplyProject() {
     navigate("/");
   };
 
+  /* =========================================================
+   ตรวจสอบว่าผู้ใช้เข้าสู่ระบบแล้วหรือยัง
+========================================================= */
+
   useEffect(() => {
+    if (!userId) {
+      navigate("/", { replace: true });
+    }
+  }, [userId, navigate]);
+
+  /* =========================================================
+   โหลดข้อมูลโครงงานเมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    // ยังไม่เข้าสู่ระบบ ไม่ต้องโหลดข้อมูล
+    if (!userId || !id) {
+      return;
+    }
+
     axios
       .get(`http://localhost:5000/projects/${id}`)
       .then((res) => {
         console.log("Project Detail =", res.data);
-
         setProject(res.data);
       })
       .catch((err) => {
         console.log("Get project error:", err);
       });
-  }, [id]);
+  }, [id, userId]);
 
   useEffect(() => {
     if (!project?.id || !userId) {
@@ -179,6 +197,13 @@ function ApplyProject() {
       );
     }
   };
+  /* =========================================================
+   ไม่แสดงหน้าสมัครโครงงานถ้ายังไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId) {
+    return null;
+  }
 
   return (
     <div className="student-apply-project-page">
@@ -203,13 +228,13 @@ function ApplyProject() {
               หน้าหลัก
             </li>
 
-            <li>รายชื่ออาจารย์</li>
+            <li onClick={() => navigate("/teachers")}>รายชื่ออาจารย์</li>
 
             <li onClick={() => navigate("/submit-new-project")}>
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li>โครงงานของฉัน</li>
+            <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
             <li onClick={() => navigate("/student-notifications")}>
               การแจ้งเตือน

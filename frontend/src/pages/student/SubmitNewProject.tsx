@@ -46,8 +46,6 @@ function SubmitNewProject() {
   const [academicYear, setAcademicYear] = useState("");
   const [projectType, setProjectType] = useState("โครงงานเดี่ยว");
 
-  const [projectId, setProjectId] = useState<number | null>(null);
-
   const [major, setMajor] = useState("");
 
   const [description, setDescription] = useState("");
@@ -63,6 +61,16 @@ function SubmitNewProject() {
   const [memberUserId, setMemberUserId] = useState<number | null>(null);
 
   const [memberName, setMemberName] = useState("");
+
+  /* =========================================================
+   เก็บข้อมูลคำเชิญสมาชิกคนที่ 2
+========================================================= */
+
+  const [invitationId, setInvitationId] = useState<number | null>(null);
+
+  const [invitationStatus, setInvitationStatus] = useState("");
+
+  const [sendingInvitation, setSendingInvitation] = useState(false);
 
   /* =========================================================
      ADVISOR
@@ -159,7 +167,10 @@ function SubmitNewProject() {
 
         const detail = detailRes.data?.request ?? detailRes.data;
 
-        if (!detail || String(detail.request_id) !== String(resubmitRequestId)) {
+        if (
+          !detail ||
+          String(detail.request_id) !== String(resubmitRequestId)
+        ) {
           throw new Error("ข้อมูลคำขอที่ได้รับไม่ตรงกับคำขอที่ต้องการแก้ไข");
         }
 
@@ -198,7 +209,6 @@ function SubmitNewProject() {
 
         /* ================= PROJECT ================= */
 
-        setProjectId(Number(detail.project_id || resubmitProjectId));
         setProjectTitle(initialValues.projectTitle);
         setAcademicYear(detail.academic_year || "");
         setProjectType(detail.project_type || "โครงงานเดี่ยว");
@@ -218,7 +228,9 @@ function SubmitNewProject() {
         setContactType(initialValues.contactType);
         setContactValue(initialValues.contactValue);
         setIntroduction(initialValues.introduction);
-        setRevisionSuggestion(detail.suggestion || contactData.suggestion || "");
+        setRevisionSuggestion(
+          detail.suggestion || contactData.suggestion || "",
+        );
         setOriginalResubmitValues(initialValues);
 
         /* ================= MEMBER 2 ================= */
@@ -245,7 +257,9 @@ function SubmitNewProject() {
               if (invitation.status === "ตอบรับ") {
                 setMemberId(invitation.receiver_username || "");
                 setMemberUserId(
-                  invitation.receiver_id ? Number(invitation.receiver_id) : null,
+                  invitation.receiver_id
+                    ? Number(invitation.receiver_id)
+                    : null,
                 );
                 setMemberName(invitation.receiver_name || "");
               } else {
@@ -283,7 +297,58 @@ function SubmitNewProject() {
     return () => {
       cancelled = true;
     };
-  }, [isResubmit, resubmitProjectId, resubmitRequestId, userId, username, navigate]);
+  }, [
+    isResubmit,
+    resubmitProjectId,
+    resubmitRequestId,
+    userId,
+    username,
+    navigate,
+  ]);
+
+  /* =========================================================
+   โหลดคำเชิญเดิมของนิสิต
+========================================================= */
+
+  useEffect(() => {
+    // ไม่โหลดคำเชิญเมื่อยังไม่ได้เข้าสู่ระบบ
+    if (!userId || isResubmit) {
+      return;
+    }
+
+    const loadInvitation = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/project-invitations/draft/${userId}`,
+        );
+
+        const invitation = res.data.invitation;
+
+        // ถ้าไม่มีคำเชิญค้างอยู่ ไม่ต้องทำอะไร
+        if (!invitation) {
+          return;
+        }
+
+        // เก็บข้อมูลคำเชิญ
+        setInvitationId(invitation.id);
+        setInvitationStatus(invitation.status);
+
+        // นำข้อมูลเดิมกลับมาแสดงในฟอร์ม
+        setProjectType("โครงงานคู่");
+        setProjectTitle(invitation.title);
+        setAcademicYear(invitation.academic_year || "");
+
+        // ข้อมูลสมาชิกคนที่ 2
+        setMemberId(invitation.receiver_username);
+        setMemberUserId(invitation.receiver_id);
+        setMemberName(invitation.receiver_name);
+      } catch (err) {
+        console.log("โหลดคำเชิญเดิมไม่สำเร็จ:", err);
+      }
+    };
+
+    loadInvitation();
+  }, [userId, isResubmit]);
 
   /* =========================================================
      LOGOUT
@@ -300,8 +365,8 @@ function SubmitNewProject() {
   };
 
   /* =========================================================
-     SEARCH STUDENT
-  ========================================================= */
+   ค้นหาสมาชิกคนที่ 2
+========================================================= */
 
   const searchStudent = async () => {
     if (!memberId.trim()) {
@@ -309,9 +374,18 @@ function SubmitNewProject() {
       return;
     }
 
+    // ป้องกันการค้นหาบัญชีของตัวเอง
+    if (memberId.trim() === username) {
+      alert("ไม่สามารถเชิญตัวเองเข้าร่วมโครงงานได้");
+
+      setMemberName("");
+      setMemberUserId(null);
+      return;
+    }
+
     try {
       const res = await axios.get(
-        `http://localhost:5000/users/student/${memberId}`,
+        `http://localhost:5000/users/student/${memberId.trim()}`,
       );
 
       setMemberName(res.data.name);
@@ -326,111 +400,136 @@ function SubmitNewProject() {
   };
 
   /* =========================================================
-     SEND INVITATION
-  ========================================================= */
+   ส่งคำเชิญเพื่อนก่อนเลือกอาจารย์ที่ปรึกษา
+========================================================= */
 
   const sendInvitation = async () => {
+    // ตรวจสอบการเข้าสู่ระบบ
+    if (!userId) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // ตรวจสอบชื่อโครงงาน
+    if (!projectTitle.trim()) {
+      alert("กรุณากรอกชื่อหัวข้อโครงงาน");
+      return;
+    }
+
+    // ตรวจสอบปีการศึกษา
+    if (!academicYear) {
+      alert("กรุณาเลือกปีการศึกษา");
+      return;
+    }
+
+    // ตรวจสอบว่าเป็นโครงงานคู่
+    if (projectType !== "โครงงานคู่" || isResubmit) {
+      return;
+    }
+
+    // ตรวจสอบสมาชิกคนที่ 2
+    if (!memberUserId) {
+      alert("กรุณาค้นหาและเลือกสมาชิกก่อน");
+      return;
+    }
+
+    // ห้ามเชิญตัวเอง
+    if (Number(memberUserId) === Number(userId)) {
+      alert("ไม่สามารถเชิญตัวเองเข้าร่วมโครงงานได้");
+      return;
+    }
+
+    // ป้องกันการกดส่งคำเชิญเดิมซ้ำ
+    if (invitationId !== null || sendingInvitation) {
+      alert("คุณส่งคำเชิญสมาชิกคนที่ 2 แล้ว");
+      return;
+    }
+
     try {
-      if (!projectTitle.trim()) {
-        alert("กรุณากรอกชื่อหัวข้อโครงงาน");
-        return;
-      }
+      setSendingInvitation(true);
 
-      if (!academicYear) {
-        alert("กรุณาเลือกปีการศึกษา");
-        return;
-      }
+      // บันทึกคำเชิญโดยยังไม่สร้างโครงงาน
+      const res = await axios.post(
+        "http://localhost:5000/project-invitations",
+        {
+          sender_id: Number(userId),
+          receiver_id: memberUserId,
 
-      if (!advisorId) {
-        alert("กรุณาเลือกอาจารย์ที่ปรึกษาก่อน");
-        return;
-      }
+          // ยังไม่เลือกอาจารย์และยังไม่มีโครงงาน
+          project_id: null,
+          advisor_id: null,
 
-      if (!memberUserId) {
-        alert("กรุณาค้นหาและเลือกสมาชิกก่อน");
-        return;
-      }
-
-      let currentProjectId = projectId;
-
-      /* ================= CREATE PROJECT ================= */
-
-      if (!currentProjectId) {
-        const projectRes = await axios.post("http://localhost:5000/projects", {
           title: projectTitle,
-
           academic_year: academicYear,
-
-          advisor: advisorName,
-
-          advisor_id: advisorId,
-
-          major: major,
-
-          project_type: projectType,
-
-          max_members: projectType === "โครงงานคู่" ? 2 : 1,
+          project_type: "โครงงานคู่",
 
           description: description,
-
           objectives: objective,
-
           skills: skills,
-
           requirements: "",
 
-          source: "student",
+          contact_type: contactType,
+          contact_value: contactValue,
+          introduction: introduction,
+        },
+      );
 
-          student_id: Number(userId),
-        });
+      // เก็บรหัสคำเชิญที่ Backend ส่งกลับมา
+      setInvitationId(res.data.invitation_id);
+      setInvitationStatus("รอตอบรับ");
 
-        currentProjectId = projectRes.data.project_id;
+      alert("ส่งคำเชิญเข้าร่วมโครงงานเรียบร้อยแล้ว");
+    } catch (err: any) {
+      console.log("ส่งคำเชิญไม่สำเร็จ:", err);
 
-        if (!currentProjectId) {
-          throw new Error("สร้าง project ไม่สำเร็จ: ไม่มี project_id");
-        }
+      alert(err.response?.data?.message || "ไม่สามารถส่งคำเชิญได้");
+    } finally {
+      setSendingInvitation(false);
+    }
+  };
 
-        setProjectId(currentProjectId);
+  /* =========================================================
+   ตรวจสอบสถานะการตอบรับของสมาชิกคนที่ 2
+========================================================= */
+
+  const checkInvitationStatus = async () => {
+    if (!invitationId || !userId) {
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/project-invitations/draft-status/${invitationId}/${userId}`,
+      );
+
+      const status = res.data.status;
+
+      setInvitationStatus(status);
+
+      if (status === "ตอบรับ") {
+        alert("สมาชิกคนที่ 2 ตอบรับคำเชิญแล้ว สามารถเลือกอาจารย์ที่ปรึกษาได้");
+        return;
       }
 
-      /* ================= SEND INVITATION ================= */
+      if (status === "รอตอบรับ") {
+        alert("สมาชิกคนที่ 2 ยังไม่ได้ตอบรับคำเชิญ");
+        return;
+      }
 
-      await axios.post("http://localhost:5000/project-invitations", {
-        sender_id: Number(userId),
+      if (status === "ปฏิเสธ") {
+        alert("สมาชิกคนที่ 2 ปฏิเสธคำเชิญ กรุณาเลือกสมาชิกใหม่");
 
-        receiver_id: memberUserId,
+        setInvitationId(null);
+        setInvitationStatus("");
 
-        project_id: currentProjectId,
-
-        advisor_id: advisorId,
-
-        title: projectTitle,
-
-        academic_year: academicYear,
-
-        project_type: projectType,
-
-        description: description,
-
-        objectives: objective,
-
-        skills: skills,
-
-        requirements: "",
-
-        contact_type: contactType,
-
-        contact_value: contactValue,
-
-        introduction: introduction,
-      });
-
-      alert("ส่งคำเชิญแล้ว");
+        setMemberId("");
+        setMemberUserId(null);
+        setMemberName("");
+      }
     } catch (err: any) {
-      console.log("Invitation error:", err);
-      console.log(err.response?.data);
+      console.log("ตรวจสอบคำเชิญไม่สำเร็จ:", err);
 
-      alert(err.response?.data?.message || "ส่งคำเชิญไม่สำเร็จ");
+      alert(err.response?.data?.message || "ไม่สามารถตรวจสอบสถานะคำเชิญได้");
     }
   };
 
@@ -548,47 +647,47 @@ function SubmitNewProject() {
       }
 
       /* =====================================================
-         PROJECT คู่
-      ===================================================== */
+   ส่งคำเสนอโครงงานคู่
+===================================================== */
 
       if (projectType === "โครงงานคู่") {
-        if (!projectId) {
-          alert("กรุณาส่งคำเชิญให้สมาชิกก่อน");
+        // ตรวจสอบว่ามีคำเชิญเพื่อนแล้วหรือยัง
+        if (!invitationId) {
+          alert("กรุณาเชิญสมาชิกคนที่ 2 ก่อน");
           return;
         }
 
-        const invitationRes = await axios.get(
-          `http://localhost:5000/project-invitations/status/${projectId}/${userId}`,
+        // ตรวจสอบสถานะการตอบรับที่แสดงในหน้าเว็บ
+        if (invitationStatus !== "ตอบรับ") {
+          alert("กรุณารอให้สมาชิกตอบรับคำเชิญก่อน");
+          return;
+        }
+
+        // ตรวจสอบข้อมูลโครงงาน
+        if (!description.trim() || !objective.trim() || !skills.trim()) {
+          alert("กรุณากรอกรายละเอียด วัตถุประสงค์ และเทคโนโลยีที่ใช้");
+          return;
+        }
+
+        // ให้ Backend ตรวจสถานะและบันทึกทั้งหมด
+        const res = await axios.post(
+          "http://localhost:5000/student/submit-pair-project",
+          {
+            invitation_id: invitationId,
+            sender_id: Number(userId),
+            advisor_id: advisorId,
+
+            description: description,
+            objectives: objective,
+            skills: skills,
+
+            contact_type: contactType,
+            contact_value: contactValue,
+            introduction: introduction,
+          },
         );
 
-        if (invitationRes.data.status === "รอตอบรับ") {
-          alert("สมาชิกคนที่ 2 ยังไม่ได้ตอบรับคำเชิญ");
-          return;
-        }
-
-        if (invitationRes.data.status === "ปฏิเสธ") {
-          alert("สมาชิกคนที่ 2 ปฏิเสธคำเชิญ กรุณาเลือกสมาชิกใหม่");
-          return;
-        }
-
-        if (invitationRes.data.status !== "ตอบรับ") {
-          alert("ไม่สามารถส่งข้อเสนอได้");
-          return;
-        }
-
-        await axios.post("http://localhost:5000/project-requests", {
-          project_id: projectId,
-
-          student_id: Number(userId),
-
-          contact_type: contactType,
-
-          contact_value: contactValue,
-
-          introduction: introduction,
-        });
-
-        alert("ส่งข้อเสนอโครงงานสำเร็จ");
+        alert(res.data.message);
 
         navigate("/StudentHome");
         return;
@@ -750,13 +849,16 @@ function SubmitNewProject() {
 
           <section className="proposal-section">
             <div className="form-group">
-              <label>ชื่อหัวข้อโครงงาน <span className="required-star">*</span></label>
+              <label>
+                ชื่อหัวข้อโครงงาน <span className="required-star">*</span>
+              </label>
 
               <input
                 type="text"
                 value={projectTitle}
                 onChange={(e) => setProjectTitle(e.target.value)}
                 placeholder="กรอกชื่อหัวข้อโครงงาน"
+                disabled={invitationId !== null}
               />
             </div>
           </section>
@@ -766,13 +868,15 @@ function SubmitNewProject() {
           <section className="proposal-section">
             <div className="proposal-two-column">
               <div className="form-group">
-                <label>ปีการศึกษา / ภาคเรียน <span className="required-star">*</span></label>
+                <label>
+                  ปีการศึกษา / ภาคเรียน <span className="required-star">*</span>
+                </label>
 
                 <div className="contact-select-wrapper">
                   <select
                     value={academicYear}
                     onChange={(e) => setAcademicYear(e.target.value)}
-                    disabled={isResubmit}
+                    disabled={isResubmit || invitationId !== null}
                   >
                     <option value="">เลือกปีการศึกษา</option>
 
@@ -792,15 +896,38 @@ function SubmitNewProject() {
               </div>
 
               <div className="form-group">
-                <label>ประเภทโครงงาน <span className="required-star">*</span></label>
+                <label>
+                  ประเภทโครงงาน <span className="required-star">*</span>
+                </label>
 
                 <div className="contact-select-wrapper">
                   <select
                     value={projectType}
-                    onChange={(e) => setProjectType(e.target.value)}
-                    disabled={isResubmit}
+                    onChange={(e) => {
+                      // เปลี่ยนประเภทโครงงาน
+                      setProjectType(e.target.value);
+
+                      // ล้างข้อมูลอาจารย์ที่เคยเลือก
+                      setAdvisorId(null);
+                      setAdvisorName("");
+                      setTeacherKeyword("");
+                      setTeacherList([]);
+                      setMajor("");
+
+                      // ถ้าเปลี่ยนเป็นโครงงานเดี่ยว ให้ล้างสมาชิกคนที่ 2
+                      if (e.target.value === "โครงงานเดี่ยว") {
+                        setMemberId("");
+                        setMemberUserId(null);
+                        setMemberName("");
+                      }
+                    }}
+                    disabled={isResubmit || invitationId !== null}
                     aria-label="ประเภทโครงงาน"
-                    title={isResubmit ? "ไม่สามารถเปลี่ยนประเภทโครงงานระหว่างแก้ไขคำขอได้" : undefined}
+                    title={
+                      isResubmit
+                        ? "ไม่สามารถเปลี่ยนประเภทโครงงานระหว่างแก้ไขคำขอได้"
+                        : undefined
+                    }
                   >
                     <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
 
@@ -877,11 +1004,20 @@ function SubmitNewProject() {
                         <input
                           type="text"
                           value={memberId}
-                          onChange={(e) => setMemberId(e.target.value)}
+                          onChange={(e) => {
+                            setMemberId(e.target.value);
+                            setMemberUserId(null);
+                            setMemberName("");
+                          }}
                           placeholder="กรอกรหัสนิสิต"
+                          disabled={invitationId !== null}
                         />
 
-                        <button type="button" onClick={searchStudent}>
+                        <button
+                          type="button"
+                          onClick={searchStudent}
+                          disabled={invitationId !== null}
+                        >
                           <FaSearch />
                         </button>
                       </div>
@@ -899,7 +1035,9 @@ function SubmitNewProject() {
 
                           <div className="result-item">
                             <span className="result-label">ชื่อ</span>
-                            <strong className="result-value">{memberName}</strong>
+                            <strong className="result-value">
+                              {memberName}
+                            </strong>
                           </div>
                         </div>
 
@@ -907,6 +1045,7 @@ function SubmitNewProject() {
                           <button
                             type="button"
                             className="change-btn"
+                            disabled={invitationId !== null}
                             onClick={() => {
                               setMemberId("");
 
@@ -918,13 +1057,32 @@ function SubmitNewProject() {
                             เปลี่ยนสมาชิก
                           </button>
 
+                          {/* ปุ่มเชิญสมาชิกคนที่ 2 */}
                           <button
                             type="button"
                             className="invite-btn"
                             onClick={sendInvitation}
+                            disabled={
+                              invitationId !== null || sendingInvitation
+                            }
                           >
-                            เชิญเข้าร่วมโครงงาน
+                            {sendingInvitation
+                              ? "กำลังส่งคำเชิญ..."
+                              : invitationId !== null
+                                ? "ส่งคำเชิญแล้ว"
+                                : "เชิญเข้าร่วมโครงงาน"}
                           </button>
+
+                          {/* ปุ่มตรวจสอบผลการตอบรับ */}
+                          {invitationId !== null && (
+                            <button
+                              type="button"
+                              className="change-btn"
+                              onClick={checkInvitationStatus}
+                            >
+                              ตรวจสอบสถานะคำเชิญ
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -935,133 +1093,154 @@ function SubmitNewProject() {
           </section>
 
           <div className="proposal-contact-advisor-grid">
-          {/* ================= CONTACT ================= */}
+            {/* ================= CONTACT ================= */}
 
-          <section className="proposal-section">
-            <h4 className="proposal-section-title">ช่องทางการติดต่อ <span className="required-star">*</span></h4>
+            <section className="proposal-section">
+              <h4 className="proposal-section-title">
+                ช่องทางการติดต่อ <span className="required-star">*</span>
+              </h4>
 
-            <div className="contact-select-wrapper">
-              <select
-                value={contactType}
-                onChange={(e) => {
-                  setContactType(e.target.value);
-                  setContactValue("");
-                }}
-              >
-                <option value="">เลือกช่องทางการติดต่อ</option>
-                <option value="Email">Email</option>
-                <option value="Line ID">Line ID</option>
-                <option value="Facebook">Facebook</option>
-                <option value="Discord">Discord</option>
-                <option value="Instagram">Instagram</option>
-                <option value="เบอร์โทรศัพท์">เบอร์โทรศัพท์</option>
-              </select>
+              <div className="contact-select-wrapper">
+                <select
+                  value={contactType}
+                  onChange={(e) => {
+                    setContactType(e.target.value);
+                    setContactValue("");
+                  }}
+                >
+                  <option value="">เลือกช่องทางการติดต่อ</option>
+                  <option value="Email">Email</option>
+                  <option value="Line ID">Line ID</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="Discord">Discord</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="เบอร์โทรศัพท์">เบอร์โทรศัพท์</option>
+                </select>
 
-              <span className="contact-select-arrow">▼</span>
-            </div>
-
-            {contactType !== "" && (
-              <div className="form-group">
-                <label>{contactType} <span className="required-star">*</span></label>
-
-                <input
-                  type={
-                    contactType === "Email"
-                      ? "email"
-                      : contactType === "เบอร์โทรศัพท์"
-                        ? "tel"
-                        : "text"
-                  }
-                  value={contactValue}
-                  onChange={(e) => setContactValue(e.target.value)}
-                />
+                <span className="contact-select-arrow">▼</span>
               </div>
-            )}
-          </section>
 
-          {/* ================= ADVISOR ================= */}
+              {contactType !== "" && (
+                <div className="form-group">
+                  <label>
+                    {contactType} <span className="required-star">*</span>
+                  </label>
 
-          <section className="proposal-section">
-            <div className="form-group">
-              <label>เลือกอาจารย์ที่ปรึกษา <span className="required-star">*</span></label>
-
-              {advisorName ? (
-                <div className="advisor-selected-row">
-                  <span className="advisor-name">{advisorName}</span>
-
-                  {!isResubmit && (
-                    <button
-                      type="button"
-                      className="change-advisor-btn"
-                      onClick={() => {
-                        setAdvisorId(null);
-                        setAdvisorName("");
-                        setTeacherKeyword("");
-                        setTeacherList([]);
-                      }}
-                    >
-                      เปลี่ยนอาจารย์
-                    </button>
-                  )}
+                  <input
+                    type={
+                      contactType === "Email"
+                        ? "email"
+                        : contactType === "เบอร์โทรศัพท์"
+                          ? "tel"
+                          : "text"
+                    }
+                    value={contactValue}
+                    onChange={(e) => setContactValue(e.target.value)}
+                  />
                 </div>
-              ) : (
-                !isResubmit && (
-                  <div className="teacher-search">
-                    <div className="search-box">
-                      <input
-                        type="text"
-                        value={teacherKeyword}
-                        onChange={(e) => setTeacherKeyword(e.target.value)}
-                        placeholder="พิมพ์ชื่ออาจารย์"
-                      />
-                    </div>
-
-                    {teacherList.map((teacher) => {
-                      const requiredSlots =
-                        projectType === "โครงงานคู่" ? 2 : 1;
-
-                      const canAccept =
-                        Number(teacher.remaining_capacity) >= requiredSlots;
-
-                      return (
-                        <div
-                          key={teacher.id}
-                          className={`teacher-item ${
-                            !canAccept ? "teacher-full" : ""
-                          }`}
-                          onClick={() => {
-                            if (!canAccept) {
-                              alert(
-                                projectType === "โครงงานคู่"
-                                  ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
-                                  : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
-                              );
-
-                              return;
-                            }
-
-                            setAdvisorId(teacher.id);
-                            setAdvisorName(teacher.name);
-                            setMajor(teacher.major);
-                            setTeacherKeyword(teacher.name);
-                            setTeacherList([]);
-                          }}
-                        >
-                          <span>{teacher.name}</span>
-
-                          <span>
-                            {canAccept
-                              ? `เปิดรับ (${teacher.accepted_students}/${teacher.total_capacity})`
-                              : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/${teacher.total_capacity})`}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )
               )}
-            </div>
-          </section>
+            </section>
+
+            {/* ================= ADVISOR ================= */}
+
+            <section className="proposal-section">
+              <div className="form-group">
+                <label>
+                  เลือกอาจารย์ที่ปรึกษา <span className="required-star">*</span>
+                </label>
+
+                {advisorName ? (
+                  <div className="advisor-selected-row">
+                    <span className="advisor-name">{advisorName}</span>
+
+                    {!isResubmit && (
+                      <button
+                        type="button"
+                        className="change-advisor-btn"
+                        onClick={() => {
+                          setAdvisorId(null);
+                          setAdvisorName("");
+                          setTeacherKeyword("");
+                          setTeacherList([]);
+                        }}
+                      >
+                        เปลี่ยนอาจารย์
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  !isResubmit && (
+                    <div className="teacher-search">
+                      <div className="search-box">
+                        <input
+                          type="text"
+                          value={teacherKeyword}
+                          onChange={(e) => setTeacherKeyword(e.target.value)}
+                          placeholder="พิมพ์ชื่ออาจารย์"
+                        />
+                      </div>
+
+                      {teacherList.map((teacher) => {
+                        const requiredSlots =
+                          projectType === "โครงงานคู่" ? 2 : 1;
+
+                        const canAccept =
+                          Number(teacher.remaining_capacity) >= requiredSlots;
+
+                        return (
+                          <div
+                            key={teacher.id}
+                            className={`teacher-item ${
+                              !canAccept ? "teacher-full" : ""
+                            }`}
+                            onClick={() => {
+                              /* =================================================
+                                   ตรวจสอบคำเชิญก่อนเลือกอาจารย์สำหรับโครงงานคู่
+                                ================================================= */
+
+                              if (
+                                !isResubmit &&
+                                projectType === "โครงงานคู่" &&
+                                invitationStatus !== "ตอบรับ"
+                              ) {
+                                alert(
+                                  "กรุณาเชิญเพื่อนและรอให้ตอบรับก่อนเลือกอาจารย์",
+                                );
+                                return;
+                              }
+
+                              if (!canAccept) {
+                                alert(
+                                  projectType === "โครงงานคู่"
+                                    ? `อาจารย์ท่านนี้เหลือรับนิสิตได้ ${teacher.remaining_capacity} คน ไม่เพียงพอสำหรับโครงงานคู่`
+                                    : "อาจารย์ท่านนี้รับนิสิตครบแล้ว",
+                                );
+
+                                return;
+                              }
+
+                              setAdvisorId(teacher.id);
+                              setAdvisorName(teacher.name);
+                              setMajor(teacher.major);
+                              setTeacherKeyword(teacher.name);
+                              setTeacherList([]);
+                            }}
+                          >
+                            <span>{teacher.name}</span>
+
+                            <span>
+                              {canAccept
+                                ? `เปิดรับ (${teacher.accepted_students}/${teacher.total_capacity})`
+                                : `ไม่สามารถรับเพิ่ม (${teacher.accepted_students}/${teacher.total_capacity})`}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
           </div>
 
           {/* ================= REASON ================= */}
@@ -1082,7 +1261,9 @@ function SubmitNewProject() {
 
           <section className="proposal-section">
             <div className="form-group">
-              <label>รายละเอียดโครงงาน <span className="required-star">*</span></label>
+              <label>
+                รายละเอียดโครงงาน <span className="required-star">*</span>
+              </label>
 
               <textarea
                 rows={5}
@@ -1093,7 +1274,9 @@ function SubmitNewProject() {
             </div>
 
             <div className="form-group">
-              <label>วัตถุประสงค์ <span className="required-star">*</span></label>
+              <label>
+                วัตถุประสงค์ <span className="required-star">*</span>
+              </label>
 
               <textarea
                 rows={4}
@@ -1104,7 +1287,9 @@ function SubmitNewProject() {
             </div>
 
             <div className="form-group">
-              <label>เทคโนโลยีที่ใช้ <span className="required-star">*</span></label>
+              <label>
+                เทคโนโลยีที่ใช้ <span className="required-star">*</span>
+              </label>
 
               <p className="example-text">
                 ตัวอย่างการกรอก: React|Node.js|MySQL|Git|HTML|CSS

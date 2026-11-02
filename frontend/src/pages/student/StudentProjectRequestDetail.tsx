@@ -138,6 +138,7 @@ function StudentProjectRequestDetail() {
 
   const { requestId, studentId } = useParams();
 
+  const userId = sessionStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
 
   const profileImage = sessionStorage.getItem("profileImage");
@@ -147,11 +148,36 @@ function StudentProjectRequestDetail() {
   const [loading, setLoading] = useState(true);
 
   /* =========================================================
-     LOAD DATA
-  ========================================================= */
+   ตรวจสอบการเข้าสู่ระบบและรหัสนิสิต
+========================================================= */
 
   useEffect(() => {
-    if (!requestId || !studentId) return;
+    // ยังไม่ได้เข้าสู่ระบบ
+    if (!userId) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // รหัสนิสิตใน URL ไม่ตรงกับบัญชีที่เข้าสู่ระบบ
+    if (userId !== studentId) {
+      navigate("/", { replace: true });
+      return;
+    }
+  }, [userId, studentId, navigate]);
+
+  /* =========================================================
+   โหลดรายละเอียดคำขอเมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    if (!userId || !requestId || !studentId) {
+      return;
+    }
+
+    // ตรวจสอบว่าเป็นข้อมูลของนิสิตที่เข้าสู่ระบบ
+    if (userId !== studentId) {
+      return;
+    }
 
     axios
       .get(
@@ -172,7 +198,7 @@ function StudentProjectRequestDetail() {
       .finally(() => {
         setLoading(false);
       });
-  }, [requestId, studentId, navigate]);
+  }, [requestId, studentId, userId, navigate]);
 
   /* =========================================================
      DATE
@@ -289,6 +315,14 @@ function StudentProjectRequestDetail() {
   };
 
   /* =========================================================
+   ไม่แสดงรายละเอียดคำขอเมื่อไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId || userId !== studentId) {
+    return null;
+  }
+
+  /* =========================================================
      LOADING
   ========================================================= */
 
@@ -337,7 +371,9 @@ function StudentProjectRequestDetail() {
               โครงงานของฉัน
             </li>
 
-            <li onClick={() => navigate("/student-notifications")}>การแจ้งเตือน</li>
+            <li onClick={() => navigate("/student-notifications")}>
+              การแจ้งเตือน
+            </li>
 
             <li onClick={() => navigate("/student-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
@@ -408,7 +444,8 @@ function StudentProjectRequestDetail() {
                 {formatThaiDate(request.request_date)}
               </p>
               <p>
-                <strong>เวลา :</strong> {formatThaiTime(request.request_date)} น.
+                <strong>เวลา :</strong> {formatThaiTime(request.request_date)}{" "}
+                น.
               </p>
             </section>
 
@@ -418,7 +455,8 @@ function StudentProjectRequestDetail() {
               <div className="student-request-line" />
 
               <p>
-                <strong>อาจารย์ที่ปรึกษา :</strong> {request.advisor_name || "-"}
+                <strong>อาจารย์ที่ปรึกษา :</strong>{" "}
+                {request.advisor_name || "-"}
               </p>
               <p>
                 <strong>ประเภทโครงงาน :</strong> {request.project_type || "-"}
@@ -507,7 +545,8 @@ function StudentProjectRequestDetail() {
                   {formatThaiDate(request.decision_date)}
                 </p>
                 <p>
-                  <strong>เวลา :</strong> {formatThaiTime(request.decision_date)} น.
+                  <strong>เวลา :</strong>{" "}
+                  {formatThaiTime(request.decision_date)} น.
                 </p>
 
                 {request.request_status === "ต้องแก้ไข" && (

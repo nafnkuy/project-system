@@ -23,6 +23,7 @@ interface Teacher {
 function TeacherList() {
   const navigate = useNavigate();
 
+  const userId = sessionStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
   const profileImage = sessionStorage.getItem("profileImage");
 
@@ -36,10 +37,25 @@ function TeacherList() {
   const itemsPerPage = 10;
 
   /* =========================================================
-     ดึงรายชื่ออาจารย์
-  ========================================================= */
+   ตรวจสอบว่าผู้ใช้เข้าสู่ระบบแล้วหรือยัง
+========================================================= */
 
   useEffect(() => {
+    if (!userId) {
+      navigate("/", { replace: true });
+    }
+  }, [userId, navigate]);
+
+  /* =========================================================
+   ดึงรายชื่ออาจารย์เมื่อเข้าสู่ระบบแล้ว
+========================================================= */
+
+  useEffect(() => {
+    // ถ้ายังไม่ได้เข้าสู่ระบบ ไม่ต้องโหลดข้อมูล
+    if (!userId) {
+      return;
+    }
+
     const fetchTeachers = async () => {
       try {
         setLoading(true);
@@ -62,7 +78,7 @@ function TeacherList() {
     };
 
     fetchTeachers();
-  }, [search]);
+  }, [search, userId]);
 
   /* =========================================================
      กลับหน้า 1 เมื่อค้นหา
@@ -80,10 +96,7 @@ function TeacherList() {
 
   const startIndex = (currentPage - 1) * itemsPerPage;
 
-  const currentTeachers = teachers.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
+  const currentTeachers = teachers.slice(startIndex, startIndex + itemsPerPage);
 
   /* =========================================================
      LOGOUT
@@ -94,6 +107,13 @@ function TeacherList() {
 
     navigate("/");
   };
+  /* =========================================================
+   ไม่แสดงหน้ารายชื่ออาจารย์ถ้ายังไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId) {
+    return null;
+  }
 
   return (
     <div className="teacher-list-page">
@@ -118,50 +138,27 @@ function TeacherList() {
 
         <nav>
           <ul>
-            <li onClick={() => navigate("/StudentHome")}>
-              หน้าหลัก
-            </li>
+            <li onClick={() => navigate("/StudentHome")}>หน้าหลัก</li>
 
-            <li className="active">
-              รายชื่ออาจารย์
-            </li>
+            <li className="active">รายชื่ออาจารย์</li>
 
-            <li
-              onClick={() =>
-                navigate("/submit-new-project")
-              }
-            >
+            <li onClick={() => navigate("/submit-new-project")}>
               ส่งคำเสนอโครงงานใหม่
             </li>
 
-            <li
-              onClick={() =>
-                navigate("/student-project")
-              }
-            >
-              โครงงานของฉัน
-            </li>
+            <li onClick={() => navigate("/student-project")}>โครงงานของฉัน</li>
 
-            <li
-              onClick={() =>
-                navigate("/student-notifications")
-              }
-            >
+            <li onClick={() => navigate("/student-notifications")}>
               การแจ้งเตือน
             </li>
 
-            <li onClick={() => navigate("/student-profile")}>
-              ข้อมูลส่วนตัว
-            </li>
+            <li onClick={() => navigate("/student-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 
         {/* LOGOUT */}
 
-        <button
-          className="teacher-list-logout"
-          onClick={handleLogout}
-        >
+        <button className="teacher-list-logout" onClick={handleLogout}>
           ออกจากระบบ
         </button>
       </aside>
@@ -188,9 +185,7 @@ function TeacherList() {
             <div className="teacher-list-user">
               <img
                 src={
-                  profileImage
-                    ? `http://localhost:5000${profileImage}`
-                    : logo
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
                 }
                 alt="Profile"
               />
@@ -215,9 +210,7 @@ function TeacherList() {
                 type="text"
                 placeholder="ค้นหาชื่ออาจารย์"
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
               />
 
               <FaSearch />
@@ -253,10 +246,7 @@ function TeacherList() {
 
                 {loading && (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="teacher-table-message"
-                    >
+                    <td colSpan={5} className="teacher-table-message">
                       กำลังโหลดข้อมูล...
                     </td>
                   </tr>
@@ -264,28 +254,22 @@ function TeacherList() {
 
                 {/* EMPTY */}
 
-                {!loading &&
-                  currentTeachers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="teacher-table-message"
-                      >
-                        ไม่พบข้อมูลอาจารย์
-                      </td>
-                    </tr>
-                  )}
+                {!loading && currentTeachers.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="teacher-table-message">
+                      ไม่พบข้อมูลอาจารย์
+                    </td>
+                  </tr>
+                )}
 
                 {/* TEACHER LIST */}
 
                 {!loading &&
                   currentTeachers.map((teacher) => {
-                    const isFull =
-                      teacher.advisor_status === "เต็ม";
+                    const isFull = teacher.advisor_status === "เต็ม";
 
                     const isAlmostFull =
-                      !isFull &&
-                      teacher.remaining_capacity <= 2;
+                      !isFull && teacher.remaining_capacity <= 2;
 
                     const statusText = isFull
                       ? "เต็ม"
@@ -303,29 +287,22 @@ function TeacherList() {
                       <tr key={teacher.id}>
                         {/* อาจารย์ */}
 
-                        <td>
-                          {teacher.name}
-                        </td>
+                        <td>{teacher.name}</td>
 
                         {/* สาขาวิชา */}
 
-                        <td>
-                          {teacher.major || "-"}
-                        </td>
+                        <td>{teacher.major || "-"}</td>
 
                         {/* จำนวนโครงงาน */}
 
                         <td>
-                          {teacher.accepted_students} /{" "}
-                          {teacher.total_capacity}
+                          {teacher.accepted_students} / {teacher.total_capacity}
                         </td>
 
                         {/* สถานะ */}
 
                         <td>
-                          <span
-                            className={`teacher-status ${statusClass}`}
-                          >
+                          <span className={`teacher-status ${statusClass}`}>
                             {statusText}
                           </span>
                         </td>
@@ -337,9 +314,7 @@ function TeacherList() {
                             className="teacher-detail-link"
                             type="button"
                             onClick={() =>
-                              navigate(
-                                `/teacher-detail/${teacher.id}`,
-                              )
+                              navigate(`/teacher-detail/${teacher.id}`)
                             }
                           >
                             ดูรายละเอียด
@@ -364,9 +339,7 @@ function TeacherList() {
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() =>
-                    setCurrentPage((page) =>
-                      Math.max(page - 1, 1),
-                    )
+                    setCurrentPage((page) => Math.max(page - 1, 1))
                   }
                 >
                   &lt;
@@ -375,25 +348,16 @@ function TeacherList() {
                 {/* PAGE */}
 
                 <span>
-                  {currentPage} of{" "}
-                  {Math.max(totalPages, 1)}
+                  {currentPage} of {Math.max(totalPages, 1)}
                 </span>
 
                 {/* NEXT */}
 
                 <button
                   type="button"
-                  disabled={
-                    currentPage === totalPages ||
-                    totalPages === 0
-                  }
+                  disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() =>
-                    setCurrentPage((page) =>
-                      Math.min(
-                        page + 1,
-                        totalPages,
-                      ),
-                    )
+                    setCurrentPage((page) => Math.min(page + 1, totalPages))
                   }
                 >
                   &gt;

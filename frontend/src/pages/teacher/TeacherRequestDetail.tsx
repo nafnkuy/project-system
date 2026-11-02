@@ -68,8 +68,12 @@ function TeacherRequestDetail() {
   const previousPage =
     fromPage === "home" ? "/teacher-home" : "/teacher-requests";
 
+  /* =========================================================
+   กำหนดชื่อหน้าก่อนหน้าสำหรับแสดง Breadcrumb
+========================================================= */
+
   const previousPageName =
-    fromPage === "home" ? "คำขอเข้าร่วมโครงงาน" : "คำขอเข้าร่วมโครงงาน";
+    fromPage === "home" ? "หน้าหลัก" : "คำขอเข้าร่วมโครงงาน";
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -390,13 +394,25 @@ function TeacherRequestDetail() {
 
         <nav>
           <ul>
-            <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
+            {/* เมนูหน้าหลัก */}
+            <li
+              className={fromPage === "home" ? "active" : ""}
+              onClick={() => navigate("/teacher-home")}
+            >
+              หน้าหลัก
+            </li>
 
             <li onClick={() => navigate("/teacher-projects")}>
               จัดการหัวข้อโครงงาน
             </li>
 
-            <li className="active">คำขอเข้าร่วมโครงงาน</li>
+            {/* เมนูคำขอเข้าร่วมโครงงาน */}
+            <li
+              className={fromPage === "requests" ? "active" : ""}
+              onClick={() => navigate("/teacher-requests")}
+            >
+              คำขอเข้าร่วมโครงงาน
+            </li>
 
             <li onClick={() => navigate("/teacher-managed-projects")}>
               โครงงานที่ดูแล

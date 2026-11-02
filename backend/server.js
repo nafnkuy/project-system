@@ -2038,6 +2038,464 @@ app.get("/teacher/decision-history/:advisorId", (req, res) => {
   });
 });
 
+/* =========================================================
+   ส่งคำเสนอโครงงานคู่หลังสมาชิกตอบรับและเลือกอาจารย์
+========================================================= */
+
+app.post("/student/submit-pair-project", async (req, res) => {
+  const {
+    invitation_id,
+    sender_id,
+    advisor_id,
+    description,
+    objectives,
+    skills,
+    contact_type,
+    contact_value,
+    introduction,
+  } = req.body;
+
+  const invitationId = Number(invitation_id);
+  const senderId = Number(sender_id);
+  const advisorId = Number(advisor_id);
+
+  /* =========================================================
+     ตรวจสอบข้อมูลที่ส่งมาจากหน้าเว็บไซต์
+  ========================================================= */
+
+  if (
+    !Number.isInteger(invitationId) ||
+    !Number.isInteger(senderId) ||
+    !Number.isInteger(advisorId) ||
+    invitationId <= 0 ||
+    senderId <= 0 ||
+    advisorId <= 0
+  ) {
+    return res.status(400).json({
+      message: "ข้อมูลคำเชิญหรืออาจารย์ไม่ถูกต้อง",
+    });
+  }
+
+  if (
+    typeof description !== "string" ||
+    description.trim() === "" ||
+    typeof objectives !== "string" ||
+    objectives.trim() === "" ||
+    typeof skills !== "string" ||
+    skills.trim() === "" ||
+    typeof contact_type !== "string" ||
+    contact_type.trim() === "" ||
+    typeof contact_value !== "string" ||
+    contact_value.trim() === ""
+  ) {
+    return res.status(400).json({
+      message: "กรุณากรอกข้อมูลโครงงานและการติดต่อให้ครบถ้วน",
+    });
+  }
+
+  /* =========================================================
+     ฟังก์ชันช่วยเชื่อมต่อฐานข้อมูล
+  ========================================================= */
+
+  const getConnection = () => {
+    return new Promise((resolve, reject) => {
+      if (typeof db.getConnection === "function") {
+        db.getConnection((err, connection) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              connection: connection,
+              pooled: true,
+            });
+          }
+        });
+      } else {
+        resolve({
+          connection: db,
+          pooled: false,
+        });
+      }
+    });
+  };
+
+  const runQuery = (connection, sql, params = []) => {
+    return new Promise((resolve, reject) => {
+      connection.query(sql, params, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  };
+
+  const runTransaction = (connection, action) => {
+    return new Promise((resolve, reject) => {
+      connection[action]((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  };
+
+  // ใช้แสดงข้อความเมื่อข้อมูลไม่ผ่านเงื่อนไข
+  const rejectRequest = (message) => {
+    const error = new Error(message);
+    error.statusCode = 400;
+    throw error;
+  };
+
+  let connection = null;
+  let pooled = false;
+  let transactionStarted = false;
+
+  try {
+    const database = await getConnection();
+
+    connection = database.connection;
+    pooled = database.pooled;
+
+    // เริ่ม Transaction
+    await runTransaction(connection, "beginTransaction");
+    transactionStarted = true;
+
+    /* =========================================================
+       1. ตรวจสอบคำเชิญและการตอบรับของสมาชิก
+    ========================================================= */
+
+    const invitationSql = `
+      SELECT
+        id,
+        sender_id,
+        receiver_id,
+        title,
+        academic_year,
+        status
+      FROM project_invitations
+      WHERE id = ?
+        AND sender_id = ?
+        AND project_type = 'โครงงานคู่'
+        AND project_id IS NULL
+      FOR UPDATE
+    `;
+
+    const invitations = await runQuery(connection, invitationSql, [
+      invitationId,
+      senderId,
+    ]);
+
+    if (invitations.length === 0) {
+      rejectRequest("ไม่พบคำเชิญ หรือคำเชิญนี้ถูกใช้ไปแล้ว");
+    }
+
+    const invitation = invitations[0];
+
+    if (invitation.status !== "ตอบรับ") {
+      rejectRequest("สมาชิกคนที่ 2 ยังไม่ได้ตอบรับคำเชิญ");
+    }
+
+    if (!invitation.title || !invitation.academic_year) {
+      rejectRequest("ข้อมูลชื่อโครงงานหรือปีการศึกษาไม่ครบถ้วน");
+    }
+
+    const receiverId = Number(invitation.receiver_id);
+
+    if (senderId === receiverId) {
+      rejectRequest("ไม่สามารถสร้างโครงงานคู่กับตัวเองได้");
+    }
+
+    /* =========================================================
+       2. ตรวจสอบบัญชีนิสิตทั้งสองคน
+    ========================================================= */
+
+    const students = await runQuery(
+      connection,
+      `
+        SELECT id
+        FROM users
+        WHERE id IN (?, ?)
+          AND role = 'student'
+        ORDER BY id
+        FOR UPDATE
+      `,
+      [senderId, receiverId],
+    );
+
+    if (students.length !== 2) {
+      rejectRequest("ไม่พบข้อมูลนิสิตทั้งสองคน");
+    }
+
+    /* =========================================================
+       3. ตรวจสอบอาจารย์ที่ปรึกษา
+    ========================================================= */
+
+    const teachers = await runQuery(
+      connection,
+      `
+        SELECT id, name, major
+        FROM users
+        WHERE id = ?
+          AND role = 'teacher'
+        FOR UPDATE
+      `,
+      [advisorId],
+    );
+
+    if (teachers.length === 0) {
+      rejectRequest("ไม่พบข้อมูลอาจารย์ที่ปรึกษา");
+    }
+
+    const teacher = teachers[0];
+
+    /* =========================================================
+       4. ตรวจสอบจำนวนนิสิตที่อาจารย์รับแล้ว
+    ========================================================= */
+
+    const capacityResults = await runQuery(
+      connection,
+      `
+        SELECT COUNT(DISTINCT pm.user_id) AS accepted_students
+        FROM project_members pm
+        INNER JOIN projects p
+          ON pm.project_id = p.id
+        WHERE p.advisor_id = ?
+      `,
+      [advisorId],
+    );
+
+    const acceptedStudents = Number(capacityResults[0].accepted_students);
+
+    const remainingCapacity = 14 - acceptedStudents;
+
+    if (remainingCapacity < 2) {
+      rejectRequest("อาจารย์ที่ปรึกษามีที่นั่งเหลือไม่เพียงพอสำหรับโครงงานคู่");
+    }
+
+    /* =========================================================
+       5. ตรวจสอบคำขอที่ค้างอยู่ของนิสิตทั้งสองคน
+    ========================================================= */
+
+    const existingRequests = await runQuery(
+      connection,
+      `
+        SELECT id
+        FROM project_requests
+        WHERE student_id IN (?, ?)
+          AND status IN ('รอพิจารณา', 'อนุมัติ')
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [senderId, receiverId],
+    );
+
+    if (existingRequests.length > 0) {
+      rejectRequest("สมาชิกคนใดคนหนึ่งมีคำขอรอพิจารณาหรือได้รับอนุมัติแล้ว");
+    }
+
+    /* =========================================================
+       6. สร้างโครงงานใหม่
+    ========================================================= */
+
+    const projectResult = await runQuery(
+      connection,
+      `
+        INSERT INTO projects
+        (
+          title,
+          advisor,
+          advisor_id,
+          major,
+          status,
+          project_type,
+          max_members,
+          current_members,
+          academic_year,
+          description,
+          objectives,
+          skills,
+          requirements,
+          source
+        )
+        VALUES
+        (
+          ?, ?, ?, ?,
+          'รออนุมัติ',
+          'โครงงานคู่',
+          2,
+          0,
+          ?, ?, ?, ?,
+          '',
+          'student'
+        )
+      `,
+      [
+        invitation.title,
+        teacher.name,
+        advisorId,
+        teacher.major,
+        invitation.academic_year,
+        description.trim(),
+        objectives.trim(),
+        skills.trim(),
+      ],
+    );
+
+    const newProjectId = projectResult.insertId;
+
+    /* =========================================================
+       7. เชื่อมคำเชิญกับโครงงานที่สร้างแล้ว
+    ========================================================= */
+
+    const invitationResult = await runQuery(
+      connection,
+      `
+        UPDATE project_invitations
+        SET
+          project_id = ?,
+          advisor_id = ?,
+          description = ?,
+          objectives = ?,
+          skills = ?,
+          contact_type = ?,
+          contact_value = ?,
+          introduction = ?
+        WHERE id = ?
+          AND sender_id = ?
+          AND status = 'ตอบรับ'
+          AND project_id IS NULL
+      `,
+      [
+        newProjectId,
+        advisorId,
+        description.trim(),
+        objectives.trim(),
+        skills.trim(),
+        contact_type.trim(),
+        contact_value.trim(),
+        introduction || "",
+        invitationId,
+        senderId,
+      ],
+    );
+
+    if (invitationResult.affectedRows !== 1) {
+      rejectRequest("ไม่สามารถเชื่อมคำเชิญกับโครงงานได้");
+    }
+
+    /* =========================================================
+       8. สร้างคำขอให้อาจารย์พิจารณา
+    ========================================================= */
+
+    const requestResult = await runQuery(
+      connection,
+      `
+        INSERT INTO project_requests
+        (
+          project_id,
+          student_id,
+          contact_type,
+          contact_value,
+          introduction,
+          status
+        )
+        VALUES (?, ?, ?, ?, ?, 'รอพิจารณา')
+      `,
+      [
+        newProjectId,
+        senderId,
+        contact_type.trim(),
+        contact_value.trim(),
+        introduction || "",
+      ],
+    );
+
+    const requestId = requestResult.insertId;
+
+    /* =========================================================
+       9. แจ้งเตือนอาจารย์ที่ปรึกษา
+    ========================================================= */
+
+    const senderResults = await runQuery(
+      connection,
+      `
+        SELECT name
+        FROM users
+        WHERE id = ?
+        LIMIT 1
+      `,
+      [senderId],
+    );
+
+    const senderName = senderResults[0].name;
+
+    const notificationMessage =
+      senderName +
+      ' ส่งคำเสนอหัวข้อโครงงาน "' +
+      invitation.title +
+      '" มาให้คุณพิจารณา';
+
+    await runQuery(
+      connection,
+      `
+        INSERT INTO notifications
+        (
+          user_id,
+          message,
+          request_id,
+          project_id
+        )
+        VALUES (?, ?, ?, ?)
+      `,
+      [advisorId, notificationMessage, requestId, newProjectId],
+    );
+
+    /* =========================================================
+       10. ยืนยันการบันทึกทั้งหมด
+    ========================================================= */
+
+    await runTransaction(connection, "commit");
+    transactionStarted = false;
+
+    return res.json({
+      success: true,
+      message: "ส่งคำเสนอโครงงานสำเร็จ",
+      project_id: newProjectId,
+      request_id: requestId,
+    });
+  } catch (error) {
+    // หากขั้นตอนใดล้มเหลว ให้ยกเลิกการบันทึก
+    if (connection && transactionStarted) {
+      try {
+        await runTransaction(connection, "rollback");
+      } catch (rollbackError) {
+        console.error("Rollback error:", rollbackError);
+      }
+    }
+
+    console.error("Submit pair project error:", error);
+
+    if (error.statusCode === 400) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: "ไม่สามารถส่งคำเสนอโครงงานได้",
+    });
+  } finally {
+    // คืน Connection เมื่อใช้ Connection Pool
+    if (connection && pooled) {
+      connection.release();
+    }
+  }
+});
+
 app.post("/project-invitations", (req, res) => {
   const {
     sender_id,
@@ -2045,6 +2503,7 @@ app.post("/project-invitations", (req, res) => {
     project_id,
     advisor_id,
     title,
+    academic_year,
     project_type,
     description,
     objectives,
@@ -2070,6 +2529,7 @@ app.post("/project-invitations", (req, res) => {
     project_id,
     advisor_id,
     title,
+    academic_year,
     project_type,
     description,
     objectives,
@@ -2079,7 +2539,7 @@ app.post("/project-invitations", (req, res) => {
     contact_value,
     introduction
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
   db.query(
     sql,
@@ -2089,6 +2549,7 @@ app.post("/project-invitations", (req, res) => {
       project_id,
       advisor_id,
       title,
+      academic_year,
       project_type,
       description,
       objectives,
@@ -2113,6 +2574,114 @@ app.post("/project-invitations", (req, res) => {
     },
   );
 });
+
+/* =========================================================
+   โหลดคำเชิญโครงงานคู่ที่ยังไม่ได้สร้างโครงงาน
+========================================================= */
+
+app.get("/project-invitations/draft/:senderId", (req, res) => {
+  const senderId = Number(req.params.senderId);
+
+  if (!Number.isInteger(senderId) || senderId <= 0) {
+    return res.status(400).json({
+      message: "รหัสนิสิตไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT
+      pi.id,
+      pi.title,
+      pi.academic_year,
+      pi.project_type,
+      pi.status,
+      pi.receiver_id,
+      u.username AS receiver_username,
+      u.name AS receiver_name
+
+    FROM project_invitations pi
+
+    INNER JOIN users u
+      ON pi.receiver_id = u.id
+
+    WHERE pi.sender_id = ?
+      AND pi.project_id IS NULL
+      AND pi.status IN ('รอตอบรับ', 'ตอบรับ')
+
+    ORDER BY pi.id DESC
+    LIMIT 1
+  `;
+
+  db.query(sql, [senderId], (err, results) => {
+    if (err) {
+      console.log("Load draft invitation error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดคำเชิญได้",
+      });
+    }
+
+    res.json({
+      invitation: results.length > 0 ? results[0] : null,
+    });
+  });
+});
+
+/* =========================================================
+   ตรวจสอบสถานะการตอบรับคำเชิญ
+========================================================= */
+
+app.get(
+  "/project-invitations/draft-status/:invitationId/:senderId",
+  (req, res) => {
+    const invitationId = Number(req.params.invitationId);
+    const senderId = Number(req.params.senderId);
+
+    if (
+      !Number.isInteger(invitationId) ||
+      !Number.isInteger(senderId) ||
+      invitationId <= 0 ||
+      senderId <= 0
+    ) {
+      return res.status(400).json({
+        message: "ข้อมูลคำเชิญไม่ถูกต้อง",
+      });
+    }
+
+    const sql = `
+      SELECT
+        id,
+        sender_id,
+        receiver_id,
+        status
+
+      FROM project_invitations
+
+      WHERE id = ?
+        AND sender_id = ?
+
+      LIMIT 1
+    `;
+
+    db.query(sql, [invitationId, senderId], (err, results) => {
+      if (err) {
+        console.log("Check invitation status error:", err);
+
+        return res.status(500).json({
+          message: "ไม่สามารถตรวจสอบคำเชิญได้",
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          message: "ไม่พบคำเชิญ",
+        });
+      }
+
+      res.json(results[0]);
+    });
+  },
+);
 
 app.get("/project-invitations/:userId", (req, res) => {
   const userId = req.params.userId;
