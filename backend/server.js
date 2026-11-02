@@ -3375,6 +3375,12 @@ app.post("/teacher/request/:requestId/revision", (req, res) => {
     }
 
     const request = results[0];
+    // อนุญาตให้ส่งกลับไปแก้ไขเฉพาะหัวข้อที่นิสิตเสนอ
+    if (request.source !== "student") {
+      return res.status(400).json({
+        message: "คำขอสมัครเข้าร่วมโครงงานไม่สามารถส่งกลับไปแก้ไขได้",
+      });
+    }
 
     if (request.status !== "รอพิจารณา") {
       return res.status(400).json({

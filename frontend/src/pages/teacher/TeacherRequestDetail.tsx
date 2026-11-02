@@ -356,21 +356,20 @@ function TeacherRequestDetail() {
   }
 
   // แยกข้อมูลที่คั่นด้วย | เพื่อแสดงเป็นรายการแบบ bullet
-const objectives =
-  request?.objectives
+  const objectives = request?.objectives
     ? request.objectives
         .split(/\r?\n|\|/)
-        .map((item) =>
-          item
-            .trim()
-            .replace(/^[-•]\s*/, "")
-        )
+        .map((item) => item.trim().replace(/^[-•]\s*/, ""))
         .filter(Boolean)
     : [];
 
+  /* =========================================================
+   แยกคุณสมบัติผู้สมัครตามการขึ้นบรรทัดใหม่
+========================================================= */
+
   const requirements = request.requirements
     ? request.requirements
-        .split("|")
+        .split(/\r?\n|\|/)
         .map((item) => item.trim())
         .filter(Boolean)
     : [];
@@ -399,9 +398,13 @@ const objectives =
 
             <li className="active">คำขอเข้าร่วมโครงงาน</li>
 
-            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>
+              โครงงานที่ดูแล
+            </li>
 
-            <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
+            <li onClick={() => navigate("/teacher-work")}>
+              งานที่ต้องดำเนินการ
+            </li>
 
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา
@@ -465,7 +468,11 @@ const objectives =
             {/* ================= TITLE ================= */}
 
             <div className="request-title-row">
-              <h3>คำขอสมัครเข้าร่วมโครงงาน</h3>
+              <h3>
+                {request.source === "student"
+                  ? "คำขอเสนอหัวข้อโครงงาน"
+                  : "คำขอสมัครเข้าร่วมโครงงาน"}
+              </h3>
 
               <div className="request-meta">
                 <span>
@@ -552,7 +559,9 @@ const objectives =
                         <div className="applicant-fields-grid">
                           <div className="applicant-field">
                             <label>รหัสประจำตัว</label>
-                            <div className="readonly-box">{member.username}</div>
+                            <div className="readonly-box">
+                              {member.username}
+                            </div>
                           </div>
 
                           <div className="applicant-field">
@@ -724,19 +733,22 @@ const objectives =
                     อนุมัติ
                   </label>
 
-                  <label>
-                    <input
-                      type="radio"
-                      name="decision"
-                      checked={decision === "ต้องแก้ไข"}
-                      disabled={request.status !== "รอพิจารณา"}
-                      onChange={() => {
-                        setDecision("ต้องแก้ไข");
-                        setRejectionReason("");
-                      }}
-                    />
-                    ต้องแก้ไข
-                  </label>
+                  {/* แสดงตัวเลือกต้องแก้ไขเฉพาะโครงงานที่นิสิตเสนอ */}
+                  {request.source === "student" && (
+                    <label>
+                      <input
+                        type="radio"
+                        name="decision"
+                        checked={decision === "ต้องแก้ไข"}
+                        disabled={request.status !== "รอพิจารณา"}
+                        onChange={() => {
+                          setDecision("ต้องแก้ไข");
+                          setRejectionReason("");
+                        }}
+                      />
+                      ต้องแก้ไข
+                    </label>
+                  )}
 
                   <label>
                     <input
@@ -755,7 +767,7 @@ const objectives =
 
                 {/* ================= ต้องแก้ไข ================= */}
 
-                {decision === "ต้องแก้ไข" && (
+                {request.source === "student" && decision === "ต้องแก้ไข" && (
                   <>
                     <label>
                       ข้อเสนอแนะ / สิ่งที่ต้องแก้ไข
