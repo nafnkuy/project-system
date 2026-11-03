@@ -691,6 +691,17 @@ function StudentProjectDetail() {
   };
 
   /* =========================================================
+   จัดรูปแบบรายละเอียดโครงงานให้แสดงเป็นรายการ
+========================================================= */
+
+  const descriptions = project?.description
+    ? project.description
+        .split(/\r?\n|\|/)
+        .map((item) => item.trim().replace(/^[-•]\s*/, ""))
+        .filter(Boolean)
+    : [];
+
+  /* =========================================================
      DATA FORMAT
   ========================================================= */
 
@@ -701,10 +712,14 @@ function StudentProjectDetail() {
         .filter(Boolean)
     : [];
 
+  /* =========================================================
+   จัดรูปแบบคุณสมบัติ / ข้อกำหนดให้แสดงเป็นรายการ
+========================================================= */
+
   const requirements = project?.requirements
     ? project.requirements
-        .split("|")
-        .map((item) => item.trim())
+        .split(/\r?\n|\|/)
+        .map((item) => item.trim().replace(/^[-•]\s*/, ""))
         .filter(Boolean)
     : [];
 
@@ -1547,9 +1562,17 @@ function StudentProjectDetail() {
 
                 <div className="student-overview-divider" />
 
-                <p className="student-overview-description">
-                  {project.description || "-"}
-                </p>
+                {/* แสดงรายละเอียดโครงงานแยกเป็นแต่ละข้อ */}
+
+                {descriptions.length > 0 ? (
+                  <ul>
+                    {descriptions.map((description, index) => (
+                      <li key={index}>{description}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>-</p>
+                )}
               </div>
 
               {/* OBJECTIVES */}

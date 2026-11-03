@@ -709,41 +709,51 @@
   gap: 6px;
 }
 
-/* รูปร่างสถานะ */
+/* =========================================================
+   ป้ายสถานะการตรวจงาน
+========================================================= */
 
 .teacher-work-page .tw-review-status-badge {
   display: inline-flex;
   justify-content: center;
   align-items: center;
 
-  min-width: 76px;
-  padding: 5px 12px;
+  min-width: 80px;
+  height: 26px;
 
-  border-radius: 8px;
+  padding: 0 12px;
+  border-radius: 20px;
 
-  color: #ffffff;
   font-size: 12px;
   font-weight: 500;
-
   white-space: nowrap;
 }
 
-/* รอตรวจ - สีเหลือง */
+/* =========================================================
+   รอตรวจ - พื้นเหลืองอ่อน ตัวอักษรเหลืองเข้ม
+========================================================= */
 
 .teacher-work-page .tw-status-waiting {
-  background-color: #ffbf00;
+  background-color: #fff5d6;
+  color: #b88600;
 }
 
-/* ผ่าน - สีเขียว */
+/* =========================================================
+   ผ่าน - พื้นเขียวอ่อน ตัวอักษรเขียวเข้ม
+========================================================= */
 
 .teacher-work-page .tw-status-passed {
-  background-color: #20a86b;
+  background-color: #e6f5ee;
+  color: #159c68;
 }
 
-/* ต้องแก้ไข - สีส้ม */
+/* =========================================================
+   ต้องแก้ไข - พื้นส้มอ่อน ตัวอักษรส้มเข้ม
+========================================================= */
 
 .teacher-work-page .tw-status-revision {
-  background-color: #ff8a00;
+  background-color: #fff0e3;
+  color: #d66a00;
 }
 
 /* ข้อความแจ้งว่าเป็นงานส่งแก้ไข */
@@ -1759,7 +1769,6 @@
   font-weight: 600;
 }
 
-
 /* =========================================================
    EXAM REQUEST MODAL
    MATCH EXAM ANNOUNCEMENT MODAL
@@ -2080,7 +2089,6 @@
   cursor: pointer;
 }
 
-
 .tw-exam-detail-close:hover {
   background: #f0f0f0;
   color: #333;
@@ -2139,4 +2147,48 @@
 .teacher-work-page .tw-exam-round-retake {
   color: #e67e00;
   font-weight: 600;
+}
+
+/* =========================================================
+   ปรับขนาดสถานะกำหนดการสอบให้เหมือนสถานะการตรวจงาน
+========================================================= */
+
+.teacher-work-page .tw-exam-request-pending,
+.teacher-work-page .tw-exam-request-approved,
+.teacher-work-page .tw-exam-request-announced {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 80px;
+  height: 26px;
+
+  padding: 0 12px;
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   ปรับขนาดสถานะกำหนดการสอบให้เท่ากัน
+========================================================= */
+
+.teacher-work-page .tw-exam-request-pending,
+.teacher-work-page .tw-exam-request-approved,
+.teacher-work-page .tw-exam-request-announced {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100px;
+  height: 28px;
+
+  padding: 0 12px;
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
 }
