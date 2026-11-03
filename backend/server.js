@@ -1012,7 +1012,8 @@ app.get("/staff/profile/:staffId", (req, res) => {
       role,
       profile_image,
       phone,
-      email
+      email,
+      backup_email
     FROM users
     WHERE id = ?
       AND role = 'staff'
@@ -1036,6 +1037,180 @@ app.get("/staff/profile/:staffId", (req, res) => {
     res.json(results[0]);
   });
 });
+
+/* =========================================================
+   แก้ไขข้อมูลการติดต่อของเจ้าหน้าที่
+========================================================= */
+
+app.put("/staff/profile/:staffId/contact", (req, res) => {
+  const staffId = Number(req.params.staffId);
+
+  if (!Number.isInteger(staffId) || staffId <= 0) {
+    return res.status(400).json({
+      message: "รหัสเจ้าหน้าที่ไม่ถูกต้อง",
+    });
+  }
+
+  const { backup_email, phone } = req.body;
+
+  if (typeof backup_email !== "string" || typeof phone !== "string") {
+    return res.status(400).json({
+      message: "ข้อมูลการติดต่อไม่ถูกต้อง",
+    });
+  }
+
+  const backupEmail = backup_email.trim();
+  const phoneNumber = phone.trim();
+
+  // ตรวจสอบอีเมลสำรอง
+  if (backupEmail !== "") {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(backupEmail)) {
+      return res.status(400).json({
+        message: "รูปแบบอีเมลสำรองไม่ถูกต้อง",
+      });
+    }
+  }
+
+  // ตรวจสอบเบอร์โทรศัพท์
+  const phoneDigits = phoneNumber.replace(/-/g, "");
+
+  if (
+    phoneNumber !== "" &&
+    (!/^[0-9-]+$/.test(phoneNumber) || !/^0[0-9]{8,9}$/.test(phoneDigits))
+  ) {
+    return res.status(400).json({
+      message: "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง",
+    });
+  }
+
+  const backupEmailValue = backupEmail || null;
+  const phoneValue = phoneNumber || null;
+
+  const sql = `
+    UPDATE users
+    SET
+      backup_email = ?,
+      phone = ?
+    WHERE id = ?
+      AND role = 'staff'
+  `;
+
+  db.query(sql, [backupEmailValue, phoneValue, staffId], (err, result) => {
+    if (err) {
+      console.error("Update staff contact error:", err);
+
+      return res.status(500).json({
+        message: "บันทึกข้อมูลการติดต่อไม่สำเร็จ",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "ไม่พบข้อมูลเจ้าหน้าที่",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกข้อมูลเรียบร้อยแล้ว",
+      backup_email: backupEmailValue,
+      phone: phoneValue,
+    });
+  });
+});
+
+
+/* =========================================================
+   เปลี่ยนรูปโปรไฟล์ของเจ้าหน้าที่
+========================================================= */
+
+app.put("/staff/profile/:staffId/image", (req, res) => {
+  const staffId = Number(req.params.staffId);
+
+  if (!Number.isInteger(staffId) || staffId <= 0) {
+    return res.status(400).json({
+      message: "รหัสเจ้าหน้าที่ไม่ถูกต้อง",
+    });
+  }
+
+  // ใช้ตัวรับไฟล์รูปเดียวกับนิสิตและอาจารย์
+  uploadStudentProfile(req, res, async (uploadError) => {
+    if (uploadError) {
+      return res.status(400).json({
+        message: "ไฟล์ไม่ถูกต้องหรือมีขนาดเกิน 2 MB",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "กรุณาเลือกรูปโปรไฟล์",
+      });
+    }
+
+    const folderPath = path.join(
+      __dirname,
+      "uploads",
+      "profile-images"
+    );
+
+    const fileName =
+      "staff-" + staffId + "-" + Date.now() + ".webp";
+
+    const filePath = path.join(folderPath, fileName);
+    const imageUrl = "/uploads/profile-images/" + fileName;
+
+    try {
+      fs.mkdirSync(folderPath, {
+        recursive: true,
+      });
+
+      // ตรวจสอบรูปจริงและแปลงเป็น WebP
+      await sharp(req.file.buffer, {
+        limitInputPixels: 10000000,
+      })
+        .resize(400, 400, {
+          fit: "cover",
+        })
+        .webp({
+          quality: 85,
+        })
+        .toFile(filePath);
+    } catch (error) {
+      console.error("Staff image error:", error);
+
+      return res.status(400).json({
+        message: "ไม่สามารถอ่านไฟล์รูปภาพได้",
+      });
+    }
+
+    // บันทึกที่อยู่รูปใหม่ลงฐานข้อมูล
+    const sql = `
+      UPDATE users
+      SET profile_image = ?
+      WHERE id = ?
+        AND role = 'staff'
+    `;
+
+    db.query(sql, [imageUrl, staffId], (err, result) => {
+      if (err || result.affectedRows === 0) {
+        fs.unlink(filePath, () => {});
+
+        return res.status(500).json({
+          message: "ไม่สามารถบันทึกรูปโปรไฟล์ได้",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว",
+        profile_image: imageUrl,
+      });
+    });
+  });
+});
+
 
 app.get("/projects", (req, res) => {
   const sql = `

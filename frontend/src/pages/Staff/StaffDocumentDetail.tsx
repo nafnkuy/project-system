@@ -53,6 +53,7 @@ function StaffDocumentDetail() {
 
   const { id } = useParams();
 
+  const userId = sessionStorage.getItem("userId");
   const username = sessionStorage.getItem("username");
   const profileImage = sessionStorage.getItem("profileImage");
 
@@ -60,12 +61,24 @@ function StaffDocumentDetail() {
 
   const [loading, setLoading] = useState(true);
 
+  /* =========================================================
+   ตรวจสอบการเข้าสู่ระบบของเจ้าหน้าที่
+========================================================= */
+
+  useEffect(() => {
+    if (!userId || !username) {
+      navigate("/", { replace: true });
+    }
+  }, [userId, username, navigate]);
+
   /* =========================
      ดึงข้อมูลเอกสาร
   ========================= */
 
   useEffect(() => {
-    if (!id) return;
+    if (!userId || !username || !id) {
+      return;
+    }
 
     axios
       .get(`http://localhost:5000/staff/documents/${id}`)
@@ -80,7 +93,7 @@ function StaffDocumentDetail() {
       .finally(() => {
         setLoading(false);
       });
-  }, [id]);
+  }, [id, userId, username]);
 
   /* =========================
      Format วันที่
@@ -186,6 +199,18 @@ function StaffDocumentDetail() {
     }
   };
 
+  /* =========================================================
+   ไม่แสดงหน้าเอกสารเมื่อไม่ได้เข้าสู่ระบบ
+========================================================= */
+
+  if (!userId || !username) {
+    return null;
+  }
+
+  if (loading) {
+    return <div>กำลังโหลดข้อมูล...</div>;
+  }
+
   if (loading) {
     return <div>กำลังโหลดข้อมูล...</div>;
   }
@@ -238,9 +263,7 @@ function StaffDocumentDetail() {
               การแจ้งเตือน
             </li>
 
-            <li onClick={() => navigate("/staff-profile")}>
-              ข้อมูลส่วนตัว
-            </li>
+            <li onClick={() => navigate("/staff-profile")}>ข้อมูลส่วนตัว</li>
           </ul>
         </nav>
 
