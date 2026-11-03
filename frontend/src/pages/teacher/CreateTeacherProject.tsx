@@ -3,6 +3,7 @@ import TeacherNotificationBell from "./TeacherNotificationBell";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { FaPaperclip, FaDownload, FaTrash } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -20,6 +21,11 @@ function CreateTeacherProject() {
   const [objectives, setObjectives] = useState("");
   const [skills, setSkills] = useState("");
   const [requirements, setRequirements] = useState("");
+  /* =========================================================
+   เอกสารประกอบโครงงาน (ไม่บังคับ)
+========================================================= */
+
+  const [documents, setDocuments] = useState<File[]>([]);
 
   const [projectType, setProjectType] = useState("โครงงานเดี่ยว");
   const [academicYear, setAcademicYear] = useState("2569/1");
@@ -41,6 +47,75 @@ function CreateTeacherProject() {
     navigate("/");
   };
 
+  /* =========================================================
+   เลือกเอกสารแนบ
+========================================================= */
+
+  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    if (documents.length + selectedFiles.length > 5) {
+      alert("แนบเอกสารได้สูงสุด 5 ไฟล์");
+      e.target.value = "";
+      return;
+    }
+
+    setDocuments([...documents, ...selectedFiles]);
+    e.target.value = "";
+  };
+
+  /* =========================================================
+   ลบเอกสารที่เลือก
+========================================================= */
+
+  const handleRemoveDocument = (indexToRemove: number) => {
+    const updatedFiles = documents.filter(
+      (_, index) => index !== indexToRemove,
+    );
+
+    setDocuments(updatedFiles);
+  };
+
+  /* =========================================================
+   ดาวน์โหลดเอกสารที่เลือก
+========================================================= */
+
+  const handleDownloadDocument = (file: File) => {
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = file.name;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      URL.revokeObjectURL(fileUrl);
+    }, 1000);
+  };
+
+  /* =========================================================
+   แสดงขนาดเอกสาร
+========================================================= */
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   // สร้างหัวข้อโครงงาน: ใช้ API และข้อมูลชุดเดิมของอาจารย์
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,6 +133,38 @@ function CreateTeacherProject() {
     if (!skills.trim()) {
       alert("กรุณากรอกทักษะหรือความรู้ที่จำเป็น");
       return;
+    }
+
+    /* =========================================================
+   ตรวจสอบเอกสารประกอบที่เลือก
+========================================================= */
+
+    if (documents.length > 5) {
+      alert("แนบเอกสารได้สูงสุด 5 ไฟล์");
+      return;
+    }
+
+    const allowedExtensions = [
+      ".pdf",
+      ".docx",
+      ".pptx",
+      ".jpg",
+      ".jpeg",
+      ".png",
+    ];
+
+    for (const file of documents) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`ไฟล์ ${file.name} มีขนาดเกิน 10 MB`);
+        return;
+      }
+
+      const extension = "." + file.name.split(".").pop()?.toLowerCase();
+
+      if (!allowedExtensions.includes(extension)) {
+        alert(`ไม่รองรับไฟล์ ${file.name}`);
+        return;
+      }
     }
 
     try {
@@ -80,6 +187,36 @@ function CreateTeacherProject() {
         requirements,
         source: "teacher",
       });
+
+      /* =========================================================
+   อัปโหลดเอกสารเมื่ออาจารย์เลือกแนบไฟล์
+========================================================= */
+
+      if (documents.length > 0) {
+        const formData = new FormData();
+
+        formData.append("teacher_id", String(userId));
+
+        for (const file of documents) {
+          formData.append("documents", file);
+        }
+
+        try {
+          await axios.post(
+            `http://localhost:5000/teacher/projects/${res.data.project_id}/documents`,
+            formData,
+          );
+        } catch (uploadError) {
+          console.error("Upload documents error:", uploadError);
+
+          alert(
+            "สร้างหัวข้อโครงงานสำเร็จแล้ว แต่แนบเอกสารไม่สำเร็จ กรุณาตรวจสอบโครงงานที่สร้างไว้ก่อน ไม่ต้องกดสร้างซ้ำ",
+          );
+
+          navigate("/teacher-projects");
+          return;
+        }
+      }
 
       console.log("Create project response:", res.data);
       alert("สร้างหัวข้อโครงงานเรียบร้อยแล้ว");
@@ -108,14 +245,21 @@ function CreateTeacherProject() {
         <nav>
           <ul>
             <li onClick={() => navigate("/teacher-home")}>หน้าหลัก</li>
-            <li className="active" onClick={() => navigate("/teacher-projects")}>
+            <li
+              className="active"
+              onClick={() => navigate("/teacher-projects")}
+            >
               จัดการหัวข้อโครงงาน
             </li>
             <li onClick={() => navigate("/teacher-requests")}>
               คำขอเข้าร่วมโครงงาน
             </li>
-            <li onClick={() => navigate("/teacher-managed-projects")}>โครงงานที่ดูแล</li>
-            <li onClick={() => navigate("/teacher-work")}>งานที่ต้องดำเนินการ</li>
+            <li onClick={() => navigate("/teacher-managed-projects")}>
+              โครงงานที่ดูแล
+            </li>
+            <li onClick={() => navigate("/teacher-work")}>
+              งานที่ต้องดำเนินการ
+            </li>
             <li onClick={() => navigate("/teacher-decision-history")}>
               ประวัติการพิจารณา
             </li>
@@ -149,7 +293,9 @@ function CreateTeacherProject() {
             <TeacherNotificationBell />
             <div className="user-info">
               <img
-                src={profileImage ? `http://localhost:5000${profileImage}` : logo}
+                src={
+                  profileImage ? `http://localhost:5000${profileImage}` : logo
+                }
                 alt="Profile"
                 className="profile-image"
               />
@@ -182,7 +328,8 @@ function CreateTeacherProject() {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="teacher-project-year">
-                    ปีการศึกษา / ภาคเรียน <span className="required-star">*</span>
+                    ปีการศึกษา / ภาคเรียน{" "}
+                    <span className="required-star">*</span>
                   </label>
                   <div className="create-select-wrapper">
                     <select
@@ -196,7 +343,9 @@ function CreateTeacherProject() {
                       <option value="2570/1">2570/1</option>
                       <option value="2570/2">2570/2</option>
                     </select>
-                    <span className="create-select-arrow" aria-hidden="true">▼</span>
+                    <span className="create-select-arrow" aria-hidden="true">
+                      ▼
+                    </span>
                   </div>
                 </div>
 
@@ -214,7 +363,9 @@ function CreateTeacherProject() {
                       <option value="โครงงานเดี่ยว">โครงงานเดี่ยว</option>
                       <option value="โครงงานคู่">โครงงานคู่</option>
                     </select>
-                    <span className="create-select-arrow" aria-hidden="true">▼</span>
+                    <span className="create-select-arrow" aria-hidden="true">
+                      ▼
+                    </span>
                   </div>
                 </div>
               </div>
@@ -298,6 +449,88 @@ function CreateTeacherProject() {
                   placeholder="กรอกคุณสมบัติของผู้สมัครเข้าร่วมโครงงาน"
                   rows={3}
                 />
+              </div>
+
+              {/* =========================================================
+    เอกสารที่เกี่ยวข้อง (ไม่บังคับ)
+========================================================= */}
+
+              <div className="form-group teacher-document-group">
+                {/* หัวข้อและปุ่มแนบเอกสาร */}
+                <div className="teacher-document-header">
+                  <label htmlFor="teacher-project-documents">
+                    เอกสารที่เกี่ยวข้อง (ไม่บังคับ)
+                  </label>
+
+                  <label
+                    htmlFor="teacher-project-documents"
+                    className="teacher-document-upload-btn"
+                  >
+                    <FaPaperclip />
+                    แนบเอกสาร
+                  </label>
+                </div>
+
+                <p className="example-text">
+                  แนบได้สูงสุด 5 ไฟล์ ขนาดไม่เกิน 10 MB ต่อไฟล์ รองรับ PDF,
+                  DOCX, PPTX, JPG และ PNG
+                </p>
+
+                {/* ช่องเลือกไฟล์ */}
+                <input
+                  id="teacher-project-documents"
+                  type="file"
+                  className="teacher-document-hidden-input"
+                  accept=".pdf,.docx,.pptx,.jpg,.jpeg,.png"
+                  multiple
+                  onChange={handleDocumentChange}
+                />
+
+                {/* รายการเอกสารที่เลือก */}
+                {documents.length > 0 && (
+                  <div className="teacher-document-list">
+                    {documents.map((file, index) => (
+                      <div className="teacher-document-item" key={index}>
+                        {/* ชื่อและขนาดไฟล์ */}
+                        <div className="teacher-document-left">
+                          <FaPaperclip />
+
+                          <div className="teacher-document-info">
+                            <div className="teacher-document-name">
+                              {file.name}
+                            </div>
+
+                            <div className="teacher-document-meta">
+                              {formatFileSize(file.size)} • เตรียมแนบโดย{" "}
+                              {username}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ปุ่มดาวน์โหลดและลบ */}
+                        <div className="teacher-document-actions">
+                          <button
+                            type="button"
+                            className="teacher-document-download-btn"
+                            onClick={() => handleDownloadDocument(file)}
+                          >
+                            <FaDownload />
+                            ดาวน์โหลด
+                          </button>
+
+                          <button
+                            type="button"
+                            className="teacher-document-delete-btn"
+                            onClick={() => handleRemoveDocument(index)}
+                            aria-label={`ลบไฟล์ ${file.name}`}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="form-actions">

@@ -3,7 +3,6 @@ import StudentNotificationBell from "./StudentNotificationBell";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaBell } from "react-icons/fa";
 
 import logo from "../../assets/Logo.svg";
 
@@ -31,6 +30,16 @@ interface Member {
   name: string;
 }
 
+/* =========================================================
+   ข้อมูลเอกสารประกอบโครงงาน
+========================================================= */
+
+interface ProjectDocument {
+  id: number;
+  original_name: string;
+  file_path: string;
+}
+
 function ProjectDetail() {
   // ใช้ useParams เพื่อดึงค่าพารามิเตอร์ id จาก URL
   const { id } = useParams();
@@ -43,16 +52,9 @@ function ProjectDetail() {
 
   // <Project | null> หมายถึง project อาจเป็น Project หรือ null ได้ แล้วใช้ useState เพื่อเก็บสถานะของโครงงานที่ดึงมาจาก API
   const [project, setProject] = useState<Project | null>(null); // สถานะของโครงงานที่ดึงมาจาก API
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const notifications = [
-    {
-      id: 1,
-      message: "อาจารย์ตอบรับหัวข้อของคุณแล้ว",
-      time: "2 ชั่วโมงที่แล้ว",
-    },
-    { id: 2, message: "ส่งคำขอเลือกหัวข้อสำเร็จ", time: "1 วันที่แล้ว" },
-  ];
+  const [projectDocuments, setProjectDocuments] = useState<ProjectDocument[]>(
+    [],
+  );
 
   // useEffect ทำงานเมื่อค่า username หรือ navigate เปลี่ยนแปลง ถ้า username ไม่มีค่า (ผู้ใช้ยังไม่ได้เข้าสู่ระบบ) จะเปลี่ยนหน้าไปยังหน้าเข้าสู่ระบบ
   useEffect(() => {
@@ -65,6 +67,26 @@ function ProjectDetail() {
       .get(`http://localhost:5000/projects/${id}`)
       .then((res) => setProject(res.data))
       .catch((err) => console.log(err));
+  }, [id]);
+
+  /* =========================================================
+   โหลดเอกสารที่อาจารย์แนบไว้ในโครงงาน
+========================================================= */
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    axios
+      .get(`http://localhost:5000/projects/${id}/documents`)
+      .then((res) => {
+        setProjectDocuments(res.data || []);
+      })
+      .catch((err) => {
+        console.log("โหลดเอกสารไม่สำเร็จ:", err);
+        setProjectDocuments([]);
+      });
   }, [id]);
 
   const handleLogout = () => {
@@ -263,13 +285,15 @@ function ProjectDetail() {
           <section className="detail-section">
             <h4>วัตถุประสงค์</h4>
 
+            {/* แสดงวัตถุประสงค์แยกแต่ละบรรทัด */}
             <ul>
               {(project.objectives || "")
-                .split("|")
-                .map(
-                  (objective, index) =>
-                    objective && <li key={index}>{objective}</li>,
-                )}
+                .split(/\r?\n|\|/)
+                .map((item) => item.trim().replace(/^[-•]\s*/, ""))
+                .filter(Boolean)
+                .map((objective, index) => (
+                  <li key={index}>{objective}</li>
+                ))}
             </ul>
           </section>
 
@@ -301,20 +325,39 @@ function ProjectDetail() {
           <section className="detail-section">
             <h4>คุณสมบัติผู้สมัคร</h4>
 
+            {/* แสดงคุณสมบัติผู้สมัครแยกแต่ละบรรทัด */}
             <ul className="requirement-list">
               {(project.requirements || "")
-                .split("|")
-                .map((req, index) => req && <li key={index}>{req}</li>)}
+                .split(/\r?\n|\|/)
+                .map((item) => item.trim().replace(/^[-•]\s*/, ""))
+                .filter(Boolean)
+                .map((requirement, index) => (
+                  <li key={index}>{requirement}</li>
+                ))}
             </ul>
           </section>
 
-          <section className="detail-section">
-            <h4>เอกสารที่เกี่ยวข้อง</h4>
+          {/* =====================================================
+    แสดงเอกสารเฉพาะเมื่ออาจารย์แนบไว้
+===================================================== */}
 
-            <div className="file-box">📄 Project Proposal.pdf</div>
-            <br />
-            <div className="file-box">📄 Requirement Specification.pdf</div>
-          </section>
+          {projectDocuments.length > 0 && (
+            <section className="detail-section">
+              <h4>เอกสารที่เกี่ยวข้อง</h4>
+
+              {projectDocuments.map((document) => (
+                <div className="file-box" key={document.id}>
+                  <a
+                    href={`http://localhost:5000${document.file_path}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📄 {document.original_name}
+                  </a>
+                </div>
+              ))}
+            </section>
+          )}
 
           <div className="apply-section">
             <button

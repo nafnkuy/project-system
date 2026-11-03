@@ -80,6 +80,66 @@ const uploadTaskFile = multer({
     }
   },
 });
+
+/* =========================================================
+   รับเอกสารประกอบหัวข้อโครงงานจากอาจารย์
+========================================================= */
+
+const projectDocumentDir = path.join(__dirname, "uploads", "project-documents");
+
+fs.mkdirSync(projectDocumentDir, {
+  recursive: true,
+});
+
+const uploadProjectDocuments = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, projectDocumentDir);
+    },
+
+    filename: (req, file, cb) => {
+      const extension = path.extname(file.originalname).toLowerCase();
+      const fileName = crypto.randomUUID() + extension;
+      cb(null, fileName);
+    },
+  }),
+
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 5,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+
+    const allowedExtensions = [
+      ".pdf",
+      ".docx",
+      ".pptx",
+      ".jpg",
+      ".jpeg",
+      ".png",
+    ];
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "image/jpeg",
+      "image/png",
+    ];
+
+    if (
+      allowedExtensions.includes(extension) &&
+      allowedTypes.includes(file.mimetype)
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("ประเภทไฟล์ไม่รองรับ"));
+    }
+  },
+}).array("documents", 5);
+
 app.use(
   "/src/assets",
   express.static(path.join(__dirname, "../frontend/src/assets")),
@@ -1121,7 +1181,6 @@ app.put("/staff/profile/:staffId/contact", (req, res) => {
   });
 });
 
-
 /* =========================================================
    เปลี่ยนรูปโปรไฟล์ของเจ้าหน้าที่
 ========================================================= */
@@ -1149,14 +1208,9 @@ app.put("/staff/profile/:staffId/image", (req, res) => {
       });
     }
 
-    const folderPath = path.join(
-      __dirname,
-      "uploads",
-      "profile-images"
-    );
+    const folderPath = path.join(__dirname, "uploads", "profile-images");
 
-    const fileName =
-      "staff-" + staffId + "-" + Date.now() + ".webp";
+    const fileName = "staff-" + staffId + "-" + Date.now() + ".webp";
 
     const filePath = path.join(folderPath, fileName);
     const imageUrl = "/uploads/profile-images/" + fileName;
@@ -1210,7 +1264,6 @@ app.put("/staff/profile/:staffId/image", (req, res) => {
     });
   });
 });
-
 
 app.get("/projects", (req, res) => {
   const sql = `
@@ -1810,6 +1863,130 @@ app.post("/projects", (req, res) => {
       });
     },
   );
+});
+
+/* =========================================================
+   บันทึกเอกสารประกอบหัวข้อโครงงาน
+========================================================= */
+
+app.post("/teacher/projects/:projectId/documents", (req, res) => {
+  uploadProjectDocuments(req, res, (uploadError) => {
+    const files = req.files || [];
+
+    // ลบไฟล์ที่อัปโหลดมาแล้วกรณีเกิดข้อผิดพลาด
+    const removeFiles = () => {
+      for (const file of files) {
+        fs.unlink(file.path, () => {});
+      }
+    };
+
+    if (uploadError) {
+      removeFiles();
+
+      return res.status(400).json({
+        message: "ไฟล์ไม่ถูกต้อง จำนวนเกิน 5 ไฟล์ หรือขนาดเกิน 10 MB",
+      });
+    }
+
+    const projectId = Number(req.params.projectId);
+    const teacherId = Number(req.body.teacher_id);
+
+    if (
+      !Number.isInteger(projectId) ||
+      !Number.isInteger(teacherId) ||
+      projectId <= 0 ||
+      teacherId <= 0 ||
+      files.length === 0
+    ) {
+      removeFiles();
+
+      return res.status(400).json({
+        message: "ข้อมูลเอกสารไม่ครบถ้วน",
+      });
+    }
+
+    /* ตรวจสอบว่าโครงงานเป็นของอาจารย์ที่ระบุ */
+    const checkSql = `
+      SELECT id
+      FROM projects
+      WHERE id = ?
+        AND advisor_id = ?
+        AND source = 'teacher'
+      LIMIT 1
+    `;
+
+    db.query(checkSql, [projectId, teacherId], (checkErr, rows) => {
+      if (checkErr || rows.length === 0) {
+        removeFiles();
+
+        return res.status(checkErr ? 500 : 403).json({
+          message: "ไม่พบโครงงานหรือไม่มีสิทธิ์แนบเอกสาร",
+        });
+      }
+
+      /* เตรียมรายการเอกสารลงฐานข้อมูล */
+      const values = files.map((file) => [
+        projectId,
+        file.originalname,
+        "/uploads/project-documents/" + file.filename,
+      ]);
+
+      const insertSql = `
+        INSERT INTO project_documents
+          (project_id, original_name, file_path)
+        VALUES ?
+      `;
+
+      db.query(insertSql, [values], (insertErr) => {
+        if (insertErr) {
+          removeFiles();
+          console.error("Save project documents error:", insertErr);
+
+          return res.status(500).json({
+            message: "ไม่สามารถบันทึกเอกสารได้",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "บันทึกเอกสารเรียบร้อยแล้ว",
+        });
+      });
+    });
+  });
+});
+
+/* =========================================================
+   ดูเอกสารประกอบของแต่ละโครงงาน
+========================================================= */
+
+app.get("/projects/:id/documents", (req, res) => {
+  const projectId = Number(req.params.id);
+
+  if (!Number.isInteger(projectId) || projectId <= 0) {
+    return res.status(400).json({
+      message: "รหัสโครงงานไม่ถูกต้อง",
+    });
+  }
+
+  const sql = `
+    SELECT id, original_name, file_path
+    FROM project_documents
+    WHERE project_id = ?
+    ORDER BY id ASC
+  `;
+
+  db.query(sql, [projectId], (err, rows) => {
+    if (err) {
+      console.error("Get project documents error:", err);
+
+      return res.status(500).json({
+        message: "ไม่สามารถโหลดเอกสารได้",
+      });
+    }
+
+    res.json(rows);
+  });
 });
 
 app.get("/teachers/search", (req, res) => {

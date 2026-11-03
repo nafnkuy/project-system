@@ -46,7 +46,9 @@
   flex-shrink: 0;
 }
 
-.teacher-project-page .logo-section > div { min-width: 0; }
+.teacher-project-page .logo-section > div {
+  min-width: 0;
+}
 
 .teacher-project-page .logo-section h2 {
   margin: 0;
@@ -65,8 +67,15 @@
   white-space: nowrap;
 }
 
-.teacher-project-page .sidebar nav { width: 100%; margin: 0; }
-.teacher-project-page .sidebar ul { margin: 0; padding: 0; list-style: none; }
+.teacher-project-page .sidebar nav {
+  width: 100%;
+  margin: 0;
+}
+.teacher-project-page .sidebar ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .teacher-project-page .sidebar li {
   width: 100%;
   margin: 0;
@@ -77,7 +86,9 @@
   text-align: center;
   cursor: pointer;
 }
-.teacher-project-page .sidebar li:hover { background: #f0f0f0; }
+.teacher-project-page .sidebar li:hover {
+  background: #f0f0f0;
+}
 .teacher-project-page .sidebar li.active,
 .teacher-project-page .sidebar li.active:hover {
   background: #2f5d7c;
@@ -97,7 +108,9 @@
   font-weight: 400;
   cursor: pointer;
 }
-.teacher-project-page .logout-btn:hover { background: #2f6db5; }
+.teacher-project-page .logout-btn:hover {
+  background: #2f6db5;
+}
 
 /* HEADER */
 .teacher-project-page .main {
@@ -138,7 +151,9 @@
   text-decoration: none;
   cursor: pointer;
 }
-.teacher-project-page .breadcrumb-link:hover { text-decoration: none; }
+.teacher-project-page .breadcrumb-link:hover {
+  text-decoration: none;
+}
 
 .teacher-project-page .header-right {
   display: flex;
@@ -186,7 +201,9 @@
   margin: 30px auto 35px;
   padding: 0;
 }
-.teacher-project-page .create-project-content form { width: 100%; }
+.teacher-project-page .create-project-content form {
+  width: 100%;
+}
 
 /* WHITE SECTION CARDS */
 .teacher-project-page .form-section {
@@ -234,7 +251,9 @@
   font-size: 13px;
   font-weight: 400;
 }
-.teacher-project-page .form-group input { height: 42px; }
+.teacher-project-page .form-group input {
+  height: 42px;
+}
 .teacher-project-page .form-group textarea {
   min-height: 100px;
   resize: vertical;
@@ -245,7 +264,9 @@
   border-color: #aaaaaa;
 }
 .teacher-project-page .form-group input::placeholder,
-.teacher-project-page .form-group textarea::placeholder { color: #777777; }
+.teacher-project-page .form-group textarea::placeholder {
+  color: #777777;
+}
 
 /* YEAR + PROJECT TYPE */
 .teacher-project-page .form-row,
@@ -274,7 +295,9 @@
   -moz-appearance: none;
   cursor: pointer;
 }
-.teacher-project-page .create-filter-select:focus { border-color: #aaaaaa; }
+.teacher-project-page .create-filter-select:focus {
+  border-color: #aaaaaa;
+}
 .teacher-project-page .create-select-arrow {
   position: absolute;
   top: 50%;
@@ -381,10 +404,18 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.teacher-project-page .cancel-btn { background: #ff0000; }
-.teacher-project-page .cancel-btn:hover { background: #d90000; }
-.teacher-project-page .save-btn { background: #20a36a; }
-.teacher-project-page .save-btn:hover:not(:disabled) { background: #188c59; }
+.teacher-project-page .cancel-btn {
+  background: #ff0000;
+}
+.teacher-project-page .cancel-btn:hover {
+  background: #d90000;
+}
+.teacher-project-page .save-btn {
+  background: #20a36a;
+}
+.teacher-project-page .save-btn:hover:not(:disabled) {
+  background: #188c59;
+}
 .teacher-project-page .save-btn:disabled {
   background: #d8d8d8;
   color: #ffffff;
@@ -394,11 +425,181 @@
 
 /* RESPONSIVE: adapt content but keep app sidebar at 250px */
 @media (max-width: 1100px) {
-  .teacher-project-page .create-project-content { width: 88%; }
+  .teacher-project-page .create-project-content {
+    width: 88%;
+  }
 }
 @media (max-width: 800px) {
-  .teacher-project-page .main { overflow-x: auto; }
-  .teacher-project-page .create-project-content { min-width: 700px; }
+  .teacher-project-page .main {
+    overflow-x: auto;
+  }
+  .teacher-project-page .create-project-content {
+    min-width: 700px;
+  }
   .teacher-project-page .form-row,
-  .teacher-project-page .teacher-row { grid-template-columns: 1fr; }
+  .teacher-project-page .teacher-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   ส่วนเอกสารแนบของโครงงาน
+========================================================= */
+
+/* หัวข้อและปุ่มแนบเอกสาร */
+.teacher-project-page .teacher-document-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.teacher-project-page .teacher-document-header > label:first-child {
+  margin: 0;
+}
+
+/* ซ่อนช่องเลือกไฟล์เดิม */
+.teacher-project-page .form-group input.teacher-document-hidden-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  opacity: 0;
+  clip-path: inset(50%);
+}
+
+/* ปุ่มแนบเอกสารสีน้ำเงิน */
+.teacher-project-page .form-group label.teacher-document-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  height: 36px;
+  margin: 0;
+  padding: 0 16px;
+
+  background: #3b75c4;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.teacher-project-page .teacher-document-upload-btn:hover {
+  background: #2f6db5;
+}
+
+.teacher-project-page
+  .teacher-document-hidden-input:focus-visible
+  + .teacher-document-upload-btn {
+  outline: 2px solid #3678c5;
+  outline-offset: 3px;
+}
+
+/* รายการเอกสาร */
+.teacher-project-page .teacher-document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* กรอบแต่ละไฟล์ */
+.teacher-project-page .teacher-document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+/* ชื่อไฟล์ฝั่งซ้าย */
+.teacher-project-page .teacher-document-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #666666;
+}
+
+.teacher-project-page .teacher-document-info {
+  min-width: 0;
+}
+
+.teacher-project-page .teacher-document-name {
+  color: #222222;
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.teacher-project-page .teacher-document-meta {
+  margin-top: 4px;
+  color: #888888;
+  font-size: 11px;
+}
+
+/* ปุ่มจัดการไฟล์ฝั่งขวา */
+.teacher-project-page .teacher-document-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ปุ่มดาวน์โหลด */
+.teacher-project-page .teacher-document-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  height: 32px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #3678c5;
+  border: 1px solid #3678c5;
+  border-radius: 5px;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ปุ่มลบ */
+.teacher-project-page .teacher-document-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  color: #e53935;
+  border: 1px solid #e53935;
+  border-radius: 5px;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* รองรับหน้าจอเล็ก */
+@media (max-width: 800px) {
+  .teacher-project-page .teacher-document-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .teacher-project-page .teacher-document-actions {
+    justify-content: flex-end;
+  }
 }
